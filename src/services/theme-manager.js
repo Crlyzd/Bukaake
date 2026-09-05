@@ -1,7 +1,4 @@
-/**
- * Bukaake Theme Manager Service
- * Manages pure neutral Dark and Light themes per Pillar 2
- */
+import { tauriBridge } from './tauri-bridge.js';
 
 export class ThemeManager {
   constructor(options = {}) {
@@ -33,6 +30,23 @@ export class ThemeManager {
         }
       });
     }
+
+    // Cross-window settings synchronization
+    window.addEventListener('storage', (e) => {
+      if (e.key === 'bukaake_window_opacity' && e.newValue) {
+        const alpha = (parseInt(e.newValue, 10) / 100).toFixed(2);
+        document.documentElement.style.setProperty('--window-opacity', alpha);
+      }
+    });
+
+    if (window.__TAURI__?.event?.listen) {
+      window.__TAURI__.event.listen('settings-changed', (e) => {
+        if (e.payload?.opacity !== undefined) {
+          const alpha = (parseInt(e.payload.opacity, 10) / 100).toFixed(2);
+          document.documentElement.style.setProperty('--window-opacity', alpha);
+        }
+      });
+    }
   }
 
   bindToggleBtn(btnElement) {
@@ -58,6 +72,11 @@ export class ThemeManager {
       localStorage.setItem(this.storageKey, theme);
     }
 
+    const isViewer = document.body.classList.contains('mode-viewer');
+    tauriBridge.setWindowVibrancy(theme === 'dark', isViewer);
+    if (window.__TAURI__?.event?.emit) {
+      window.__TAURI__.event.emit('theme-changed', { theme });
+    }
     this.updateToggleIcon();
     this.onThemeChange?.(theme);
   }

@@ -1,6 +1,6 @@
 /* ==========================================================================
    Bukaake Settings & About Modal Styles
-   Matches ALITKEN & Cathet frosted glass specifications (< 180 lines)
+   Matches Pillar 1 frosted glass specifications (< 220 lines)
    ========================================================================== */
 
 .settings-card {
@@ -74,12 +74,12 @@
   background: var(--glass-bg);
   border: 1px solid var(--glass-border);
   border-radius: var(--radius-md);
-  padding: 16px;
+  padding: 14px;
   text-align: center;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
 }
 
 .settings-desc {
@@ -136,10 +136,6 @@
   gap: 5px;
 }
 
-.coffee-label i {
-  font-size: 14px;
-}
-
 .coffee-chip {
   display: inline-flex;
   align-items: center;
@@ -155,16 +151,16 @@
   transition: all var(--transition-fast);
 }
 
-.coffee-chip i {
-  font-size: 10px;
-  opacity: 0.8;
-  transition: transform var(--transition-fast);
-}
-
 .coffee-chip:hover {
   background: var(--glass-bg-active);
   border-color: var(--active-border);
   transform: translateY(-1px);
+}
+
+.coffee-chip i {
+  font-size: 10px;
+  opacity: 0.8;
+  transition: transform var(--transition-fast);
 }
 
 .coffee-chip:hover i {

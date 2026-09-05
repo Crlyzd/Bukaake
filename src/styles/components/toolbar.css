@@ -1,6 +1,6 @@
 /* ==========================================================================
    Bukaake Floating Glass Control Dock & Tool Elements
-   Sleek capsule ergonomics with pure monochrome aesthetics
+   Sleek capsule ergonomics with pure stroke-free monochrome aesthetics
    ========================================================================== */
 
 .floating-toolbar {
@@ -8,11 +8,13 @@
   bottom: 20px;
   left: 50%;
   transform: translateX(-50%);
-  padding: 4px 8px;
+  padding: 3px 6px;
   border-radius: var(--radius-pill);
   display: flex;
   align-items: center;
-  gap: 2px;
+  gap: 1px;
+  max-width: calc(100% - 16px);
+  box-sizing: border-box;
   z-index: 50;
   transition: opacity var(--transition-fast), transform var(--transition-fast);
   -webkit-app-region: no-drag;
@@ -20,8 +22,8 @@
   background: var(--glass-bg);
   backdrop-filter: blur(24px) saturate(180%);
   -webkit-backdrop-filter: blur(24px) saturate(180%);
-  border: 1px solid var(--glass-border);
-  box-shadow: var(--glass-shadow);
+  border: none !important;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.45);
 }
 
 body:not(.image-loaded) .floating-toolbar {
@@ -46,40 +48,49 @@ body.image-loaded .floating-toolbar:hover {
 .toolbar-group {
   display: flex;
   align-items: center;
-  gap: 2px;
+  gap: 1px;
 }
 
 .toolbar-divider {
-  width: 1px;
-  height: 16px;
-  background: var(--glass-border);
-  margin: 0 4px;
+  width: 5px;
+  height: 14px;
+  background: transparent;
+  border: none !important;
+  margin: 0 1px;
+  flex-shrink: 0;
 }
 
 .toolbar-btn {
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
   border-radius: var(--radius-pill);
   background: transparent;
-  border: 1px solid transparent;
+  border: none !important;
   color: var(--text-main);
-  font-size: 15px;
+  font-size: 14px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
+  flex-shrink: 0;
   transition: all var(--transition-fast);
+}
+
+.toolbar-btn svg {
+  width: 14px;
+  height: 14px;
+  stroke: currentColor;
 }
 
 .toolbar-btn:hover:not(:disabled) {
   background: var(--glass-bg-hover);
-  border-color: var(--glass-border-bright);
+  border: none !important;
   transform: translateY(-1px);
 }
 
 .toolbar-btn.active {
   background: var(--glass-bg-active);
-  border-color: var(--active-border);
+  border: none !important;
   color: var(--text-main);
 }
 
@@ -90,24 +101,31 @@ body.image-loaded .floating-toolbar:hover {
 
 .zoom-preset-btn {
   width: auto;
-  padding: 0 8px;
+  min-width: 34px;
+  padding: 0 4px;
   border-radius: var(--radius-pill);
   font-family: 'JetBrains Mono', monospace;
-  font-size: 11px;
+  font-size: 10px;
   color: var(--text-muted);
 }
 
 .highlight-btn {
-  width: auto;
-  height: 30px;
-  padding: 0 12px;
+  width: 28px;
+  height: 28px;
+  padding: 0;
   border-radius: var(--radius-pill);
   background: var(--action-bg);
   color: var(--action-text);
-  font-weight: 600;
-  font-size: 12px;
-  gap: 5px;
-  border: 1px solid transparent;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none !important;
+  flex-shrink: 0;
+}
+
+.highlight-btn span {
+  display: none;
 }
 
 .highlight-btn:hover {
@@ -118,138 +136,62 @@ body.image-loaded .floating-toolbar:hover {
 
 .file-counter {
   font-family: 'JetBrains Mono', monospace;
-  font-size: 11px;
+  font-size: 10px;
   color: var(--text-dim);
-  padding: 0 4px;
-  min-width: 44px;
+  padding: 0 2px;
+  min-width: 36px;
   text-align: center;
+  flex-shrink: 0;
 }
 
-/* Crop Tool & Overlay */
-.crop-overlay-container {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  z-index: 40;
+/* Responsive compact toolbar to prevent clipping on small windows */
+@media (max-width: 560px) {
+  .floating-toolbar {
+    padding: 2px 4px;
+    gap: 0;
+    max-width: calc(100% - 10px);
+  }
+  .toolbar-btn {
+    width: 25px;
+    height: 25px;
+    font-size: 12px;
+  }
+  .toolbar-btn svg {
+    width: 12px;
+    height: 12px;
+  }
+  .file-counter {
+    min-width: 28px;
+    font-size: 9px;
+  }
+  .zoom-preset-btn {
+    min-width: 28px;
+    font-size: 9px;
+    padding: 0 2px;
+  }
+  .toolbar-divider {
+    width: 3px;
+  }
 }
 
-.crop-box {
-  position: absolute;
-  border: 2px solid var(--text-main);
-  box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.5);
-  pointer-events: auto;
-  cursor: move;
+@media (max-width: 480px) {
+  #btnFlipV,
+  #btnPixelated {
+    display: none !important;
+  }
+  .floating-toolbar {
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .floating-toolbar::-webkit-scrollbar {
+    display: none;
+  }
 }
 
-.crop-handle {
-  position: absolute;
-  width: 10px;
-  height: 10px;
-  background: var(--action-bg);
-  border: 2px solid var(--text-main);
-  border-radius: 2px;
-  box-shadow: 0 0 4px rgba(0, 0, 0, 0.4);
+@media (max-width: 400px) {
+  #btnFlipH,
+  #btnBgMode {
+    display: none !important;
+  }
 }
 
-.handle-nw { top: -5px; left: -5px; cursor: nwse-resize; }
-.handle-ne { top: -5px; right: -5px; cursor: nesw-resize; }
-.handle-sw { bottom: -5px; left: -5px; cursor: nesw-resize; }
-.handle-se { bottom: -5px; right: -5px; cursor: nwse-resize; }
-
-.crop-grid-line {
-  position: absolute;
-  background: rgba(255, 255, 255, 0.25);
-  pointer-events: none;
-}
-
-.crop-grid-line.h1 { top: 33.33%; left: 0; right: 0; height: 1px; }
-.crop-grid-line.h2 { top: 66.66%; left: 0; right: 0; height: 1px; }
-.crop-grid-line.v1 { left: 33.33%; top: 0; bottom: 0; width: 1px; }
-.crop-grid-line.v2 { left: 66.66%; top: 0; bottom: 0; width: 1px; }
-
-.crop-dimensions-tag {
-  position: absolute;
-  top: -26px;
-  left: 0;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 11px;
-  background: var(--glass-panel-bg);
-  backdrop-filter: blur(10px);
-  padding: 2px 8px;
-  border-radius: var(--radius-xs);
-  border: 1px solid var(--glass-border);
-  color: var(--text-main);
-}
-
-.crop-toolbar {
-  position: absolute;
-  top: 56px;
-  left: 50%;
-  transform: translateX(-50%);
-  padding: 6px 14px;
-  border-radius: var(--radius-pill);
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  z-index: 50;
-  -webkit-app-region: no-drag;
-  app-region: no-drag;
-  background: var(--glass-bg);
-  backdrop-filter: blur(20px) saturate(180%);
-  border: 1px solid var(--glass-border);
-  box-shadow: var(--glass-shadow);
-}
-
-.crop-label {
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--text-main);
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.crop-presets {
-  display: flex;
-  gap: 4px;
-}
-
-.crop-preset-btn {
-  background: var(--glass-bg);
-  border: 1px solid var(--glass-border);
-  color: var(--text-muted);
-  padding: 3px 8px;
-  border-radius: var(--radius-sm);
-  font-size: 11px;
-  cursor: pointer;
-  transition: all var(--transition-fast);
-}
-
-.crop-preset-btn:hover,
-.crop-preset-btn.active {
-  background: var(--glass-bg-active);
-  border-color: var(--active-border);
-  color: var(--text-main);
-}
-
-.crop-actions {
-  display: flex;
-  gap: 6px;
-}
-
-.btn-cancel {
-  background: rgba(239, 68, 68, 0.15);
-  border: 1px solid rgba(239, 68, 68, 0.4);
-  color: #ef4444;
-  padding: 4px 10px;
-  font-size: 12px;
-}
-
-.btn-apply {
-  background: var(--action-bg);
-  color: var(--action-text);
-  border: 1px solid transparent;
-  padding: 4px 12px;
-  font-size: 12px;
-  font-weight: 600;
-}

@@ -15,16 +15,19 @@
   --transition-fast: 0.16s cubic-bezier(0.16, 1, 0.3, 1);
   --transition-normal: 0.24s cubic-bezier(0.16, 1, 0.3, 1);
 
-  /* Dark Theme Tokens (Default - Pure Neutral Monochrome) */
+  /* Window Transparency & Opacity Control (Default ~38%) */
+  --window-opacity: 0.38;
+
+  /* Dark Theme Tokens (Deep Rich Charcoal / Obsidian Glass) */
   --bg-primary: transparent;
   --bg-secondary: rgba(255, 255, 255, 0.04);
-  --glass-bg: rgba(255, 255, 255, 0.06);
+  --glass-bg: rgba(6, 7, 10, 0.92);
   --glass-bg-hover: rgba(255, 255, 255, 0.12);
-  --glass-bg-active: rgba(255, 255, 255, 0.20);
-  --glass-border: rgba(255, 255, 255, 0.10);
-  --glass-border-bright: rgba(255, 255, 255, 0.24);
-  --glass-shadow: 0 8px 24px 0 rgba(0, 0, 0, 0.28);
-  --glass-panel-bg: rgba(18, 18, 18, 0.85);
+  --glass-bg-active: rgba(255, 255, 255, 0.22);
+  --glass-border: transparent;
+  --glass-border-bright: transparent;
+  --glass-shadow: 0 12px 36px 0 rgba(0, 0, 0, 0.65);
+  --glass-panel-bg: rgba(2, 3, 5, calc(0.68 + var(--window-opacity, 0.38) * 0.32));
 
   --text-main: #ffffff;
   --text-muted: #d4d4d4;
@@ -36,7 +39,7 @@
   --btn-shadow: 0 2px 8px rgba(0, 0, 0, 0.20);
   --btn-shadow-hover: 0 4px 14px rgba(0, 0, 0, 0.30);
   --active-highlight: rgba(255, 255, 255, 0.18);
-  --active-border: rgba(255, 255, 255, 0.45);
+  --active-border: transparent;
 
   /* Neutral Accent Compatibility Tokens */
   --accent-cyan: #ffffff;
@@ -50,13 +53,18 @@
 html[data-theme="light"],
 body.light-theme {
   --bg-secondary: rgba(0, 0, 0, 0.03);
-  --glass-bg: rgba(255, 255, 255, 0.70);
+  --glass-bg: rgba(255, 255, 255, 0.65);
   --glass-bg-hover: rgba(0, 0, 0, 0.06);
   --glass-bg-active: rgba(0, 0, 0, 0.12);
-  --glass-border: rgba(0, 0, 0, 0.08);
-  --glass-border-bright: rgba(0, 0, 0, 0.18);
-  --glass-shadow: 0 8px 24px 0 rgba(0, 0, 0, 0.05);
-  --glass-panel-bg: rgba(250, 250, 250, 0.88);
+  --glass-border: transparent;
+  --glass-border-bright: transparent;
+  --glass-shadow: 0 8px 24px 0 rgba(0, 0, 0, 0.08);
+  --glass-panel-bg: rgba(244, 246, 249, calc(0.55 + var(--window-opacity, 0.38) * 0.45));
+
+  /* Titlebar Gradient Blur Tokens */
+  --glass-titlebar-bg: rgba(255, 255, 255, 0.65);
+  --glass-titlebar-fade: rgba(255, 255, 255, 0.06);
+  --glass-titlebar-glow: rgba(0, 0, 0, 0.04);
 
   --text-main: #111111;
   --text-muted: #444444;
@@ -68,7 +76,7 @@ body.light-theme {
   --btn-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
   --btn-shadow-hover: 0 4px 10px rgba(0, 0, 0, 0.12);
   --active-highlight: rgba(0, 0, 0, 0.10);
-  --active-border: rgba(0, 0, 0, 0.30);
+  --active-border: transparent;
 
   --accent-cyan: #111111;
   --accent-blue: #333333;

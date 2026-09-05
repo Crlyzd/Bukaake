@@ -23,6 +23,20 @@
         "transparent": true,
         "decorations": false,
         "shadow": true
+      },
+      {
+        "label": "settings",
+        "title": "Bukaake Settings",
+        "url": "settings.html",
+        "width": 460,
+        "height": 580,
+        "resizable": false,
+        "fullscreen": false,
+        "transparent": true,
+        "decorations": false,
+        "shadow": true,
+        "visible": false,
+        "center": true
       }
     ],
     "withGlobalTauri": true,

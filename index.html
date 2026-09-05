@@ -148,10 +148,10 @@
       <!-- Tools & Effects Group -->
       <div class="toolbar-group">
         <button class="toolbar-btn" id="btnRotateLeft" title="Rotate Left 90° (L)">
-          <i class="ri-rotate-left-line"></i>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
         </button>
         <button class="toolbar-btn" id="btnRotateRight" title="Rotate Right 90° (R)">
-          <i class="ri-rotate-right-line"></i>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg>
         </button>
         <button class="toolbar-btn" id="btnFlipH" title="Flip Horizontal (H)">
           <i class="ri-flip-horizontal-line"></i>
@@ -303,6 +303,22 @@
         </div>
 
         <div class="settings-body">
+          <!-- Window Glass & Vibrancy Appearance -->
+          <div class="settings-group-card">
+            <div class="settings-group-title">
+              <i class="ri-contrast-drop-2-line"></i> Window Glass & Transparency
+            </div>
+            
+
+            <div class="settings-slider-row">
+              <div class="settings-slider-header">
+                <span class="settings-label">Glass Opacity</span>
+                <span class="settings-slider-val" id="valWindowOpacity">38%</span>
+              </div>
+              <input type="range" class="glass-range-slider" id="sliderWindowOpacity" min="5" max="100" value="38" step="1">
+            </div>
+          </div>
+
           <div class="settings-bio-card">
             <p class="settings-desc">
               Lightweight, distraction-free & portable Windows image viewer crafted with native Windows frosted glass.

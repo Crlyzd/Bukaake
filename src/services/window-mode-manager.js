@@ -82,12 +82,15 @@ export class WindowModeManager {
 
   updateModeClasses(mode) {
     this.currentMode = mode;
+    const isDark = !document.body.classList.contains('light-theme');
     if (mode === MODE_VIEWER) {
       document.body.classList.remove(MODE_REGULAR);
       document.body.classList.add(MODE_VIEWER);
+      tauriBridge.setWindowVibrancy(isDark, true);
     } else {
       document.body.classList.remove(MODE_VIEWER);
       document.body.classList.add(MODE_REGULAR);
+      tauriBridge.setWindowVibrancy(isDark, false);
     }
     this.onModeChange?.(mode);
   }

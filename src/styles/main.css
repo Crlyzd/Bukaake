@@ -8,7 +8,9 @@
 @import './glass.css';
 @import './components/titlebar.css';
 @import './components/toolbar.css';
+@import './components/crop.css';
 @import './components/panels.css';
 @import './components/toast.css';
 @import './components/modes.css';
 @import './components/settings.css';
+@import './components/vibrancy.css';

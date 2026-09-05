@@ -254,8 +254,28 @@ export class TauriBridge {
 
     try {
       window.open(url, '_blank', 'noopener,noreferrer');
+    } catch (e) {}
+  }
+
+  async setWindowVibrancy(isDark = false, isViewer = false) {
+    if (this.isTauri()) {
+      try { await this.invoke('set_window_vibrancy', { isDark, isViewer }); } catch (e) {}
+    }
+  }
+
+  async openSettingsWindow() {
+    if (!this.isTauri()) return false;
+    try {
+      await this.invoke('open_settings_window');
+      return true;
     } catch (e) {
-      console.warn('[TauriBridge] window.open failed:', e);
+      return false;
+    }
+  }
+
+  async hideSettingsWindow() {
+    if (this.isTauri()) {
+      try { await this.invoke('hide_settings_window'); } catch (e) {}
     }
   }
 

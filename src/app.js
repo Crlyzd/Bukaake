@@ -53,7 +53,12 @@ class BukaakeApp {
       onOpenFile: () => this.fileInput?.click(),
       onPasteClipboard: () => this.fileLoader.loadFromClipboard(),
       onToggleMetadata: () => this.metadataDrawer.toggle(),
-      onToggleSettings: () => this.settingsModal.toggle(),
+      onToggleSettings: async () => {
+        const opened = await tauriBridge.openSettingsWindow();
+        if (!opened) {
+          this.settingsModal.toggle();
+        }
+      },
       onToggleHelp: () => this.shortcutsModal.toggle(),
       onToggleMode: () => this.windowModeManager?.toggleMode(),
     });

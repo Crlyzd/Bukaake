@@ -91,11 +91,63 @@ fn is_window_fullscreen(window: tauri::Window) -> bool {
     window.is_fullscreen().unwrap_or(false)
 }
 
+#[tauri::command]
+fn open_settings_window(app_handle: tauri::AppHandle) -> Result<(), String> {
+    if let Some(settings_win) = app_handle.get_webview_window("settings") {
+        let _ = settings_win.unminimize();
+        let _ = settings_win.show();
+        let _ = settings_win.set_focus();
+    }
+    Ok(())
+}
+
+#[tauri::command]
+fn hide_settings_window(app_handle: tauri::AppHandle) -> Result<(), String> {
+    if let Some(settings_win) = app_handle.get_webview_window("settings") {
+        let _ = settings_win.hide();
+    }
+    Ok(())
+}
+
+#[tauri::command]
+fn set_window_vibrancy(app_handle: tauri::AppHandle, is_dark: bool, is_viewer: Option<bool>) -> Result<(), String> {
+    #[cfg(target_os = "windows")]
+    {
+        use window_vibrancy::{apply_acrylic, clear_acrylic};
+        let dark_tint = Some((0, 0, 0, 248));
+        let light_tint = Some((245, 247, 250, 130));
+        let tint = if is_dark { dark_tint } else { light_tint };
+
+        if let Some(main_win) = app_handle.get_webview_window("main") {
+            if is_viewer.unwrap_or(false) {
+                let _ = clear_acrylic(&main_win);
+            } else {
+                let _ = apply_acrylic(&main_win, tint);
+            }
+        }
+
+        if let Some(settings_win) = app_handle.get_webview_window("settings") {
+            let _ = apply_acrylic(&settings_win, tint);
+        }
+    }
+    let _ = (app_handle, is_dark, is_viewer);
+    Ok(())
+}
+
 fn main() {
     tauri::Builder::default()
         .setup(|app| {
-            if let Some(window) = app.get_webview_window("main") {
-                let _ = window.set_shadow(true);
+            #[cfg(target_os = "windows")]
+            {
+                let tint = Some((0, 0, 0, 248));
+                if let Some(window) = app.get_webview_window("main") {
+                    let _ = window.set_shadow(true);
+                    let _ = window_vibrancy::apply_acrylic(&window, tint);
+                }
+                if let Some(settings_win) = app.get_webview_window("settings") {
+                    let _ = settings_win.set_shadow(true);
+                    let _ = window_vibrancy::apply_acrylic(&settings_win, tint);
+                }
             }
             Ok(())
         })
@@ -112,7 +164,10 @@ fn main() {
             resize_and_center_window,
             start_window_resize,
             set_fullscreen_window,
-            is_window_fullscreen
+            is_window_fullscreen,
+            set_window_vibrancy,
+            open_settings_window,
+            hide_settings_window
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
