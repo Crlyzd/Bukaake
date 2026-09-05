@@ -11,7 +11,7 @@
   background: var(--glass-panel-bg);
   backdrop-filter: blur(28px) saturate(180%);
   -webkit-backdrop-filter: blur(28px) saturate(180%);
-  border: 1px solid var(--glass-border);
+  border: none !important;
   box-shadow: var(--glass-shadow);
   display: flex;
   flex-direction: column;
@@ -19,7 +19,7 @@
 
 .settings-header {
   padding: 14px 18px;
-  border-bottom: 1px solid var(--glass-border);
+  border-bottom: none !important;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -71,15 +71,18 @@
 
 /* Creator & Bio Sub-card */
 .settings-bio-card {
-  background: var(--glass-bg);
-  border: 1px solid var(--glass-border);
+  background: var(--glass-card-bg);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: none !important;
   border-radius: var(--radius-md);
-  padding: 14px;
+  padding: 16px;
   text-align: center;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
+  box-shadow: var(--glass-card-shadow);
 }
 
 .settings-desc {
@@ -133,17 +136,26 @@
 .coffee-label {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
+  gap: 6px;
+  line-height: 1;
+}
+
+.coffee-label i {
+  font-size: 13px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transform: translateY(-0.5px);
 }
 
 .coffee-chip {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  padding: 3px 10px;
+  padding: 4px 11px;
   border-radius: var(--radius-pill);
   background: var(--glass-bg-hover);
-  border: 1px solid var(--glass-border-bright);
+  border: none !important;
   color: var(--text-main);
   font-size: 11px;
   font-weight: 500;
@@ -153,7 +165,6 @@
 
 .coffee-chip:hover {
   background: var(--glass-bg-active);
-  border-color: var(--active-border);
   transform: translateY(-1px);
 }
 
@@ -173,11 +184,14 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: var(--glass-bg);
-  border: 1px solid var(--glass-border);
+  background: var(--glass-card-bg);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: none !important;
   border-radius: var(--radius-md);
-  padding: 10px 14px;
+  padding: 12px 16px;
   font-size: 12px;
+  box-shadow: var(--glass-card-shadow);
 }
 
 .update-status-wrap {
@@ -193,7 +207,7 @@
 }
 
 .btn-check-update {
-  padding: 4px 12px;
+  padding: 5px 13px;
   font-size: 11px;
   font-weight: 500;
   border-radius: var(--radius-sm);
@@ -204,11 +218,13 @@
   display: flex;
   align-items: center;
   gap: 4px;
+  box-shadow: var(--btn-shadow);
   transition: all var(--transition-fast);
 }
 
 .btn-check-update:hover {
   background: var(--action-hover-bg);
+  box-shadow: var(--btn-shadow-hover);
   transform: translateY(-1px);
 }
 
@@ -226,11 +242,13 @@
 }
 
 .settings-action-btn {
-  background: var(--glass-bg);
-  border: 1px solid var(--glass-border);
+  background: var(--glass-card-bg);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: none !important;
   border-radius: var(--radius-md);
   color: var(--text-main);
-  padding: 8px 12px;
+  padding: 10px 14px;
   font-size: 12px;
   font-weight: 500;
   cursor: pointer;
@@ -239,12 +257,12 @@
   justify-content: center;
   gap: 6px;
   text-decoration: none;
+  box-shadow: var(--glass-card-shadow);
   transition: all var(--transition-fast);
 }
 
 .settings-action-btn:hover {
-  background: var(--glass-bg-hover);
-  border-color: var(--glass-border-bright);
+  background: var(--glass-card-bg-hover);
   transform: translateY(-1px);
 }
 
@@ -262,7 +280,7 @@
 /* Footer Info */
 .settings-footer {
   padding: 10px 18px;
-  border-top: 1px solid var(--glass-border);
+  border-top: none !important;
   display: flex;
   align-items: center;
   justify-content: space-between;

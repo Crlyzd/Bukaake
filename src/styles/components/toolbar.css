@@ -23,7 +23,7 @@
   backdrop-filter: blur(24px) saturate(180%);
   -webkit-backdrop-filter: blur(24px) saturate(180%);
   border: none !important;
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.45);
+  box-shadow: var(--glass-card-shadow);
 }
 
 body:not(.image-loaded) .floating-toolbar {

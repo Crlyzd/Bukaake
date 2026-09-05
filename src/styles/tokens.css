@@ -18,16 +18,27 @@
   /* Window Transparency & Opacity Control (Default ~38%) */
   --window-opacity: 0.38;
 
-  /* Dark Theme Tokens (Deep Rich Charcoal / Obsidian Glass) */
+  /* Dark Theme Tokens (Translucent Obsidian Frosted Glass) */
   --bg-primary: transparent;
   --bg-secondary: rgba(255, 255, 255, 0.04);
-  --glass-bg: rgba(6, 7, 10, 0.92);
+  --glass-bg: rgba(22, 26, 36, 0.52);
   --glass-bg-hover: rgba(255, 255, 255, 0.12);
-  --glass-bg-active: rgba(255, 255, 255, 0.22);
+  --glass-bg-active: rgba(255, 255, 255, 0.20);
   --glass-border: transparent;
   --glass-border-bright: transparent;
-  --glass-shadow: 0 12px 36px 0 rgba(0, 0, 0, 0.65);
+  --glass-shadow: 0 6px 18px rgba(0, 0, 0, 0.16), 0 20px 48px rgba(0, 0, 0, 0.22);
   --glass-panel-bg: rgba(2, 3, 5, calc(0.68 + var(--window-opacity, 0.38) * 0.32));
+
+  /* Frosted Glass Island & Card Tokens */
+  --glass-card-bg: rgba(255, 255, 255, 0.08);
+  --glass-card-bg-hover: rgba(255, 255, 255, 0.13);
+  --glass-card-shadow: 0 4px 14px rgba(0, 0, 0, 0.12), 0 16px 36px rgba(0, 0, 0, 0.18);
+  --slider-track-bg: rgba(255, 255, 255, 0.14);
+
+  /* Titlebar Gradient Tokens (Dark Mode) */
+  --glass-titlebar-bg: rgba(255, 255, 255, 0.04);
+  --glass-titlebar-fade: rgba(255, 255, 255, 0.01);
+  --glass-titlebar-glow: rgba(255, 255, 255, 0.03);
 
   --text-main: #ffffff;
   --text-muted: #d4d4d4;
@@ -53,13 +64,19 @@
 html[data-theme="light"],
 body.light-theme {
   --bg-secondary: rgba(0, 0, 0, 0.03);
-  --glass-bg: rgba(255, 255, 255, 0.65);
+  --glass-bg: rgba(255, 255, 255, 0.68);
   --glass-bg-hover: rgba(0, 0, 0, 0.06);
   --glass-bg-active: rgba(0, 0, 0, 0.12);
   --glass-border: transparent;
   --glass-border-bright: transparent;
-  --glass-shadow: 0 8px 24px 0 rgba(0, 0, 0, 0.08);
+  --glass-shadow: 0 4px 14px rgba(0, 0, 0, 0.03), 0 18px 40px rgba(0, 0, 0, 0.06);
   --glass-panel-bg: rgba(244, 246, 249, calc(0.55 + var(--window-opacity, 0.38) * 0.45));
+
+  /* Frosted Glass Island & Card Tokens */
+  --glass-card-bg: rgba(255, 255, 255, 0.72);
+  --glass-card-bg-hover: rgba(255, 255, 255, 0.92);
+  --glass-card-shadow: 0 4px 12px rgba(0, 0, 0, 0.02), 0 14px 32px rgba(0, 0, 0, 0.05);
+  --slider-track-bg: rgba(0, 0, 0, 0.10);
 
   /* Titlebar Gradient Blur Tokens */
   --glass-titlebar-bg: rgba(255, 255, 255, 0.65);

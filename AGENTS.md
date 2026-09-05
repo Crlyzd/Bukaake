@@ -8,25 +8,26 @@
 
 Every agent (Architect, Coding Specialist, Code Reviewer, Orchestrator) working on this repository **MUST** strictly adhere to and enforce these five non-negotiable architectural pillars:
 
-### Pillar 1: Modern Glassmorphism Design System
-All visual components must follow a cohesive, ultra-sleek, frosted glass aesthetic:
+### Pillar 1: Modern Stroke-Free Glassmorphism Design System
+All visual components must follow a cohesive, ultra-sleek, stroke-free frosted glass aesthetic:
 - **Materials**: Use `backdrop-filter: blur(20px) saturate(180%)` with translucent RGBA/HSLA background fills.
-- **Borders & Highlights**: Subtle 1px specular borders (`rgba(255, 255, 255, 0.12)` in dark, `rgba(0, 0, 0, 0.08)` in light) with delicate top-edge specular highlights.
-- **Shadows**: Multi-layered soft ambient drop shadows and subtle inner glows (`box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.1)`).
-- **Controls**: Floating pill toolbars, rounded glass cards (`border-radius: 12px` to `9999px`), frosted modal dialogs, and smooth micro-interactions (spring hover scale, active depression).
-- **Typography & Icons**: Inter for UI, JetBrains Mono for metadata/coordinates. All UI icons **MUST** be **minimalist monochrome SVGs** (clean, razor-sharp single-color vector graphics that inherit `currentColor` to adapt dynamically across dark and light glass themes; never use multi-colored, bitmap, or raster icons). **Zero Emojis Policy**: Never use colorful system/Unicode emojis (e.g., ❤️, ☕, 🚀) or raw text arrow symbols (e.g., ↗) in UI markup or component templates; always use crisp monochrome vector SVG icons (`ri-*` vector classes or inline SVG elements with `currentColor`).
+- **Zero Lines / Strokes Policy**: **Never use 1px border strokes, lines, or specular highlight outlines** on windows, floating toolbars, buttons, cards, or dialogs. Visual boundary and depth are created exclusively through translucent frosted glass fills and soft, multi-layered ambient drop shadows (`box-shadow: 0 12px 36px rgba(0, 0, 0, 0.5)`).
+- **Seamless Spacing Dividers**: Never use solid 1px divider lines or strokes between button groups; use transparent spacing margins (`width: 5px; background: transparent;`).
+- **Controls**: Floating pill toolbars, rounded glass cards (`border-radius: 8px` to `9999px`), frameless titlebar ghost buttons, and smooth micro-interactions (spring hover scale, active depression).
+- **Typography & Icons**: Inter for UI, JetBrains Mono for metadata/coordinates. All UI icons **MUST** be **minimalist monochrome SVGs** (clean, razor-sharp single-color vector graphics that inherit `currentColor` to adapt dynamically across dark and light glass themes; never use multi-colored, bitmap, or raster icons). **Zero Emojis Policy**: Never use colorful system/Unicode emojis (e.g., ❤️, ☕, 🚀) or raw text arrow symbols (e.g., ↗) in UI markup or component templates; always use crisp monochrome vector SVG icons.
 - **Zero Monolithic / Plain Components**: Never use unstyled browser defaults or flat, opaque gray boxes for buttons, dropdowns, inputs, or toolbars.
 
 ### Pillar 2: Dual Theme Engine (Dark & Light)
 The application must provide first-class support for both Dark and Light themes:
 - **Design Tokens**: All styling must strictly utilize CSS custom properties defined in the design token system:
-  - `--glass-bg`: Frosted background fill (`rgba(18, 20, 26, 0.65)` dark vs `rgba(245, 247, 250, 0.72)` light).
-  - `--glass-border`: Translucent boundary (`rgba(255, 255, 255, 0.12)` dark vs `rgba(0, 0, 0, 0.08)` light).
-  - `--glass-panel`: Surface fill for floating panels and drawers.
-  - `--text-primary`, `--text-secondary`, `--text-muted`: High-contrast accessible text colors.
-  - `--accent-color`, `--accent-glow`: Electric cyan/teal accent for active states.
+  - `--glass-bg`: Frosted background fill (Deep obsidian `rgba(6, 7, 10, 0.92)` in dark vs `rgba(255, 255, 255, 0.65)` in light).
+  - `--glass-border`: Set to `transparent` (zero stroke lines).
+  - `--glass-panel-bg`: Surface fill for window and panels (`rgba(2, 3, 5, calc(0.68 + var(--window-opacity) * 0.32))` in dark vs `rgba(244, 246, 249, ...)` in light).
+  - `--text-main`, `--text-muted`, `--text-dim`: High-contrast accessible text colors.
+  - `--action-bg`, `--action-text`: Monochrome action button fills.
+- **Deep Obsidian Dark Mode**: Dark mode must be deeply dark, never washed-out blue or gray.
 - **No Hardcoded Hex Colors**: Hardcoded color literals in component CSS or inline styles are prohibited.
-- **Native Acrylic Tint Coordination**: The Rust backend adjusts the Windows acrylic blur tint color in coordination with the active theme (`(15, 15, 20, 10)` for dark, `(240, 243, 248, 120)` for light).
+- **Native Acrylic Tint Coordination**: The Rust backend applies native Windows Acrylic blur in coordination with the active theme (`Some((0, 0, 0, 248))` for dark, `Some((245, 247, 250, 130))` for light).
 - **Theme Switching**: Instant, flicker-free theme switching with persistence in local storage and automatic system preference detection (`prefers-color-scheme`).
 
 ### Pillar 3: GitHub Releases Auto-Updater
@@ -40,13 +41,18 @@ The application must be able to self-update from its GitHub repository releases:
   - Manual "Check for Updates" trigger in Titlebar / Help modal.
   - Resilient offline error handling (no blocking error dialogs if network is unavailable).
 
-### Pillar 4: Picasa-Style Borderless Transparent Viewing
-Reliving the iconic Google Picasa Photo Viewer experience:
-- **Borderless & Transparent**: Window runs with `decorations: false` and `transparent: true`.
-- **Desktop Immersion on Image Open**: When an image is opened, the window immediately maximizes borderless over the desktop, applying a frosted translucent acrylic blur so the desktop wallpaper remains subtly visible behind the viewing canvas.
+### Pillar 4: Dual-Mode & Picasa-Style Transparent Viewing
+Reliving the iconic Google Picasa Photo Viewer experience with two tailored modes:
+- **Mode 1: Regular App Mode (`body.mode-regular`)**:
+  - Centered aspect-ratio window with docked frameless titlebar and native Windows acrylic blur.
+  - Smooth window resizing with proportional aspect fitting and edge handles.
+- **Mode 2: Fullscreen Image Viewer Mode (`body.mode-viewer`)**:
+  - **Strictly transparent with lowered brightness and NO blur**: Windows Acrylic blur is cleared via `clear_acrylic(&main_win)` and CSS blur is removed (`backdrop-filter: brightness(0.60)`). The desktop wallpaper remains visible behind the image without harsh/distracting blur.
+  - **CRITICAL IMMERSION INVARIANT — Never Alter Mode 2**: Fullscreen Image Viewer Mode (`body.mode-viewer`) MUST ALWAYS remain strictly transparent with lowered brightness (60%) and zero blur. Any changes to tokens, frosted glass, card styles, window acrylic, or settings windows MUST NEVER introduce blur, opacity, or borders to Mode 2.
+  - Borderless maximization over the desktop (`decorations: false`, `transparent: true`).
 - **Picasa Idle Mouse Fade**:
-  - When the image is displayed and the mouse is stationary for 2.5 seconds, all UI chrome (titlebar, floating pill toolbar, badges) fades smoothly to `opacity: 0` (`pointer-events: none`).
-  - As soon as the user moves the mouse, the controls instantly fade back in.
+  - When an image is displayed and the mouse is stationary for 2.5 seconds, all UI chrome (titlebar, floating pill toolbar, badges) fades smoothly to `opacity: 0` (`pointer-events: none`).
+  - As soon as the user moves the mouse, controls instantly fade back in.
 - **Navigation & Canvas Ergonomics**:
   - High-performance 60 FPS HTML5 Canvas pan and zoom.
   - Smooth mouse wheel zoom anchored to cursor coordinates.
@@ -57,7 +63,7 @@ Reliving the iconic Google Picasa Photo Viewer experience:
 - **Hard Rule — Maximum 300 Lines Per File**: No source code file (`.js`, `.css`, `.rs`) may exceed **300 lines of code**. Any file approaching this limit must be proactively refactored into focused submodules.
 - **Single Responsibility Principle**: Each file must do one thing well:
   - UI components manage only DOM rendering and user interaction events.
-  - Services handle external concerns (Tauri IPC, updater, filesystem, shortcuts).
+  - Services handle external concerns (Tauri IPC, updater, filesystem, shortcuts, window modes).
   - Core engines handle computation and canvas rendering.
 - **Never Dump Code into `app.js` or `style.css`**: Feature additions must create dedicated, importable modules.
 
@@ -66,48 +72,59 @@ Reliving the iconic Google Picasa Photo Viewer experience:
 ## 2. Directory Structure & Module Standards
 
 ```
-e:/Default/DEVS/Bukaake/
+bukaake/
 ├── .agents/
 │   └── workflows/             # Specialized Agent Workflows
 │       ├── orchestrator.md    # Multi-phase task coordinator
 │       ├── architect.md       # Planning & system design
 │       ├── coding-specialist.md # Code executor
 │       └── code-reviewer.md   # Quality & 5-pillar auditor
-├── AGENTS.md                  # This file: authoritative project rules
+├── AGENTS.md                  # Authoritative project rules manual
 ├── package.json
-├── index.html
+├── index.html                 # Main viewer entrypoint
+├── settings.html              # Dedicated standalone settings window
 ├── src/
-│   ├── components/            # Isolated Glassmorphism UI modules (< 250 lines)
+│   ├── components/            # Isolated UI modules (< 250 lines each)
 │   │   ├── titlebar.js        # Window controls, filename badge, image dimensions
-│   │   ├── toolbar.js         # Floating glass pill toolbar
+│   │   ├── toolbar.js         # Responsive floating control dock (< 200 lines)
 │   │   ├── adjustments-panel.js # Color sliders, preset chips
 │   │   ├── metadata-drawer.js # EXIF, file size, dimensions drawer
 │   │   ├── shortcuts-modal.js # Keyboard shortcuts overlay
 │   │   ├── updater-modal.js   # Glass GitHub release update dialog
 │   │   └── toast.js           # Translucent toast notifications
-│   ├── core/                  # Core canvas & image engines
+│   ├── core/                  # Core canvas & image math engines
 │   │   ├── canvas-viewer.js   # 60fps pan/zoom canvas engine
-│   │   ├── cropper.js         # Interactive crop overlay
+│   │   ├── cropper.js         # Interactive crop overlay engine
 │   │   ├── filters.js         # Color adjustment processor
 │   │   └── metadata.js        # EXIF parser & dimension reader
-│   ├── services/              # External & platform services (< 200 lines)
+│   ├── services/              # External & platform services (< 200 lines each)
 │   │   ├── tauri-bridge.js    # Tauri v2 window, args, fs IPC wrapper
+│   │   ├── window-mode-manager.js # Regular mode vs Fullscreen viewer mode coordinator
 │   │   ├── updater.js         # GitHub release auto-updater service
 │   │   ├── theme-manager.js   # Dark & light theme switcher + acrylic tint
 │   │   ├── file-loader.js     # Image file loader, drag & drop, clipboard
 │   │   ├── shortcuts.js       # Keyboard hotkeys registry
 │   │   └── idle-controller.js # Picasa-style idle mouse fade controller
-│   ├── styles/                # Modular CSS design system (< 250 lines each)
-│   │   ├── tokens.css         # Glass tokens for dark and light themes
+│   ├── styles/                # Modular CSS design system (< 200 lines each)
+│   │   ├── tokens.css         # Stroke-free glass tokens (dark & light)
 │   │   ├── base.css           # Typography, reset, viewport layout
-│   │   ├── glass.css          # Glassmorphism utilities, shadows, blur
+│   │   ├── glass.css          # Core glassmorphism classes & ambient shadows
+│   │   ├── main.css           # Master stylesheet bundling component submodules
 │   │   └── components/        # Component-specific styles
-│   └── app.js                 # Lean coordinator bootstrapping all modules (< 120 lines)
+│   │       ├── titlebar.css   # Frameless ghost titlebar
+│   │       ├── toolbar.css    # Responsive floating control dock
+│   │       ├── crop.css       # Crop tool overlay & controls
+│   │       ├── modes.css      # Mode 1 regular vs Mode 2 fullscreen viewer
+│   │       ├── settings.css   # Standalone settings window styling
+│   │       └── toast.css      # Translucent toast styling
+│   ├── app.js                 # Main window bootstrap coordinator (< 120 lines)
+│   └── settings-app.js        # Standalone settings window coordinator (< 100 lines)
 └── src-tauri/
-    ├── Cargo.toml             # Tauri v2 dependencies & updater plugin
-    ├── tauri.conf.json        # Transparent borderless window + updater endpoints
+    ├── Cargo.toml             # Tauri v2 dependencies (`window-vibrancy 0.6.0`)
+    ├── tauri.conf.json        # Multi-window config (main + settings)
     └── src/
-        └── main.rs            # Windows acrylic vibrancy + updater plugin init
+        ├── main.rs            # Native acrylic vibrancy + window IPC commands
+        └── image_loader.rs    # Fast native image decoding & metadata reading
 ```
 
 ---
@@ -118,12 +135,12 @@ e:/Default/DEVS/Bukaake/
 | :--- | :--- | :--- |
 | **Desktop Framework** | Tauri v2 | `@tauri-apps/cli` ^2.0.0, `tauri` ^2.0.0 |
 | **Backend Language** | Rust | Edition 2021 |
-| **Windows Acrylic** | `window-vibrancy` | 0.5.0 (`apply_acrylic`) |
+| **Windows Acrylic** | `window-vibrancy` | 0.6.0 (`apply_acrylic`, `clear_acrylic`) |
 | **Auto-Updater** | Tauri Updater Plugin | `@tauri-apps/plugin-updater`, `tauri-plugin-updater` |
-| **Frontend Bundler** | Vite | ^5.4.0 (ES Modules) |
+| **Frontend Bundler** | Vite | ^5.4.0 (Multi-page ES Modules: `index.html`, `settings.html`) |
 | **Frontend Core** | Vanilla JavaScript | ES6+ Modules, No Heavy Frameworks |
-| **Styling** | Vanilla CSS | CSS Custom Properties, Glassmorphism, BEM |
-| **Icons** | Minimalist Monochrome SVG | Clean vector icons (Remix Icons SVG/vector, monochrome, `currentColor`) |
+| **Styling** | Vanilla CSS | Stroke-free Glassmorphism, CSS Custom Properties |
+| **Icons** | Minimalist Monochrome SVG | Clean vector icons (Monochrome inline SVGs / Remix Icons, `currentColor`) |
 | **Typography** | Inter & JetBrains Mono | Google Fonts |
 
 ### Common CLI Commands
@@ -141,26 +158,30 @@ e:/Default/DEVS/Bukaake/
 
 1. **Architect (`/architect`)**:
    - Performs deep analysis of current codebase.
-   - Outputs implementation plans adhering to the 5 Pillars.
+   - Outputs implementation plans adhering to the 5 Pillars (including Stroke-Free Glass and Mode 2 Zero-Blur).
    - Enforces file size budgets (< 300 lines) and explicit modular breakdowns.
    - Does NOT write final implementation code.
 
 2. **Coding Specialist (`/coding-specialist`)**:
    - Implements features strictly matching architectural specifications.
    - Never creates monolithic files or adds bloat to existing files.
-   - Builds UI using glassmorphism tokens and classes.
-   - Ensures all UI functions seamlessly in both Dark and Light themes.
-   - Integrates Tauri v2 APIs cleanly.
+   - Builds UI using stroke-free glassmorphism tokens and classes (no 1px borders).
+   - Ensures all UI functions seamlessly in both deep dark and light themes.
+   - Integrates Tauri v2 APIs and multi-window IPC cleanly.
 
 3. **Code Reviewer (`/code-reviewer`)**:
    - Audits code against the **Bukaake 5-Pillar Checklist**:
-     1. Glassmorphism styling validated (no flat/un-blurred elements).
-     2. Dual-theme compatibility verified (no hardcoded colors).
+     1. Stroke-Free Glassmorphism styling validated (no border strokes or 1px dividing lines).
+     2. Dual-theme compatibility verified (deep obsidian dark mode, no hardcoded colors).
      3. Auto-updater hooks verified for safety and resilience.
-     4. Picasa borderless transparent maximization & idle fade verified.
+     4. Mode transitions verified (regular mode acrylic vs fullscreen viewer strictly transparent with zero blur).
      5. Strict modularity check: **Instantly reject any file exceeding 300 lines.**
 
 4. **Orchestrator (`/orchestrator`)**:
    - Breaks down multi-step tasks into clear, atomic specialist subtasks.
    - Tracks execution progress across Architect, Coding Specialist, and Code Reviewer.
    - Ensures quality handoffs and synthesizes results for the user.
+
+5. **Universal Rule — Never Assume, Always Ask**:
+   - Agents MUST NEVER assume the user's aesthetic, functional, or architectural intentions when an instruction or design nuance is subjective, ambiguous, or underspecified.
+   - If user intent is unclear or open to interpretation, agents MUST actively ask clarifying questions before committing changes.
