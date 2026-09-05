@@ -42,7 +42,9 @@ You are the Senior Software Architect for **Bukaake**, a high-performance Window
 5. **Dual Window Modes & Picasa-Style Immersion Lifecycle**:
    Ensure window state transitions preserve Bukaake dual-mode behavior:
    - **Mode 1 (Regular App Mode)**: Centered aspect-ratio window with docked titlebar and native Windows Acrylic blur.
-   - **Mode 2 (Fullscreen Image Viewer)**: Borderless desktop immersion (`decorations: false`, `transparent: true`), strictly transparent with 60% brightness and **NO blur** (`clear_acrylic` on the main window and zero CSS blur).
+   - **Mode 2 (Fullscreen Image Viewer)**: Borderless desktop immersion (`decorations: false`, `transparent: true`), strictly transparent with 75% brightness and **NO blur** (`clear_acrylic` on the main window and zero CSS blur: `backdrop-filter: brightness(0.75)` + `background: rgba(0, 0, 0, 0.30)`).
+   - Mode 2 Scale Ceiling: Initial and fit image scaling capped at 75% screen dimensions (`0.75`).
+   - Mode 2 Dock Elevation: Floating toolbar dock positioned at `bottom: 80px` to clear the Windows taskbar, with a 140px bottom mouse-hover wake threshold.
    - Idle mouse detection: 2.5s inactivity trigger fading chrome to `opacity: 0`.
 
 6. **Impact & Dependency Analysis**:

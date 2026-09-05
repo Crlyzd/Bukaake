@@ -30,6 +30,7 @@ You are the Senior Software Engineer for **Bukaake**, the lightweight, high-perf
    Whenever creating buttons, dropdowns, menus, modals, cards, or inputs:
    - Always apply glass styling classes (`.glass-panel`, `.glass-card`, `.glass-btn`).
    - **Zero Lines / Strokes Policy**: Never use 1px border strokes or dividers. Use transparent spacing and layered drop shadows (`box-shadow: 0 12px 36px rgba(0, 0, 0, 0.5)`).
+   - **Zero Focus Outlines**: Enforce `outline: none !important;` on `:focus` and `:focus-visible` for all interactive elements.
    - Apply `backdrop-filter: blur(20px) saturate(180%)`.
    - Include dynamic micro-interactions: spring hover lifts, active press scales (`transform: scale(0.97)`), and smooth transitions.
    - All UI icons **MUST** be **minimalist monochrome SVGs** (inheriting `currentColor` for dynamic dark/light theme adaptation; never use multi-color or bitmap images for UI icons).
@@ -38,6 +39,7 @@ You are the Senior Software Engineer for **Bukaake**, the lightweight, high-perf
 3. **Dual Theme Implementation (Deep Dark & Light)**:
    - Always use CSS custom properties (`var(--glass-bg)`, `--glass-border: transparent`, `var(--text-main)`, `var(--action-bg)`).
    - Verify that contrast and readability are preserved in both deep obsidian Dark (`html[data-theme="dark"]`) and Light (`html[data-theme="light"]`) modes.
+   - In Light Mode, strictly follow the Zero Pure Black policy: use obsidian slate `#242938` / `#2a3142` and `rgba(26, 32, 44, ...)` for dark accents.
    - Never write hardcoded color hex values like `#fff` or `#111` in component rules.
 
 4. **GitHub Auto-Updater Implementation**:
@@ -47,7 +49,9 @@ You are the Senior Software Engineer for **Bukaake**, the lightweight, high-perf
 
 5. **Dual Window Modes & Transparent Viewing**:
    - **Mode 1 (Regular App Mode)**: Centered aspect-ratio window with docked titlebar and native Windows Acrylic blur (`Some((0,0,0,248))` dark / `Some((245,247,250,130))` light).
-   - **Mode 2 (Fullscreen Image Viewer)**: Borderless desktop immersion (`decorations: false`, `transparent: true`), strictly transparent with lowered brightness (`brightness(0.60)`) and **NO blur** (call `clear_acrylic` on main window and remove CSS blur).
+   - **Mode 2 (Fullscreen Image Viewer)**: Borderless desktop immersion (`decorations: false`, `transparent: true`), strictly transparent with lowered brightness (`brightness(0.75)` + `rgba(0, 0, 0, 0.30)`) and **NO blur** (call `clear_acrylic` on main window and remove CSS blur).
+   - Mode 2 Scale Ceiling: Initial and fit image scaling capped at 75% screen dimensions (`0.75`).
+   - Mode 2 Dock Elevation: Floating toolbar dock positioned at `bottom: 80px` to clear the Windows taskbar, with a 140px bottom mouse-hover wake threshold.
    - Implement the 2.5-second mouse idle timer: fade all UI controls to `opacity: 0` during inactivity; instantly restore on mouse motion.
 
 6. **Performance & Memory Hygiene**:
