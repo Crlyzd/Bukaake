@@ -19,7 +19,7 @@
   transition: opacity var(--transition-fast), transform var(--transition-fast);
   -webkit-app-region: no-drag;
   app-region: no-drag;
-  background: var(--glass-bg);
+  background: var(--glass-card-bg);
   backdrop-filter: blur(24px) saturate(180%);
   -webkit-backdrop-filter: blur(24px) saturate(180%);
   border: none !important;
@@ -83,13 +83,16 @@ body.image-loaded .floating-toolbar:hover {
 }
 
 .toolbar-btn:hover:not(:disabled) {
-  background: var(--glass-bg-hover);
+  background: linear-gradient(135deg, rgba(147, 51, 234, 0.28), rgba(59, 130, 246, 0.28));
+  box-shadow: 0 0 12px rgba(147, 51, 234, 0.25);
   border: none !important;
+  color: var(--text-main);
   transform: translateY(-1px);
 }
 
 .toolbar-btn.active {
-  background: var(--glass-bg-active);
+  background: linear-gradient(135deg, rgba(147, 51, 234, 0.40), rgba(59, 130, 246, 0.40));
+  box-shadow: 0 0 14px rgba(147, 51, 234, 0.35);
   border: none !important;
   color: var(--text-main);
 }
@@ -110,28 +113,12 @@ body.image-loaded .floating-toolbar:hover {
 }
 
 .highlight-btn {
-  width: 28px;
-  height: 28px;
-  padding: 0;
-  border-radius: var(--radius-pill);
-  background: var(--action-bg);
-  color: var(--action-text);
-  font-size: 14px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: none !important;
-  flex-shrink: 0;
+  background: transparent;
+  color: var(--text-main);
 }
 
 .highlight-btn span {
   display: none;
-}
-
-.highlight-btn:hover {
-  background: var(--action-hover-bg);
-  box-shadow: var(--btn-shadow-hover);
-  transform: translateY(-1px);
 }
 
 .file-counter {

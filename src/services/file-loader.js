@@ -150,7 +150,6 @@ export class FileLoader {
         naturalHeight: img.naturalHeight || img.height,
       };
       this.onImageLoaded?.(img, this.currentMeta);
-      if (meta.name) this.onStatusMessage?.(`Loaded ${meta.name}`);
     };
     img.onerror = () => {
       this.onStatusMessage?.(`Failed to display ${meta.name || 'image'}`);

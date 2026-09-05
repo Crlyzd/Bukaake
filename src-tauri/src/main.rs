@@ -31,6 +31,22 @@ fn open_url(url: String) -> Result<(), String> {
 }
 
 #[tauri::command]
+fn show_in_folder(path: String) -> Result<(), String> {
+    #[cfg(target_os = "windows")]
+    {
+        std::process::Command::new("explorer")
+            .args(["/select,", &path])
+            .spawn()
+            .map_err(|e| e.to_string())?;
+    }
+    #[cfg(not(target_os = "windows"))]
+    {
+        let _ = path;
+    }
+    Ok(())
+}
+
+#[tauri::command]
 fn close_window(window: tauri::Window) {
     let _ = window.close();
 }
@@ -156,6 +172,7 @@ fn main() {
             get_initial_image,
             read_image_file,
             open_url,
+            show_in_folder,
             close_window,
             minimize_window,
             toggle_maximize_window,

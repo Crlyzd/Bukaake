@@ -18,6 +18,7 @@ import { AdjustmentsPanel } from './components/adjustments-panel.js';
 import { MetadataDrawer } from './components/metadata-drawer.js';
 import { ShortcutsModal } from './components/shortcuts-modal.js';
 import { SettingsModal } from './components/settings-modal.js';
+import { ContextMenu } from './components/context-menu.js';
 import { toast } from './components/toast.js';
 
 class BukaakeApp {
@@ -30,10 +31,8 @@ class BukaakeApp {
     this.viewer = new CanvasViewer(this.canvasEl, this.viewportEl);
     this.filters = new FilterEngine(this.viewer);
     this.cropper = new CropperTool(
-      document.getElementById('cropOverlayContainer'),
-      document.getElementById('cropBox'),
-      document.getElementById('cropDimensionsTag'),
-      this.viewer
+      document.getElementById('cropOverlayContainer'), document.getElementById('cropBox'),
+      document.getElementById('cropDimensionsTag'), this.viewer
     );
     this.metadataInspector = new MetadataInspector(document.getElementById('metadataBody'));
 
@@ -54,10 +53,7 @@ class BukaakeApp {
       onPasteClipboard: () => this.fileLoader.loadFromClipboard(),
       onToggleMetadata: () => this.metadataDrawer.toggle(),
       onToggleSettings: async () => {
-        const opened = await tauriBridge.openSettingsWindow();
-        if (!opened) {
-          this.settingsModal.toggle();
-        }
+        if (!(await tauriBridge.openSettingsWindow())) this.settingsModal.toggle();
       },
       onToggleHelp: () => this.shortcutsModal.toggle(),
       onToggleMode: () => this.windowModeManager?.toggleMode(),
@@ -68,11 +64,23 @@ class BukaakeApp {
       onClose: () => this.toolbar.setAdjustmentsActive(false),
     });
 
-    this.metadataDrawer = new MetadataDrawer({
-      metadataInspector: this.metadataInspector,
-    });
-
+    this.metadataDrawer = new MetadataDrawer({ metadataInspector: this.metadataInspector });
     this.shortcutsModal = new ShortcutsModal();
+
+    this.contextMenu = new ContextMenu({
+      container: this.viewportEl,
+      getFilePath: () => this.fileLoader.currentMeta?.path || null,
+      hasImage: () => Boolean(this.viewer.img),
+      actions: {
+        onCopyImage: () => this.copyImage(),
+        onSaveImage: () => this.saveImage(),
+        onRotateRight: () => this.viewer.rotate(90),
+        onFlipH: () => this.viewer.toggleFlipH(),
+        onFitScreen: () => this.viewer.fitToScreen(),
+        onCrop: () => this.toggleCrop(true),
+        onToggleMetadata: () => this.metadataDrawer.toggle(),
+      },
+    });
 
     this.toolbar = new Toolbar({
       actions: {
@@ -130,9 +138,7 @@ class BukaakeApp {
 
     this.viewer.onToggleMode = () => this.windowModeManager.toggleMode();
     this.viewer.onOutsideClick = () => {
-      if (this.windowModeManager.currentMode === MODE_VIEWER) {
-        this.windowModeManager.setMode(MODE_REGULAR);
-      }
+      if (this.windowModeManager.currentMode === MODE_VIEWER) this.windowModeManager.setMode(MODE_REGULAR);
     };
 
     this.idleController = new IdleController({
@@ -167,15 +173,12 @@ class BukaakeApp {
       onToggleMaximize: () => this.windowModeManager?.toggleMode(),
       onToggleHelp: () => this.shortcutsModal.toggle(),
       onEscape: () => {
-        if (this.cropper.active) { this.toggleCrop(false); return; }
-        if (this.adjustmentsPanel.isOpen()) { this.adjustmentsPanel.hide(); this.toolbar.setAdjustmentsActive(false); return; }
-        if (this.metadataDrawer.isOpen()) { this.metadataDrawer.hide(); return; }
-        if (this.settingsModal.isOpen()) { this.settingsModal.hide(); return; }
-        if (this.shortcutsModal.isOpen()) { this.shortcutsModal.hide(); return; }
-        if (this.windowModeManager?.currentMode === MODE_VIEWER) {
-          this.windowModeManager.setMode(MODE_REGULAR);
-          return;
-        }
+        if (this.cropper.active) return this.toggleCrop(false);
+        if (this.adjustmentsPanel.isOpen()) { this.adjustmentsPanel.hide(); return this.toolbar.setAdjustmentsActive(false); }
+        if (this.metadataDrawer.isOpen()) return this.metadataDrawer.hide();
+        if (this.settingsModal.isOpen()) return this.settingsModal.hide();
+        if (this.shortcutsModal.isOpen()) return this.shortcutsModal.hide();
+        if (this.windowModeManager?.currentMode === MODE_VIEWER) return this.windowModeManager.setMode(MODE_REGULAR);
         tauriBridge.closeWindow();
       },
     });
@@ -186,27 +189,21 @@ class BukaakeApp {
     this.fileLoader.bindDropAndPaste(this.viewportEl, this.fileInput);
     document.getElementById('dropSampleBtn')?.addEventListener('click', () => this.loadSampleImage());
     document.body.classList.add('bg-transparent');
+    this.titlebar.syncMaximizedState(await tauriBridge.isFullscreen());
 
     try {
       const initial = await tauriBridge.getInitialImage();
-      if (initial && initial.target_path) {
-        this.fileLoader.loadFromTauriContext(initial);
-        return;
-      }
-    } catch (err) {
-      console.warn('[Bukaake] Startup check failed:', err);
-    }
+      if (initial?.target_path) return this.fileLoader.loadFromTauriContext(initial);
+    } catch (err) { console.warn('[Bukaake] Startup check failed:', err); }
 
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get('sample')) this.loadSampleImage();
+    if (new URLSearchParams(window.location.search).get('sample')) this.loadSampleImage();
   }
 
   updateStatusBadges() {
     if (!this.viewer.img) return;
     const w = this.viewer.img.naturalWidth || this.viewer.img.width;
     const h = this.viewer.img.naturalHeight || this.viewer.img.height;
-    const pct = Math.round(this.viewer.scale * 100);
-    this.titlebar.setDimensions(w, h, pct);
+    this.titlebar.setDimensions(w, h, Math.round(this.viewer.scale * 100));
     this.toolbar.updateZoomPercent(this.viewer.scale);
   }
 
@@ -221,10 +218,7 @@ class BukaakeApp {
   toggleCrop(forceState = null) {
     const shouldCrop = forceState !== null ? forceState : !this.cropper.active;
     if (shouldCrop) {
-      if (!this.viewer.img) {
-        toast.show('Load an image first to crop');
-        return;
-      }
+      if (!this.viewer.img) return toast.show('Load an image first to crop');
       this.cropper.show();
       this.toolbar.setCropActive(true);
       toast.show('Drag box or handles to select crop region');
@@ -236,10 +230,7 @@ class BukaakeApp {
 
   applyCrop() {
     const rect = this.cropper.getCropImageRect();
-    if (!rect || rect.width <= 0 || rect.height <= 0) {
-      toast.show('Invalid crop area');
-      return;
-    }
+    if (!rect || rect.width <= 0 || rect.height <= 0) return toast.show('Invalid crop area');
     const offCanvas = this.viewer.getProcessedCanvas(rect, this.filters.getFilterCssString());
     if (!offCanvas) return;
 
@@ -252,34 +243,41 @@ class BukaakeApp {
     img.src = offCanvas.toDataURL('image/png');
   }
 
-  saveImage() {
-    if (!this.viewer.img) {
-      toast.show('No image loaded to save');
-      return;
-    }
-    const offCanvas = this.viewer.getProcessedCanvas(null, this.filters.getFilterCssString());
-    if (!offCanvas) return;
+  copyImage() {
+    if (!this.viewer.img) { toast.show('No image loaded to copy'); return; }
+    try {
+      const off = this.viewer.getProcessedCanvas(null, this.filters.getFilterCssString());
+      if (!off) return;
+      off.toBlob(async (b) => {
+        if (!b) return;
+        try {
+          await navigator.clipboard.write([new ClipboardItem({ 'image/png': b })]);
+          toast.show('Image copied to clipboard');
+        } catch { toast.show('Failed to copy to clipboard'); }
+      }, 'image/png');
+    } catch { toast.show('Clipboard copy unsupported'); }
+  }
 
+  saveImage() {
+    if (!this.viewer.img) { toast.show('No image loaded to save'); return; }
+    const off = this.viewer.getProcessedCanvas(null, this.filters.getFilterCssString());
+    if (!off) return;
     const link = document.createElement('a');
-    const baseName = this.fileLoader.currentMeta?.name?.replace(/\.[^/.]+$/, '') || 'bukaake_export';
-    link.download = `${baseName}_edited.png`;
-    link.href = offCanvas.toDataURL('image/png');
+    const base = this.fileLoader.currentMeta?.name?.replace(/\.[^/.]+$/, '') || 'bukaake_export';
+    link.download = `${base}_edited.png`;
+    link.href = off.toDataURL('image/png');
     link.click();
     toast.show(`Exported ${link.download}`);
   }
 
   loadSampleImage() {
     const c = document.createElement('canvas');
-    c.width = 1920;
-    c.height = 1080;
+    c.width = 1920; c.height = 1080;
     const ctx = c.getContext('2d');
-    const grad = ctx.createLinearGradient(0, 0, 1920, 1080);
-    grad.addColorStop(0, '#0a0c1b');
-    grad.addColorStop(0.5, '#1e0538');
-    grad.addColorStop(1, '#051b2c');
-    ctx.fillStyle = grad;
+    const g = ctx.createLinearGradient(0, 0, 1920, 1080);
+    g.addColorStop(0, '#0a0c1b'); g.addColorStop(0.5, '#1e0538'); g.addColorStop(1, '#051b2c');
+    ctx.fillStyle = g;
     ctx.fillRect(0, 0, 1920, 1080);
-
     const img = new Image();
     img.onload = () => {
       this.fileLoader.loadDirectImage(img, { name: 'bukaake_demo_wallpaper.png' });

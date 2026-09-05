@@ -1,0 +1,103 @@
+/* ==========================================================================
+   Bukaake Frosted Glass Context Menu Styles
+   Stroke-free frosted glass floating menu adhering to Pillar 1 & 2
+   ========================================================================== */
+
+.glass-context-menu {
+  position: fixed;
+  z-index: 1000;
+  min-width: 210px;
+  padding: 5px;
+  border-radius: var(--radius-md);
+  background: var(--glass-card-bg);
+  backdrop-filter: blur(28px) saturate(190%);
+  -webkit-backdrop-filter: blur(28px) saturate(190%);
+  border: none !important;
+  box-shadow: var(--glass-card-shadow);
+  user-select: none;
+  -webkit-user-select: none;
+  animation: contextFadeIn 0.12s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.glass-context-menu.hidden {
+  display: none !important;
+}
+
+.context-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+  color: var(--text-main);
+  font-size: 12px;
+  font-weight: 400;
+  cursor: pointer;
+  border: none !important;
+  transition: all var(--transition-fast);
+}
+
+.context-menu-icon {
+  font-size: 14px;
+  color: var(--text-muted);
+  width: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: color var(--transition-fast);
+}
+
+.context-menu-label {
+  flex: 1;
+  white-space: nowrap;
+}
+
+.context-menu-shortcut {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--text-dim);
+  padding: 1px 5px;
+  border-radius: var(--radius-xs);
+  background: rgba(255, 255, 255, 0.06);
+  flex-shrink: 0;
+}
+
+body.light-theme .context-menu-shortcut,
+html[data-theme="light"] .context-menu-shortcut {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.context-menu-item:hover:not(.disabled) {
+  background: linear-gradient(135deg, rgba(147, 51, 234, 0.24), rgba(59, 130, 246, 0.24));
+  color: var(--text-main);
+  transform: translateX(1px);
+}
+
+.context-menu-item:hover:not(.disabled) .context-menu-icon {
+  color: var(--text-main);
+}
+
+.context-menu-item.disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.context-menu-divider {
+  height: 1px;
+  margin: 4px 6px;
+  background: var(--bg-secondary);
+  border: none !important;
+}
+
+@keyframes contextFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.97) translateY(-2px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}

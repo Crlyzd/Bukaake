@@ -30,22 +30,13 @@ export class TauriBridge {
         await window.__TAURI__.window.getCurrentWindow().close();
         return;
       }
-    } catch (e) {
-      console.warn('[TauriBridge] getCurrentWindow().close() failed, trying native command', e);
-    }
+    } catch (e) { console.warn('[TauriBridge] getCurrentWindow().close() failed', e); }
 
     try {
-      if (this.isTauri()) {
-        await this.invoke('close_window');
-        return;
-      }
-    } catch (e) {
-      console.warn('[TauriBridge] invoke close_window failed', e);
-    }
+      if (this.isTauri()) { await this.invoke('close_window'); return; }
+    } catch (e) { console.warn('[TauriBridge] invoke close_window failed', e); }
 
-    try {
-      window.close();
-    } catch (e) {}
+    try { window.close(); } catch (e) {}
   }
 
   async minimizeWindow() {
@@ -57,9 +48,7 @@ export class TauriBridge {
     } catch (e) {}
 
     try {
-      if (this.isTauri()) {
-        await this.invoke('minimize_window');
-      }
+      if (this.isTauri()) await this.invoke('minimize_window');
     } catch (e) {}
   }
 
@@ -72,10 +61,7 @@ export class TauriBridge {
     } catch (e) {}
 
     try {
-      if (this.isTauri()) {
-        await this.invoke('toggle_maximize_window');
-        return;
-      }
+      if (this.isTauri()) { await this.invoke('toggle_maximize_window'); return; }
     } catch (e) {}
 
     // Fallback for standalone browser/preview
@@ -83,10 +69,8 @@ export class TauriBridge {
       if (document.documentElement.requestFullscreen) {
         try { await document.documentElement.requestFullscreen(); } catch (e) {}
       }
-    } else {
-      if (document.exitFullscreen) {
-        try { await document.exitFullscreen(); } catch (e) {}
-      }
+    } else if (document.exitFullscreen) {
+      try { await document.exitFullscreen(); } catch (e) {}
     }
   }
 
@@ -277,6 +261,13 @@ export class TauriBridge {
     if (this.isTauri()) {
       try { await this.invoke('hide_settings_window'); } catch (e) {}
     }
+  }
+
+  async showInFolder(path) {
+    if (this.isTauri() && path) {
+      try { await this.invoke('show_in_folder', { path }); return true; } catch (e) { console.warn(e); }
+    }
+    return false;
   }
 
   initExternalLinks() {

@@ -16,11 +16,11 @@
   transition: all var(--transition-normal);
   -webkit-app-region: no-drag;
   app-region: no-drag;
-  background: var(--glass-panel-bg);
+  background: var(--glass-card-bg);
   backdrop-filter: blur(24px) saturate(180%);
   -webkit-backdrop-filter: blur(24px) saturate(180%);
-  border: 1px solid var(--glass-border);
-  box-shadow: var(--glass-shadow);
+  border: none !important;
+  box-shadow: var(--glass-card-shadow);
 }
 
 .adjustments-panel {
@@ -35,7 +35,7 @@
 .drawer-header,
 .modal-header {
   padding: 16px;
-  border-bottom: 1px solid var(--glass-border);
+  border-bottom: none !important;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -103,7 +103,7 @@
 
 .preset-chip {
   background: rgba(255, 255, 255, 0.1);
-  border: 1px solid var(--glass-border);
+  border: none !important;
   color: var(--text-muted);
   padding: 4px 10px;
   border-radius: var(--radius-pill);
@@ -115,7 +115,6 @@
 .preset-chip:hover,
 .preset-chip.active {
   background: var(--glass-bg-active);
-  border-color: var(--active-border);
   color: var(--text-main);
 }
 
@@ -217,7 +216,8 @@ input[type="range"]::-webkit-slider-thumb:hover {
   overflow: hidden;
   background: var(--glass-panel-bg);
   backdrop-filter: blur(24px) saturate(180%);
-  border: 1px solid var(--glass-border);
+  border: none !important;
+  box-shadow: var(--glass-card-shadow);
 }
 
 .shortcuts-grid {
@@ -236,13 +236,13 @@ input[type="range"]::-webkit-slider-thumb:hover {
   background: rgba(255, 255, 255, 0.08);
   padding: 8px 12px;
   border-radius: var(--radius-md);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: none !important;
 }
 
 kbd {
   font-family: 'JetBrains Mono', monospace;
   background: rgba(255, 255, 255, 0.18);
-  border: 1px solid var(--glass-border-bright);
+  border: none !important;
   padding: 2px 6px;
   border-radius: 4px;
   color: var(--text-main);

@@ -29,7 +29,7 @@
         "title": "Bukaake Settings",
         "url": "settings.html",
         "width": 460,
-        "height": 580,
+        "height": 440,
         "resizable": false,
         "fullscreen": false,
         "transparent": true,
