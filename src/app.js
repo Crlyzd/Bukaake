@@ -37,7 +37,7 @@ class BukaakeApp {
     this.metadataInspector = new MetadataInspector(document.getElementById('metadataBody'));
 
     this.fileLoader = new FileLoader();
-    this.bgModes = ['bg-transparent', 'bg-checkerboard', 'bg-solid-dark', 'bg-solid-light'];
+    this.bgModes = ['bg-transparent', 'bg-checkerboard'];
     this.currentBgIndex = 0;
 
     this.initComponents();
@@ -85,8 +85,8 @@ class BukaakeApp {
     this.toolbar = new Toolbar({
       actions: {
         onNavigateBatch: (delta) => this.fileLoader.navigateBatch(delta),
-        onZoomIn: () => this.viewer.zoomTo(this.viewer.scale * 1.25),
-        onZoomOut: () => this.viewer.zoomTo(this.viewer.scale * 0.8),
+        onZoomIn: () => this.viewer.zoomTo(this.viewer.scale * 1.25, false, this.viewer.cursorX, this.viewer.cursorY),
+        onZoomOut: () => this.viewer.zoomTo(this.viewer.scale * 0.8, false, this.viewer.cursorX, this.viewer.cursorY),
         onFitScreen: () => this.viewer.fitToScreen(),
         onActualSize: () => this.viewer.zoomTo(1.0),
         onRotateLeft: () => this.viewer.rotate(-90),
@@ -208,10 +208,14 @@ class BukaakeApp {
   }
 
   cycleBgMode() {
+    if (document.body.classList.contains('mode-viewer')) {
+      toast.show('Background theme is disabled in fullscreen');
+      return;
+    }
     document.body.classList.remove(...this.bgModes);
     this.currentBgIndex = (this.currentBgIndex + 1) % this.bgModes.length;
     document.body.classList.add(this.bgModes[this.currentBgIndex]);
-    const names = ['Pure Crystal Transparency', 'Checkerboard Grid', 'Solid Dark Glass', 'Solid Light Glass'];
+    const names = ['Pure Crystal Transparency', 'Checkerboard Grid'];
     toast.show(`Background: ${names[this.currentBgIndex]}`);
   }
 

@@ -9,7 +9,7 @@ export class IdleController {
     this.toolbarEl = options.toolbar || document.getElementById('floatingToolbar');
 
     this.topThreshold = options.topThreshold || 55;
-    this.bottomThreshold = options.bottomThreshold || 90;
+    this.bottomThreshold = options.bottomThreshold || 140;
 
     this.isBlocked = options.isBlocked || (() => false);
     this.hasImage = options.hasImage || (() => false);

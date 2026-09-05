@@ -11,6 +11,17 @@ export function attachCanvasInteractions(viewer) {
     viewer.resizeObserver.observe(viewer.container);
   }
 
+  canvas.addEventListener('mousemove', (e) => {
+    const rect = canvas.getBoundingClientRect();
+    viewer.cursorX = e.clientX - rect.left;
+    viewer.cursorY = e.clientY - rect.top;
+  });
+
+  canvas.addEventListener('mouseleave', () => {
+    viewer.cursorX = null;
+    viewer.cursorY = null;
+  });
+
   canvas.addEventListener('wheel', (e) => {
     if (!viewer.img) return;
     e.preventDefault();
@@ -18,6 +29,8 @@ export function attachCanvasInteractions(viewer) {
     const rect = canvas.getBoundingClientRect();
     const mx = e.clientX - rect.left;
     const my = e.clientY - rect.top;
+    viewer.cursorX = mx;
+    viewer.cursorY = my;
     const nextScale = Math.max(0.05, Math.min(viewer.targetScale * zoomFactor, 50.0));
 
     viewer.targetPanX = mx - (mx - viewer.targetPanX) * (nextScale / viewer.targetScale);

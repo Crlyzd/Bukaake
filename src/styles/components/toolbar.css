@@ -66,6 +66,7 @@ body.image-loaded .floating-toolbar:hover {
   border-radius: var(--radius-pill);
   background: transparent;
   border: none !important;
+  outline: none !important;
   color: var(--text-main);
   font-size: 14px;
   display: flex;
@@ -74,6 +75,11 @@ body.image-loaded .floating-toolbar:hover {
   cursor: pointer;
   flex-shrink: 0;
   transition: all var(--transition-fast);
+}
+
+.toolbar-btn:focus,
+.toolbar-btn:focus-visible {
+  outline: none !important;
 }
 
 .toolbar-btn svg {

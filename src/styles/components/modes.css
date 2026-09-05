@@ -71,10 +71,16 @@ body.mode-viewer {
   border-radius: 0 !important;
   border: none !important;
   box-shadow: none !important;
-  background: rgba(0, 0, 0, 0.55) !important;
-  backdrop-filter: brightness(0.60) !important;
-  -webkit-backdrop-filter: brightness(0.60) !important;
+  background: rgba(0, 0, 0, 0.30) !important;
+  backdrop-filter: brightness(0.75) !important;
+  -webkit-backdrop-filter: brightness(0.75) !important;
   transition: background 0.3s ease;
+}
+
+body.mode-viewer #btnBgMode {
+  opacity: 0.25 !important;
+  pointer-events: none !important;
+  cursor: not-allowed !important;
 }
 
 body.mode-viewer .viewport-container {
@@ -98,6 +104,21 @@ body.mode-viewer.image-loaded .app-titlebar:hover {
   opacity: 1;
   pointer-events: auto;
   transform: translateY(0);
+}
+
+body.mode-viewer.image-loaded .floating-toolbar {
+  bottom: 80px !important;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(-50%) translateY(14px);
+  transition: opacity var(--transition-fast), transform var(--transition-fast);
+}
+
+body.mode-viewer.image-loaded .floating-toolbar.visible,
+body.mode-viewer.image-loaded .floating-toolbar:hover {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateX(-50%) translateY(0);
 }
 
 /* --------------------------------------------------------------------------

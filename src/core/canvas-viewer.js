@@ -112,8 +112,10 @@ export class CanvasViewer {
     const isVert = (this.rotation === 90 || this.rotation === 270);
     const w = isVert ? this.img.height : this.img.width;
     const h = isVert ? this.img.width : this.img.height;
-    const pad = 24;
-    return Math.min((Math.max(100, this.canvas.width - pad * 2)) / w, (Math.max(100, this.canvas.height - pad * 2)) / h, 1.0);
+    const isViewer = document.body.classList.contains('mode-viewer');
+    const availW = isViewer ? (this.canvas.width * 0.75) : Math.max(100, this.canvas.width - 48);
+    const availH = isViewer ? (this.canvas.height * 0.75) : Math.max(100, this.canvas.height - 48);
+    return Math.min(availW / w, availH / h, 1.0);
   }
 
   fitToScreen(instant = false) {
@@ -140,10 +142,10 @@ export class CanvasViewer {
     }
   }
 
-  zoomTo(targetScale, instant = false) {
+  zoomTo(targetScale, instant = false, anchorX = null, anchorY = null) {
     if (!this.img) return;
-    const cx = this.canvas.width / 2;
-    const cy = this.canvas.height / 2;
+    const cx = anchorX !== null ? anchorX : (this.canvas.width / 2);
+    const cy = anchorY !== null ? anchorY : (this.canvas.height / 2);
     const newScale = Math.max(0.05, Math.min(targetScale, 50.0));
 
     this.targetPanX = cx - (cx - this.targetPanX) * (newScale / this.targetScale);
@@ -213,10 +215,10 @@ export class CanvasViewer {
   snapBackToBounds(withInertia = false) {
     if (!this.img) return;
     const bounds = this.getPanBounds(this.targetScale);
-    const flingX = withInertia ? this.velocityX * 2 : 0;
-    const flingY = withInertia ? this.velocityY * 2 : 0;
-    this.targetPanX = Math.max(bounds.minX, Math.min(bounds.maxX, this.panX + flingX));
-    this.targetPanY = Math.max(bounds.minY, Math.min(bounds.maxY, this.panY + flingY));
+    const baseX = withInertia ? (this.panX + this.velocityX * 2) : this.targetPanX;
+    const baseY = withInertia ? (this.panY + this.velocityY * 2) : this.targetPanY;
+    this.targetPanX = Math.max(bounds.minX, Math.min(bounds.maxX, baseX));
+    this.targetPanY = Math.max(bounds.minY, Math.min(bounds.maxY, baseY));
     this.velocityX = 0;
     this.velocityY = 0;
     this.startSmoothAnimation();

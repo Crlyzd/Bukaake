@@ -1,5 +1,6 @@
 /* ==========================================================================
    Bukaake Toast Notifications
+   Capsule glass pill with pure stroke-free styling
    ========================================================================== */
 
 .toast-container {
@@ -17,19 +18,25 @@
 
 .toast {
   background: var(--glass-panel-bg);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid var(--glass-border);
-  padding: 10px 16px;
-  border-radius: var(--radius-md);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: none !important;
+  padding: 9px 18px;
+  border-radius: var(--radius-pill);
   color: var(--text-main);
   font-size: 13px;
+  font-weight: 500;
   display: flex;
   align-items: center;
   gap: 8px;
-  box-shadow: var(--glass-shadow);
-  animation: toastIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+  animation: toastIn 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   white-space: nowrap;
+}
+
+body.light-theme .toast,
+html[data-theme="light"] .toast {
+  box-shadow: 0 8px 24px rgba(26, 32, 44, 0.12);
 }
 
 .toast i {
@@ -39,10 +46,10 @@
 @keyframes toastIn {
   from {
     opacity: 0;
-    transform: translateY(-10px);
+    transform: translateY(-8px) scale(0.96);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: translateY(0) scale(1);
   }
 }

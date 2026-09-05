@@ -83,7 +83,11 @@ export class WindowModeManager {
   updateModeClasses(mode) {
     this.currentMode = mode;
     const isDark = !document.body.classList.contains('light-theme');
-    if (mode === MODE_VIEWER) {
+    const isViewer = (mode === MODE_VIEWER);
+    const btnBg = document.getElementById('btnBgMode');
+    if (btnBg) btnBg.disabled = isViewer;
+
+    if (isViewer) {
       document.body.classList.remove(MODE_REGULAR);
       document.body.classList.add(MODE_VIEWER);
       tauriBridge.setWindowVibrancy(isDark, true);

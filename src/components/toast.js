@@ -1,25 +1,44 @@
 /**
  * Bukaake Toast Notification Component
- * Displays translucent glass toast alerts
+ * Displays single translucent glass toast alert with debounced replacement
  */
 
 export class ToastManager {
   constructor() {
     this.container = document.getElementById('toastContainer');
+    this.currentToast = null;
+    this.dismissTimer = null;
   }
 
-  show(message, icon = 'ri-sparkles-fill', durationMs = 2400) {
+  show(message, icon = 'ri-sparkles-fill', durationMs = 1800) {
     if (!this.container) return;
+
+    if (this.dismissTimer) {
+      clearTimeout(this.dismissTimer);
+      this.dismissTimer = null;
+    }
+
+    if (this.currentToast) {
+      this.currentToast.remove();
+      this.currentToast = null;
+    }
 
     const toast = document.createElement('div');
     toast.className = 'toast';
     toast.innerHTML = `<i class="${icon}"></i> <span>${message}</span>`;
     this.container.appendChild(toast);
+    this.currentToast = toast;
 
-    setTimeout(() => {
+    this.dismissTimer = setTimeout(() => {
       toast.style.opacity = '0';
-      toast.style.transition = 'opacity 0.3s ease';
-      setTimeout(() => toast.remove(), 300);
+      toast.style.transform = 'translateY(-6px)';
+      toast.style.transition = 'opacity 0.22s ease, transform 0.22s ease';
+      setTimeout(() => {
+        if (this.currentToast === toast) {
+          toast.remove();
+          this.currentToast = null;
+        }
+      }, 220);
     }, durationMs);
   }
 }
