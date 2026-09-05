@@ -40,17 +40,16 @@ export class DrawingTool {
         return;
       }
       if (e.button !== 0) return;
-      e.stopPropagation();
-      this.isDrawing = true;
       const rect = this.canvas.getBoundingClientRect();
       const imgPt = this.viewer.screenToImageCoords(e.clientX - rect.left, e.clientY - rect.top);
+      if (imgPt.x < 0 || imgPt.x > this.viewer.img.width || imgPt.y < 0 || imgPt.y > this.viewer.img.height) return;
+
+      e.stopPropagation();
+      this.isDrawing = true;
       const isHighlighter = this.mode === 'highlighter';
       const strokeSize = isHighlighter ? (20 / (this.viewer.scale || 1)) : this.size;
       this.currentStroke = {
-        mode: this.mode,
-        color: this.color,
-        size: strokeSize,
-        points: [imgPt],
+        mode: this.mode, color: this.color, size: strokeSize, points: [imgPt],
       };
       this.strokes.push(this.currentStroke);
       this.redraw();
@@ -126,7 +125,12 @@ export class DrawingTool {
       e.clientY <= 44 ||
       hitEl?.closest?.('#appTitlebar, .app-titlebar, #floatingToolbar, .floating-toolbar, #drawToolbar, .draw-toolbar, .draw-popover, .context-menu, .modal-backdrop, .dialog-card')
     );
-    if (isOverChrome) {
+
+    const rect = this.canvas.getBoundingClientRect();
+    const pt = this.viewer.screenToImageCoords(e.clientX - rect.left, e.clientY - rect.top);
+    const isOutside = pt.x < 0 || pt.x > this.viewer.img.width || pt.y < 0 || pt.y > this.viewer.img.height;
+
+    if (isOverChrome || isOutside) {
       this.cursorRing?.classList.add('hidden');
       this.canvas.classList.remove('cursor-highlighter');
       return;
@@ -184,6 +188,7 @@ export class DrawingTool {
     this.cursorRing?.classList.add('hidden');
     this.canvas.classList.remove('cursor-highlighter', 'is-panning');
     this.canvas.classList.add('hidden');
+    this.clear();
   }
 
   setMode(mode) { this.mode = mode; this.updateCursorMode(); }
@@ -229,6 +234,11 @@ export class DrawingTool {
     this.ctx.scale(this.viewer.flipH ? -1 : 1, this.viewer.flipV ? -1 : 1);
     this.ctx.translate(-this.viewer.img.width / 2, -this.viewer.img.height / 2);
 
+    // Strictly clip drawing strokes to the image boundaries
+    this.ctx.beginPath();
+    this.ctx.rect(0, 0, this.viewer.img.width, this.viewer.img.height);
+    this.ctx.clip();
+
     for (const stroke of this.strokes) {
       if (stroke.points?.length > 0) this._renderStroke(this.ctx, stroke);
     }
@@ -241,22 +251,15 @@ export class DrawingTool {
     ctx.strokeStyle = stroke.color;
     ctx.fillStyle = stroke.color;
     if (stroke.mode === 'highlighter') {
-      ctx.globalAlpha = 0.40;
-      ctx.lineCap = 'butt';
-      ctx.lineJoin = 'miter';
-      ctx.lineWidth = stroke.size;
+      ctx.globalAlpha = 0.40; ctx.lineCap = 'butt'; ctx.lineJoin = 'miter'; ctx.lineWidth = stroke.size;
       if (stroke.points.length === 1) {
-        const p = stroke.points[0];
-        const w = Math.max(2, stroke.size / 3);
+        const p = stroke.points[0], w = Math.max(2, stroke.size / 3);
         ctx.fillRect(p.x - w / 2, p.y - stroke.size / 2, w, stroke.size);
         ctx.restore();
         return;
       }
     } else {
-      ctx.globalAlpha = 1.0;
-      ctx.lineCap = 'round';
-      ctx.lineJoin = 'round';
-      ctx.lineWidth = stroke.size;
+      ctx.globalAlpha = 1.0; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.lineWidth = stroke.size;
     }
     ctx.beginPath();
     ctx.moveTo(stroke.points[0].x, stroke.points[0].y);
@@ -273,9 +276,14 @@ export class DrawingTool {
     const octx = offCanvas.getContext('2d');
     octx.drawImage(this.viewer.img, 0, 0);
 
+    octx.save();
+    octx.beginPath();
+    octx.rect(0, 0, this.viewer.img.width, this.viewer.img.height);
+    octx.clip();
     for (const stroke of this.strokes) {
       if (stroke.points?.length > 0) this._renderStroke(octx, stroke);
     }
+    octx.restore();
 
     const bakedImg = new Image();
     bakedImg.src = offCanvas.toDataURL('image/png');

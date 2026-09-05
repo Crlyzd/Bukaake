@@ -261,6 +261,7 @@ class BukaakeApp {
     } else {
       this.viewer.setBottomInset(0, true);
       this.drawingTool.hide(); this.toolbar.setDrawActive(false);
+      changeTracker.markDraw(false);
     }
   }
 
