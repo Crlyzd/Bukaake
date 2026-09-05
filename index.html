@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bukaake — Glass Image Viewer</title>
+  <!-- Google Fonts: Inter & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <!-- Remix Icons for crisp Glass UI icons -->
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet">
+  <link rel="stylesheet" href="/src/style.css">
+</head>
+<body class="glass-theme dark">
+  
+  <!-- Borderless Window Edge Resizers (Active in Mode 1) -->
+  <div class="resize-handle-container" id="resizeHandleContainer">
+    <div class="resize-handle" data-direction="North"></div>
+    <div class="resize-handle" data-direction="South"></div>
+    <div class="resize-handle" data-direction="West"></div>
+    <div class="resize-handle" data-direction="East"></div>
+    <div class="resize-handle" data-direction="NorthWest"></div>
+    <div class="resize-handle" data-direction="NorthEast"></div>
+    <div class="resize-handle" data-direction="SouthWest"></div>
+    <div class="resize-handle" data-direction="SouthEast"></div>
+  </div>
+
+  <!-- Windows Frameless Glass Draggable Titlebar -->
+  <header class="app-titlebar" id="appTitlebar" data-tauri-drag-region>
+    <div class="titlebar-left" data-tauri-drag-region>
+      <div class="app-logo">
+        <i class="ri-image-2-line"></i>
+      </div>
+      <span class="app-name" data-tauri-drag-region>Bukaake</span>
+      <span class="app-version" data-tauri-drag-region>v0.1.0</span>
+      <span class="titlebar-sep hidden" id="titlebarSep">/</span>
+      <span class="titlebar-filename hidden" id="fileNameBadge"></span>
+      <span class="titlebar-dimensions hidden" id="titlebarDimensions"></span>
+    </div>
+
+    <div class="titlebar-right">
+      <button class="titlebar-ghost-btn" id="btnOpenFile" title="Open Image File (Ctrl+O)">
+        <i class="ri-folder-open-line"></i>
+      </button>
+      <button class="titlebar-ghost-btn" id="btnClipboard" title="Paste Image from Clipboard (Ctrl+V)">
+        <i class="ri-clipboard-line"></i>
+      </button>
+      <button class="titlebar-ghost-btn" id="btnThemeToggle" title="Toggle Dark / Light Theme">
+        <i class="ri-sun-line"></i>
+      </button>
+      <button class="titlebar-ghost-btn" id="btnToggleInfo" title="Toggle Image Properties (I)">
+        <i class="ri-information-line"></i>
+      </button>
+      <button class="titlebar-ghost-btn" id="btnSettings" title="Settings & About">
+        <i class="ri-settings-3-line"></i>
+      </button>
+
+      <div class="titlebar-divider"></div>
+
+      <div class="window-controls">
+        <button class="win-btn win-min" id="winMin" title="Minimize"><i class="ri-subtract-line"></i></button>
+        <button class="win-btn win-max" id="winMax" title="Maximize / Restore"><i class="ri-checkbox-blank-line"></i></button>
+        <button class="win-btn win-close" id="winClose" title="Close"><i class="ri-close-line"></i></button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Viewing Container -->
+  <main class="viewport-container" id="viewportContainer">
+    
+    <!-- Empty Drop Zone Placeholder -->
+    <div class="drop-zone" id="dropZone">
+      <div class="drop-card glass-card">
+        <div class="drop-icon">
+          <i class="ri-drag-drop-line"></i>
+        </div>
+        <h2>Bukaake Viewer</h2>
+        <p>Drag & drop images here, or paste from clipboard (Ctrl+V)</p>
+        <div class="drop-actions">
+          <button class="btn-primary glass-btn" id="dropOpenBtn">
+            <i class="ri-folder-open-fill"></i> Select Image File
+          </button>
+          <button class="btn-secondary glass-btn" id="dropSampleBtn">
+            <i class="ri-sparkles-line"></i> Load Demo Sample
+          </button>
+        </div>
+        <div class="supported-formats">
+          <span>PNG</span> • <span>JPG</span> • <span>WEBP</span> • <span>GIF</span> • <span>SVG</span> • <span>BMP</span> • <span>ICO</span> • <span>TIFF</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- HTML5 Canvas Renderer -->
+    <canvas id="imageCanvas"></canvas>
+
+    <!-- Interactive Crop Box Overlay (Hidden by default) -->
+    <div class="crop-overlay-container hidden" id="cropOverlayContainer">
+      <div class="crop-box" id="cropBox">
+        <div class="crop-handle handle-nw" data-handle="nw"></div>
+        <div class="crop-handle handle-ne" data-handle="ne"></div>
+        <div class="crop-handle handle-sw" data-handle="sw"></div>
+        <div class="crop-handle handle-se" data-handle="se"></div>
+        <div class="crop-grid-line h1"></div>
+        <div class="crop-grid-line h2"></div>
+        <div class="crop-grid-line v1"></div>
+        <div class="crop-grid-line v2"></div>
+        <div class="crop-dimensions-tag" id="cropDimensionsTag">0 x 0</div>
+      </div>
+    </div>
+
+    <!-- Floating Glass Main Control Dock -->
+    <nav class="floating-toolbar glass-panel" id="floatingToolbar">
+      <!-- Navigation Group -->
+      <div class="toolbar-group">
+        <button class="toolbar-btn" id="btnPrevImage" title="Previous Image (Left Arrow)" disabled>
+          <i class="ri-arrow-left-s-line"></i>
+        </button>
+        <span class="file-counter" id="fileCounter">0 / 0</span>
+        <button class="toolbar-btn" id="btnNextImage" title="Next Image (Right Arrow)" disabled>
+          <i class="ri-arrow-right-s-line"></i>
+        </button>
+      </div>
+
+      <div class="toolbar-divider"></div>
+
+      <!-- Zoom Group -->
+      <div class="toolbar-group">
+        <button class="toolbar-btn" id="btnZoomOut" title="Zoom Out (-)">
+          <i class="ri-zoom-out-line"></i>
+        </button>
+        <button class="toolbar-btn zoom-preset-btn" id="btnZoomLabel" title="Reset Zoom (1:1 / Fit)">
+          <span id="zoomPercentText">100%</span>
+        </button>
+        <button class="toolbar-btn" id="btnZoomIn" title="Zoom In (+)">
+          <i class="ri-zoom-in-line"></i>
+        </button>
+        <button class="toolbar-btn" id="btnFitScreen" title="Fit to Screen (F)">
+          <i class="ri-aspect-ratio-line"></i>
+        </button>
+        <button class="toolbar-btn" id="btnActualSize" title="Actual Size 1:1 (1)">
+          <i class="ri-expand-diagonal-2-line"></i>
+        </button>
+      </div>
+
+      <div class="toolbar-divider"></div>
+
+      <!-- Tools & Effects Group -->
+      <div class="toolbar-group">
+        <button class="toolbar-btn" id="btnRotateLeft" title="Rotate Left 90° (L)">
+          <i class="ri-rotate-left-line"></i>
+        </button>
+        <button class="toolbar-btn" id="btnRotateRight" title="Rotate Right 90° (R)">
+          <i class="ri-rotate-right-line"></i>
+        </button>
+        <button class="toolbar-btn" id="btnFlipH" title="Flip Horizontal (H)">
+          <i class="ri-flip-horizontal-line"></i>
+        </button>
+        <button class="toolbar-btn" id="btnFlipV" title="Flip Vertical (V)">
+          <i class="ri-flip-vertical-line"></i>
+        </button>
+        <button class="toolbar-btn" id="btnCropMode" title="Crop Image (C)">
+          <i class="ri-crop-line"></i>
+        </button>
+        <button class="toolbar-btn" id="btnAdjustments" title="Color & Filters (E)">
+          <i class="ri-equalizer-line"></i>
+        </button>
+        <button class="toolbar-btn" id="btnPixelated" title="Toggle Pixel Anti-Aliasing (P)">
+          <i class="ri-grid-fill"></i>
+        </button>
+        <button class="toolbar-btn" id="btnBgMode" title="Toggle Canvas Background Theme (B)">
+          <i class="ri-contrast-drop-2-line"></i>
+        </button>
+      </div>
+
+      <div class="toolbar-divider"></div>
+
+      <!-- Action & Export Group -->
+      <div class="toolbar-group">
+        <button class="toolbar-btn highlight-btn" id="btnSaveAs" title="Save / Export Image (Ctrl+S)">
+          <i class="ri-download-2-line"></i>
+          <span>Save</span>
+        </button>
+      </div>
+    </nav>
+
+    <!-- Crop Sub-Toolbar (Visible when cropping) -->
+    <div class="crop-toolbar glass-panel hidden" id="cropToolbar">
+      <span class="crop-label"><i class="ri-crop-2-line"></i> Cropping</span>
+      <div class="crop-presets">
+        <button class="crop-preset-btn active" data-ratio="free">Free</button>
+        <button class="crop-preset-btn" data-ratio="1:1">1:1</button>
+        <button class="crop-preset-btn" data-ratio="16:9">16:9</button>
+        <button class="crop-preset-btn" data-ratio="4:3">4:3</button>
+        <button class="crop-preset-btn" data-ratio="3:2">3:2</button>
+      </div>
+      <div class="crop-actions">
+        <button class="btn-cancel glass-btn" id="btnCancelCrop"><i class="ri-close-line"></i> Cancel</button>
+        <button class="btn-apply glass-btn" id="btnApplyCrop"><i class="ri-check-line"></i> Apply Crop</button>
+      </div>
+    </div>
+
+    <!-- Adjustments & Filters Floating Panel -->
+    <aside class="adjustments-panel glass-panel hidden" id="adjustmentsPanel">
+      <div class="panel-header">
+        <h3><i class="ri-equalizer-2-line"></i> Color & Image Tuning</h3>
+        <button class="icon-btn-close" id="btnCloseAdjustments"><i class="ri-close-line"></i></button>
+      </div>
+
+      <!-- Sliders -->
+      <div class="panel-body">
+        <div class="filter-preset-row">
+          <span class="filter-section-title">Presets</span>
+          <div class="preset-chips">
+            <button class="preset-chip active" data-preset="normal">Normal</button>
+            <button class="preset-chip" data-preset="vivid">Vivid</button>
+            <button class="preset-chip" data-preset="cyberpunk">Cyberpunk</button>
+            <button class="preset-chip" data-preset="vintage">Vintage</button>
+            <button class="preset-chip" data-preset="noir">Noir</button>
+            <button class="preset-chip" data-preset="highcontrast">Punch</button>
+          </div>
+        </div>
+
+        <div class="slider-control">
+          <div class="slider-label">
+            <span>Brightness</span>
+            <span class="slider-val" id="valBrightness">100%</span>
+          </div>
+          <input type="range" id="sliderBrightness" min="0" max="200" value="100">
+        </div>
+
+        <div class="slider-control">
+          <div class="slider-label">
+            <span>Contrast</span>
+            <span class="slider-val" id="valContrast">100%</span>
+          </div>
+          <input type="range" id="sliderContrast" min="0" max="200" value="100">
+        </div>
+
+        <div class="slider-control">
+          <div class="slider-label">
+            <span>Saturation</span>
+            <span class="slider-val" id="valSaturation">100%</span>
+          </div>
+          <input type="range" id="sliderSaturation" min="0" max="200" value="100">
+        </div>
+
+        <div class="slider-control">
+          <div class="slider-label">
+            <span>Hue Shift</span>
+            <span class="slider-val" id="valHue">0°</span>
+          </div>
+          <input type="range" id="sliderHue" min="0" max="360" value="0">
+        </div>
+
+        <div class="slider-control">
+          <div class="slider-label">
+            <span>Blur</span>
+            <span class="slider-val" id="valBlur">0px</span>
+          </div>
+          <input type="range" id="sliderBlur" min="0" max="20" value="0">
+        </div>
+
+        <div class="slider-control">
+          <div class="slider-label">
+            <span>Invert</span>
+            <span class="slider-val" id="valInvert">0%</span>
+          </div>
+          <input type="range" id="sliderInvert" min="0" max="100" value="0">
+        </div>
+
+        <div class="panel-footer-actions">
+          <button class="glass-btn btn-secondary" id="btnResetFilters"><i class="ri-refresh-line"></i> Reset Filters</button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Metadata & Information Drawer -->
+    <aside class="metadata-drawer glass-panel hidden" id="metadataDrawer">
+      <div class="drawer-header">
+        <h3><i class="ri-information-line"></i> Image Properties</h3>
+        <button class="icon-btn-close" id="btnCloseMetadata"><i class="ri-close-line"></i></button>
+      </div>
+      <div class="drawer-body" id="metadataBody">
+        <!-- Content populated via metadata.js -->
+      </div>
+    </aside>
+
+    <!-- Settings & About Modal -->
+    <div class="modal-overlay hidden" id="settingsModal">
+      <div class="settings-card">
+        <div class="settings-header">
+          <div class="settings-header-brand">
+            <div class="settings-logo">
+              <i class="ri-image-2-line"></i>
+            </div>
+            <div class="settings-title-wrap">
+              <span class="settings-title">Bukaake</span>
+              <span class="settings-subtitle">v0.1.0 (x64) • Glass Image Viewer</span>
+            </div>
+          </div>
+          <button class="icon-btn-close" id="btnCloseSettings"><i class="ri-close-line"></i></button>
+        </div>
+
+        <div class="settings-body">
+          <div class="settings-bio-card">
+            <p class="settings-desc">
+              Lightweight, distraction-free & portable Windows image viewer crafted with native Windows frosted glass.
+            </p>
+            <div class="settings-author-row">
+              Made with ❤️ by <a href="https://kaleksananbagus.com" target="_blank" class="settings-author-link">Kaleksanan Bagus</a>
+            </div>
+            <div class="settings-coffee-row">
+              <span>☕ Buy me a coffee:</span>
+              <a href="https://saweria.co/curlyzed" target="_blank" class="coffee-chip">Saweria ↗</a>
+              <a href="https://paypal.me/BagusMassani" target="_blank" class="coffee-chip">PayPal ↗</a>
+            </div>
+          </div>
+
+          <!-- Update Banner -->
+          <div class="settings-update-banner">
+            <div class="update-status-wrap">
+              <i class="ri-checkbox-circle-line"></i>
+              <span id="updateStatusText">Bukaake v0.1.0 (Latest Version)</span>
+            </div>
+            <button class="btn-check-update" id="btnCheckUpdate"><i class="ri-refresh-line"></i> Check</button>
+          </div>
+
+          <!-- Action Grid -->
+          <div class="settings-actions-grid">
+            <a href="https://docs.google.com/forms/d/e/1FAIpQLSciTFA6rWYPq98UwqOvJgLnqGh5P71Vcz5d2GPVdne9Tz34WA/viewform" target="_blank" class="settings-action-btn" id="btnReportBug">
+              <i class="ri-bug-line"></i> Report Bug / Feature ↗
+            </a>
+            <button class="settings-action-btn" id="btnOpenLogs">
+              <i class="ri-folder-open-line"></i> Open Logs
+            </button>
+          </div>
+        </div>
+
+        <div class="settings-footer">
+          <span>Engine: Tauri v2 • Rust Tokio</span>
+          <span>Webview2 & Vanilla JS</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Keyboard Shortcuts Modal -->
+    <div class="modal-overlay hidden" id="helpModal">
+      <div class="modal-card glass-card">
+        <div class="modal-header">
+          <h3><i class="ri-keyboard-line"></i> Keyboard Shortcuts</h3>
+          <button class="icon-btn-close" id="btnCloseHelp"><i class="ri-close-line"></i></button>
+        </div>
+        <div class="modal-body shortcuts-grid">
+          <div class="shortcut-item"><kbd>Left</kbd> / <kbd>Right</kbd> <span>Navigate Batch Images</span></div>
+          <div class="shortcut-item"><kbd>Wheel</kbd> / <kbd>+</kbd> / <kbd>-</kbd> <span>Zoom In / Zoom Out</span></div>
+          <div class="shortcut-item"><kbd>F</kbd> <span>Fit to Screen</span></div>
+          <div class="shortcut-item"><kbd>1</kbd> <span>Actual Size (100%)</span></div>
+          <div class="shortcut-item"><kbd>R</kbd> / <kbd>L</kbd> <span>Rotate Right / Left</span></div>
+          <div class="shortcut-item"><kbd>H</kbd> / <kbd>V</kbd> <span>Flip Horizontal / Vertical</span></div>
+          <div class="shortcut-item"><kbd>C</kbd> <span>Toggle Crop Mode</span></div>
+          <div class="shortcut-item"><kbd>E</kbd> <span>Toggle Color & Filters</span></div>
+          <div class="shortcut-item"><kbd>I</kbd> <span>Image Properties / EXIF</span></div>
+          <div class="shortcut-item"><kbd>B</kbd> <span>Toggle Background Theme</span></div>
+          <div class="shortcut-item"><kbd>P</kbd> <span>Toggle Pixel Smoothing</span></div>
+          <div class="shortcut-item"><kbd>Ctrl</kbd> + <kbd>V</kbd> <span>Paste Image from Clipboard</span></div>
+          <div class="shortcut-item"><kbd>Ctrl</kbd> + <kbd>S</kbd> <span>Save / Export Image</span></div>
+          <div class="shortcut-item"><kbd>Esc</kbd> <span>Cancel Crop / Close Modals</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Hidden File Input for system file picking -->
+    <input type="file" id="fileInput" accept="image/*" multiple style="display: none;">
+
+    <!-- Toast Notification Overlay -->
+    <div class="toast-container" id="toastContainer"></div>
+
+  </main>
+
+  <script type="module" src="/src/app.js"></script>
+</body>
+</html>

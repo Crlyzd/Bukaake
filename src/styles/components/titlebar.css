@@ -1,0 +1,189 @@
+/* ==========================================================================
+   Bukaake Frameless Glass Titlebar (Seamless Ghost Actions)
+   No island pills per user request & Pillar 1
+   ========================================================================== */
+
+.app-titlebar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: var(--titlebar-height);
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-bottom: 1px solid var(--glass-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 0 0 14px;
+  z-index: 100;
+  transition: opacity var(--transition-fast), transform var(--transition-fast);
+  -webkit-app-region: drag;
+  app-region: drag;
+}
+
+body.image-loaded .app-titlebar {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-100%);
+}
+
+body.image-loaded .app-titlebar.visible,
+body.image-loaded .app-titlebar:hover {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+
+.titlebar-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  pointer-events: none;
+  min-width: 0;
+  flex: 1 1 auto;
+  overflow: hidden;
+}
+
+.app-logo {
+  width: 22px;
+  height: 22px;
+  border-radius: var(--radius-xs);
+  background: var(--glass-bg-hover);
+  border: 1px solid var(--glass-border-bright);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-main);
+  font-size: 13px;
+  flex-shrink: 0;
+}
+
+.app-name {
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  color: var(--text-main);
+  flex-shrink: 0;
+}
+
+.app-version {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--text-dim);
+  opacity: 0.75;
+  margin-left: 2px;
+  margin-right: 4px;
+  flex-shrink: 0;
+}
+
+.titlebar-sep {
+  color: var(--text-dim);
+  font-size: 12px;
+  margin: 0 2px;
+  flex-shrink: 0;
+}
+
+.titlebar-filename {
+  color: var(--text-muted);
+  font-size: 12px;
+  max-width: 220px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 0 1 auto;
+}
+
+.titlebar-dimensions {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--text-dim);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.titlebar-right {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  -webkit-app-region: no-drag;
+  app-region: no-drag;
+  height: 100%;
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+/* Seamless Ghost Action Buttons (No Island Pills) */
+.titlebar-ghost-btn {
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--text-muted);
+  width: 32px;
+  height: 28px;
+  border-radius: var(--radius-sm);
+  font-size: 15px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-fast);
+  -webkit-app-region: no-drag;
+  app-region: no-drag;
+}
+
+.titlebar-ghost-btn:hover {
+  background: var(--glass-bg-hover);
+  color: var(--text-main);
+}
+
+.titlebar-ghost-btn:active {
+  background: var(--glass-bg-active);
+  transform: scale(0.95);
+}
+
+.titlebar-divider {
+  width: 1px;
+  height: 16px;
+  background: var(--glass-border);
+  margin: 0 4px;
+}
+
+/* Seamless Windows Controls */
+.window-controls {
+  display: flex;
+  align-items: center;
+  height: 100%;
+}
+
+.win-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  width: 42px;
+  height: var(--titlebar-height);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 13px;
+  transition: background var(--transition-fast), color var(--transition-fast);
+  -webkit-app-region: no-drag !important;
+  app-region: no-drag !important;
+}
+
+.win-btn * {
+  pointer-events: none;
+}
+
+.win-btn:hover {
+  background: var(--glass-bg-hover);
+  color: var(--text-main);
+}
+
+.win-close:hover {
+  background: #e81123 !important;
+  color: #ffffff !important;
+}

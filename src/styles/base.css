@@ -1,0 +1,123 @@
+/* ==========================================================================
+   Bukaake Base Setup & Viewport Layout
+   ========================================================================== */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+html {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background-color: transparent !important;
+  background: transparent !important;
+}
+
+body {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  background-color: transparent !important;
+  background: transparent !important;
+  color: var(--text-main);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Glassmorphism Scrollbar System */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--glass-border-bright);
+  border-radius: var(--radius-pill);
+  transition: background var(--transition-fast);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-dim);
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--glass-border-bright) transparent;
+}
+
+/* Background canvas themes */
+body.bg-transparent #viewportContainer {
+  background: transparent !important;
+}
+
+body.bg-checkerboard #viewportContainer {
+  background-image:
+    linear-gradient(45deg, rgba(255, 255, 255, 0.1) 25%, transparent 25%),
+    linear-gradient(-45deg, rgba(255, 255, 255, 0.1) 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, rgba(255, 255, 255, 0.1) 75%),
+    linear-gradient(-45deg, transparent 75%, rgba(255, 255, 255, 0.1) 75%);
+  background-size: 24px 24px;
+  background-position: 0 0, 0 12px, 12px -12px, -12px 0px;
+  background-color: rgba(0, 0, 0, 0.15) !important;
+}
+
+body.bg-solid-dark #viewportContainer {
+  background: rgba(0, 0, 0, 0.5) !important;
+}
+
+body.bg-solid-light #viewportContainer {
+  background: rgba(255, 255, 255, 0.5) !important;
+}
+
+/* Viewport Container */
+.viewport-container {
+  position: absolute;
+  top: var(--titlebar-height);
+  bottom: 0;
+  left: 0;
+  right: 0;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent !important;
+  transition: top var(--transition-normal);
+}
+
+body.window-maximized .viewport-container,
+body.image-loaded .viewport-container {
+  top: 0;
+}
+
+canvas#imageCanvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  cursor: grab;
+}
+
+canvas#imageCanvas.panning {
+  cursor: grabbing;
+}
+
+.hidden {
+  display: none !important;
+}

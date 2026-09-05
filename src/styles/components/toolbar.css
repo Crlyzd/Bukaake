@@ -1,0 +1,255 @@
+/* ==========================================================================
+   Bukaake Floating Glass Control Dock & Tool Elements
+   Sleek capsule ergonomics with pure monochrome aesthetics
+   ========================================================================== */
+
+.floating-toolbar {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 4px 8px;
+  border-radius: var(--radius-pill);
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  z-index: 50;
+  transition: opacity var(--transition-fast), transform var(--transition-fast);
+  -webkit-app-region: no-drag;
+  app-region: no-drag;
+  background: var(--glass-bg);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+}
+
+body:not(.image-loaded) .floating-toolbar {
+  display: none !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+body.image-loaded .floating-toolbar {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(-50%) translateY(16px);
+}
+
+body.image-loaded .floating-toolbar.visible,
+body.image-loaded .floating-toolbar:hover {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateX(-50%) translateY(0);
+}
+
+.toolbar-group {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.toolbar-divider {
+  width: 1px;
+  height: 16px;
+  background: var(--glass-border);
+  margin: 0 4px;
+}
+
+.toolbar-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-pill);
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--text-main);
+  font-size: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.toolbar-btn:hover:not(:disabled) {
+  background: var(--glass-bg-hover);
+  border-color: var(--glass-border-bright);
+  transform: translateY(-1px);
+}
+
+.toolbar-btn.active {
+  background: var(--glass-bg-active);
+  border-color: var(--active-border);
+  color: var(--text-main);
+}
+
+.toolbar-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.zoom-preset-btn {
+  width: auto;
+  padding: 0 8px;
+  border-radius: var(--radius-pill);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.highlight-btn {
+  width: auto;
+  height: 30px;
+  padding: 0 12px;
+  border-radius: var(--radius-pill);
+  background: var(--action-bg);
+  color: var(--action-text);
+  font-weight: 600;
+  font-size: 12px;
+  gap: 5px;
+  border: 1px solid transparent;
+}
+
+.highlight-btn:hover {
+  background: var(--action-hover-bg);
+  box-shadow: var(--btn-shadow-hover);
+  transform: translateY(-1px);
+}
+
+.file-counter {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--text-dim);
+  padding: 0 4px;
+  min-width: 44px;
+  text-align: center;
+}
+
+/* Crop Tool & Overlay */
+.crop-overlay-container {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 40;
+}
+
+.crop-box {
+  position: absolute;
+  border: 2px solid var(--text-main);
+  box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.5);
+  pointer-events: auto;
+  cursor: move;
+}
+
+.crop-handle {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background: var(--action-bg);
+  border: 2px solid var(--text-main);
+  border-radius: 2px;
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.4);
+}
+
+.handle-nw { top: -5px; left: -5px; cursor: nwse-resize; }
+.handle-ne { top: -5px; right: -5px; cursor: nesw-resize; }
+.handle-sw { bottom: -5px; left: -5px; cursor: nesw-resize; }
+.handle-se { bottom: -5px; right: -5px; cursor: nwse-resize; }
+
+.crop-grid-line {
+  position: absolute;
+  background: rgba(255, 255, 255, 0.25);
+  pointer-events: none;
+}
+
+.crop-grid-line.h1 { top: 33.33%; left: 0; right: 0; height: 1px; }
+.crop-grid-line.h2 { top: 66.66%; left: 0; right: 0; height: 1px; }
+.crop-grid-line.v1 { left: 33.33%; top: 0; bottom: 0; width: 1px; }
+.crop-grid-line.v2 { left: 66.66%; top: 0; bottom: 0; width: 1px; }
+
+.crop-dimensions-tag {
+  position: absolute;
+  top: -26px;
+  left: 0;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  background: var(--glass-panel-bg);
+  backdrop-filter: blur(10px);
+  padding: 2px 8px;
+  border-radius: var(--radius-xs);
+  border: 1px solid var(--glass-border);
+  color: var(--text-main);
+}
+
+.crop-toolbar {
+  position: absolute;
+  top: 56px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 6px 14px;
+  border-radius: var(--radius-pill);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  z-index: 50;
+  -webkit-app-region: no-drag;
+  app-region: no-drag;
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+}
+
+.crop-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-main);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.crop-presets {
+  display: flex;
+  gap: 4px;
+}
+
+.crop-preset-btn {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  color: var(--text-muted);
+  padding: 3px 8px;
+  border-radius: var(--radius-sm);
+  font-size: 11px;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.crop-preset-btn:hover,
+.crop-preset-btn.active {
+  background: var(--glass-bg-active);
+  border-color: var(--active-border);
+  color: var(--text-main);
+}
+
+.crop-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.btn-cancel {
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  color: #ef4444;
+  padding: 4px 10px;
+  font-size: 12px;
+}
+
+.btn-apply {
+  background: var(--action-bg);
+  color: var(--action-text);
+  border: 1px solid transparent;
+  padding: 4px 12px;
+  font-size: 12px;
+  font-weight: 600;
+}

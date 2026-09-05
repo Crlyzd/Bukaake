@@ -1,0 +1,262 @@
+/**
+ * Bukaake Canvas Viewer Engine
+ * 60 FPS HTML5 Canvas pan, zoom, rotations, flips, and LERP physics
+ */
+
+import { screenToImage, renderOffscreenCanvas } from './canvas-helpers.js';
+import { attachCanvasInteractions } from './canvas-events.js';
+
+export class CanvasViewer {
+  constructor(canvasElement, viewportContainer) {
+    this.canvas = canvasElement;
+    this.ctx = this.canvas.getContext('2d');
+    this.container = viewportContainer;
+
+    this.img = null;
+    this.scale = 1.0;
+    this.panX = 0;
+    this.panY = 0;
+
+    this.targetScale = 1.0;
+    this.targetPanX = 0;
+    this.targetPanY = 0;
+    this.isAnimating = false;
+    this.animFrameId = null;
+
+    this.velocityX = 0;
+    this.velocityY = 0;
+    this.lastMouseX = 0;
+    this.lastMouseY = 0;
+    this.lastMouseTime = 0;
+
+    this.rotation = 0;
+    this.flipH = false;
+    this.flipV = false;
+    this.pixelSmoothing = true;
+
+    this.isPanning = false;
+    this.startX = 0;
+    this.startY = 0;
+
+    this.onTransformChange = null;
+
+    attachCanvasInteractions(this);
+    this.resizeCanvas();
+  }
+
+  resizeCanvas() {
+    if (!this.container) return;
+    const w = this.container.clientWidth;
+    const h = this.container.clientHeight;
+
+    if (w > 0 && h > 0 && (this.canvas.width !== w || this.canvas.height !== h)) {
+      const oldW = this.canvas.width;
+      const oldH = this.canvas.height;
+      this.canvas.width = w;
+      this.canvas.height = h;
+
+      if (oldW > 0 && oldH > 0 && this.img) {
+        const dx = (w - oldW) / 2;
+        const dy = (h - oldH) / 2;
+        this.panX += dx;
+        this.targetPanX += dx;
+        this.panY += dy;
+        this.targetPanY += dy;
+      }
+      this.render();
+      this.onTransformChange?.();
+    }
+  }
+
+  startSmoothAnimation() {
+    if (this.isAnimating) return;
+    this.isAnimating = true;
+
+    const animateStep = () => {
+      const lerp = 0.16;
+      const friction = 0.94;
+
+      if (Math.hypot(this.velocityX, this.velocityY) > 0.05) {
+        this.targetPanX += this.velocityX;
+        this.targetPanY += this.velocityY;
+        this.velocityX *= friction;
+        this.velocityY *= friction;
+      } else {
+        this.velocityX = 0;
+        this.velocityY = 0;
+      }
+
+      const ds = this.targetScale - this.scale;
+      const dx = this.targetPanX - this.panX;
+      const dy = this.targetPanY - this.panY;
+
+      if (Math.abs(ds) < 0.0001 && Math.abs(dx) < 0.05 && Math.abs(dy) < 0.05 && Math.hypot(this.velocityX, this.velocityY) < 0.05) {
+        this.scale = this.targetScale;
+        this.panX = this.targetPanX;
+        this.panY = this.targetPanY;
+        this.isAnimating = false;
+        this.animFrameId = null;
+        this.render();
+        this.onTransformChange?.();
+        return;
+      }
+
+      this.scale += ds * lerp;
+      this.panX += dx * lerp;
+      this.panY += dy * lerp;
+
+      this.render();
+      this.onTransformChange?.();
+      this.animFrameId = requestAnimationFrame(animateStep);
+    };
+
+    this.animFrameId = requestAnimationFrame(animateStep);
+  }
+
+  setImage(img) {
+    this.img = img;
+    this.rotation = 0;
+    this.flipH = false;
+    this.flipV = false;
+    this.fitToScreen(true);
+  }
+
+  calculateFitScale() {
+    if (!this.img) return 1.0;
+    const isVert = (this.rotation === 90 || this.rotation === 270);
+    const w = isVert ? this.img.height : this.img.width;
+    const h = isVert ? this.img.width : this.img.height;
+    return Math.min((Math.max(100, this.canvas.width - 40)) / w, (Math.max(100, this.canvas.height - 40)) / h, 1.0);
+  }
+
+  fitToScreen(instant = false) {
+    if (!this.img) return;
+    const fitScale = this.calculateFitScale();
+    const isVert = (this.rotation === 90 || this.rotation === 270);
+    const imgW = (isVert ? this.img.height : this.img.width) * fitScale;
+    const imgH = (isVert ? this.img.width : this.img.height) * fitScale;
+
+    this.velocityX = 0;
+    this.velocityY = 0;
+    this.targetScale = fitScale;
+    this.targetPanX = (this.canvas.width - imgW) / 2;
+    this.targetPanY = (this.canvas.height - imgH) / 2;
+
+    if (instant) {
+      this.scale = this.targetScale;
+      this.panX = this.targetPanX;
+      this.panY = this.targetPanY;
+      this.render();
+      this.onTransformChange?.();
+    } else {
+      this.startSmoothAnimation();
+    }
+  }
+
+  zoomTo(targetScale, instant = false) {
+    if (!this.img) return;
+    const cx = this.canvas.width / 2;
+    const cy = this.canvas.height / 2;
+    const newScale = Math.max(0.05, Math.min(targetScale, 50.0));
+
+    this.targetPanX = cx - (cx - this.targetPanX) * (newScale / this.targetScale);
+    this.targetPanY = cy - (cy - this.targetPanY) * (newScale / this.targetScale);
+    this.targetScale = newScale;
+
+    if (instant) {
+      this.scale = this.targetScale;
+      this.panX = this.targetPanX;
+      this.panY = this.targetPanY;
+      this.render();
+      this.onTransformChange?.();
+    } else {
+      this.startSmoothAnimation();
+    }
+  }
+
+  centerImage(instant = false) {
+    if (!this.img) return;
+    const isVert = (this.rotation === 90 || this.rotation === 270);
+    const imgW = (isVert ? this.img.height : this.img.width) * this.targetScale;
+    const imgH = (isVert ? this.img.width : this.img.height) * this.targetScale;
+
+    this.velocityX = 0;
+    this.velocityY = 0;
+    this.targetPanX = (this.canvas.width - imgW) / 2;
+    this.targetPanY = (this.canvas.height - imgH) / 2;
+
+    if (instant) {
+      this.panX = this.targetPanX;
+      this.panY = this.targetPanY;
+      this.render();
+      this.onTransformChange?.();
+    } else {
+      this.startSmoothAnimation();
+    }
+  }
+
+  rotate(deg) {
+    if (!this.img) return;
+    this.rotation = (this.rotation + deg + 360) % 360;
+    this.centerImage();
+  }
+
+  toggleFlipH() { this.flipH = !this.flipH; this.render(); }
+  toggleFlipV() { this.flipV = !this.flipV; this.render(); }
+
+  togglePixelSmoothing() {
+    this.pixelSmoothing = !this.pixelSmoothing;
+    this.render();
+    return this.pixelSmoothing;
+  }
+
+  render(filterCss = '') {
+    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    if (!this.img) return;
+
+    this.ctx.save();
+    this.ctx.imageSmoothingEnabled = this.pixelSmoothing;
+    if (filterCss) this.ctx.filter = filterCss;
+
+    this.ctx.translate(this.panX, this.panY);
+    this.ctx.scale(this.scale, this.scale);
+
+    const cx = this.img.width / 2;
+    const cy = this.img.height / 2;
+    this.ctx.translate(cx, cy);
+    this.ctx.rotate((this.rotation * Math.PI) / 180);
+    this.ctx.scale(this.flipH ? -1 : 1, this.flipV ? -1 : 1);
+    this.ctx.translate(-cx, -cy);
+
+    this.ctx.drawImage(this.img, 0, 0);
+    this.ctx.restore();
+  }
+
+  isPointInsideImage(screenX, screenY) {
+    if (!this.img) return false;
+    const isVert = (this.rotation === 90 || this.rotation === 270);
+    const w = (isVert ? this.img.height : this.img.width) * this.scale;
+    const h = (isVert ? this.img.width : this.img.height) * this.scale;
+    return (
+      screenX >= this.panX &&
+      screenX <= this.panX + w &&
+      screenY >= this.panY &&
+      screenY <= this.panY + h
+    );
+  }
+
+  screenToImageCoords(sx, sy) {
+    return screenToImage(sx, sy, this.panX, this.panY, this.scale);
+  }
+
+  getProcessedCanvas(cropRect = null, filterCss = '') {
+    return renderOffscreenCanvas(this.img, {
+      rotation: this.rotation,
+      flipH: this.flipH,
+      flipV: this.flipV,
+      pixelSmoothing: this.pixelSmoothing,
+      cropRect,
+      filterCss,
+    });
+  }
+}

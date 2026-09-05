@@ -1,0 +1,78 @@
+/* ==========================================================================
+   Bukaake Design Tokens — Ultra-Clean Crystal Glass System
+   Supports Dark and Light Modes per Pillar 2
+   ========================================================================== */
+
+:root {
+  /* Common Sizing & Animation Tokens */
+  --titlebar-height: 42px;
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 14px;
+  --radius-pill: 9999px;
+
+  --transition-fast: 0.16s cubic-bezier(0.16, 1, 0.3, 1);
+  --transition-normal: 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* Dark Theme Tokens (Default - Pure Neutral Monochrome) */
+  --bg-primary: transparent;
+  --bg-secondary: rgba(255, 255, 255, 0.04);
+  --glass-bg: rgba(255, 255, 255, 0.06);
+  --glass-bg-hover: rgba(255, 255, 255, 0.12);
+  --glass-bg-active: rgba(255, 255, 255, 0.20);
+  --glass-border: rgba(255, 255, 255, 0.10);
+  --glass-border-bright: rgba(255, 255, 255, 0.24);
+  --glass-shadow: 0 8px 24px 0 rgba(0, 0, 0, 0.28);
+  --glass-panel-bg: rgba(18, 18, 18, 0.85);
+
+  --text-main: #ffffff;
+  --text-muted: #d4d4d4;
+  --text-dim: #8a8a8a;
+
+  --action-bg: #ffffff;
+  --action-text: #0a0a0a;
+  --action-hover-bg: #e5e5e5;
+  --btn-shadow: 0 2px 8px rgba(0, 0, 0, 0.20);
+  --btn-shadow-hover: 0 4px 14px rgba(0, 0, 0, 0.30);
+  --active-highlight: rgba(255, 255, 255, 0.18);
+  --active-border: rgba(255, 255, 255, 0.45);
+
+  /* Neutral Accent Compatibility Tokens */
+  --accent-cyan: #ffffff;
+  --accent-blue: #e0e0e0;
+  --accent-purple: #888888;
+  --accent-magenta: #ffffff;
+  --accent-glow: rgba(255, 255, 255, 0.15);
+}
+
+/* Light Theme Tokens (Pure Neutral Monochrome) */
+html[data-theme="light"],
+body.light-theme {
+  --bg-secondary: rgba(0, 0, 0, 0.03);
+  --glass-bg: rgba(255, 255, 255, 0.70);
+  --glass-bg-hover: rgba(0, 0, 0, 0.06);
+  --glass-bg-active: rgba(0, 0, 0, 0.12);
+  --glass-border: rgba(0, 0, 0, 0.08);
+  --glass-border-bright: rgba(0, 0, 0, 0.18);
+  --glass-shadow: 0 8px 24px 0 rgba(0, 0, 0, 0.05);
+  --glass-panel-bg: rgba(250, 250, 250, 0.88);
+
+  --text-main: #111111;
+  --text-muted: #444444;
+  --text-dim: #777777;
+
+  --action-bg: #111111;
+  --action-text: #ffffff;
+  --action-hover-bg: #2a2a2a;
+  --btn-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  --btn-shadow-hover: 0 4px 10px rgba(0, 0, 0, 0.12);
+  --active-highlight: rgba(0, 0, 0, 0.10);
+  --active-border: rgba(0, 0, 0, 0.30);
+
+  --accent-cyan: #111111;
+  --accent-blue: #333333;
+  --accent-purple: #666666;
+  --accent-magenta: #111111;
+  --accent-glow: rgba(0, 0, 0, 0.12);
+}

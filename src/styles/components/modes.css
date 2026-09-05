@@ -1,0 +1,138 @@
+/* ==========================================================================
+   Bukaake Dual-Mode System Styles
+   Mode 1: Regular App Mode (Frosted Glass, Rounded, Centered, Resizable)
+   Mode 2: Fullscreen Image Viewer (Transparent, 60% Brightness, Auto-Hide Chrome)
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   Mode 1: Regular App Mode
+   -------------------------------------------------------------------------- */
+body.mode-regular {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden !important;
+  background: var(--glass-panel-bg) !important;
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  box-shadow: inset 0 1px 0 var(--glass-border-bright);
+  transition: background 0.25s ease, border-radius 0.25s ease;
+}
+
+body.mode-regular .app-titlebar {
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  transform: translateY(0) !important;
+  border-top-left-radius: calc(var(--radius-md) - 1px);
+  border-top-right-radius: calc(var(--radius-md) - 1px);
+  border-bottom: 1px solid var(--glass-border);
+  overflow: hidden;
+}
+
+
+
+body.mode-regular .viewport-container {
+  top: var(--titlebar-height) !important;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  border-bottom-left-radius: calc(var(--radius-md) - 1px);
+  border-bottom-right-radius: calc(var(--radius-md) - 1px);
+  background: transparent !important;
+  overflow: hidden;
+}
+
+body.mode-regular.image-loaded .floating-toolbar {
+  bottom: 20px;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(-50%) translateY(14px);
+  transition: opacity var(--transition-fast), transform var(--transition-fast);
+}
+
+body.mode-regular.image-loaded .floating-toolbar.visible,
+body.mode-regular.image-loaded .floating-toolbar:hover {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateX(-50%) translateY(0);
+}
+
+body:not(.image-loaded) .floating-toolbar {
+  display: none !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+/* --------------------------------------------------------------------------
+   Mode 2: Fullscreen Image Viewer Mode
+   Desktop Immersion: 60% brightness (40% dark dimming veil over desktop)
+   -------------------------------------------------------------------------- */
+body.mode-viewer {
+  border-radius: 0 !important;
+  border: none !important;
+  box-shadow: none !important;
+  background: rgba(0, 0, 0, 0.40) !important;
+  backdrop-filter: brightness(0.60);
+  -webkit-backdrop-filter: brightness(0.60);
+  transition: background 0.3s ease;
+}
+
+body.mode-viewer .viewport-container {
+  top: 0 !important;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  border-radius: 0 !important;
+  background: transparent !important;
+}
+
+body.mode-viewer.image-loaded .app-titlebar {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-100%);
+  border-radius: 0;
+}
+
+body.mode-viewer.image-loaded .app-titlebar.visible,
+body.mode-viewer.image-loaded .app-titlebar:hover {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+
+/* --------------------------------------------------------------------------
+   Window Resize Edge Handles (Mode 1 Only)
+   -------------------------------------------------------------------------- */
+.resize-handle-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 999;
+}
+
+body.mode-viewer .resize-handle-container {
+  display: none !important;
+}
+
+.resize-handle {
+  position: absolute;
+  pointer-events: auto;
+  background: transparent;
+}
+
+/* Edges */
+.resize-handle[data-direction="North"] { top: 0; left: 10px; right: 10px; height: 6px; cursor: n-resize; }
+.resize-handle[data-direction="South"] { bottom: 0; left: 10px; right: 10px; height: 6px; cursor: s-resize; }
+.resize-handle[data-direction="West"]  { left: 0; top: 10px; bottom: 10px; width: 6px; cursor: w-resize; }
+.resize-handle[data-direction="East"]  { right: 0; top: 10px; bottom: 10px; width: 6px; cursor: e-resize; }
+
+/* Corners */
+.resize-handle[data-direction="NorthWest"] { top: 0; left: 0; width: 10px; height: 10px; cursor: nw-resize; }
+.resize-handle[data-direction="NorthEast"] { top: 0; right: 0; width: 10px; height: 10px; cursor: ne-resize; }
+.resize-handle[data-direction="SouthWest"] { bottom: 0; left: 0; width: 10px; height: 10px; cursor: sw-resize; }
+.resize-handle[data-direction="SouthEast"] { bottom: 0; right: 0; width: 10px; height: 10px; cursor: se-resize; }

@@ -1,0 +1,14 @@
+/* ==========================================================================
+   Bukaake Modular Design System Entrypoint
+   All component styles strictly organized in submodules (< 200 lines each)
+   ========================================================================== */
+
+@import './tokens.css';
+@import './base.css';
+@import './glass.css';
+@import './components/titlebar.css';
+@import './components/toolbar.css';
+@import './components/panels.css';
+@import './components/toast.css';
+@import './components/modes.css';
+@import './components/settings.css';

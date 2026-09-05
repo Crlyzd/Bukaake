@@ -1,0 +1,135 @@
+/* ==========================================================================
+   Bukaake Glassmorphism Core Utilities
+   Spec: backdrop-filter blur(20px), specular borders, ambient shadows
+   ========================================================================== */
+
+.glass-card,
+.glass-panel {
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+}
+
+.glass-btn {
+  padding: 8px 16px;
+  border-radius: var(--radius-md);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all var(--transition-fast);
+  border: 1px solid var(--glass-border);
+}
+
+.btn-primary {
+  background: var(--action-bg);
+  color: var(--action-text);
+  border: 1px solid transparent;
+  box-shadow: var(--btn-shadow);
+}
+
+.btn-primary:hover {
+  background: var(--action-hover-bg);
+  transform: translateY(-1px);
+  box-shadow: var(--btn-shadow-hover);
+}
+
+.btn-secondary {
+  background: var(--glass-bg);
+  color: var(--text-main);
+  border: 1px solid var(--glass-border);
+}
+
+.btn-secondary:hover {
+  background: var(--glass-bg-hover);
+  border-color: var(--glass-border-bright);
+  transform: translateY(-1px);
+}
+
+/* Responsive Empty Drop Zone */
+.drop-zone {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  max-height: calc(100vh - 44px);
+  overflow: hidden;
+  transition: all var(--transition-normal);
+}
+
+.drop-card {
+  padding: 28px 36px;
+  border-radius: var(--radius-lg);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  max-width: 440px;
+  border: 1px solid var(--glass-border-bright);
+  background: var(--glass-bg);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  box-shadow: var(--glass-shadow);
+}
+
+.drop-icon {
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  background: var(--glass-bg-hover);
+  border: 1px solid var(--glass-border-bright);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  color: var(--text-main);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.drop-card h2 {
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--text-main);
+  letter-spacing: -0.2px;
+}
+
+.drop-card p {
+  font-size: 13px;
+  color: var(--text-muted);
+  line-height: 1.5;
+  max-width: 340px;
+}
+
+.drop-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 4px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.supported-formats {
+  font-size: 11px;
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--text-dim);
+  margin-top: 6px;
+  letter-spacing: 0.4px;
+}
+
+.supported-formats span {
+  color: var(--text-muted);
+}
+
+.viewport-container.drag-over .drop-card {
+  border-color: var(--active-border);
+  background: var(--glass-bg-active);
+  transform: scale(1.02);
+}

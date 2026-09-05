@@ -1,0 +1,202 @@
+/**
+ * Bukaake Tauri v2 IPC Bridge
+ * Robust wrapper for Tauri v2 window APIs, CLI arguments, and filesystem IPC
+ */
+
+export class TauriBridge {
+  constructor() {
+    this.hasTauri = typeof window !== 'undefined' && Boolean(window.__TAURI__);
+  }
+
+  isTauri() {
+    return typeof window !== 'undefined' && Boolean(window.__TAURI__);
+  }
+
+  async invoke(cmd, args = {}) {
+    if (!this.isTauri() || !window.__TAURI__.core?.invoke) {
+      return null;
+    }
+    try {
+      return await window.__TAURI__.core.invoke(cmd, args);
+    } catch (err) {
+      console.warn(`[TauriBridge] IPC error in '${cmd}':`, err);
+      throw err;
+    }
+  }
+
+  async closeWindow() {
+    try {
+      if (this.isTauri() && window.__TAURI__.window?.getCurrentWindow) {
+        await window.__TAURI__.window.getCurrentWindow().close();
+        return;
+      }
+    } catch (e) {
+      console.warn('[TauriBridge] getCurrentWindow().close() failed, trying native command', e);
+    }
+
+    try {
+      if (this.isTauri()) {
+        await this.invoke('close_window');
+        return;
+      }
+    } catch (e) {
+      console.warn('[TauriBridge] invoke close_window failed', e);
+    }
+
+    try {
+      window.close();
+    } catch (e) {}
+  }
+
+  async minimizeWindow() {
+    try {
+      if (this.isTauri() && window.__TAURI__.window?.getCurrentWindow) {
+        await window.__TAURI__.window.getCurrentWindow().minimize();
+        return;
+      }
+    } catch (e) {}
+
+    try {
+      if (this.isTauri()) {
+        await this.invoke('minimize_window');
+      }
+    } catch (e) {}
+  }
+
+  async toggleMaximize() {
+    try {
+      if (this.isTauri() && window.__TAURI__.window?.getCurrentWindow) {
+        await window.__TAURI__.window.getCurrentWindow().toggleMaximize();
+        return;
+      }
+    } catch (e) {}
+
+    try {
+      if (this.isTauri()) {
+        await this.invoke('toggle_maximize_window');
+        return;
+      }
+    } catch (e) {}
+
+    // Fallback for standalone browser/preview
+    if (!document.fullscreenElement) {
+      if (document.documentElement.requestFullscreen) {
+        try { await document.documentElement.requestFullscreen(); } catch (e) {}
+      }
+    } else {
+      if (document.exitFullscreen) {
+        try { await document.exitFullscreen(); } catch (e) {}
+      }
+    }
+  }
+
+  async isMaximized() {
+    try {
+      if (this.isTauri() && window.__TAURI__.window?.getCurrentWindow) {
+        return await window.__TAURI__.window.getCurrentWindow().isMaximized();
+      }
+      if (this.isTauri()) {
+        return await this.invoke('is_window_maximized');
+      }
+    } catch (e) {}
+
+    return Boolean(document.fullscreenElement);
+  }
+
+  async maximizeBorderless() {
+    try {
+      if (this.isTauri() && window.__TAURI__.window?.getCurrentWindow) {
+        const win = window.__TAURI__.window.getCurrentWindow();
+        const isMax = await win.isMaximized();
+        if (!isMax) {
+          await win.maximize();
+        }
+        return;
+      }
+    } catch (e) {}
+
+    try {
+      if (this.isTauri()) {
+        const isMax = await this.invoke('is_window_maximized');
+        if (!isMax) {
+          await this.invoke('toggle_maximize_window');
+        }
+      }
+    } catch (e) {}
+  }
+
+  async unmaximize() {
+    try {
+      if (this.isTauri() && window.__TAURI__.window?.getCurrentWindow) {
+        await window.__TAURI__.window.getCurrentWindow().unmaximize();
+        return;
+      }
+    } catch (e) {}
+
+    try {
+      if (this.isTauri()) {
+        await this.invoke('unmaximize_window');
+        return;
+      }
+    } catch (e) {}
+
+    if (document.fullscreenElement && document.exitFullscreen) {
+      try { await document.exitFullscreen(); } catch (e) {}
+    }
+  }
+
+  async resizeAndCenter(width, height) {
+    try {
+      if (this.isTauri()) {
+        await this.invoke('resize_and_center_window', {
+          width: Math.round(width),
+          height: Math.round(height),
+        });
+        return;
+      }
+    } catch (e) {
+      console.warn('[TauriBridge] resize_and_center_window failed:', e);
+    }
+
+    try {
+      if (this.isTauri() && window.__TAURI__.window?.getCurrentWindow) {
+        const win = window.__TAURI__.window.getCurrentWindow();
+        await win.unmaximize();
+        if (window.__TAURI__.window.LogicalSize) {
+          await win.setSize(new window.__TAURI__.window.LogicalSize(width, height));
+        }
+        await win.center();
+      }
+    } catch (e) {}
+  }
+
+  async startResizeDragging(direction) {
+    try {
+      if (this.isTauri() && window.__TAURI__.window?.getCurrentWindow) {
+        await window.__TAURI__.window.getCurrentWindow().startResizeDragging(direction);
+      }
+    } catch (e) {}
+  }
+
+  async getInitialImage() {
+    if (!this.isTauri()) return null;
+    try {
+      return await this.invoke('get_initial_image');
+    } catch (err) {
+      console.warn('[TauriBridge] get_initial_image failed:', err);
+      return null;
+    }
+  }
+
+  async readImageFile(path) {
+    if (!this.isTauri()) return null;
+    try {
+      return await this.invoke('read_image_file', { path });
+    } catch (err) {
+      console.warn(`[TauriBridge] read_image_file failed for '${path}':`, err);
+      throw err;
+    }
+  }
+}
+
+export const tauriBridge = new TauriBridge();
