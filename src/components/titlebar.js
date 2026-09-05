@@ -5,6 +5,7 @@
 
 import { tauriBridge } from '../services/tauri-bridge.js';
 import { themeManager } from '../services/theme-manager.js';
+import { updaterService } from '../services/updater-service.js';
 
 export class Titlebar {
   constructor(options = {}) {
@@ -17,6 +18,7 @@ export class Titlebar {
     this.btnClose = document.getElementById('winClose');
     this.btnTheme = document.getElementById('btnThemeToggle');
     this.btnInfo = document.getElementById('btnToggleInfo');
+    this.btnSettings = document.getElementById('btnSettings');
 
     this.onOpenFile = options.onOpenFile || null;
     this.onPasteClipboard = options.onPasteClipboard || null;
@@ -34,6 +36,7 @@ export class Titlebar {
     this.bindActionButtons();
     this.syncMaximizedState();
     this.setHasImage(false);
+    this.initUpdateListeners();
 
     if (this.btnTheme) {
       themeManager.bindToggleBtn(this.btnTheme);
@@ -85,6 +88,7 @@ export class Titlebar {
     });
 
     document.getElementById('btnSettings')?.addEventListener('click', () => {
+      updaterService.onSettingsClick();
       this.onToggleSettings?.();
     });
 
@@ -151,5 +155,25 @@ export class Titlebar {
       this.btnInfo.disabled = !hasImage;
       this.btnInfo.title = hasImage ? 'Toggle Image Properties (I)' : 'Image Properties (Load an image first)';
     }
+  }
+
+  initUpdateListeners() {
+    updaterService.subscribe((state) => {
+      this.setUpdateBadge(Boolean(state.hasUpdate));
+    });
+
+    updaterService.initLaunchCheck();
+
+    window.__toggleUpdateBadge = (enable = true) => {
+      updaterService.setUpdateAvailable(enable);
+    };
+  }
+
+  setUpdateBadge(hasUpdate = true) {
+    if (!this.btnSettings) return;
+    this.btnSettings.classList.toggle('has-update', hasUpdate);
+    this.btnSettings.title = hasUpdate
+      ? 'Settings & About (Update Available!)'
+      : 'Settings & About';
   }
 }

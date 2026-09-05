@@ -6,6 +6,7 @@
 import './styles/main.css';
 import { tauriBridge } from './services/tauri-bridge.js';
 import { toast } from './components/toast.js';
+import { updaterService } from './services/updater-service.js';
 
 class SettingsApp {
   constructor() {
@@ -14,6 +15,7 @@ class SettingsApp {
     this.valWindowOpacity = document.getElementById('valWindowOpacity');
     this.btnCheckUpdate = document.getElementById('btnCheckUpdate');
     this.updateStatusText = document.getElementById('updateStatusText');
+    this.updateBanner = document.querySelector('.settings-update-banner');
 
     this.init();
   }
@@ -96,19 +98,29 @@ class SettingsApp {
   }
 
   bindUpdater() {
-    this.btnCheckUpdate?.addEventListener('click', () => {
-      const original = this.btnCheckUpdate.innerHTML;
-      this.btnCheckUpdate.innerHTML = '<i class="ri-loader-4-line ri-spin"></i> Checking...';
-      this.btnCheckUpdate.disabled = true;
-
-      setTimeout(() => {
-        this.btnCheckUpdate.innerHTML = original;
-        this.btnCheckUpdate.disabled = false;
-        if (this.updateStatusText) {
+    updaterService.subscribe((state) => {
+      this.updateBanner?.classList.toggle('has-update', Boolean(state.hasUpdate));
+      if (this.btnCheckUpdate) {
+        this.btnCheckUpdate.disabled = Boolean(state.isChecking);
+        if (state.isChecking) {
+          this.btnCheckUpdate.innerHTML = '<i class="ri-loader-4-line ri-spin"></i> Checking...';
+        } else if (state.hasUpdate) {
+          this.btnCheckUpdate.innerHTML = `<i class="ri-download-cloud-line"></i> Install v${state.version || '0.2.0'}`;
+        } else {
+          this.btnCheckUpdate.innerHTML = '<i class="ri-refresh-line"></i> Check';
+        }
+      }
+      if (this.updateStatusText) {
+        if (state.hasUpdate) {
+          this.updateStatusText.textContent = `Update available: Bukaake v${state.version || '0.2.0'}`;
+        } else {
           this.updateStatusText.textContent = 'Bukaake v0.1.0 (Latest Version)';
         }
-        toast.show('You are on the latest version of Bukaake (v0.1.0)');
-      }, 800);
+      }
+    });
+
+    this.btnCheckUpdate?.addEventListener('click', () => {
+      updaterService.checkUpdate({ silent: false });
     });
   }
 }

@@ -204,3 +204,60 @@ body.image-loaded .app-titlebar:hover {
   background: #e81123 !important;
   color: #ffffff !important;
 }
+
+/* Ambient Glowing Icon for Update Available (Pillars 1 & 2 Compliant — Zero Dot) */
+.titlebar-ghost-btn.has-update i {
+  color: #38bdf8 !important;
+  text-shadow: 0 0 10px rgba(56, 189, 248, 0.8), 0 0 20px rgba(56, 189, 248, 0.4);
+  filter: drop-shadow(0 0 6px rgba(56, 189, 248, 0.7));
+  animation: pulse-icon-glow 2.4s ease-in-out infinite;
+  transition: all var(--transition-fast);
+}
+
+.titlebar-ghost-btn.has-update:hover i {
+  color: #7dd3fc !important;
+  text-shadow: 0 0 14px rgba(125, 211, 252, 0.95), 0 0 26px rgba(56, 189, 248, 0.6);
+  filter: drop-shadow(0 0 8px rgba(125, 211, 252, 0.9));
+}
+
+html[data-theme="light"] .titlebar-ghost-btn.has-update i,
+body.light-theme .titlebar-ghost-btn.has-update i {
+  color: #0284c7 !important;
+  text-shadow: 0 0 8px rgba(2, 132, 199, 0.6), 0 0 16px rgba(2, 132, 199, 0.3);
+  filter: drop-shadow(0 0 5px rgba(2, 132, 199, 0.55));
+  animation: pulse-icon-glow-light 2.4s ease-in-out infinite;
+}
+
+html[data-theme="light"] .titlebar-ghost-btn.has-update:hover i,
+body.light-theme .titlebar-ghost-btn.has-update:hover i {
+  color: #0369a1 !important;
+  text-shadow: 0 0 10px rgba(3, 105, 161, 0.75), 0 0 20px rgba(2, 132, 199, 0.45);
+  filter: drop-shadow(0 0 7px rgba(3, 105, 161, 0.7));
+}
+
+@keyframes pulse-icon-glow {
+  0%, 100% {
+    opacity: 0.85;
+    filter: drop-shadow(0 0 4px rgba(56, 189, 248, 0.6));
+    text-shadow: 0 0 8px rgba(56, 189, 248, 0.7), 0 0 16px rgba(56, 189, 248, 0.35);
+  }
+  50% {
+    opacity: 1;
+    filter: drop-shadow(0 0 8px rgba(56, 189, 248, 0.95));
+    text-shadow: 0 0 12px rgba(56, 189, 248, 0.95), 0 0 24px rgba(56, 189, 248, 0.6);
+  }
+}
+
+@keyframes pulse-icon-glow-light {
+  0%, 100% {
+    opacity: 0.88;
+    filter: drop-shadow(0 0 3px rgba(2, 132, 199, 0.45));
+    text-shadow: 0 0 6px rgba(2, 132, 199, 0.5), 0 0 12px rgba(2, 132, 199, 0.25);
+  }
+  50% {
+    opacity: 1;
+    filter: drop-shadow(0 0 7px rgba(2, 132, 199, 0.8));
+    text-shadow: 0 0 10px rgba(2, 132, 199, 0.8), 0 0 18px rgba(2, 132, 199, 0.4);
+  }
+}
+

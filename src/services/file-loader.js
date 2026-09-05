@@ -70,6 +70,18 @@ export class FileLoader {
     window.addEventListener('paste', (e) => {
       if (e.clipboardData?.files?.length > 0) {
         this.loadWebFiles(e.clipboardData.files);
+        return;
+      }
+      if (e.clipboardData?.items) {
+        for (const item of e.clipboardData.items) {
+          if (item.type.startsWith('image/')) {
+            const file = item.getAsFile();
+            if (file) {
+              this.loadWebFiles([file]);
+              return;
+            }
+          }
+        }
       }
     });
   }
@@ -184,7 +196,21 @@ export class FileLoader {
 
   async loadFromClipboard() {
     try {
-      if (!navigator.clipboard?.read) throw new Error('Clipboard API unavailable');
+      if (navigator.permissions?.query) {
+        try {
+          const perm = await navigator.permissions.query({ name: 'clipboard-read' });
+          if (perm.state === 'prompt' || perm.state === 'denied') {
+            this.onStatusMessage?.('Press Ctrl+V to paste image directly');
+            return false;
+          }
+        } catch (_) {}
+      }
+
+      if (!navigator.clipboard?.read) {
+        this.onStatusMessage?.('Press Ctrl+V to paste image directly');
+        return false;
+      }
+
       const items = await navigator.clipboard.read();
       for (const item of items) {
         for (const type of item.types) {
@@ -198,8 +224,8 @@ export class FileLoader {
       }
       this.onStatusMessage?.('No image found in clipboard');
       return false;
-    } catch (err) {
-      this.onStatusMessage?.('Clipboard access denied or unsupported');
+    } catch (_) {
+      this.onStatusMessage?.('Press Ctrl+V to paste image directly');
       return false;
     }
   }

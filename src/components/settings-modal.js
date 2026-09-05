@@ -6,6 +6,7 @@
 
 import { toast } from './toast.js';
 import { themeManager } from '../services/theme-manager.js';
+import { updaterService } from '../services/updater-service.js';
 
 export class SettingsModal {
   constructor(options = {}) {
@@ -14,6 +15,7 @@ export class SettingsModal {
     this.btnCheckUpdate = document.getElementById('btnCheckUpdate');
     this.btnReportBug = document.getElementById('btnReportBug');
     this.updateStatusText = document.getElementById('updateStatusText');
+    this.updateBanner = this.modalEl?.querySelector('.settings-update-banner');
 
     this.sliderWindowOpacity = document.getElementById('sliderWindowOpacity');
     this.valWindowOpacity = document.getElementById('valWindowOpacity');
@@ -29,6 +31,27 @@ export class SettingsModal {
     });
 
     this.btnCheckUpdate?.addEventListener('click', () => this.handleCheckUpdate());
+
+    updaterService.subscribe((state) => {
+      this.updateBanner?.classList.toggle('has-update', Boolean(state.hasUpdate));
+      if (this.btnCheckUpdate) {
+        this.btnCheckUpdate.disabled = Boolean(state.isChecking);
+        if (state.isChecking) {
+          this.btnCheckUpdate.innerHTML = '<i class="ri-loader-4-line ri-spin"></i> Checking...';
+        } else if (state.hasUpdate) {
+          this.btnCheckUpdate.innerHTML = `<i class="ri-download-cloud-line"></i> Install v${state.version || '0.2.0'}`;
+        } else {
+          this.btnCheckUpdate.innerHTML = '<i class="ri-refresh-line"></i> Check';
+        }
+      }
+      if (this.updateStatusText) {
+        if (state.hasUpdate) {
+          this.updateStatusText.textContent = `Update available: Bukaake v${state.version || '0.2.0'}`;
+        } else {
+          this.updateStatusText.textContent = 'Bukaake v0.1.0 (Latest Version)';
+        }
+      }
+    });
   }
 
   initAppearanceSettings() {
@@ -76,18 +99,6 @@ export class SettingsModal {
   }
 
   async handleCheckUpdate() {
-    if (!this.btnCheckUpdate) return;
-    const originalText = this.btnCheckUpdate.innerHTML;
-    this.btnCheckUpdate.innerHTML = '<i class="ri-loader-4-line ri-spin"></i> Checking...';
-    this.btnCheckUpdate.disabled = true;
-
-    setTimeout(() => {
-      this.btnCheckUpdate.innerHTML = originalText;
-      this.btnCheckUpdate.disabled = false;
-      if (this.updateStatusText) {
-        this.updateStatusText.textContent = 'Bukaake v0.1.0 (Latest Version)';
-      }
-      toast.show('You are on the latest version of Bukaake (v0.1.0)');
-    }, 900);
+    updaterService.checkUpdate({ silent: false });
   }
 }

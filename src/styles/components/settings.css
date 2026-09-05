@@ -166,6 +166,53 @@ body.settings-window {
   -webkit-backdrop-filter: blur(24px) saturate(180%);
   border: none !important; border-radius: var(--radius-md);
   padding: 12px 16px; font-size: 12px; box-shadow: var(--glass-card-shadow);
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+}
+
+.settings-update-banner.has-update {
+  background: var(--galactic-glow-bg) !important;
+  background-size: 220% 220% !important;
+  box-shadow: var(--galactic-glow-card-shadow) !important;
+  border: none !important;
+  animation: galactic-flow 6s ease infinite alternate, pulse-galactic-card 3s ease-in-out infinite;
+}
+
+.settings-update-banner.has-update .update-status-wrap {
+  color: var(--text-main);
+  font-weight: 600;
+}
+
+.settings-update-banner.has-update .update-status-wrap i {
+  color: #38bdf8;
+  text-shadow: 0 0 12px rgba(56, 189, 248, 0.9);
+  filter: drop-shadow(0 0 6px rgba(56, 189, 248, 0.8));
+}
+
+html[data-theme="light"] .settings-update-banner.has-update .update-status-wrap i,
+body.light-theme .settings-update-banner.has-update .update-status-wrap i {
+  color: #0284c7;
+  text-shadow: 0 0 8px rgba(2, 132, 199, 0.6);
+  filter: drop-shadow(0 0 4px rgba(2, 132, 199, 0.5));
+}
+
+.settings-update-banner.has-update .btn-check-update {
+  box-shadow: 0 4px 18px rgba(168, 85, 247, 0.45), 0 2px 8px rgba(0, 0, 0, 0.25);
+}
+
+@keyframes galactic-flow {
+  0% { background-position: 0% 40%; }
+  50% { background-position: 100% 60%; }
+  100% { background-position: 0% 40%; }
+}
+
+@keyframes pulse-galactic-card {
+  0%, 100% {
+    box-shadow: var(--galactic-glow-shadow);
+  }
+  50% {
+    box-shadow: var(--galactic-glow-card-shadow);
+  }
 }
 
 .update-status-wrap { display: flex; align-items: center; gap: 8px; color: var(--text-muted); }

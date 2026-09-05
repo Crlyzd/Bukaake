@@ -5,6 +5,11 @@ mod image_loader;
 use image_loader::{get_initial_image, read_image_context, read_image_file};
 use tauri::{Emitter, Manager};
 
+#[cfg(target_os = "windows")]
+use std::os::windows::process::CommandExt;
+
+const CREATE_NO_WINDOW: u32 = 0x08000000;
+
 #[tauri::command]
 fn get_cli_args() -> Vec<String> {
     std::env::args().collect()
@@ -14,18 +19,15 @@ fn get_cli_args() -> Vec<String> {
 fn open_url(url: String) -> Result<(), String> {
     #[cfg(target_os = "windows")]
     {
-        std::process::Command::new("rundll32")
-            .args(["url.dll,FileProtocolHandler", &url])
-            .spawn()
-            .map_err(|e| e.to_string())?;
+        let mut cmd = std::process::Command::new("rundll32");
+        cmd.args(["url.dll,FileProtocolHandler", &url]);
+        cmd.creation_flags(CREATE_NO_WINDOW);
+        cmd.spawn().map_err(|e| e.to_string())?;
     }
     #[cfg(not(target_os = "windows"))]
     {
         let cmd = if cfg!(target_os = "macos") { "open" } else { "xdg-open" };
-        std::process::Command::new(cmd)
-            .arg(&url)
-            .spawn()
-            .map_err(|e| e.to_string())?;
+        std::process::Command::new(cmd).arg(&url).spawn().map_err(|e| e.to_string())?;
     }
     Ok(())
 }
@@ -34,10 +36,10 @@ fn open_url(url: String) -> Result<(), String> {
 fn show_in_folder(path: String) -> Result<(), String> {
     #[cfg(target_os = "windows")]
     {
-        std::process::Command::new("explorer")
-            .args(["/select,", &path])
-            .spawn()
-            .map_err(|e| e.to_string())?;
+        let mut cmd = std::process::Command::new("explorer");
+        cmd.args(["/select,", &path]);
+        cmd.creation_flags(CREATE_NO_WINDOW);
+        cmd.spawn().map_err(|e| e.to_string())?;
     }
     #[cfg(not(target_os = "windows"))]
     {
@@ -100,11 +102,7 @@ fn minimize_window(window: tauri::Window) {
 #[tauri::command]
 fn toggle_maximize_window(window: tauri::Window) {
     if let Ok(is_max) = window.is_maximized() {
-        if is_max {
-            let _ = window.unmaximize();
-        } else {
-            let _ = window.maximize();
-        }
+        if is_max { let _ = window.unmaximize(); } else { let _ = window.maximize(); }
     }
 }
 
