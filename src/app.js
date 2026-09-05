@@ -221,7 +221,6 @@ class BukaakeApp {
       if (!this.viewer.img) return toast.show('Load an image first to crop');
       this.cropper.show();
       this.toolbar.setCropActive(true);
-      toast.show('Drag box or handles to select crop region');
     } else {
       this.cropper.hide();
       this.toolbar.setCropActive(false);

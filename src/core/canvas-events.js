@@ -23,7 +23,7 @@ export function attachCanvasInteractions(viewer) {
     viewer.targetPanX = mx - (mx - viewer.targetPanX) * (nextScale / viewer.targetScale);
     viewer.targetPanY = my - (my - viewer.targetPanY) * (nextScale / viewer.targetScale);
     viewer.targetScale = nextScale;
-    viewer.startSmoothAnimation();
+    viewer.snapBackToBounds();
   }, { passive: false });
 
   let mouseDownX = 0;
@@ -59,10 +59,14 @@ export function attachCanvasInteractions(viewer) {
     viewer.lastMouseY = e.clientY;
     viewer.lastMouseTime = now;
 
-    viewer.panX = e.clientX - viewer.startX;
-    viewer.panY = e.clientY - viewer.startY;
-    viewer.targetPanX = viewer.panX;
-    viewer.targetPanY = viewer.panY;
+    const rawX = e.clientX - viewer.startX;
+    const rawY = e.clientY - viewer.startY;
+    const damped = viewer.applyRubberDamping(rawX, rawY);
+
+    viewer.panX = damped.x;
+    viewer.panY = damped.y;
+    viewer.targetPanX = damped.x;
+    viewer.targetPanY = damped.y;
     viewer.render();
     viewer.onTransformChange?.();
   });
@@ -71,9 +75,7 @@ export function attachCanvasInteractions(viewer) {
     if (viewer.isPanning) {
       viewer.isPanning = false;
       canvas.classList.remove('panning');
-      if (Math.hypot(viewer.velocityX, viewer.velocityY) > 0.5) {
-        viewer.startSmoothAnimation();
-      }
+      viewer.snapBackToBounds(true);
 
       // Check if mouse released without drag (clean single click)
       const dist = Math.hypot(e.clientX - mouseDownX, e.clientY - mouseDownY);

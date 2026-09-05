@@ -65,7 +65,7 @@
 
 body.light-theme .context-menu-shortcut,
 html[data-theme="light"] .context-menu-shortcut {
-  background: rgba(0, 0, 0, 0.05);
+  background: rgba(26, 32, 44, 0.06);
 }
 
 .context-menu-item:hover:not(.disabled) {

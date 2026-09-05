@@ -79,7 +79,7 @@
   justify-content: center;
   font-size: 22px;
   color: var(--text-main);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 12px rgba(26, 32, 44, 0.08);
 }
 
 .settings-hero-title {

@@ -51,36 +51,56 @@ export class CropperTool {
       const dx = e.clientX - this.startMouseX;
       const dy = e.clientY - this.startMouseY;
       let { left, top, width, height } = this.startBoxState;
+      const img = this.getImageScreenBounds();
+      const SNAP = 14;
 
       if (this.isDraggingBox) {
         left += dx;
         top += dy;
+        if (img) {
+          if (Math.abs(left - img.left) < SNAP) left = img.left;
+          else if (Math.abs(left + width - img.right) < SNAP) left = img.right - width;
+          if (Math.abs(top - img.top) < SNAP) top = img.top;
+          else if (Math.abs(top + height - img.bottom) < SNAP) top = img.bottom - height;
+        }
       } else if (this.activeHandle) {
-        switch (this.activeHandle) {
-          case 'se':
-            width = Math.max(30, width + dx);
-            height = this.aspectRatio ? width / this.aspectRatio : Math.max(30, height + dy);
-            break;
-          case 'sw':
-            const newW_sw = Math.max(30, width - dx);
-            left += (width - newW_sw);
-            width = newW_sw;
-            height = this.aspectRatio ? width / this.aspectRatio : Math.max(30, height + dy);
-            break;
-          case 'ne':
-            width = Math.max(30, width + dx);
-            const newH_ne = this.aspectRatio ? width / this.aspectRatio : Math.max(30, height - dy);
-            top += (height - newH_ne);
-            height = newH_ne;
-            break;
-          case 'nw':
-            const newW_nw = Math.max(30, width - dx);
-            left += (width - newW_nw);
-            width = newW_nw;
-            const newH_nw = this.aspectRatio ? width / this.aspectRatio : Math.max(30, height - dy);
-            top += (height - newH_nw);
-            height = newH_nw;
-            break;
+        let right = left + width;
+        let bottom = top + height;
+
+        if (this.activeHandle.includes('e')) {
+          right += dx;
+          if (img && Math.abs(right - img.right) < SNAP) right = img.right;
+          width = Math.max(30, right - left);
+        }
+        if (this.activeHandle.includes('w')) {
+          left += dx;
+          if (img && Math.abs(left - img.left) < SNAP) left = img.left;
+          width = Math.max(30, right - left);
+          left = right - width;
+        }
+
+        if (this.activeHandle.includes('s')) {
+          bottom += dy;
+          if (img && Math.abs(bottom - img.bottom) < SNAP) bottom = img.bottom;
+          height = Math.max(30, bottom - top);
+        }
+        if (this.activeHandle.includes('n')) {
+          top += dy;
+          if (img && Math.abs(top - img.top) < SNAP) top = img.top;
+          height = Math.max(30, bottom - top);
+          top = bottom - height;
+        }
+
+        if (this.aspectRatio) {
+          if (this.activeHandle === 'n' || this.activeHandle === 's') {
+            const newW = height * this.aspectRatio;
+            left += (width - newW) / 2;
+            width = newW;
+          } else {
+            const newH = width / this.aspectRatio;
+            if (this.activeHandle.includes('n')) top += (height - newH);
+            height = newH;
+          }
         }
       }
 
@@ -101,6 +121,21 @@ export class CropperTool {
       this.isDraggingBox = false;
       this.activeHandle = null;
     });
+  }
+
+  getImageScreenBounds() {
+    if (!this.viewer.img) return null;
+    const isVert = (this.viewer.rotation === 90 || this.viewer.rotation === 270);
+    const w = (isVert ? this.viewer.img.height : this.viewer.img.width) * this.viewer.scale;
+    const h = (isVert ? this.viewer.img.width : this.viewer.img.height) * this.viewer.scale;
+    return {
+      left: this.viewer.panX,
+      top: this.viewer.panY,
+      right: this.viewer.panX + w,
+      bottom: this.viewer.panY + h,
+      width: w,
+      height: h,
+    };
   }
 
   setAspectRatio(ratioStr) {
@@ -130,15 +165,25 @@ export class CropperTool {
     this.active = true;
     this.container.classList.remove('hidden');
 
-    const cW = this.container.clientWidth;
-    const cH = this.container.clientHeight;
-    const boxW = cW * 0.7;
-    const boxH = this.aspectRatio ? boxW / this.aspectRatio : cH * 0.7;
+    const img = this.getImageScreenBounds();
+    let boxW = img ? img.width : this.container.clientWidth * 0.7;
+    let boxH = img ? img.height : this.container.clientHeight * 0.7;
+
+    if (this.aspectRatio) {
+      if (boxW / boxH > this.aspectRatio) {
+        boxW = boxH * this.aspectRatio;
+      } else {
+        boxH = boxW / this.aspectRatio;
+      }
+    }
+
+    const left = img ? img.left + (img.width - boxW) / 2 : (this.container.clientWidth - boxW) / 2;
+    const top = img ? img.top + (img.height - boxH) / 2 : (this.container.clientHeight - boxH) / 2;
 
     this.box.style.width = `${boxW}px`;
     this.box.style.height = `${boxH}px`;
-    this.box.style.left = `${(cW - boxW) / 2}px`;
-    this.box.style.top = `${(cH - boxH) / 2}px`;
+    this.box.style.left = `${left}px`;
+    this.box.style.top = `${top}px`;
     this.updateDimensionsTag();
   }
 

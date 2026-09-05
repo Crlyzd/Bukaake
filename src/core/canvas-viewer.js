@@ -13,31 +13,17 @@ export class CanvasViewer {
     this.container = viewportContainer;
 
     this.img = null;
-    this.scale = 1.0;
-    this.panX = 0;
-    this.panY = 0;
+    this.scale = 1.0; this.targetScale = 1.0;
+    this.panX = 0; this.panY = 0;
+    this.targetPanX = 0; this.targetPanY = 0;
+    this.isAnimating = false; this.animFrameId = null;
 
-    this.targetScale = 1.0;
-    this.targetPanX = 0;
-    this.targetPanY = 0;
-    this.isAnimating = false;
-    this.animFrameId = null;
+    this.velocityX = 0; this.velocityY = 0;
+    this.lastMouseX = 0; this.lastMouseY = 0; this.lastMouseTime = 0;
 
-    this.velocityX = 0;
-    this.velocityY = 0;
-    this.lastMouseX = 0;
-    this.lastMouseY = 0;
-    this.lastMouseTime = 0;
-
-    this.rotation = 0;
-    this.flipH = false;
-    this.flipV = false;
+    this.rotation = 0; this.flipH = false; this.flipV = false;
     this.pixelSmoothing = true;
-
-    this.isPanning = false;
-    this.startX = 0;
-    this.startY = 0;
-
+    this.isPanning = false; this.startX = 0; this.startY = 0;
     this.onTransformChange = null;
 
     attachCanvasInteractions(this);
@@ -126,7 +112,8 @@ export class CanvasViewer {
     const isVert = (this.rotation === 90 || this.rotation === 270);
     const w = isVert ? this.img.height : this.img.width;
     const h = isVert ? this.img.width : this.img.height;
-    return Math.min((Math.max(100, this.canvas.width - 40)) / w, (Math.max(100, this.canvas.height - 40)) / h, 1.0);
+    const pad = 24;
+    return Math.min((Math.max(100, this.canvas.width - pad * 2)) / w, (Math.max(100, this.canvas.height - pad * 2)) / h, 1.0);
   }
 
   fitToScreen(instant = false) {
@@ -162,6 +149,7 @@ export class CanvasViewer {
     this.targetPanX = cx - (cx - this.targetPanX) * (newScale / this.targetScale);
     this.targetPanY = cy - (cy - this.targetPanY) * (newScale / this.targetScale);
     this.targetScale = newScale;
+    this.snapBackToBounds(false);
 
     if (instant) {
       this.scale = this.targetScale;
@@ -169,8 +157,6 @@ export class CanvasViewer {
       this.panY = this.targetPanY;
       this.render();
       this.onTransformChange?.();
-    } else {
-      this.startSmoothAnimation();
     }
   }
 
@@ -193,6 +179,47 @@ export class CanvasViewer {
     } else {
       this.startSmoothAnimation();
     }
+  }
+
+  getPanBounds(scale = this.scale) {
+    if (!this.img) return { minX: 0, maxX: 0, minY: 0, maxY: 0, centerX: 0, centerY: 0 };
+    const isVert = (this.rotation === 90 || this.rotation === 270);
+    const imgW = (isVert ? this.img.height : this.img.width) * scale;
+    const imgH = (isVert ? this.img.width : this.img.height) * scale;
+    const pad = 24;
+    const centerX = (this.canvas.width - imgW) / 2;
+    const centerY = (this.canvas.height - imgH) / 2;
+    const availW = this.canvas.width - pad * 2;
+    const availH = this.canvas.height - pad * 2;
+    return {
+      minX: imgW <= availW ? centerX : this.canvas.width - pad - imgW,
+      maxX: imgW <= availW ? centerX : pad,
+      minY: imgH <= availH ? centerY : this.canvas.height - pad - imgH,
+      maxY: imgH <= availH ? centerY : pad,
+      centerX, centerY, imgW, imgH, pad,
+    };
+  }
+
+  applyRubberDamping(rawX, rawY) {
+    const { minX, maxX, minY, maxY } = this.getPanBounds(this.scale);
+    const damp = (val, min, max) => {
+      if (val < min) return min - Math.pow(min - val, 0.78) * 1.8;
+      if (val > max) return max + Math.pow(val - max, 0.78) * 1.8;
+      return val;
+    };
+    return { x: damp(rawX, minX, maxX), y: damp(rawY, minY, maxY) };
+  }
+
+  snapBackToBounds(withInertia = false) {
+    if (!this.img) return;
+    const bounds = this.getPanBounds(this.targetScale);
+    const flingX = withInertia ? this.velocityX * 2 : 0;
+    const flingY = withInertia ? this.velocityY * 2 : 0;
+    this.targetPanX = Math.max(bounds.minX, Math.min(bounds.maxX, this.panX + flingX));
+    this.targetPanY = Math.max(bounds.minY, Math.min(bounds.maxY, this.panY + flingY));
+    this.velocityX = 0;
+    this.velocityY = 0;
+    this.startSmoothAnimation();
   }
 
   rotate(deg) {

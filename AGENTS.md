@@ -26,6 +26,7 @@ The application must provide first-class support for both Dark and Light themes:
   - `--text-main`, `--text-muted`, `--text-dim`: High-contrast accessible text colors.
   - `--action-bg`, `--action-text`: Monochrome action button fills.
 - **Deep Obsidian Dark Mode**: Dark mode must be deeply dark, never washed-out blue or gray.
+- **Zero Pure Black in Light Mode Policy**: **Never use pure pitch black (`#000000`, `#0a0a0a`, `#111111`, or raw `rgba(0, 0, 0, ...)`) in Light Mode** across any UI elements (action button fills, active preset chips, slider thumbs, text, icons, borders, or shadows). All dark accents, active buttons, slider thumbs, and primary text in Light Mode MUST use the refined dark obsidian slate tone derived from the Dark Mode setting card (`#242938` / `#2a3142`, with translucent alphas anchored to `rgba(26, 32, 44, ...)`). This ensures controls and typography remain modern, soft, and cohesive without harsh inky contrast.
 - **No Hardcoded Hex Colors**: Hardcoded color literals in component CSS or inline styles are prohibited.
 - **Native Acrylic Tint Coordination**: The Rust backend applies native Windows Acrylic blur in coordination with the active theme (`Some((0, 0, 0, 248))` for dark, `Some((245, 247, 250, 130))` for light).
 - **Theme Switching**: Instant, flicker-free theme switching with persistence in local storage and automatic system preference detection (`prefers-color-scheme`).

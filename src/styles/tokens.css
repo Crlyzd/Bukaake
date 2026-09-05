@@ -60,44 +60,45 @@
   --accent-glow: rgba(255, 255, 255, 0.15);
 }
 
-/* Light Theme Tokens (Pure Neutral Monochrome) */
+/* Light Theme Tokens (Setting Card Obsidian Tone & Soft Slate Alphas) */
 html[data-theme="light"],
 body.light-theme {
-  --bg-secondary: rgba(0, 0, 0, 0.03);
+  --bg-secondary: rgba(26, 32, 44, 0.03);
   --glass-bg: rgba(255, 255, 255, 0.68);
-  --glass-bg-hover: rgba(0, 0, 0, 0.06);
-  --glass-bg-active: rgba(0, 0, 0, 0.12);
+  --glass-bg-hover: rgba(26, 32, 44, 0.06);
+  --glass-bg-active: rgba(26, 32, 44, 0.12);
   --glass-border: transparent;
   --glass-border-bright: transparent;
-  --glass-shadow: 0 4px 14px rgba(0, 0, 0, 0.03), 0 18px 40px rgba(0, 0, 0, 0.06);
+  --glass-shadow: 0 4px 14px rgba(26, 32, 44, 0.04), 0 18px 40px rgba(26, 32, 44, 0.07);
   --glass-panel-bg: rgba(244, 246, 249, calc(0.55 + var(--window-opacity, 0.38) * 0.45));
 
   /* Frosted Glass Island & Card Tokens */
   --glass-card-bg: rgba(255, 255, 255, 0.72);
   --glass-card-bg-hover: rgba(255, 255, 255, 0.92);
-  --glass-card-shadow: 0 4px 12px rgba(0, 0, 0, 0.02), 0 14px 32px rgba(0, 0, 0, 0.05);
-  --slider-track-bg: rgba(0, 0, 0, 0.10);
+  --glass-card-shadow: 0 4px 12px rgba(26, 32, 44, 0.03), 0 14px 32px rgba(26, 32, 44, 0.06);
+  --slider-track-bg: rgba(26, 32, 44, 0.12);
 
   /* Titlebar Gradient Blur Tokens */
   --glass-titlebar-bg: rgba(255, 255, 255, 0.65);
   --glass-titlebar-fade: rgba(255, 255, 255, 0.06);
-  --glass-titlebar-glow: rgba(0, 0, 0, 0.04);
+  --glass-titlebar-glow: rgba(26, 32, 44, 0.04);
 
-  --text-main: #111111;
-  --text-muted: #444444;
-  --text-dim: #777777;
+  --text-main: #242938;
+  --text-muted: #535c73;
+  --text-dim: #7e879f;
 
-  --action-bg: #111111;
+  --action-bg: #242938;
   --action-text: #ffffff;
-  --action-hover-bg: #2a2a2a;
-  --btn-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
-  --btn-shadow-hover: 0 4px 10px rgba(0, 0, 0, 0.12);
-  --active-highlight: rgba(0, 0, 0, 0.10);
+  --action-hover-bg: #32394d;
+  --btn-shadow: 0 2px 6px rgba(26, 32, 44, 0.10);
+  --btn-shadow-hover: 0 4px 10px rgba(26, 32, 44, 0.15);
+  --active-highlight: rgba(26, 32, 44, 0.08);
   --active-border: transparent;
 
-  --accent-cyan: #111111;
-  --accent-blue: #333333;
-  --accent-purple: #666666;
-  --accent-magenta: #111111;
-  --accent-glow: rgba(0, 0, 0, 0.12);
+  --accent-cyan: #242938;
+  --accent-blue: #363e54;
+  --accent-purple: #5c6682;
+  --accent-magenta: #242938;
+  --accent-glow: rgba(26, 32, 44, 0.10);
 }
+
