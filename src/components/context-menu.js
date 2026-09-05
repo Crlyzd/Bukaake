@@ -11,6 +11,7 @@ export class ContextMenu {
     this.container = options.container || document.getElementById('viewportContainer');
     this.getFilePath = options.getFilePath || (() => null);
     this.hasImage = options.hasImage || (() => false);
+    this.isCropActive = options.isCropActive || (() => false);
     this.actions = options.actions || {};
 
     this.menuEl = null;
@@ -124,7 +125,14 @@ export class ContextMenu {
         label: 'Save Image As...',
         icon: 'ri-download-2-line',
         shortcut: 'Ctrl+S',
-        action: () => this.actions.onSaveImage?.(),
+        disabled: !this.hasImage() || this.isCropActive(),
+        action: () => {
+          if (this.isCropActive()) {
+            toast.show('Please apply or cancel crop before exporting');
+            return;
+          }
+          this.actions.onSaveImage?.();
+        },
       },
       { type: 'divider' },
       {

@@ -16,3 +16,5 @@
 @import './components/settings.css';
 @import './components/vibrancy.css';
 @import './components/context-menu.css';
+@import './components/draw.css';
+@import './components/confirm-modal.css';

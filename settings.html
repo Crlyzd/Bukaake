@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,167 +10,14 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet">
   <link rel="stylesheet" href="/src/styles/main.css">
-  <style>
-    html {
-      width: 100%;
-      height: 100%;
-      overflow: hidden;
-      margin: 0;
-      padding: 0;
-      background: transparent !important;
-    }
-
-    body {
-      width: 100%;
-      height: 100%;
-      overflow: hidden !important;
-      margin: 0;
-      padding: 0;
-      background: var(--glass-panel-bg) !important;
-      border-radius: var(--radius-md);
-      font-family: 'Inter', system-ui, -apple-system, sans-serif;
-      user-select: none;
-      -webkit-user-select: none;
-      display: flex;
-      flex-direction: column;
-      box-shadow: var(--glass-shadow);
-    }
-
-    .settings-window-shell {
-      width: 100%;
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-      border-radius: var(--radius-md);
-      background: transparent;
-      border: none !important;
-      box-shadow: none !important;
-      overflow: hidden;
-    }
-
-    .settings-titlebar-drag {
-      height: 44px;
-      padding: 0 12px 0 16px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      border-bottom: none !important;
-      background: linear-gradient(180deg, var(--glass-titlebar-bg) 0%, var(--glass-titlebar-fade) 100%);
-      border-top-left-radius: var(--radius-md);
-      border-top-right-radius: var(--radius-md);
-      -webkit-app-region: drag;
-      app-region: drag;
-    }
-
-    .settings-title-left {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .settings-win-logo {
-      width: 26px;
-      height: 26px;
-      border-radius: var(--radius-sm);
-      background: var(--glass-bg-hover);
-      border: none !important;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 14px;
-      color: var(--text-main);
-    }
-
-    .settings-win-title {
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--text-main);
-    }
-
-    .settings-win-version {
-      font-size: 11px;
-      font-family: 'JetBrains Mono', monospace;
-      color: var(--text-dim);
-    }
-
-    .settings-win-controls {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      -webkit-app-region: no-drag;
-      app-region: no-drag;
-    }
-
-    .settings-win-btn {
-      width: 28px;
-      height: 28px;
-      border-radius: var(--radius-sm);
-      background: transparent;
-      border: none;
-      outline: none;
-      color: var(--text-muted);
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 16px;
-      transition: all var(--transition-fast);
-    }
-
-    .settings-win-btn:focus,
-    .settings-win-btn:focus-visible {
-      outline: none !important;
-      box-shadow: none !important;
-    }
-
-    .settings-win-btn:hover {
-      background: var(--glass-bg-hover);
-      color: var(--text-main);
-    }
-
-    .settings-win-btn.close:hover {
-      background: #e81123 !important;
-      color: #ffffff !important;
-    }
-
-    .settings-content-scroll {
-      flex: 1;
-      overflow-y: auto;
-      scrollbar-width: none;
-      -ms-overflow-style: none;
-      padding: 16px 20px 24px 20px;
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-      box-sizing: border-box;
-    }
-
-    .settings-content-scroll::-webkit-scrollbar {
-      display: none;
-      width: 0;
-      height: 0;
-    }
-
-    .settings-window-footer {
-      padding: 10px 18px;
-      border-top: none !important;
-      border-bottom-left-radius: var(--radius-md);
-      border-bottom-right-radius: var(--radius-md);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      font-size: 11px;
-      color: var(--text-dim);
-      font-family: 'JetBrains Mono', monospace;
-    }
-  </style>
 </head>
-<body class="glass-theme dark">
+<body class="settings-window dark">
   <div class="settings-window-shell">
+    <!-- Draggable Transparent Ghost Titlebar -->
     <div class="settings-titlebar-drag" data-tauri-drag-region>
       <div class="settings-title-left" data-tauri-drag-region>
-        <div class="settings-win-logo">
-          <i class="ri-settings-3-line"></i>
+        <div class="app-logo">
+          <img src="/icon-frameless.png" alt="Bukaake" />
         </div>
         <span class="settings-win-title" data-tauri-drag-region>Bukaake Settings</span>
         <span class="settings-win-version" data-tauri-drag-region>v0.1.0</span>

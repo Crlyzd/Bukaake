@@ -191,3 +191,37 @@ pub fn read_image_file(path: String) -> Result<ImagePayload, String> {
         dimensions,
     })
 }
+
+#[tauri::command]
+pub fn read_image_context(path: String) -> Result<InitialImagePayload, String> {
+    let p = PathBuf::from(&path);
+    if !is_image_file(&p) {
+        return Err(format!("Not a recognized image file: {}", path));
+    }
+    let abs_path = p.canonicalize().unwrap_or_else(|_| p.clone());
+    let file_name = abs_path
+        .file_name()
+        .and_then(|n| n.to_str())
+        .unwrap_or("image")
+        .to_string();
+    let parent_dir = abs_path
+        .parent()
+        .map(|p| p.to_string_lossy().to_string())
+        .unwrap_or_default();
+    let (neighbors, current_index) = scan_directory_neighbors(&abs_path);
+    let data_url = file_to_data_url(&abs_path)?;
+    let metadata = fs::metadata(&abs_path).ok();
+    let size_bytes = metadata.map(|m| m.len()).unwrap_or(0);
+    let dimensions = image::image_dimensions(&abs_path).ok();
+
+    Ok(InitialImagePayload {
+        target_path: abs_path.to_string_lossy().to_string(),
+        file_name,
+        parent_dir,
+        neighbors,
+        current_index,
+        data_url,
+        size_bytes,
+        dimensions,
+    })
+}

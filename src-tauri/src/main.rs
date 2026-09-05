@@ -2,8 +2,8 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 mod image_loader;
-use image_loader::{get_initial_image, read_image_file};
-use tauri::Manager;
+use image_loader::{get_initial_image, read_image_context, read_image_file};
+use tauri::{Emitter, Manager};
 
 #[tauri::command]
 fn get_cli_args() -> Vec<String> {
@@ -48,7 +48,40 @@ fn show_in_folder(path: String) -> Result<(), String> {
 
 #[tauri::command]
 fn close_window(window: tauri::Window) {
-    let _ = window.close();
+    if window.label() == "main" {
+        window.app_handle().exit(0);
+    } else {
+        let _ = window.close();
+    }
+}
+
+#[tauri::command]
+fn exit_app(app_handle: tauri::AppHandle) {
+    app_handle.exit(0);
+}
+
+#[tauri::command]
+fn prompt_save_file(default_name: String, filter_ext: String) -> Result<Option<String>, String> {
+    let mut dialog = rfd::FileDialog::new().set_file_name(&default_name);
+    if !filter_ext.is_empty() {
+        let exts = [filter_ext.as_str()];
+        dialog = dialog.add_filter("Image", &exts);
+    }
+    let res = dialog.save_file();
+    Ok(res.map(|p| p.to_string_lossy().to_string()))
+}
+
+#[tauri::command]
+fn save_image_bytes(path: String, base64_data: String) -> Result<(), String> {
+    use base64::prelude::*;
+    let cleaned = if let Some(idx) = base64_data.find(',') {
+        &base64_data[idx + 1..]
+    } else {
+        &base64_data
+    };
+    let data = BASE64_STANDARD.decode(cleaned).map_err(|e| e.to_string())?;
+    std::fs::write(&path, data).map_err(|e| e.to_string())?;
+    Ok(())
 }
 
 #[tauri::command]
@@ -108,6 +141,18 @@ fn is_window_fullscreen(window: tauri::Window) -> bool {
 }
 
 #[tauri::command]
+fn play_windows_ding() {
+    #[cfg(target_os = "windows")]
+    unsafe {
+        #[link(name = "user32")]
+        extern "system" {
+            fn MessageBeep(uType: u32) -> i32;
+        }
+        MessageBeep(0);
+    }
+}
+
+#[tauri::command]
 fn open_settings_window(app_handle: tauri::AppHandle) -> Result<(), String> {
     if let Some(settings_win) = app_handle.get_webview_window("settings") {
         if let Some(main_win) = app_handle.get_webview_window("main") {
@@ -131,6 +176,7 @@ fn open_settings_window(app_handle: tauri::AppHandle) -> Result<(), String> {
         let _ = settings_win.unminimize();
         let _ = settings_win.show();
         let _ = settings_win.set_focus();
+        let _ = app_handle.emit("settings-modal-state", true);
     }
     Ok(())
 }
@@ -139,6 +185,7 @@ fn open_settings_window(app_handle: tauri::AppHandle) -> Result<(), String> {
 fn hide_settings_window(app_handle: tauri::AppHandle) -> Result<(), String> {
     if let Some(settings_win) = app_handle.get_webview_window("settings") {
         let _ = settings_win.hide();
+        let _ = app_handle.emit("settings-modal-state", false);
     }
     Ok(())
 }
@@ -148,8 +195,8 @@ fn set_window_vibrancy(app_handle: tauri::AppHandle, is_dark: bool, is_viewer: O
     #[cfg(target_os = "windows")]
     {
         use window_vibrancy::{apply_acrylic, clear_acrylic};
-        let dark_tint = Some((0, 0, 0, 248));
-        let light_tint = Some((245, 247, 250, 130));
+        let dark_tint = Some((16, 19, 28, 248));
+        let light_tint = Some((245, 247, 250, 140));
         let tint = if is_dark { dark_tint } else { light_tint };
 
         if let Some(main_win) = app_handle.get_webview_window("main") {
@@ -173,7 +220,7 @@ fn main() {
         .setup(|app| {
             #[cfg(target_os = "windows")]
             {
-                let tint = Some((0, 0, 0, 248));
+                let tint = Some((16, 19, 28, 248));
                 if let Some(icon) = app.default_window_icon() {
                     if let Some(window) = app.get_webview_window("main") {
                         let _ = window.set_icon(icon.clone());
@@ -193,13 +240,29 @@ fn main() {
             }
             Ok(())
         })
+        .on_window_event(|window, event| {
+            if window.label() == "main" {
+                if let tauri::WindowEvent::CloseRequested { .. } | tauri::WindowEvent::Destroyed = event {
+                    window.app_handle().exit(0);
+                }
+            } else if window.label() == "settings" {
+                if let tauri::WindowEvent::CloseRequested { .. } = event {
+                    let _ = window.app_handle().emit("settings-modal-state", false);
+                }
+            }
+        })
         .invoke_handler(tauri::generate_handler![
             get_cli_args,
             get_initial_image,
             read_image_file,
+            read_image_context,
+            play_windows_ding,
             open_url,
             show_in_folder,
             close_window,
+            exit_app,
+            prompt_save_file,
+            save_image_bytes,
             minimize_window,
             toggle_maximize_window,
             is_window_maximized,

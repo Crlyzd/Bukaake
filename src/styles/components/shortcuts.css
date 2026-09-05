@@ -40,20 +40,15 @@
   justify-content: space-between;
   font-size: 12px;
   color: var(--text-muted);
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--glass-btn-bg);
   padding: 8px 12px;
   border-radius: var(--radius-md);
   border: none !important;
 }
 
-body.light-theme .shortcut-item,
-html[data-theme="light"] .shortcut-item {
-  background: rgba(26, 32, 44, 0.05);
-}
-
 kbd {
   font-family: 'JetBrains Mono', monospace;
-  background: rgba(255, 255, 255, 0.18);
+  background: var(--glass-btn-hover-bg);
   border: none !important;
   padding: 2px 6px;
   border-radius: 4px;

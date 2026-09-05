@@ -3,8 +3,9 @@
  */
 
 export class FilterEngine {
-  constructor(canvasViewer) {
+  constructor(canvasViewer, options = {}) {
     this.viewer = canvasViewer;
+    this.onModified = options.onModified || null;
 
     this.brightness = 100;
     this.contrast = 100;
@@ -80,11 +81,24 @@ export class FilterEngine {
     this.apply();
   }
 
+  isModified() {
+    return (
+      this.brightness !== 100 ||
+      this.contrast !== 100 ||
+      this.saturation !== 100 ||
+      this.hue !== 0 ||
+      this.blur !== 0 ||
+      this.invert !== 0 ||
+      this.activePreset !== 'normal'
+    );
+  }
+
   getFilterCssString() {
     return `brightness(${this.brightness}%) contrast(${this.contrast}%) saturate(${this.saturation}%) hue-rotate(${this.hue}deg) blur(${this.blur}px) invert(${this.invert}%)`;
   }
 
   apply() {
     this.viewer.render(this.getFilterCssString());
+    this.onModified?.(this.isModified());
   }
 }

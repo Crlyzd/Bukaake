@@ -29,6 +29,9 @@ export class ShortcutsRegistry {
       } else if (e.key === 's' || e.key === 'S') {
         e.preventDefault();
         this.actions.onSaveImage?.();
+      } else if (e.key === 'z' || e.key === 'Z') {
+        e.preventDefault();
+        this.actions.onDrawUndo?.();
       }
       return;
     }
@@ -85,6 +88,11 @@ export class ShortcutsRegistry {
       case 'C':
         e.preventDefault();
         this.actions.onToggleCrop?.();
+        break;
+      case 'd':
+      case 'D':
+        e.preventDefault();
+        this.actions.onToggleDraw?.();
         break;
       case 'e':
       case 'E':

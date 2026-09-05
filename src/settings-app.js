@@ -3,6 +3,7 @@
  * Coordinates live settings, live sync with main window, and window controls (< 150 lines)
  */
 
+import './styles/main.css';
 import { tauriBridge } from './services/tauri-bridge.js';
 import { toast } from './components/toast.js';
 
@@ -66,11 +67,12 @@ class SettingsApp {
   }
 
   bindAppearanceControls() {
-    const savedOpacity = localStorage.getItem('bukaake_window_opacity') || '38';
+    const savedOpacity = localStorage.getItem('bukaake_window_opacity') || '28';
+    this.applyWindowOpacity(savedOpacity);
+
     if (this.sliderWindowOpacity && this.valWindowOpacity) {
       this.sliderWindowOpacity.value = savedOpacity;
       this.valWindowOpacity.textContent = `${savedOpacity}%`;
-      this.applyWindowOpacity(savedOpacity);
 
       this.sliderWindowOpacity.addEventListener('input', (e) => {
         const val = e.target.value;

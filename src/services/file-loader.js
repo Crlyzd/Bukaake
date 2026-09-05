@@ -25,6 +25,28 @@ export class FileLoader {
     fileInputEl?.addEventListener('change', (e) => this.loadWebFiles(e.target.files));
     document.getElementById('dropOpenBtn')?.addEventListener('click', () => fileInputEl?.click());
 
+    // Native Tauri v2 Window Drag-and-Drop
+    if (tauriBridge.isTauri() && window.__TAURI__?.event?.listen) {
+      window.__TAURI__.event.listen('tauri://drag-enter', () => {
+        viewportEl?.classList.add('drag-over');
+      });
+      window.__TAURI__.event.listen('tauri://drag-over', () => {
+        viewportEl?.classList.add('drag-over');
+      });
+      window.__TAURI__.event.listen('tauri://drag-leave', () => {
+        viewportEl?.classList.remove('drag-over');
+      });
+      window.__TAURI__.event.listen('tauri://drag-drop', async (event) => {
+        viewportEl?.classList.remove('drag-over');
+        const paths = event.payload?.paths || [];
+        if (paths.length > 0) {
+          const payload = await tauriBridge.readImageContext(paths[0]);
+          if (payload) this.loadFromTauriContext(payload);
+        }
+      });
+    }
+
+    // Web / HTML5 Drag and Drop Fallback
     window.addEventListener('dragover', (e) => {
       e.preventDefault();
       viewportEl?.classList.add('drag-over');

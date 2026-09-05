@@ -25,151 +25,126 @@ export class TauriBridge {
   }
 
   async closeWindow() {
-    try {
-      if (this.isTauri() && window.__TAURI__.window?.getCurrentWindow) {
-        await window.__TAURI__.window.getCurrentWindow().close();
-        return;
-      }
-    } catch (e) { console.warn('[TauriBridge] getCurrentWindow().close() failed', e); }
-
-    try {
-      if (this.isTauri()) { await this.invoke('close_window'); return; }
-    } catch (e) { console.warn('[TauriBridge] invoke close_window failed', e); }
-
+    if (this.isTauri()) {
+      try { await this.invoke('close_window'); return; } catch (e) {}
+      try { await window.__TAURI__.window?.getCurrentWindow()?.close(); return; } catch (e) {}
+    }
     try { window.close(); } catch (e) {}
+  }
+
+  async exitApp() {
+    if (this.isTauri()) {
+      try { await this.invoke('exit_app'); return; } catch (e) {}
+    }
+    await this.closeWindow();
+  }
+
+  async promptSaveFile(defaultName, filterExt = 'png') {
+    if (this.isTauri()) {
+      try {
+        return await this.invoke('prompt_save_file', { defaultName, filterExt });
+      } catch (e) { console.warn('[TauriBridge] prompt_save_file failed:', e); }
+    }
+    return null;
+  }
+
+  async saveImageBytes(path, base64Data) {
+    if (this.isTauri()) {
+      try {
+        await this.invoke('save_image_bytes', { path, base64Data });
+        return true;
+      } catch (e) {
+        console.warn('[TauriBridge] save_image_bytes failed:', e);
+        throw e;
+      }
+    }
+    return false;
   }
 
   async minimizeWindow() {
     try {
-      if (this.isTauri() && window.__TAURI__.window?.getCurrentWindow) {
-        await window.__TAURI__.window.getCurrentWindow().minimize();
-        return;
+      if (this.isTauri()) {
+        const win = window.__TAURI__.window?.getCurrentWindow?.();
+        if (win?.minimize) await win.minimize();
+        else await this.invoke('minimize_window');
       }
-    } catch (e) {}
-
-    try {
-      if (this.isTauri()) await this.invoke('minimize_window');
     } catch (e) {}
   }
 
   async toggleMaximize() {
     try {
-      if (this.isTauri() && window.__TAURI__.window?.getCurrentWindow) {
-        await window.__TAURI__.window.getCurrentWindow().toggleMaximize();
+      if (this.isTauri()) {
+        const win = window.__TAURI__.window?.getCurrentWindow?.();
+        if (win?.toggleMaximize) await win.toggleMaximize();
+        else await this.invoke('toggle_maximize_window');
         return;
       }
     } catch (e) {}
-
-    try {
-      if (this.isTauri()) { await this.invoke('toggle_maximize_window'); return; }
-    } catch (e) {}
-
-    // Fallback for standalone browser/preview
     if (!document.fullscreenElement) {
-      if (document.documentElement.requestFullscreen) {
-        try { await document.documentElement.requestFullscreen(); } catch (e) {}
-      }
-    } else if (document.exitFullscreen) {
-      try { await document.exitFullscreen(); } catch (e) {}
+      try { await document.documentElement.requestFullscreen?.(); } catch (e) {}
+    } else {
+      try { await document.exitFullscreen?.(); } catch (e) {}
     }
   }
 
   async isFullscreen() {
     try {
-      if (this.isTauri() && window.__TAURI__.window?.getCurrentWindow) {
-        return await window.__TAURI__.window.getCurrentWindow().isFullscreen();
-      }
       if (this.isTauri()) {
+        const win = window.__TAURI__.window?.getCurrentWindow?.();
+        if (win?.isFullscreen) return await win.isFullscreen();
         return await this.invoke('is_window_fullscreen');
       }
     } catch (e) {}
-
     return Boolean(document.fullscreenElement);
   }
 
   async setFullscreen(fullscreen = true) {
     try {
-      if (this.isTauri() && window.__TAURI__.window?.getCurrentWindow) {
-        await window.__TAURI__.window.getCurrentWindow().setFullscreen(fullscreen);
-        return;
-      }
-    } catch (e) {
-      console.warn('[TauriBridge] getCurrentWindow().setFullscreen failed, trying native IPC', e);
-    }
-
-    try {
       if (this.isTauri()) {
-        await this.invoke('set_fullscreen_window', { fullscreen });
+        const win = window.__TAURI__.window?.getCurrentWindow?.();
+        if (win?.setFullscreen) await win.setFullscreen(fullscreen);
+        else await this.invoke('set_fullscreen_window', { fullscreen });
         return;
       }
-    } catch (e) {
-      console.warn('[TauriBridge] invoke set_fullscreen_window failed', e);
-    }
-
+    } catch (e) {}
     if (fullscreen) {
-      if (!document.fullscreenElement && document.documentElement.requestFullscreen) {
-        try { await document.documentElement.requestFullscreen(); } catch (e) {}
-      }
+      if (!document.fullscreenElement) try { await document.documentElement.requestFullscreen?.(); } catch (e) {}
     } else {
-      if (document.fullscreenElement && document.exitFullscreen) {
-        try { await document.exitFullscreen(); } catch (e) {}
-      }
+      if (document.fullscreenElement) try { await document.exitFullscreen?.(); } catch (e) {}
     }
   }
 
   async isMaximized() {
     try {
-      if (this.isTauri() && window.__TAURI__.window?.getCurrentWindow) {
-        return await window.__TAURI__.window.getCurrentWindow().isMaximized();
-      }
       if (this.isTauri()) {
+        const win = window.__TAURI__.window?.getCurrentWindow?.();
+        if (win?.isMaximized) return await win.isMaximized();
         return await this.invoke('is_window_maximized');
       }
     } catch (e) {}
-
     return Boolean(document.fullscreenElement);
   }
 
   async maximizeBorderless() {
     try {
-      if (this.isTauri() && window.__TAURI__.window?.getCurrentWindow) {
-        const win = window.__TAURI__.window.getCurrentWindow();
-        const isMax = await win.isMaximized();
-        if (!isMax) {
-          await win.maximize();
-        }
-        return;
-      }
-    } catch (e) {}
-
-    try {
       if (this.isTauri()) {
-        const isMax = await this.invoke('is_window_maximized');
-        if (!isMax) {
-          await this.invoke('toggle_maximize_window');
-        }
+        const win = window.__TAURI__.window?.getCurrentWindow?.();
+        if (win && !(await win.isMaximized())) await win.maximize();
+        else if (!(await this.invoke('is_window_maximized'))) await this.invoke('toggle_maximize_window');
       }
     } catch (e) {}
   }
 
   async unmaximize() {
     try {
-      if (this.isTauri() && window.__TAURI__.window?.getCurrentWindow) {
-        await window.__TAURI__.window.getCurrentWindow().unmaximize();
-        return;
-      }
-    } catch (e) {}
-
-    try {
       if (this.isTauri()) {
-        await this.invoke('unmaximize_window');
+        const win = window.__TAURI__.window?.getCurrentWindow?.();
+        if (win?.unmaximize) await win.unmaximize();
+        else await this.invoke('unmaximize_window');
         return;
       }
     } catch (e) {}
-
-    if (document.fullscreenElement && document.exitFullscreen) {
-      try { await document.exitFullscreen(); } catch (e) {}
-    }
+    if (document.fullscreenElement) try { await document.exitFullscreen?.(); } catch (e) {}
   }
 
   async resizeAndCenter(width, height) {
@@ -268,6 +243,30 @@ export class TauriBridge {
       try { await this.invoke('show_in_folder', { path }); return true; } catch (e) { console.warn(e); }
     }
     return false;
+  }
+
+  async readImageContext(path) {
+    if (!this.isTauri()) return null;
+    try {
+      return await this.invoke('read_image_context', { path });
+    } catch (err) {
+      console.warn(`[TauriBridge] read_image_context failed for '${path}':`, err);
+      return null;
+    }
+  }
+
+  async playWindowsDing() {
+    if (this.isTauri()) {
+      try { await this.invoke('play_windows_ding'); } catch (e) {}
+    }
+  }
+
+  onSettingsModalState(callback) {
+    if (this.isTauri() && window.__TAURI__?.event?.listen) {
+      window.__TAURI__.event.listen('settings-modal-state', (event) => {
+        callback(Boolean(event.payload));
+      });
+    }
   }
 
   initExternalLinks() {

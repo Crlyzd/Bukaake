@@ -15,6 +15,9 @@
 </head>
 <body class="glass-theme dark">
   
+  <!-- Main Window Modal Shield (Active when Settings window is open) -->
+  <div class="modal-shield hidden" id="modalShield"></div>
+  
   <!-- Borderless Window Edge Resizers (Active in Mode 1) -->
   <div class="resize-handle-container" id="resizeHandleContainer">
     <div class="resize-handle" data-direction="North"></div>
@@ -77,23 +80,28 @@
           <img src="/icon-frameless.png" alt="Bukaake" />
         </div>
         <h2>Bukaake Viewer</h2>
-        <p>Drag & drop images here, or paste from clipboard (Ctrl+V)</p>
+        <p>Drop image anywhere or press Ctrl+V to paste</p>
         <div class="drop-actions">
           <button class="btn-primary glass-btn" id="dropOpenBtn">
             <i class="ri-folder-open-fill"></i> Select Image File
           </button>
-          <button class="btn-secondary glass-btn" id="dropSampleBtn">
-            <i class="ri-sparkles-line"></i> Load Demo Sample
-          </button>
         </div>
         <div class="supported-formats">
-          <span>PNG</span> • <span>JPG</span> • <span>WEBP</span> • <span>GIF</span> • <span>SVG</span> • <span>BMP</span> • <span>ICO</span> • <span>TIFF</span>
+          <span class="format-chip">PNG</span>
+          <span class="format-chip">JPG</span>
+          <span class="format-chip">WEBP</span>
+          <span class="format-chip">GIF</span>
+          <span class="format-chip">SVG</span>
+          <span class="format-chip">BMP</span>
+          <span class="format-chip">ICO</span>
+          <span class="format-chip">TIFF</span>
         </div>
       </div>
     </div>
 
     <!-- HTML5 Canvas Renderer -->
     <canvas id="imageCanvas"></canvas>
+    <canvas id="drawCanvas" class="hidden"></canvas>
 
     <!-- Interactive Crop Box Overlay (Hidden by default) -->
     <div class="crop-overlay-container hidden" id="cropOverlayContainer">
@@ -114,6 +122,8 @@
         <div class="crop-grid-line h2"></div>
         <div class="crop-grid-line v1"></div>
         <div class="crop-grid-line v2"></div>
+        <div class="crop-snap-line snap-h"></div>
+        <div class="crop-snap-line snap-v"></div>
         <div class="crop-dimensions-tag" id="cropDimensionsTag">0 x 0</div>
       </div>
     </div>
@@ -171,6 +181,9 @@
         <button class="toolbar-btn" id="btnCropMode" title="Crop Image (C)">
           <i class="ri-crop-line"></i>
         </button>
+        <button class="toolbar-btn" id="btnDrawMode" title="Draw & Highlight (D)">
+          <i class="ri-mark-pen-line"></i>
+        </button>
         <button class="toolbar-btn" id="btnAdjustments" title="Color & Filters (E)">
           <i class="ri-equalizer-line"></i>
         </button>
@@ -193,19 +206,63 @@
       </div>
     </nav>
 
-    <!-- Crop Sub-Toolbar (Visible when cropping) -->
+    <!-- Redesigned Frosted Glass Crop Sub-Toolbar -->
     <div class="crop-toolbar glass-panel hidden" id="cropToolbar">
-      <span class="crop-label"><i class="ri-crop-2-line"></i> Cropping</span>
-      <div class="crop-presets">
-        <button class="crop-preset-btn active" data-ratio="free">Free</button>
-        <button class="crop-preset-btn" data-ratio="1:1">1:1</button>
-        <button class="crop-preset-btn" data-ratio="16:9">16:9</button>
-        <button class="crop-preset-btn" data-ratio="4:3">4:3</button>
-        <button class="crop-preset-btn" data-ratio="3:2">3:2</button>
+      <div class="crop-pill-brand">
+        <i class="ri-crop-2-line"></i>
+        <span>Crop</span>
       </div>
+      <div class="crop-pill-divider"></div>
+      <div class="crop-presets">
+        <button class="crop-preset-btn active" data-ratio="free" title="Free Aspect Ratio">Free</button>
+        <button class="crop-preset-btn" data-ratio="1:1" title="Square (1:1)">1:1</button>
+        <button class="crop-preset-btn" data-ratio="16:9" title="Widescreen (16:9)">16:9</button>
+        <button class="crop-preset-btn" data-ratio="9:16" title="Story / Reel (9:16)">9:16</button>
+        <button class="crop-preset-btn" data-ratio="4:3" title="Standard Photo (4:3)">4:3</button>
+        <button class="crop-preset-btn" data-ratio="4:5" title="Portrait Post (4:5)">4:5</button>
+        <button class="crop-preset-btn" data-ratio="3:2" title="Classic 35mm (3:2)">3:2</button>
+      </div>
+      <div class="crop-pill-divider"></div>
       <div class="crop-actions">
-        <button class="btn-cancel glass-btn" id="btnCancelCrop"><i class="ri-close-line"></i> Cancel</button>
-        <button class="btn-apply glass-btn" id="btnApplyCrop"><i class="ri-check-line"></i> Apply Crop</button>
+        <button class="crop-action-btn btn-cancel" id="btnCancelCrop" title="Cancel Crop (Esc)"><i class="ri-close-line"></i> Cancel</button>
+        <button class="crop-action-btn btn-apply" id="btnApplyCrop" title="Apply Crop"><i class="ri-check-line"></i> Apply</button>
+      </div>
+    </div>
+
+    <!-- Drawing & Highlighting Sub-Toolbar -->
+    <div class="draw-toolbar glass-panel hidden" id="drawToolbar">
+      <div class="draw-modes">
+        <button class="draw-mode-btn active" id="btnDrawPen" title="Pen Tool"><i class="ri-ball-pen-line"></i> Pen</button>
+        <button class="draw-mode-btn" id="btnDrawHighlighter" title="Highlighter Tool"><i class="ri-mark-pen-line"></i> Highlight</button>
+      </div>
+      <div class="draw-pill-divider"></div>
+      <div class="draw-colors">
+        <button class="draw-color-chip active" data-color="#00f0ff" style="--chip-c: #00f0ff" title="Cyan"></button>
+        <button class="draw-color-chip" data-color="#ffea00" style="--chip-c: #ffea00" title="Highlighter Yellow"></button>
+        <button class="draw-color-chip" data-color="#ff3366" style="--chip-c: #ff3366" title="Coral Red"></button>
+        <button class="draw-color-chip" data-color="#00ff66" style="--chip-c: #00ff66" title="Neon Green"></button>
+        <button class="draw-color-chip" data-color="#ffffff" style="--chip-c: #ffffff" title="White"></button>
+        <button class="draw-color-chip" data-color="#242938" style="--chip-c: #242938" title="Obsidian Slate"></button>
+        <label class="draw-custom-color-wrap" title="Custom Color Picker">
+          <i class="ri-palette-line"></i>
+          <input type="color" id="drawCustomColor" value="#00f0ff" />
+        </label>
+      </div>
+      <div class="draw-pill-divider"></div>
+      <div class="draw-sizes">
+        <button class="draw-size-btn" data-size="3" title="Thin (3px)"><span class="size-dot s-thin"></span></button>
+        <button class="draw-size-btn active" data-size="6" title="Medium (6px)"><span class="size-dot s-med"></span></button>
+        <button class="draw-size-btn" data-size="14" title="Thick (14px)"><span class="size-dot s-thick"></span></button>
+      </div>
+      <div class="draw-pill-divider"></div>
+      <div class="draw-history">
+        <button class="draw-tool-btn" id="btnDrawUndo" title="Undo Stroke (Ctrl+Z)"><i class="ri-arrow-go-back-line"></i></button>
+        <button class="draw-tool-btn" id="btnDrawClear" title="Clear All Drawings"><i class="ri-delete-bin-line"></i></button>
+      </div>
+      <div class="draw-pill-divider"></div>
+      <div class="draw-actions">
+        <button class="draw-action-btn btn-cancel" id="btnCancelDraw" title="Cancel (Esc)"><i class="ri-close-line"></i> Cancel</button>
+        <button class="draw-action-btn btn-apply" id="btnApplyDraw" title="Apply Drawing"><i class="ri-check-line"></i> Apply</button>
       </div>
     </div>
 
@@ -388,6 +445,24 @@
 
     <!-- Hidden File Input for system file picking -->
     <input type="file" id="fileInput" accept="image/*" multiple style="display: none;">
+
+    <!-- Unsaved Changes Confirmation Modal -->
+    <div class="confirm-modal-overlay hidden" id="confirmModalOverlay">
+      <div class="confirm-modal-card glass-panel">
+        <div class="confirm-modal-header">
+          <div class="confirm-modal-icon"><i class="ri-alert-line"></i></div>
+          <div class="confirm-modal-title-wrap">
+            <h3 class="confirm-modal-title">Unsaved Changes</h3>
+            <p class="confirm-modal-desc">You have modified this image. Save changes before leaving?</p>
+          </div>
+        </div>
+        <div class="confirm-modal-actions">
+          <button class="confirm-btn btn-save" id="btnConfirmSave"><i class="ri-save-line"></i> Save</button>
+          <button class="confirm-btn btn-discard" id="btnConfirmDiscard"><i class="ri-delete-bin-line"></i> Don't Save</button>
+          <button class="confirm-btn btn-cancel" id="btnConfirmCancel">Cancel</button>
+        </div>
+      </div>
+    </div>
 
     <!-- Toast Notification Overlay -->
     <div class="toast-container" id="toastContainer"></div>

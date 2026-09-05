@@ -24,6 +24,7 @@ export class Titlebar {
     this.onToggleSettings = options.onToggleSettings || null;
     this.onToggleHelp = options.onToggleHelp || null;
     this.onToggleMode = options.onToggleMode || null;
+    this.onClose = options.onClose || null;
 
     this.init();
   }
@@ -49,7 +50,11 @@ export class Titlebar {
     });
 
     this.btnClose?.addEventListener('click', async () => {
-      await tauriBridge.closeWindow();
+      if (this.onClose) {
+        this.onClose();
+      } else {
+        await tauriBridge.closeWindow();
+      }
     });
 
     if (this.container) {

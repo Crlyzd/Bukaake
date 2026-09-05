@@ -79,104 +79,175 @@
 
 .crop-toolbar {
   position: absolute;
-  top: 56px;
+  bottom: 72px;
   left: 50%;
   transform: translateX(-50%);
-  padding: 6px 14px;
+  padding: 4px 6px;
   border-radius: var(--radius-pill);
   display: flex;
   align-items: center;
-  gap: 12px;
-  z-index: 50;
+  gap: 3px;
+  z-index: 52;
   -webkit-app-region: no-drag;
   app-region: no-drag;
-  background: var(--glass-bg);
-  backdrop-filter: blur(20px) saturate(180%);
+  background: var(--glass-island-bg);
+  backdrop-filter: blur(28px) saturate(180%);
+  -webkit-backdrop-filter: blur(28px) saturate(180%);
   border: none !important;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.45);
+  box-shadow: var(--glass-island-shadow);
+  animation: slideUpCrop 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.crop-label {
-  font-size: 12px;
+.crop-snap-line {
+  position: absolute;
+  pointer-events: none;
+  display: none;
+  z-index: 8;
+}
+
+.crop-snap-line.snap-h {
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: #00f0ff;
+  box-shadow: 0 0 8px rgba(0, 240, 255, 0.6);
+}
+
+.crop-snap-line.snap-v {
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: #00f0ff;
+  box-shadow: 0 0 8px rgba(0, 240, 255, 0.6);
+}
+
+.crop-box.snapped-center-x .crop-snap-line.snap-v {
+  display: block;
+}
+
+.crop-box.snapped-center-y .crop-snap-line.snap-h {
+  display: block;
+}
+
+@keyframes slideUpCrop {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+body.mode-viewer .crop-toolbar {
+  bottom: 132px !important;
+}
+
+.crop-pill-brand {
+  font-size: 11px;
   font-weight: 600;
-  color: var(--text-main);
+  color: var(--text-dim);
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
+  padding: 0 6px 0 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  user-select: none;
+}
+
+.crop-pill-brand i {
+  font-size: 13px;
+  color: var(--accent-cyan);
+}
+
+.crop-pill-divider {
+  width: 1px;
+  height: 18px;
+  background: var(--bg-secondary);
+  margin: 0 4px;
+  border: none !important;
 }
 
 .crop-presets {
   display: flex;
-  gap: 4px;
+  align-items: center;
+  gap: 3px;
 }
 
 .crop-preset-btn {
-  background: var(--glass-bg);
+  background: transparent;
   border: none !important;
+  outline: none !important;
   color: var(--text-muted);
-  padding: 3px 8px;
-  border-radius: var(--radius-sm);
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
   font-size: 11px;
+  font-weight: 500;
   cursor: pointer;
   transition: all var(--transition-fast);
+  white-space: nowrap;
 }
 
-.crop-preset-btn:hover,
-.crop-preset-btn.active {
-  background: var(--glass-bg-active);
+.crop-preset-btn:hover {
+  background: var(--glass-bg-hover);
   color: var(--text-main);
+  transform: translateY(-1px);
+}
+
+.crop-preset-btn.active {
+  background: var(--action-bg) !important;
+  color: var(--action-text) !important;
+  font-weight: 600;
+  box-shadow: var(--btn-shadow);
+  transform: none;
 }
 
 .crop-actions {
   display: flex;
   align-items: center;
-  gap: 6px;
-  flex-shrink: 0;
+  gap: 5px;
+  padding-left: 2px;
 }
 
-.btn-cancel {
-  background: rgba(239, 68, 68, 0.15);
+.crop-action-btn {
   border: none !important;
-  color: #ef4444;
-  padding: 0 12px;
+  outline: none !important;
   height: 28px;
-  font-size: 12px;
-  font-weight: 500;
-  border-radius: var(--radius-sm);
+  font-size: 11px;
+  border-radius: var(--radius-pill);
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  white-space: nowrap;
-  flex-shrink: 0;
+  gap: 4px;
   cursor: pointer;
   transition: all var(--transition-fast);
+  white-space: nowrap;
 }
 
-.btn-cancel:hover {
-  background: rgba(239, 68, 68, 0.25);
+.crop-action-btn.btn-cancel {
+  background: rgba(239, 68, 68, 0.14);
+  color: #ef4444;
+  padding: 0 11px;
+  font-weight: 500;
+}
+
+.crop-action-btn.btn-cancel:hover {
+  background: rgba(239, 68, 68, 0.24);
   transform: translateY(-1px);
 }
 
-.btn-apply {
+.crop-action-btn.btn-apply {
   background: var(--action-bg);
   color: var(--action-text);
-  border: none !important;
-  padding: 0 14px;
-  height: 28px;
-  font-size: 12px;
+  padding: 0 13px;
   font-weight: 600;
-  border-radius: var(--radius-sm);
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  white-space: nowrap;
-  flex-shrink: 0;
-  cursor: pointer;
   box-shadow: var(--btn-shadow);
-  transition: all var(--transition-fast);
 }
 
-.btn-apply:hover {
+.crop-action-btn.btn-apply:hover {
   background: var(--action-hover-bg);
   box-shadow: var(--btn-shadow-hover);
   transform: translateY(-1px);

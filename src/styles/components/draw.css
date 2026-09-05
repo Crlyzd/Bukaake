@@ -1,0 +1,249 @@
+/* ==========================================================================
+   Bukaake Drawing & Highlighting Tool Submodule
+   Stroke-free frosted glass styling adhering to Pillar 1 (< 150 lines)
+   ========================================================================== */
+
+#drawCanvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: auto;
+  z-index: 38;
+  cursor: crosshair;
+}
+
+#drawCanvas.hidden {
+  display: none !important;
+}
+
+.draw-toolbar {
+  position: absolute;
+  top: 56px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 5px 8px;
+  border-radius: var(--radius-pill);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  z-index: 50;
+  -webkit-app-region: no-drag;
+  app-region: no-drag;
+  background: var(--glass-island-bg);
+  backdrop-filter: blur(28px) saturate(180%);
+  -webkit-backdrop-filter: blur(28px) saturate(180%);
+  border: none !important;
+  box-shadow: var(--glass-island-shadow);
+}
+
+.draw-pill-divider {
+  width: 1px;
+  height: 18px;
+  background: var(--bg-secondary);
+  margin: 0 4px;
+  border: none !important;
+}
+
+.draw-modes {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.draw-mode-btn {
+  background: transparent;
+  border: none !important;
+  outline: none !important;
+  color: var(--text-muted);
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+  font-size: 11px;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+}
+
+.draw-mode-btn:hover {
+  background: var(--glass-bg-hover);
+  color: var(--text-main);
+  transform: translateY(-1px);
+}
+
+.draw-mode-btn.active {
+  background: var(--action-bg) !important;
+  color: var(--action-text) !important;
+  font-weight: 600;
+  box-shadow: var(--btn-shadow);
+  transform: none;
+}
+
+.draw-colors {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.draw-color-chip {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--chip-c);
+  border: none !important;
+  outline: none !important;
+  cursor: pointer;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+}
+
+.draw-color-chip:hover {
+  transform: scale(1.15);
+}
+
+.draw-color-chip.active {
+  transform: scale(1.2);
+  box-shadow: 0 0 0 2px var(--action-bg), 0 2px 8px rgba(0, 0, 0, 0.45);
+}
+
+.draw-custom-color-wrap {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--text-muted);
+  font-size: 13px;
+  position: relative;
+  transition: all var(--transition-fast);
+}
+
+.draw-custom-color-wrap:hover {
+  color: var(--text-main);
+  background: var(--glass-bg-hover);
+}
+
+.draw-custom-color-wrap input[type="color"] {
+  position: absolute;
+  opacity: 0;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+}
+
+.draw-sizes {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.draw-size-btn {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: transparent;
+  border: none !important;
+  outline: none !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.draw-size-btn:hover {
+  background: var(--glass-bg-hover);
+}
+
+.draw-size-btn.active {
+  background: var(--glass-bg-active);
+}
+
+.size-dot {
+  border-radius: 50%;
+  background: var(--text-main);
+}
+
+.size-dot.s-thin { width: 4px; height: 4px; }
+.size-dot.s-med { width: 7px; height: 7px; }
+.size-dot.s-thick { width: 11px; height: 11px; }
+
+.draw-history {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.draw-tool-btn {
+  width: 26px;
+  height: 26px;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  border: none !important;
+  outline: none !important;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.draw-tool-btn:hover {
+  background: var(--glass-bg-hover);
+  color: var(--text-main);
+  transform: translateY(-1px);
+}
+
+.draw-actions {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding-left: 2px;
+}
+
+.draw-action-btn {
+  border: none !important;
+  outline: none !important;
+  height: 28px;
+  font-size: 11px;
+  border-radius: var(--radius-pill);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+}
+
+.draw-action-btn.btn-cancel {
+  background: rgba(239, 68, 68, 0.14);
+  color: #ef4444;
+  padding: 0 11px;
+  font-weight: 500;
+}
+
+.draw-action-btn.btn-cancel:hover {
+  background: rgba(239, 68, 68, 0.24);
+  transform: translateY(-1px);
+}
+
+.draw-action-btn.btn-apply {
+  background: var(--action-bg);
+  color: var(--action-text);
+  padding: 0 13px;
+  font-weight: 600;
+  box-shadow: var(--btn-shadow);
+}
+
+.draw-action-btn.btn-apply:hover {
+  background: var(--action-hover-bg);
+  box-shadow: var(--btn-shadow-hover);
+  transform: translateY(-1px);
+}

@@ -32,3 +32,31 @@ export function renderOffscreenCanvas(img, { rotation, flipH, flipV, pixelSmooth
   ctx.drawImage(img, dx, dy);
   return off;
 }
+
+export function calculatePanBounds(canvas, img, scale, rotation, bottomInset = 0) {
+  if (!img) return { minX: 0, maxX: 0, minY: 0, maxY: 0, centerX: 0, centerY: 0 };
+  const isVert = (rotation === 90 || rotation === 270);
+  const imgW = (isVert ? img.height : img.width) * scale;
+  const imgH = (isVert ? img.width : img.height) * scale;
+  const pad = 24;
+  const centerX = (canvas.width - imgW) / 2;
+  const centerY = (canvas.height - bottomInset - imgH) / 2;
+  const availW = canvas.width - pad * 2;
+  const availH = canvas.height - bottomInset - pad * 2;
+  return {
+    minX: imgW <= availW ? centerX : canvas.width - pad - imgW,
+    maxX: imgW <= availW ? centerX : pad,
+    minY: imgH <= availH ? centerY : canvas.height - bottomInset - pad - imgH,
+    maxY: imgH <= availH ? centerY : pad,
+    centerX, centerY, imgW, imgH, pad,
+  };
+}
+
+export function computeRubberDamping(rawX, rawY, bounds) {
+  const damp = (val, min, max) => {
+    if (val < min) return min - Math.pow(min - val, 0.78) * 1.8;
+    if (val > max) return max + Math.pow(val - max, 0.78) * 1.8;
+    return val;
+  };
+  return { x: damp(rawX, bounds.minX, bounds.maxX), y: damp(rawY, bounds.minY, bounds.maxY) };
+}

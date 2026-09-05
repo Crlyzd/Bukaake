@@ -15,25 +15,32 @@
   --transition-fast: 0.16s cubic-bezier(0.16, 1, 0.3, 1);
   --transition-normal: 0.24s cubic-bezier(0.16, 1, 0.3, 1);
 
-  /* Window Transparency & Opacity Control (Default ~38%) */
-  --window-opacity: 0.38;
+  /* Window Transparency & Opacity Control (Default ~35%) */
+  --window-opacity: 0.35;
 
-  /* Dark Theme Tokens (Translucent Obsidian Frosted Glass) */
+  /* Dark Theme Tokens (Refined Obsidian Slate — Zero Pure Black) */
   --bg-primary: transparent;
   --bg-secondary: rgba(255, 255, 255, 0.04);
-  --glass-bg: rgba(22, 26, 36, 0.52);
-  --glass-bg-hover: rgba(255, 255, 255, 0.12);
-  --glass-bg-active: rgba(255, 255, 255, 0.20);
+  --glass-bg: rgba(255, 255, 255, 0.08);
+  --glass-bg-hover: rgba(255, 255, 255, 0.14);
+  --glass-bg-active: rgba(255, 255, 255, 0.22);
   --glass-border: transparent;
   --glass-border-bright: transparent;
   --glass-shadow: 0 6px 18px rgba(0, 0, 0, 0.16), 0 20px 48px rgba(0, 0, 0, 0.22);
-  --glass-panel-bg: rgba(2, 3, 5, calc(0.68 + var(--window-opacity, 0.38) * 0.32));
+  --glass-panel-bg: rgba(16, 19, 28, calc(0.72 + var(--window-opacity, 0.35) * 0.28));
 
   /* Frosted Glass Island & Card Tokens */
-  --glass-card-bg: rgba(255, 255, 255, 0.08);
-  --glass-card-bg-hover: rgba(255, 255, 255, 0.13);
+  --glass-card-bg: rgba(255, 255, 255, 0.07);
+  --glass-card-bg-hover: rgba(255, 255, 255, 0.12);
   --glass-card-shadow: 0 4px 14px rgba(0, 0, 0, 0.12), 0 16px 36px rgba(0, 0, 0, 0.18);
+  --glass-island-bg: rgba(14, 18, 27, 0.92);
+  --glass-island-shadow: 0 16px 40px rgba(0, 0, 0, 0.65);
   --slider-track-bg: rgba(255, 255, 255, 0.14);
+
+  /* Unified Button Tokens (Dark Mode) */
+  --glass-btn-bg: rgba(255, 255, 255, 0.08);
+  --glass-btn-hover-bg: rgba(255, 255, 255, 0.14);
+  --glass-btn-active-bg: rgba(255, 255, 255, 0.22);
 
   /* Titlebar Gradient Tokens (Dark Mode) */
   --glass-titlebar-bg: rgba(255, 255, 255, 0.04);
@@ -44,9 +51,10 @@
   --text-muted: #d4d4d4;
   --text-dim: #8a8a8a;
 
+  /* Primary Action Button (Refined Obsidian Text, Never Pure Black #000000) */
   --action-bg: #ffffff;
-  --action-text: #0a0a0a;
-  --action-hover-bg: #e5e5e5;
+  --action-text: #181b24;
+  --action-hover-bg: #f0f2f5;
   --btn-shadow: 0 2px 8px rgba(0, 0, 0, 0.20);
   --btn-shadow-hover: 0 4px 14px rgba(0, 0, 0, 0.30);
   --active-highlight: rgba(255, 255, 255, 0.18);
@@ -58,25 +66,37 @@
   --accent-purple: #888888;
   --accent-magenta: #ffffff;
   --accent-glow: rgba(255, 255, 255, 0.15);
+
+  /* Galactic Glow Tokens (Dark Mode) */
+  --galactic-glow-shadow: 0 0 20px rgba(168, 85, 247, 0.45), 0 0 38px rgba(56, 189, 248, 0.30), 0 10px 24px rgba(0, 0, 0, 0.35);
+  --galactic-glow-bg: linear-gradient(135deg, rgba(147, 51, 234, 0.24), rgba(59, 130, 246, 0.22), rgba(236, 72, 153, 0.22));
+  --galactic-glow-card-shadow: 0 0 36px rgba(168, 85, 247, 0.40), 0 0 72px rgba(56, 189, 248, 0.30), 0 18px 48px rgba(0, 0, 0, 0.45);
 }
 
-/* Light Theme Tokens (Setting Card Obsidian Tone & Soft Slate Alphas) */
+/* Light Theme Tokens (Luminous Clean White Frosted Glass — Zero Pure Black) */
 html[data-theme="light"],
 body.light-theme {
   --bg-secondary: rgba(26, 32, 44, 0.03);
-  --glass-bg: rgba(255, 255, 255, 0.68);
+  --glass-bg: rgba(255, 255, 255, 0.72);
   --glass-bg-hover: rgba(26, 32, 44, 0.06);
   --glass-bg-active: rgba(26, 32, 44, 0.12);
   --glass-border: transparent;
   --glass-border-bright: transparent;
   --glass-shadow: 0 4px 14px rgba(26, 32, 44, 0.04), 0 18px 40px rgba(26, 32, 44, 0.07);
-  --glass-panel-bg: rgba(244, 246, 249, calc(0.55 + var(--window-opacity, 0.38) * 0.45));
+  --glass-panel-bg: rgba(245, 247, 250, calc(0.72 + var(--window-opacity, 0.35) * 0.28));
 
   /* Frosted Glass Island & Card Tokens */
-  --glass-card-bg: rgba(255, 255, 255, 0.72);
-  --glass-card-bg-hover: rgba(255, 255, 255, 0.92);
+  --glass-card-bg: rgba(255, 255, 255, 0.85);
+  --glass-card-bg-hover: rgba(255, 255, 255, 0.96);
   --glass-card-shadow: 0 4px 12px rgba(26, 32, 44, 0.03), 0 14px 32px rgba(26, 32, 44, 0.06);
+  --glass-island-bg: rgba(255, 255, 255, 0.94);
+  --glass-island-shadow: 0 14px 36px rgba(26, 32, 44, 0.12);
   --slider-track-bg: rgba(26, 32, 44, 0.12);
+
+  /* Unified Button Tokens (Light Mode) */
+  --glass-btn-bg: rgba(26, 32, 44, 0.06);
+  --glass-btn-hover-bg: rgba(26, 32, 44, 0.11);
+  --glass-btn-active-bg: rgba(26, 32, 44, 0.18);
 
   /* Titlebar Gradient Blur Tokens */
   --glass-titlebar-bg: rgba(255, 255, 255, 0.65);
@@ -87,6 +107,7 @@ body.light-theme {
   --text-muted: #535c73;
   --text-dim: #7e879f;
 
+  /* Primary Action Button (Obsidian Slate Fill, White Text) */
   --action-bg: #242938;
   --action-text: #ffffff;
   --action-hover-bg: #32394d;
@@ -100,5 +121,10 @@ body.light-theme {
   --accent-purple: #5c6682;
   --accent-magenta: #242938;
   --accent-glow: rgba(26, 32, 44, 0.10);
+
+  /* Galactic Glow Tokens (Light Mode - Soft Celestial Slate Bloom, Zero Pure Black) */
+  --galactic-glow-shadow: 0 0 18px rgba(147, 51, 234, 0.30), 0 0 34px rgba(59, 130, 246, 0.22), 0 8px 20px rgba(26, 32, 44, 0.12);
+  --galactic-glow-bg: linear-gradient(135deg, rgba(147, 51, 234, 0.14), rgba(59, 130, 246, 0.14), rgba(236, 72, 153, 0.14));
+  --galactic-glow-card-shadow: 0 0 30px rgba(147, 51, 234, 0.28), 0 0 60px rgba(59, 130, 246, 0.20), 0 14px 36px rgba(26, 32, 44, 0.14);
 }
 

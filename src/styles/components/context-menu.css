@@ -9,7 +9,7 @@
   min-width: 210px;
   padding: 6px;
   border-radius: var(--radius-md);
-  background: rgba(14, 18, 27, 0.92);
+  background: rgba(16, 19, 28, 0.94);
   backdrop-filter: blur(28px) saturate(190%);
   -webkit-backdrop-filter: blur(28px) saturate(190%);
   border: none !important;
@@ -65,25 +65,14 @@ html[data-theme="light"] .glass-context-menu {
   color: var(--text-dim);
   padding: 1px 5px;
   border-radius: var(--radius-xs);
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--glass-btn-bg);
   flex-shrink: 0;
 }
 
-body.light-theme .context-menu-shortcut,
-html[data-theme="light"] .context-menu-shortcut {
-  background: rgba(26, 32, 44, 0.06);
-}
-
 .context-menu-item:hover:not(.disabled) {
-  background: rgba(255, 255, 255, 0.12);
-  color: #ffffff;
-  transform: translateX(1px);
-}
-
-body.light-theme .context-menu-item:hover:not(.disabled),
-html[data-theme="light"] .context-menu-item:hover:not(.disabled) {
-  background: rgba(26, 32, 44, 0.08);
+  background: var(--glass-btn-hover-bg);
   color: var(--text-main);
+  transform: translateX(1px);
 }
 
 .context-menu-item:hover:not(.disabled) .context-menu-icon {

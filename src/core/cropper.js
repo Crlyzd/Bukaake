@@ -53,6 +53,8 @@ export class CropperTool {
       let { left, top, width, height } = this.startBoxState;
       const img = this.getImageScreenBounds();
       const SNAP = 14;
+      let snappedX = false;
+      let snappedY = false;
 
       if (this.isDraggingBox) {
         left += dx;
@@ -62,6 +64,22 @@ export class CropperTool {
           else if (Math.abs(left + width - img.right) < SNAP) left = img.right - width;
           if (Math.abs(top - img.top) < SNAP) top = img.top;
           else if (Math.abs(top + height - img.bottom) < SNAP) top = img.bottom - height;
+
+          if (e.shiftKey) {
+            const imgCenterX = img.left + img.width / 2;
+            const imgCenterY = img.top + img.height / 2;
+            const boxCenterX = left + width / 2;
+            const boxCenterY = top + height / 2;
+
+            if (Math.abs(boxCenterX - imgCenterX) < SNAP) {
+              left = imgCenterX - width / 2;
+              snappedX = true;
+            }
+            if (Math.abs(boxCenterY - imgCenterY) < SNAP) {
+              top = imgCenterY - height / 2;
+              snappedY = true;
+            }
+          }
         }
       } else if (this.activeHandle) {
         let right = left + width;
@@ -70,11 +88,19 @@ export class CropperTool {
         if (this.activeHandle.includes('e')) {
           right += dx;
           if (img && Math.abs(right - img.right) < SNAP) right = img.right;
+          if (e.shiftKey && img && Math.abs(right - (img.left + img.width / 2)) < SNAP) {
+            right = img.left + img.width / 2;
+            snappedX = true;
+          }
           width = Math.max(30, right - left);
         }
         if (this.activeHandle.includes('w')) {
           left += dx;
           if (img && Math.abs(left - img.left) < SNAP) left = img.left;
+          if (e.shiftKey && img && Math.abs(left - (img.left + img.width / 2)) < SNAP) {
+            left = img.left + img.width / 2;
+            snappedX = true;
+          }
           width = Math.max(30, right - left);
           left = right - width;
         }
@@ -82,11 +108,19 @@ export class CropperTool {
         if (this.activeHandle.includes('s')) {
           bottom += dy;
           if (img && Math.abs(bottom - img.bottom) < SNAP) bottom = img.bottom;
+          if (e.shiftKey && img && Math.abs(bottom - (img.top + img.height / 2)) < SNAP) {
+            bottom = img.top + img.height / 2;
+            snappedY = true;
+          }
           height = Math.max(30, bottom - top);
         }
         if (this.activeHandle.includes('n')) {
           top += dy;
           if (img && Math.abs(top - img.top) < SNAP) top = img.top;
+          if (e.shiftKey && img && Math.abs(top - (img.top + img.height / 2)) < SNAP) {
+            top = img.top + img.height / 2;
+            snappedY = true;
+          }
           height = Math.max(30, bottom - top);
           top = bottom - height;
         }
@@ -104,6 +138,9 @@ export class CropperTool {
         }
       }
 
+      this.box.classList.toggle('snapped-center-x', snappedX);
+      this.box.classList.toggle('snapped-center-y', snappedY);
+
       const maxW = this.container.clientWidth;
       const maxH = this.container.clientHeight;
       left = Math.max(0, Math.min(left, maxW - width));
@@ -120,6 +157,13 @@ export class CropperTool {
     window.addEventListener('mouseup', () => {
       this.isDraggingBox = false;
       this.activeHandle = null;
+      this.box.classList.remove('snapped-center-x', 'snapped-center-y');
+    });
+
+    window.addEventListener('keyup', (e) => {
+      if (e.key === 'Shift') {
+        this.box.classList.remove('snapped-center-x', 'snapped-center-y');
+      }
     });
   }
 
@@ -141,8 +185,11 @@ export class CropperTool {
   setAspectRatio(ratioStr) {
     if (ratioStr === 'free') {
       this.aspectRatio = null;
-    } else {
-      const parts = ratioStr.split(':');
+      this.resetCropBoxToImage();
+      return;
+    }
+    const parts = ratioStr.split(':');
+    if (parts.length === 2) {
       this.aspectRatio = parseFloat(parts[0]) / parseFloat(parts[1]);
     }
     if (this.active) {
@@ -150,13 +197,39 @@ export class CropperTool {
     }
   }
 
+  resetCropBoxToImage() {
+    const img = this.getImageScreenBounds();
+    const boxW = img ? Math.max(40, img.width * 0.9) : this.container.clientWidth * 0.7;
+    const boxH = img ? Math.max(40, img.height * 0.9) : this.container.clientHeight * 0.7;
+    const left = img ? img.left + (img.width - boxW) / 2 : (this.container.clientWidth - boxW) / 2;
+    const top = img ? img.top + (img.height - boxH) / 2 : (this.container.clientHeight - boxH) / 2;
+
+    this.box.style.width = `${Math.round(boxW)}px`;
+    this.box.style.height = `${Math.round(boxH)}px`;
+    this.box.style.left = `${Math.round(left)}px`;
+    this.box.style.top = `${Math.round(top)}px`;
+    this.updateDimensionsTag();
+  }
+
   fitCropToAspect() {
-    let width = this.box.offsetWidth;
-    let height = this.box.offsetHeight;
-    if (this.aspectRatio) {
-      height = width / this.aspectRatio;
+    const img = this.getImageScreenBounds();
+    if (!img) return;
+
+    let boxW = img.width * 0.9;
+    let boxH = this.aspectRatio ? boxW / this.aspectRatio : img.height * 0.9;
+
+    if (boxH > img.height * 0.9) {
+      boxH = img.height * 0.9;
+      boxW = this.aspectRatio ? boxH * this.aspectRatio : img.width * 0.9;
     }
-    this.box.style.height = `${height}px`;
+
+    const left = img.left + (img.width - boxW) / 2;
+    const top = img.top + (img.height - boxH) / 2;
+
+    this.box.style.width = `${Math.round(boxW)}px`;
+    this.box.style.height = `${Math.round(boxH)}px`;
+    this.box.style.left = `${Math.round(left)}px`;
+    this.box.style.top = `${Math.round(top)}px`;
     this.updateDimensionsTag();
   }
 
@@ -164,31 +237,16 @@ export class CropperTool {
     if (!this.viewer.img) return;
     this.active = true;
     this.container.classList.remove('hidden');
-
-    const img = this.getImageScreenBounds();
-    let boxW = img ? img.width : this.container.clientWidth * 0.7;
-    let boxH = img ? img.height : this.container.clientHeight * 0.7;
-
     if (this.aspectRatio) {
-      if (boxW / boxH > this.aspectRatio) {
-        boxW = boxH * this.aspectRatio;
-      } else {
-        boxH = boxW / this.aspectRatio;
-      }
+      this.fitCropToAspect();
+    } else {
+      this.resetCropBoxToImage();
     }
-
-    const left = img ? img.left + (img.width - boxW) / 2 : (this.container.clientWidth - boxW) / 2;
-    const top = img ? img.top + (img.height - boxH) / 2 : (this.container.clientHeight - boxH) / 2;
-
-    this.box.style.width = `${boxW}px`;
-    this.box.style.height = `${boxH}px`;
-    this.box.style.left = `${left}px`;
-    this.box.style.top = `${top}px`;
-    this.updateDimensionsTag();
   }
 
   hide() {
     this.active = false;
+    this.box.classList.remove('snapped-center-x', 'snapped-center-y');
     this.container.classList.add('hidden');
   }
 
