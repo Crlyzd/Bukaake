@@ -1,4 +1,5 @@
 @echo off
+chcp 65001 >nul
 setlocal enabledelayedexpansion
 title Bukaake — Desktop Image Viewer Manager
 cd /d "%~dp0"
@@ -21,14 +22,14 @@ if "%CURRENT_VER%"=="" set "CURRENT_VER=1.0.0"
 echo    Current Version: v%CURRENT_VER%
 echo  ======================================================================
 echo.
-echo    [1] Live Dev: Native Desktop Window (Tauri Live Dev & Hot-Reload)
+echo    [1] Live Dev: Native Desktop Window (Tauri Live Dev ^& Hot-Reload)
 echo    [2] Live Dev: Instant Web/Edge Window (Fast UI Preview)
-echo    [3] Build Production x64 App (Smallest Size -> release-builds/)
-echo    [4] Build Production ARM64 App (Smallest Size -> release-builds/)
+echo    [3] Build Production x64 App (Smallest Size -^> release-builds/)
+echo    [4] Build Production ARM64 App (Smallest Size -^> release-builds/)
 echo    [5] Build Both Architectures (x64 + ARM64)
 echo    [6] Bump Version (Patch, Minor, Major, or Custom)
 echo    [7] Quick Run: Latest Compiled Release Executable
-echo    [8] Clean Build Artifacts & Locks
+echo    [8] Clean Build Artifacts ^& Locks
 echo    [9] Exit
 echo.
 set /p CHOICE="  Select an option [1-9]: "
@@ -61,7 +62,7 @@ goto MENU
 
 :DEV_WEB
 echo.
-echo  [+] Starting preview server & opening Edge standalone window...
+echo  [+] Starting preview server ^& opening Edge standalone window...
 start "" "msedge.exe" --app="http://localhost:3000/?sample=true" --window-size=1100,720
 call npx vite --port 3000 --host
 pause
@@ -142,9 +143,9 @@ echo.
 echo  ======================================================================
 echo    Bukaake Version Manager  (Current: v%CURRENT_VER%)
 echo  ======================================================================
-echo    [1] Patch (e.g. 1.0.0 -> 1.0.1)
-echo    [2] Minor (e.g. 1.0.0 -> 1.1.0)
-echo    [3] Major (e.g. 1.0.0 -> 2.0.0)
+echo    [1] Patch (e.g. 1.0.0 -^> 1.0.1)
+echo    [2] Minor (e.g. 1.0.0 -^> 1.1.0)
+echo    [3] Major (e.g. 1.0.0 -^> 2.0.0)
 echo    [4] Custom Version String
 echo    [5] Cancel
 echo.

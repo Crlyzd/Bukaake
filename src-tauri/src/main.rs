@@ -110,6 +110,24 @@ fn is_window_fullscreen(window: tauri::Window) -> bool {
 #[tauri::command]
 fn open_settings_window(app_handle: tauri::AppHandle) -> Result<(), String> {
     if let Some(settings_win) = app_handle.get_webview_window("settings") {
+        if let Some(main_win) = app_handle.get_webview_window("main") {
+            if let (Ok(main_pos), Ok(main_size), Ok(settings_size)) = (
+                main_win.outer_position(),
+                main_win.outer_size(),
+                settings_win.outer_size(),
+            ) {
+                let center_x = main_pos.x + (main_size.width as i32 - settings_size.width as i32) / 2;
+                let center_y = main_pos.y + (main_size.height as i32 - settings_size.height as i32) / 2;
+                let _ = settings_win.set_position(tauri::Position::Physical(tauri::PhysicalPosition {
+                    x: center_x,
+                    y: center_y,
+                }));
+            } else {
+                let _ = settings_win.center();
+            }
+        } else {
+            let _ = settings_win.center();
+        }
         let _ = settings_win.unminimize();
         let _ = settings_win.show();
         let _ = settings_win.set_focus();
@@ -156,6 +174,14 @@ fn main() {
             #[cfg(target_os = "windows")]
             {
                 let tint = Some((0, 0, 0, 248));
+                if let Some(icon) = app.default_window_icon() {
+                    if let Some(window) = app.get_webview_window("main") {
+                        let _ = window.set_icon(icon.clone());
+                    }
+                    if let Some(settings_win) = app.get_webview_window("settings") {
+                        let _ = settings_win.set_icon(icon.clone());
+                    }
+                }
                 if let Some(window) = app.get_webview_window("main") {
                     let _ = window.set_shadow(true);
                     let _ = window_vibrancy::apply_acrylic(&window, tint);

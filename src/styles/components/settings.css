@@ -6,6 +6,7 @@
 .settings-card {
   width: 100%;
   max-width: 480px;
+  margin: 0 auto;
   border-radius: var(--radius-lg);
   overflow: hidden;
   background: var(--glass-panel-bg);
@@ -47,6 +48,8 @@
 
 /* Creator & Bio Hero Sub-card */
 .settings-bio-card {
+  width: 100%;
+  box-sizing: border-box;
   background: var(--glass-card-bg);
   backdrop-filter: blur(20px) saturate(180%);
   -webkit-backdrop-filter: blur(20px) saturate(180%);
@@ -72,14 +75,20 @@
 .settings-hero-icon {
   width: 44px;
   height: 44px;
-  border-radius: var(--radius-md);
-  background: var(--glass-bg-hover);
+  background: transparent;
+  border: none;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 22px;
-  color: var(--text-main);
-  box-shadow: 0 4px 12px rgba(26, 32, 44, 0.08);
+  box-shadow: none;
+}
+
+.settings-hero-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.35));
 }
 
 .settings-hero-title {
@@ -170,6 +179,8 @@
 
 /* Update Banner */
 .settings-update-banner {
+  width: 100%;
+  box-sizing: border-box;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -211,7 +222,13 @@
 .btn-check-update:disabled { opacity: 0.7; cursor: not-allowed; transform: none; }
 
 /* Action Buttons */
-.settings-actions-grid { display: grid; grid-template-columns: 1fr; gap: 8px; }
+.settings-actions-grid {
+  width: 100%;
+  box-sizing: border-box;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+}
 
 .settings-action-btn {
   background: var(--glass-card-bg);

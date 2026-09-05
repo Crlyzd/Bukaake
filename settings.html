@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Bukaake Settings</title>
+  <link rel="icon" type="image/png" href="/favicon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -135,10 +136,19 @@
     .settings-content-scroll {
       flex: 1;
       overflow-y: auto;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
       padding: 16px 20px 24px 20px;
       display: flex;
       flex-direction: column;
       gap: 14px;
+      box-sizing: border-box;
+    }
+
+    .settings-content-scroll::-webkit-scrollbar {
+      display: none;
+      width: 0;
+      height: 0;
     }
 
     .settings-window-footer {
@@ -177,7 +187,7 @@
       <div class="settings-bio-card">
         <div class="settings-hero-header">
           <div class="settings-hero-icon">
-            <i class="ri-image-2-line"></i>
+            <img src="/icon-frameless.png" alt="Bukaake" />
           </div>
           <h2 class="settings-hero-title">Bukaake</h2>
           <span class="settings-hero-subtitle">v0.1.0 • Portable Edition</span>

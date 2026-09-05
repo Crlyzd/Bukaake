@@ -81,17 +81,23 @@
 }
 
 .drop-icon {
-  width: 58px;
-  height: 58px;
-  border-radius: 50%;
-  background: var(--glass-bg-hover);
+  width: 64px;
+  height: 64px;
+  background: transparent;
   border: none;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 28px;
-  color: var(--text-main);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: none;
+  margin-bottom: 4px;
+}
+
+.drop-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+  filter: drop-shadow(0 8px 18px rgba(0, 0, 0, 0.35));
 }
 
 .drop-card h2 {
