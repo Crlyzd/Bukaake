@@ -240,6 +240,34 @@ export class TauriBridge {
       throw err;
     }
   }
+
+  async openUrl(url) {
+    if (!url) return;
+    try {
+      if (this.isTauri()) {
+        await this.invoke('open_url', { url });
+        return;
+      }
+    } catch (e) {
+      console.warn('[TauriBridge] invoke open_url failed:', e);
+    }
+
+    try {
+      window.open(url, '_blank', 'noopener,noreferrer');
+    } catch (e) {
+      console.warn('[TauriBridge] window.open failed:', e);
+    }
+  }
+
+  initExternalLinks() {
+    document.addEventListener('click', (e) => {
+      const anchor = e.target.closest('a[href^="http"]');
+      if (anchor) {
+        e.preventDefault();
+        this.openUrl(anchor.href);
+      }
+    });
+  }
 }
 
 export const tauriBridge = new TauriBridge();

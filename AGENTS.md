@@ -14,7 +14,7 @@ All visual components must follow a cohesive, ultra-sleek, frosted glass aesthet
 - **Borders & Highlights**: Subtle 1px specular borders (`rgba(255, 255, 255, 0.12)` in dark, `rgba(0, 0, 0, 0.08)` in light) with delicate top-edge specular highlights.
 - **Shadows**: Multi-layered soft ambient drop shadows and subtle inner glows (`box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.1)`).
 - **Controls**: Floating pill toolbars, rounded glass cards (`border-radius: 12px` to `9999px`), frosted modal dialogs, and smooth micro-interactions (spring hover scale, active depression).
-- **Typography & Icons**: Inter for UI, JetBrains Mono for metadata/coordinates. All UI icons **MUST** be **minimalist monochrome SVGs** (clean, razor-sharp single-color vector graphics that inherit `currentColor` to adapt dynamically across dark and light glass themes; never use multi-colored, bitmap, or raster icons).
+- **Typography & Icons**: Inter for UI, JetBrains Mono for metadata/coordinates. All UI icons **MUST** be **minimalist monochrome SVGs** (clean, razor-sharp single-color vector graphics that inherit `currentColor` to adapt dynamically across dark and light glass themes; never use multi-colored, bitmap, or raster icons). **Zero Emojis Policy**: Never use colorful system/Unicode emojis (e.g., ❤️, ☕, 🚀) or raw text arrow symbols (e.g., ↗) in UI markup or component templates; always use crisp monochrome vector SVG icons (`ri-*` vector classes or inline SVG elements with `currentColor`).
 - **Zero Monolithic / Plain Components**: Never use unstyled browser defaults or flat, opaque gray boxes for buttons, dropdowns, inputs, or toolbars.
 
 ### Pillar 2: Dual Theme Engine (Dark & Light)

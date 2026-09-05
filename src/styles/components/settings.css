@@ -97,6 +97,17 @@
   gap: 5px;
 }
 
+.icon-author-heart {
+  font-size: 13px;
+  color: var(--text-muted);
+  transition: color var(--transition-fast), transform var(--transition-fast);
+}
+
+.settings-author-row:hover .icon-author-heart {
+  color: var(--accent-cyan);
+  transform: scale(1.15);
+}
+
 .settings-author-link {
   color: var(--text-main);
   font-weight: 600;
@@ -119,6 +130,16 @@
   justify-content: center;
 }
 
+.coffee-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.coffee-label i {
+  font-size: 14px;
+}
+
 .coffee-chip {
   display: inline-flex;
   align-items: center;
@@ -134,10 +155,21 @@
   transition: all var(--transition-fast);
 }
 
+.coffee-chip i {
+  font-size: 10px;
+  opacity: 0.8;
+  transition: transform var(--transition-fast);
+}
+
 .coffee-chip:hover {
   background: var(--glass-bg-active);
   border-color: var(--active-border);
   transform: translateY(-1px);
+}
+
+.coffee-chip:hover i {
+  opacity: 1;
+  transform: translate(1px, -1px);
 }
 
 /* Update Banner */
@@ -184,10 +216,16 @@
   transform: translateY(-1px);
 }
 
-/* Action Buttons (Report Bug, Open Logs) */
+.btn-check-update:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Action Buttons */
 .settings-actions-grid {
   display: grid;
-  grid-template-columns: 1.2fr 1fr;
+  grid-template-columns: 1fr;
   gap: 8px;
 }
 
@@ -212,6 +250,17 @@
   background: var(--glass-bg-hover);
   border-color: var(--glass-border-bright);
   transform: translateY(-1px);
+}
+
+.settings-action-btn i.ri-arrow-right-up-line {
+  font-size: 11px;
+  opacity: 0.8;
+  transition: transform var(--transition-fast);
+}
+
+.settings-action-btn:hover i.ri-arrow-right-up-line {
+  opacity: 1;
+  transform: translate(1px, -1px);
 }
 
 /* Footer Info */

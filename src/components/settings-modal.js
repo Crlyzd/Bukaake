@@ -11,7 +11,6 @@ export class SettingsModal {
     this.btnClose = document.getElementById('btnCloseSettings');
     this.btnCheckUpdate = document.getElementById('btnCheckUpdate');
     this.btnReportBug = document.getElementById('btnReportBug');
-    this.btnOpenLogs = document.getElementById('btnOpenLogs');
     this.updateStatusText = document.getElementById('updateStatusText');
 
     this.init();
@@ -24,7 +23,6 @@ export class SettingsModal {
     });
 
     this.btnCheckUpdate?.addEventListener('click', () => this.handleCheckUpdate());
-    this.btnOpenLogs?.addEventListener('click', () => this.handleOpenLogs());
   }
 
   show() {
@@ -63,11 +61,5 @@ export class SettingsModal {
       }
       toast.show('You are on the latest version of Bukaake (v0.1.0)');
     }, 900);
-  }
-
-  handleOpenLogs() {
-    const logInfo = `[Bukaake v0.1.0] OS: Windows | Engine: Tauri v2 | Mode: Active`;
-    console.log(logInfo);
-    toast.show('Application diagnostics logged to console (F12)');
   }
 }

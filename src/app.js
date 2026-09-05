@@ -177,6 +177,7 @@ class BukaakeApp {
   }
 
   async init() {
+    tauriBridge.initExternalLinks();
     this.fileLoader.bindDropAndPaste(this.viewportEl, this.fileInput);
     document.getElementById('dropSampleBtn')?.addEventListener('click', () => this.loadSampleImage());
     document.body.classList.add('bg-transparent');

@@ -133,3 +133,18 @@
   background: var(--glass-bg-active);
   transform: scale(1.02);
 }
+
+/* Loader Spin Animation Utility */
+.ri-spin {
+  display: inline-block;
+  animation: riSpin 0.85s linear infinite;
+}
+
+@keyframes riSpin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
