@@ -26,13 +26,16 @@ export class WindowModeManager {
   }
 
   bindWindowEvents() {
-    window.addEventListener('resize', async () => {
+    const checkState = async () => {
+      const isFs = await tauriBridge.isFullscreen();
       const isMax = await tauriBridge.isMaximized();
-      const nextMode = isMax ? MODE_VIEWER : MODE_REGULAR;
+      const nextMode = (isFs || isMax) ? MODE_VIEWER : MODE_REGULAR;
       if (nextMode !== this.currentMode) {
         this.updateModeClasses(nextMode);
       }
-    });
+    };
+    window.addEventListener('resize', checkState);
+    document.addEventListener('fullscreenchange', checkState);
   }
 
   calculateAspectDimensions(imgWidth, imgHeight, maxDim = 820) {
@@ -62,11 +65,13 @@ export class WindowModeManager {
   }
 
   async applyImageAspectSize(imgWidth, imgHeight, maxDim = 820) {
+    const isFs = await tauriBridge.isFullscreen();
     const isMax = await tauriBridge.isMaximized();
+    const isExpanded = isFs || isMax;
     const dims = this.calculateAspectDimensions(imgWidth, imgHeight, maxDim);
     this.lastAspectSize = dims;
 
-    if (!isMax) {
+    if (!isExpanded) {
       this.updateModeClasses(MODE_REGULAR);
       await tauriBridge.resizeAndCenter(dims.width, dims.height);
       setTimeout(() => {
@@ -90,9 +95,10 @@ export class WindowModeManager {
   async setMode(newMode) {
     if (newMode === MODE_VIEWER) {
       this.updateModeClasses(MODE_VIEWER);
-      await tauriBridge.maximizeBorderless();
+      await tauriBridge.setFullscreen(true);
     } else {
       this.updateModeClasses(MODE_REGULAR);
+      await tauriBridge.setFullscreen(false);
       await tauriBridge.unmaximize();
       if (this.lastAspectSize) {
         await tauriBridge.resizeAndCenter(this.lastAspectSize.width, this.lastAspectSize.height);
@@ -104,8 +110,9 @@ export class WindowModeManager {
   }
 
   async toggleMode() {
+    const isFs = await tauriBridge.isFullscreen();
     const isMax = await tauriBridge.isMaximized();
-    if (isMax || this.currentMode === MODE_VIEWER) {
+    if (isFs || isMax || this.currentMode === MODE_VIEWER) {
       await this.setMode(MODE_REGULAR);
     } else {
       await this.setMode(MODE_VIEWER);

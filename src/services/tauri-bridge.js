@@ -90,6 +90,49 @@ export class TauriBridge {
     }
   }
 
+  async isFullscreen() {
+    try {
+      if (this.isTauri() && window.__TAURI__.window?.getCurrentWindow) {
+        return await window.__TAURI__.window.getCurrentWindow().isFullscreen();
+      }
+      if (this.isTauri()) {
+        return await this.invoke('is_window_fullscreen');
+      }
+    } catch (e) {}
+
+    return Boolean(document.fullscreenElement);
+  }
+
+  async setFullscreen(fullscreen = true) {
+    try {
+      if (this.isTauri() && window.__TAURI__.window?.getCurrentWindow) {
+        await window.__TAURI__.window.getCurrentWindow().setFullscreen(fullscreen);
+        return;
+      }
+    } catch (e) {
+      console.warn('[TauriBridge] getCurrentWindow().setFullscreen failed, trying native IPC', e);
+    }
+
+    try {
+      if (this.isTauri()) {
+        await this.invoke('set_fullscreen_window', { fullscreen });
+        return;
+      }
+    } catch (e) {
+      console.warn('[TauriBridge] invoke set_fullscreen_window failed', e);
+    }
+
+    if (fullscreen) {
+      if (!document.fullscreenElement && document.documentElement.requestFullscreen) {
+        try { await document.documentElement.requestFullscreen(); } catch (e) {}
+      }
+    } else {
+      if (document.fullscreenElement && document.exitFullscreen) {
+        try { await document.exitFullscreen(); } catch (e) {}
+      }
+    }
+  }
+
   async isMaximized() {
     try {
       if (this.isTauri() && window.__TAURI__.window?.getCurrentWindow) {

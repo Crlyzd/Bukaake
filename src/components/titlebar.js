@@ -95,15 +95,20 @@ export class Titlebar {
   }
 
   async syncMaximizedState(forceState = null) {
-    const isMax = forceState !== null ? forceState : await tauriBridge.isMaximized();
-    document.body.classList.toggle('window-maximized', isMax);
+    let isExpanded = forceState;
+    if (isExpanded === null) {
+      const isFs = await tauriBridge.isFullscreen();
+      const isMax = await tauriBridge.isMaximized();
+      isExpanded = Boolean(isFs || isMax);
+    }
+    document.body.classList.toggle('window-maximized', isExpanded);
 
     if (this.btnMax) {
       const icon = this.btnMax.querySelector('i');
       if (icon) {
-        icon.className = isMax ? 'ri-checkbox-multiple-blank-line' : 'ri-checkbox-blank-line';
+        icon.className = isExpanded ? 'ri-checkbox-multiple-blank-line' : 'ri-checkbox-blank-line';
       }
-      this.btnMax.title = isMax ? 'Restore Window' : 'Maximize / Fullscreen (F11)';
+      this.btnMax.title = isExpanded ? 'Restore Window' : 'Fullscreen Viewer (F11)';
     }
   }
 

@@ -67,16 +67,22 @@ body:not(.image-loaded) .floating-toolbar {
 
 /* --------------------------------------------------------------------------
    Mode 2: Fullscreen Image Viewer Mode
-   Desktop Immersion: 60% brightness (40% dark dimming veil over desktop)
+   Desktop Immersion: 30% frosted glass blur over desktop
    -------------------------------------------------------------------------- */
 body.mode-viewer {
   border-radius: 0 !important;
   border: none !important;
   box-shadow: none !important;
-  background: rgba(0, 0, 0, 0.40) !important;
-  backdrop-filter: brightness(0.60);
-  -webkit-backdrop-filter: brightness(0.60);
-  transition: background 0.3s ease;
+  background: rgba(0, 0, 0, 0.45) !important;
+  backdrop-filter: blur(12px) brightness(0.70) saturate(140%);
+  -webkit-backdrop-filter: blur(12px) brightness(0.70) saturate(140%);
+  transition: background 0.3s ease, backdrop-filter 0.3s ease;
+}
+
+body.mode-viewer.light-theme {
+  background: rgba(250, 250, 250, 0.45) !important;
+  backdrop-filter: blur(12px) brightness(1.05) saturate(140%);
+  -webkit-backdrop-filter: blur(12px) brightness(1.05) saturate(140%);
 }
 
 body.mode-viewer .viewport-container {

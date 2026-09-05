@@ -167,6 +167,10 @@ class BukaakeApp {
         if (this.metadataDrawer.isOpen()) { this.metadataDrawer.hide(); return; }
         if (this.settingsModal.isOpen()) { this.settingsModal.hide(); return; }
         if (this.shortcutsModal.isOpen()) { this.shortcutsModal.hide(); return; }
+        if (this.windowModeManager?.currentMode === MODE_VIEWER) {
+          this.windowModeManager.setMode(MODE_REGULAR);
+          return;
+        }
         tauriBridge.closeWindow();
       },
     });

@@ -253,6 +253,16 @@ fn start_window_resize(window: tauri::Window, direction: String) -> Result<(), S
     Ok(())
 }
 
+#[tauri::command]
+fn set_fullscreen_window(window: tauri::Window, fullscreen: bool) -> Result<(), String> {
+    window.set_fullscreen(fullscreen).map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+fn is_window_fullscreen(window: tauri::Window) -> bool {
+    window.is_fullscreen().unwrap_or(false)
+}
+
 fn main() {
     tauri::Builder::default()
         .setup(|app| {
@@ -271,7 +281,9 @@ fn main() {
             is_window_maximized,
             unmaximize_window,
             resize_and_center_window,
-            start_window_resize
+            start_window_resize,
+            set_fullscreen_window,
+            is_window_fullscreen
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
