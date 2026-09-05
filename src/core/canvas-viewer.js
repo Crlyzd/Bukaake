@@ -215,8 +215,8 @@ export class CanvasViewer {
     this.fitToScreen(false);
   }
 
-  toggleFlipH() { this.flipH = !this.flipH; this.render(); }
-  toggleFlipV() { this.flipV = !this.flipV; this.render(); }
+  toggleFlipH() { this.flipH = !this.flipH; this.render(); this.onTransformChange?.(); }
+  toggleFlipV() { this.flipV = !this.flipV; this.render(); this.onTransformChange?.(); }
 
   togglePixelSmoothing() {
     this.pixelSmoothing = !this.pixelSmoothing;

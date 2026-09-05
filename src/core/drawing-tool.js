@@ -1,6 +1,6 @@
 /**
  * Bukaake Interactive Drawing & Highlighting Engine
- * Vector/canvas freehand drawing tool supporting pen, highlighter, undo, and image baking (< 220 lines).
+ * Vector/canvas freehand drawing tool supporting pen, highlighter, undo, and image baking (< 240 lines).
  */
 
 export class DrawingTool {
@@ -9,12 +9,16 @@ export class DrawingTool {
     this.ctx = this.canvas.getContext('2d');
     this.viewer = canvasViewer;
     this.onModified = options.onModified || null;
+    this.cursorRing = document.getElementById('drawCursorRing');
 
     this.active = false;
     this.mode = 'pen'; // 'pen' | 'highlighter'
     this.color = '#00f0ff';
-    this.size = 6;
+    this.size = 24;
     this.isDrawing = false;
+    this.isPanning = false;
+    this.panStartX = 0;
+    this.panStartY = 0;
 
     this.strokes = [];
     this.currentStroke = null;
@@ -24,14 +28,28 @@ export class DrawingTool {
 
   initEvents() {
     this.canvas.addEventListener('mousedown', (e) => {
-      if (!this.active || !this.viewer.img || e.button !== 0) return;
+      if (!this.active || !this.viewer.img) return;
+      if (e.button === 1) {
+        e.preventDefault();
+        e.stopPropagation();
+        this.isPanning = true;
+        this.panStartX = e.clientX - this.viewer.panX;
+        this.panStartY = e.clientY - this.viewer.panY;
+        this.canvas.classList.add('is-panning');
+        this.cursorRing?.classList.add('hidden');
+        return;
+      }
+      if (e.button !== 0) return;
       e.stopPropagation();
       this.isDrawing = true;
-      const imgPt = this.viewer.screenToImageCoords(e.clientX, e.clientY);
+      const rect = this.canvas.getBoundingClientRect();
+      const imgPt = this.viewer.screenToImageCoords(e.clientX - rect.left, e.clientY - rect.top);
+      const isHighlighter = this.mode === 'highlighter';
+      const strokeSize = isHighlighter ? (20 / (this.viewer.scale || 1)) : this.size;
       this.currentStroke = {
         mode: this.mode,
         color: this.color,
-        size: this.size,
+        size: strokeSize,
         points: [imgPt],
       };
       this.strokes.push(this.currentStroke);
@@ -40,17 +58,58 @@ export class DrawingTool {
     });
 
     window.addEventListener('mousemove', (e) => {
-      if (!this.active || !this.isDrawing || !this.currentStroke) return;
-      const imgPt = this.viewer.screenToImageCoords(e.clientX, e.clientY);
+      if (!this.active) return;
+      if (this.isPanning) {
+        this.viewer.panX = e.clientX - this.panStartX;
+        this.viewer.panY = e.clientY - this.panStartY;
+        this.viewer.targetPanX = this.viewer.panX;
+        this.viewer.targetPanY = this.viewer.panY;
+        this.viewer.render();
+        this.viewer.onTransformChange?.();
+        return;
+      }
+      this.updateCursor(e);
+      if (!this.isDrawing || !this.currentStroke) return;
+      const rect = this.canvas.getBoundingClientRect();
+      const imgPt = this.viewer.screenToImageCoords(e.clientX - rect.left, e.clientY - rect.top);
       this.currentStroke.points.push(imgPt);
       this.redraw();
     });
 
-    window.addEventListener('mouseup', () => {
+    window.addEventListener('mouseup', (e) => {
+      if (this.isPanning) {
+        this.isPanning = false;
+        this.canvas.classList.remove('is-panning');
+        this.updateCursor(e);
+        this.viewer.snapBackToBounds(true);
+      }
       if (this.isDrawing) {
         this.isDrawing = false;
         this.currentStroke = null;
       }
+    });
+
+    this.canvas.addEventListener('wheel', (e) => {
+      if (!this.active || !this.viewer.img) return;
+      e.preventDefault();
+      const zoomFactor = e.deltaY < 0 ? 1.15 : 0.85;
+      const rect = this.canvas.getBoundingClientRect();
+      const mx = e.clientX - rect.left;
+      const my = e.clientY - rect.top;
+      this.viewer.zoomTo(this.viewer.targetScale * zoomFactor, false, mx, my);
+      this.updateCursor(e);
+    }, { passive: false });
+
+    this.canvas.addEventListener('auxclick', (e) => {
+      if (e.button === 1) e.preventDefault();
+    });
+
+    this.canvas.addEventListener('mouseleave', () => {
+      this.cursorRing?.classList.add('hidden');
+    });
+
+    this.canvas.addEventListener('mouseenter', (e) => {
+      this.updateCursor(e);
     });
 
     window.addEventListener('resize', () => {
@@ -58,10 +117,44 @@ export class DrawingTool {
     });
   }
 
+  updateCursor(e) {
+    if (!this.active || this.isPanning || !e) return;
+    if (e.clientY <= 44 || e.target?.closest?.('#appTitlebar, .app-titlebar, #drawToolbar, .draw-popover, #toolbar, .context-menu, .modal-backdrop')) {
+      this.cursorRing?.classList.add('hidden');
+      this.canvas.classList.remove('cursor-highlighter');
+      return;
+    }
+    if (this.mode === 'pen') {
+      this.canvas.classList.remove('cursor-highlighter');
+      if (this.cursorRing) {
+        const diam = Math.max(4, Math.round(this.size * this.viewer.scale));
+        this.cursorRing.style.width = `${diam}px`;
+        this.cursorRing.style.height = `${diam}px`;
+        this.cursorRing.style.left = `${e.clientX}px`;
+        this.cursorRing.style.top = `${e.clientY}px`;
+        this.cursorRing.classList.remove('hidden');
+      }
+    } else {
+      this.cursorRing?.classList.add('hidden');
+      this.canvas.classList.add('cursor-highlighter');
+    }
+  }
+
+  updateCursorMode() {
+    if (!this.active) return;
+    if (this.mode === 'highlighter') {
+      this.cursorRing?.classList.add('hidden');
+      this.canvas.classList.add('cursor-highlighter');
+    } else {
+      this.canvas.classList.remove('cursor-highlighter');
+    }
+  }
+
   syncCanvasSize() {
-    if (!this.viewer.container) return;
-    const w = this.viewer.container.clientWidth;
-    const h = this.viewer.container.clientHeight;
+    const target = this.viewer.canvas || this.viewer.container;
+    if (!target) return;
+    const w = target.width || target.clientWidth;
+    const h = target.height || target.clientHeight;
     if (w > 0 && h > 0 && (this.canvas.width !== w || this.canvas.height !== h)) {
       this.canvas.width = w;
       this.canvas.height = h;
@@ -74,24 +167,28 @@ export class DrawingTool {
     this.active = true;
     this.canvas.classList.remove('hidden');
     this.syncCanvasSize();
+    this.updateCursorMode();
   }
 
   hide() {
     this.active = false;
     this.isDrawing = false;
+    this.isPanning = false;
+    this.cursorRing?.classList.add('hidden');
+    this.canvas.classList.remove('cursor-highlighter', 'is-panning');
     this.canvas.classList.add('hidden');
   }
 
-  setMode(mode) {
-    this.mode = mode;
-  }
-
-  setColor(hexColor) {
-    this.color = hexColor;
-  }
+  setMode(mode) { this.mode = mode; this.updateCursorMode(); }
+  setColor(hexColor) { this.color = hexColor; }
 
   setSize(sizePx) {
     this.size = sizePx;
+    if (this.cursorRing && !this.cursorRing.classList.contains('hidden')) {
+      const diam = Math.max(4, Math.round(this.size * this.viewer.scale));
+      this.cursorRing.style.width = `${diam}px`;
+      this.cursorRing.style.height = `${diam}px`;
+    }
   }
 
   undo() {
@@ -108,50 +205,57 @@ export class DrawingTool {
     this.onModified?.(false);
   }
 
-  hasStrokes() {
-    return this.strokes.length > 0;
-  }
+  hasStrokes() { return this.strokes.length > 0; }
 
   redraw() {
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
     if (!this.active || !this.viewer.img || this.strokes.length === 0) return;
 
     this.ctx.save();
-    this.ctx.translate(this.viewer.panX, this.viewer.panY);
-    this.ctx.scale(this.viewer.scale, this.viewer.scale);
+    const isVert = (this.viewer.rotation === 90 || this.viewer.rotation === 270);
+    const imgW = (isVert ? this.viewer.img.height : this.viewer.img.width) * this.viewer.scale;
+    const imgH = (isVert ? this.viewer.img.width : this.viewer.img.height) * this.viewer.scale;
 
-    const cx = this.viewer.img.width / 2;
-    const cy = this.viewer.img.height / 2;
-    this.ctx.translate(cx, cy);
+    this.ctx.translate(this.viewer.panX + imgW / 2, this.viewer.panY + imgH / 2);
+    this.ctx.scale(this.viewer.scale, this.viewer.scale);
     this.ctx.rotate((this.viewer.rotation * Math.PI) / 180);
     this.ctx.scale(this.viewer.flipH ? -1 : 1, this.viewer.flipV ? -1 : 1);
-    this.ctx.translate(-cx, -cy);
+    this.ctx.translate(-this.viewer.img.width / 2, -this.viewer.img.height / 2);
 
     for (const stroke of this.strokes) {
-      if (!stroke.points || stroke.points.length === 0) continue;
-      this.ctx.save();
-      this.ctx.beginPath();
-      this.ctx.lineCap = 'round';
-      this.ctx.lineJoin = 'round';
-      this.ctx.strokeStyle = stroke.color;
-
-      if (stroke.mode === 'highlighter') {
-        this.ctx.globalAlpha = 0.38;
-        this.ctx.lineWidth = stroke.size * 2.6;
-      } else {
-        this.ctx.globalAlpha = 1.0;
-        this.ctx.lineWidth = stroke.size;
-      }
-
-      this.ctx.moveTo(stroke.points[0].x, stroke.points[0].y);
-      for (let i = 1; i < stroke.points.length; i++) {
-        this.ctx.lineTo(stroke.points[i].x, stroke.points[i].y);
-      }
-      this.ctx.stroke();
-      this.ctx.restore();
+      if (stroke.points?.length > 0) this._renderStroke(this.ctx, stroke);
     }
 
     this.ctx.restore();
+  }
+
+  _renderStroke(ctx, stroke) {
+    ctx.save();
+    ctx.strokeStyle = stroke.color;
+    ctx.fillStyle = stroke.color;
+    if (stroke.mode === 'highlighter') {
+      ctx.globalAlpha = 0.40;
+      ctx.lineCap = 'butt';
+      ctx.lineJoin = 'miter';
+      ctx.lineWidth = stroke.size;
+      if (stroke.points.length === 1) {
+        const p = stroke.points[0];
+        const w = Math.max(2, stroke.size / 3);
+        ctx.fillRect(p.x - w / 2, p.y - stroke.size / 2, w, stroke.size);
+        ctx.restore();
+        return;
+      }
+    } else {
+      ctx.globalAlpha = 1.0;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.lineWidth = stroke.size;
+    }
+    ctx.beginPath();
+    ctx.moveTo(stroke.points[0].x, stroke.points[0].y);
+    for (let i = 1; i < stroke.points.length; i++) ctx.lineTo(stroke.points[i].x, stroke.points[i].y);
+    ctx.stroke();
+    ctx.restore();
   }
 
   bakeToImage() {
@@ -160,31 +264,10 @@ export class DrawingTool {
     offCanvas.width = this.viewer.img.width;
     offCanvas.height = this.viewer.img.height;
     const octx = offCanvas.getContext('2d');
-
     octx.drawImage(this.viewer.img, 0, 0);
 
     for (const stroke of this.strokes) {
-      if (!stroke.points || stroke.points.length === 0) continue;
-      octx.save();
-      octx.beginPath();
-      octx.lineCap = 'round';
-      octx.lineJoin = 'round';
-      octx.strokeStyle = stroke.color;
-
-      if (stroke.mode === 'highlighter') {
-        octx.globalAlpha = 0.38;
-        octx.lineWidth = stroke.size * 2.6;
-      } else {
-        octx.globalAlpha = 1.0;
-        octx.lineWidth = stroke.size;
-      }
-
-      octx.moveTo(stroke.points[0].x, stroke.points[0].y);
-      for (let i = 1; i < stroke.points.length; i++) {
-        octx.lineTo(stroke.points[i].x, stroke.points[i].y);
-      }
-      octx.stroke();
-      octx.restore();
+      if (stroke.points?.length > 0) this._renderStroke(octx, stroke);
     }
 
     const bakedImg = new Image();

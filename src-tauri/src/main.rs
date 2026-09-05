@@ -72,6 +72,14 @@ fn prompt_save_file(default_name: String, filter_ext: String) -> Result<Option<S
 }
 
 #[tauri::command]
+fn prompt_open_file() -> Result<Option<String>, String> {
+    let dialog = rfd::FileDialog::new()
+        .add_filter("Image Files", &["png", "jpg", "jpeg", "webp", "gif", "bmp", "ico", "avif", "tiff"]);
+    let res = dialog.pick_file();
+    Ok(res.map(|p| p.to_string_lossy().to_string()))
+}
+
+#[tauri::command]
 fn save_image_bytes(path: String, base64_data: String) -> Result<(), String> {
     use base64::prelude::*;
     let cleaned = if let Some(idx) = base64_data.find(',') {
@@ -155,23 +163,26 @@ fn play_windows_ding() {
 #[tauri::command]
 fn open_settings_window(app_handle: tauri::AppHandle) -> Result<(), String> {
     if let Some(settings_win) = app_handle.get_webview_window("settings") {
-        if let Some(main_win) = app_handle.get_webview_window("main") {
-            if let (Ok(main_pos), Ok(main_size), Ok(settings_size)) = (
-                main_win.outer_position(),
-                main_win.outer_size(),
-                settings_win.outer_size(),
-            ) {
-                let center_x = main_pos.x + (main_size.width as i32 - settings_size.width as i32) / 2;
-                let center_y = main_pos.y + (main_size.height as i32 - settings_size.height as i32) / 2;
-                let _ = settings_win.set_position(tauri::Position::Physical(tauri::PhysicalPosition {
-                    x: center_x,
-                    y: center_y,
-                }));
+        let is_visible = settings_win.is_visible().unwrap_or(false);
+        if !is_visible {
+            if let Some(main_win) = app_handle.get_webview_window("main") {
+                if let (Ok(main_pos), Ok(main_size), Ok(settings_size)) = (
+                    main_win.outer_position(),
+                    main_win.outer_size(),
+                    settings_win.outer_size(),
+                ) {
+                    let center_x = main_pos.x + (main_size.width as i32 - settings_size.width as i32) / 2;
+                    let center_y = main_pos.y + (main_size.height as i32 - settings_size.height as i32) / 2;
+                    let _ = settings_win.set_position(tauri::Position::Physical(tauri::PhysicalPosition {
+                        x: center_x,
+                        y: center_y,
+                    }));
+                } else {
+                    let _ = settings_win.center();
+                }
             } else {
                 let _ = settings_win.center();
             }
-        } else {
-            let _ = settings_win.center();
         }
         let _ = settings_win.unminimize();
         let _ = settings_win.show();
@@ -262,6 +273,7 @@ fn main() {
             close_window,
             exit_app,
             prompt_save_file,
+            prompt_open_file,
             save_image_bytes,
             minimize_window,
             toggle_maximize_window,

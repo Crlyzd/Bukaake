@@ -92,18 +92,108 @@ body.mode-viewer .viewport-container {
   background: transparent !important;
 }
 
+/* --------------------------------------------------------------------------
+   Mode 2: Floating Filename + Info Overlay (Zero Bars / Zero Pills)
+   -------------------------------------------------------------------------- */
+body.mode-viewer .app-titlebar {
+  position: absolute !important;
+  top: 18px !important;
+  left: 24px !important;
+  right: auto !important;
+  width: auto !important;
+  height: auto !important;
+  background: transparent !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  z-index: 50 !important;
+  transform: none !important;
+}
+
+body.mode-viewer .app-titlebar .titlebar-left {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+}
+
+body.mode-viewer .app-titlebar .titlebar-right {
+  display: flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+}
+
+/* Suppress all chrome, buttons, and branding in Mode 2 */
+body.mode-viewer .app-logo,
+body.mode-viewer .app-name,
+body.mode-viewer .app-version,
+body.mode-viewer #titlebarSep,
+body.mode-viewer .window-controls,
+body.mode-viewer .titlebar-divider,
+body.mode-viewer #btnOpenFile,
+body.mode-viewer #btnClipboard,
+body.mode-viewer #btnThemeToggle,
+body.mode-viewer #btnSettings {
+  display: none !important;
+}
+
+/* Pure text overlay: Filename */
+body.mode-viewer #fileNameBadge {
+  display: inline-block !important;
+  background: transparent !important;
+  padding: 0 !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  color: #ffffff !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.95), 0 2px 10px rgba(0, 0, 0, 0.85);
+  letter-spacing: 0.2px;
+}
+
+/* Pure text overlay: Dimensions */
+body.mode-viewer #titlebarDimensions {
+  display: inline-block !important;
+  background: transparent !important;
+  padding: 0 !important;
+  font-size: 11px !important;
+  color: rgba(255, 255, 255, 0.65) !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.95), 0 2px 8px rgba(0, 0, 0, 0.85);
+}
+
+/* Minimalist ! / Info icon */
+body.mode-viewer #btnToggleInfo {
+  display: inline-flex !important;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  width: 22px !important;
+  height: 22px !important;
+  padding: 0 !important;
+  color: rgba(255, 255, 255, 0.85) !important;
+  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.9));
+  cursor: pointer !important;
+  transition: transform var(--transition-fast), color var(--transition-fast);
+}
+
+body.mode-viewer #btnToggleInfo:hover {
+  color: #00f0ff !important;
+  transform: scale(1.15);
+}
+
+/* Picasa idle fade compatibility */
 body.mode-viewer.image-loaded .app-titlebar {
   opacity: 0;
   pointer-events: none;
-  transform: translateY(-100%);
-  border-radius: 0;
+  transition: opacity var(--transition-fast);
 }
 
 body.mode-viewer.image-loaded .app-titlebar.visible,
 body.mode-viewer.image-loaded .app-titlebar:hover {
   opacity: 1;
   pointer-events: auto;
-  transform: translateY(0);
 }
 
 body.mode-viewer.image-loaded .floating-toolbar {

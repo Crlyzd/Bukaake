@@ -238,6 +238,13 @@ export class TauriBridge {
     }
   }
 
+  async promptOpenFile() {
+    if (this.isTauri()) {
+      try { return await this.invoke('prompt_open_file'); } catch (e) { console.warn(e); }
+    }
+    return null;
+  }
+
   async showInFolder(path) {
     if (this.isTauri() && path) {
       try { await this.invoke('show_in_folder', { path }); return true; } catch (e) { console.warn(e); }

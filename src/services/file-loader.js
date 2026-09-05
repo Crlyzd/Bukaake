@@ -23,7 +23,10 @@ export class FileLoader {
 
   bindDropAndPaste(viewportEl, fileInputEl) {
     fileInputEl?.addEventListener('change', (e) => this.loadWebFiles(e.target.files));
-    document.getElementById('dropOpenBtn')?.addEventListener('click', () => fileInputEl?.click());
+    document.getElementById('dropOpenBtn')?.addEventListener('click', () => {
+      if (this.onPromptOpen) this.onPromptOpen();
+      else fileInputEl?.click();
+    });
 
     // Native Tauri v2 Window Drag-and-Drop
     if (tauriBridge.isTauri() && window.__TAURI__?.event?.listen) {

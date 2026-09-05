@@ -51,6 +51,7 @@ export class ConfirmModal {
   show() {
     if (this.overlay) {
       this.overlay.classList.remove('hidden');
+      requestAnimationFrame(() => this.btnSave?.focus());
     }
   }
 

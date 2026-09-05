@@ -129,68 +129,139 @@ export class Toolbar {
       this.actions.onCancelDraw?.();
     });
 
-    document.getElementById('btnApplyDraw')?.addEventListener('click', () => {
-      this.actions.onApplyDraw?.();
-    });
+    document.getElementById('btnApplyDraw')?.addEventListener('click', () => this.actions.onApplyDraw?.());
+    document.getElementById('btnDrawUndo')?.addEventListener('click', () => this.actions.onDrawUndo?.());
+    document.getElementById('btnDrawClear')?.addEventListener('click', () => this.actions.onDrawClear?.());
 
-    document.getElementById('btnDrawUndo')?.addEventListener('click', () => {
-      this.actions.onDrawUndo?.();
-    });
+    const sizeAnchor = document.getElementById('drawSizeAnchor');
 
-    document.getElementById('btnDrawClear')?.addEventListener('click', () => {
-      this.actions.onDrawClear?.();
-    });
-
-    document.getElementById('btnDrawPen')?.addEventListener('click', (e) => {
+    document.getElementById('btnDrawPen')?.addEventListener('click', () => {
       document.getElementById('btnDrawPen')?.classList.add('active');
       document.getElementById('btnDrawHighlighter')?.classList.remove('active');
+      if (sizeAnchor) sizeAnchor.style.display = '';
       this.actions.onDrawMode?.('pen');
     });
 
-    document.getElementById('btnDrawHighlighter')?.addEventListener('click', (e) => {
+    document.getElementById('btnDrawHighlighter')?.addEventListener('click', () => {
       document.getElementById('btnDrawHighlighter')?.classList.add('active');
       document.getElementById('btnDrawPen')?.classList.remove('active');
+      if (sizeAnchor) {
+        sizeAnchor.style.display = 'none';
+        closeDrawPopovers();
+      }
       this.actions.onDrawMode?.('highlighter');
     });
 
+    const colorPop = document.getElementById('drawColorPopover');
+    const sizePop = document.getElementById('drawSizePopover');
+    const colorDot = document.getElementById('drawCurrentColorDot');
+    const sizeDot = document.getElementById('drawSizePreviewDot');
+    const sizeBadge = document.getElementById('drawSizeBadge');
+
+    const closeDrawPopovers = () => {
+      colorPop?.classList.add('hidden');
+      sizePop?.classList.add('hidden');
+      document.getElementById('btnDrawColorPop')?.classList.remove('active');
+      document.getElementById('btnDrawSizePop')?.classList.remove('active');
+    };
+
+    document.getElementById('btnDrawColorPop')?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      sizePop?.classList.add('hidden');
+      document.getElementById('btnDrawSizePop')?.classList.remove('active');
+      const isHidden = colorPop?.classList.toggle('hidden');
+      document.getElementById('btnDrawColorPop')?.classList.toggle('active', !isHidden);
+    });
+
+    document.getElementById('btnDrawSizePop')?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      colorPop?.classList.add('hidden');
+      document.getElementById('btnDrawColorPop')?.classList.remove('active');
+      const isHidden = sizePop?.classList.toggle('hidden');
+      document.getElementById('btnDrawSizePop')?.classList.toggle('active', !isHidden);
+    });
+
+    const applyColor = (color) => {
+      if (colorDot) colorDot.style.backgroundColor = color;
+      if (sizeDot) sizeDot.style.backgroundColor = color;
+      this.actions.onDrawColor?.(color);
+    };
+
     document.querySelectorAll('.draw-color-chip').forEach((chip) => {
       chip.addEventListener('click', (e) => {
+        e.stopPropagation();
         document.querySelectorAll('.draw-color-chip').forEach((c) => c.classList.remove('active'));
         chip.classList.add('active');
-        const color = chip.getAttribute('data-color');
-        this.actions.onDrawColor?.(color);
+        applyColor(chip.getAttribute('data-color'));
+        closeDrawPopovers();
       });
     });
 
-    const customColorInput = document.getElementById('drawCustomColor');
-    customColorInput?.addEventListener('input', (e) => {
-      document.querySelectorAll('.draw-color-chip').forEach((c) => c.classList.remove('active'));
-      this.actions.onDrawColor?.(e.target.value);
+    const sizeTrack = document.getElementById('drawSizeTrack');
+    const sizeFill = document.getElementById('drawSizeFill');
+    const sizeThumb = document.getElementById('drawSizeThumb');
+    let currentSize = 24;
+
+    const updateSize = (val) => {
+      currentSize = Math.min(150, Math.max(10, parseInt(val, 10) || 24));
+      const pct = (currentSize - 10) / (150 - 10);
+      if (sizeFill) sizeFill.style.height = `${pct * 100}%`;
+      if (sizeThumb) sizeThumb.style.bottom = `${pct * 100}%`;
+      if (sizeBadge) sizeBadge.textContent = `${currentSize}px`;
+      if (sizeDot) {
+        const previewPx = Math.round(6 + pct * 26);
+        sizeDot.style.width = `${previewPx}px`;
+        sizeDot.style.height = `${previewPx}px`;
+      }
+      this.actions.onDrawSize?.(currentSize);
+    };
+
+    updateSize(24);
+
+    let isDraggingSize = false;
+    const handleTrackMove = (e) => {
+      if (!sizeTrack) return;
+      const rect = sizeTrack.getBoundingClientRect();
+      const ratio = Math.max(0, Math.min(1, (rect.bottom - e.clientY) / rect.height));
+      updateSize(Math.round(10 + ratio * (150 - 10)));
+    };
+
+    sizeTrack?.addEventListener('mousedown', (e) => {
+      e.stopPropagation();
+      e.preventDefault();
+      isDraggingSize = true;
+      handleTrackMove(e);
     });
 
-    document.querySelectorAll('.draw-size-btn').forEach((btn) => {
-      btn.addEventListener('click', (e) => {
-        document.querySelectorAll('.draw-size-btn').forEach((b) => b.classList.remove('active'));
-        btn.classList.add('active');
-        const size = parseInt(btn.getAttribute('data-size'), 10) || 6;
-        this.actions.onDrawSize?.(size);
-      });
+    window.addEventListener('mousemove', (e) => { if (isDraggingSize) handleTrackMove(e); });
+    window.addEventListener('mouseup', () => { isDraggingSize = false; });
+
+    sizePop?.addEventListener('wheel', (e) => {
+      e.stopPropagation();
+      e.preventDefault();
+      updateSize(currentSize + (e.deltaY < 0 ? 5 : -5));
+    }, { passive: false });
+
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('#drawToolbar, .draw-popover')) closeDrawPopovers();
     });
   }
 
   updateCounter(total, currentIndex) {
-    if (this.fileCounterEl) {
-      this.fileCounterEl.textContent = total > 0 ? `${currentIndex + 1} / ${total}` : '0 / 0';
-    }
-    const btnPrev = document.getElementById('btnPrevImage');
-    const btnNext = document.getElementById('btnNextImage');
-    if (btnPrev) btnPrev.disabled = total <= 1;
-    if (btnNext) btnNext.disabled = total <= 1;
+    if (this.fileCounterEl) this.fileCounterEl.textContent = total > 0 ? `${currentIndex + 1} / ${total}` : '0 / 0';
+    const bP = document.getElementById('btnPrevImage'), bN = document.getElementById('btnNextImage');
+    if (bP) bP.disabled = total <= 1;
+    if (bN) bN.disabled = total <= 1;
   }
 
   updateZoomPercent(scale) {
-    if (this.zoomPercentText) {
-      this.zoomPercentText.textContent = `${Math.round(scale * 100)}%`;
+    if (this.zoomPercentText) this.zoomPercentText.textContent = `${Math.round(scale * 100)}%`;
+  }
+
+  _setLocked(ids, active) {
+    for (const id of ids) {
+      const el = document.getElementById(id);
+      if (el) { el.disabled = active; el.style.opacity = active ? '0.28' : ''; el.style.pointerEvents = active ? 'none' : ''; }
     }
   }
 
@@ -198,45 +269,23 @@ export class Toolbar {
     if (this.btnCropMode) this.btnCropMode.classList.toggle('active', active);
     if (this.cropToolbar) this.cropToolbar.classList.toggle('hidden', !active);
     if (this.container) this.container.classList.toggle('crop-locked', active);
-
-    const lockedIds = [
-      'btnPrevImage', 'btnNextImage', 'btnRotateLeft', 'btnRotateRight',
-      'btnFlipH', 'btnFlipV', 'btnDrawMode', 'btnAdjustments',
-      'btnPixelated', 'btnBgMode', 'btnSaveAs',
-    ];
-    for (const id of lockedIds) {
-      const el = document.getElementById(id);
-      if (el) {
-        el.disabled = active;
-        el.style.opacity = active ? '0.28' : '';
-        el.style.pointerEvents = active ? 'none' : '';
-      }
-    }
+    this._setLocked(['btnPrevImage', 'btnNextImage', 'btnRotateLeft', 'btnRotateRight', 'btnFlipH', 'btnFlipV', 'btnDrawMode', 'btnAdjustments', 'btnPixelated', 'btnBgMode', 'btnSaveAs'], active);
   }
 
   setDrawActive(active) {
     if (this.btnDrawMode) this.btnDrawMode.classList.toggle('active', active);
     if (this.drawToolbar) this.drawToolbar.classList.toggle('hidden', !active);
     if (this.container) this.container.classList.toggle('draw-locked', active);
-
-    const lockedIds = [
-      'btnPrevImage', 'btnNextImage', 'btnRotateLeft', 'btnRotateRight',
-      'btnFlipH', 'btnFlipV', 'btnCropMode', 'btnAdjustments',
-      'btnPixelated', 'btnBgMode', 'btnSaveAs',
-    ];
-    for (const id of lockedIds) {
-      const el = document.getElementById(id);
-      if (el) {
-        el.disabled = active;
-        el.style.opacity = active ? '0.28' : '';
-        el.style.pointerEvents = active ? 'none' : '';
-      }
+    if (!active) {
+      document.getElementById('drawColorPopover')?.classList.add('hidden');
+      document.getElementById('drawSizePopover')?.classList.add('hidden');
+      document.getElementById('btnDrawColorPop')?.classList.remove('active');
+      document.getElementById('btnDrawSizePop')?.classList.remove('active');
     }
+    this._setLocked(['btnPrevImage', 'btnNextImage', 'btnRotateLeft', 'btnRotateRight', 'btnFlipH', 'btnFlipV', 'btnCropMode', 'btnAdjustments', 'btnPixelated', 'btnBgMode', 'btnSaveAs'], active);
   }
 
   setAdjustmentsActive(active) {
-    if (this.btnAdjustments) {
-      this.btnAdjustments.classList.toggle('active', active);
-    }
+    if (this.btnAdjustments) this.btnAdjustments.classList.toggle('active', active);
   }
 }
