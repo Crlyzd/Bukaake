@@ -51,7 +51,7 @@ class BukaakeApp {
     this.titlebar = new Titlebar({
       onOpenFile: () => this.fileInput?.click(),
       onPasteClipboard: () => this.fileLoader.loadFromClipboard(),
-      onToggleMetadata: () => this.metadataDrawer.toggle(),
+      onToggleMetadata: () => { if (!this.viewer.img) return; this.metadataDrawer.toggle(); },
       onToggleSettings: async () => {
         if (!(await tauriBridge.openSettingsWindow())) this.settingsModal.toggle();
       },
@@ -78,7 +78,7 @@ class BukaakeApp {
         onFlipH: () => this.viewer.toggleFlipH(),
         onFitScreen: () => this.viewer.fitToScreen(),
         onCrop: () => this.toggleCrop(true),
-        onToggleMetadata: () => this.metadataDrawer.toggle(),
+        onToggleMetadata: () => { if (!this.viewer.img) return; this.metadataDrawer.toggle(); },
       },
     });
 
@@ -114,6 +114,7 @@ class BukaakeApp {
       this.adjustmentsPanel.syncSliderUI();
       this.metadataDrawer.update(meta, img);
       this.titlebar.setFileName(meta.name);
+      this.titlebar.setHasImage(true);
       this.updateStatusBadges();
       this.idleController?.refreshState();
 
@@ -164,7 +165,7 @@ class BukaakeApp {
       onFlipV: () => this.viewer.toggleFlipV(),
       onToggleCrop: () => this.toggleCrop(),
       onToggleAdjustments: () => this.toolbar.setAdjustmentsActive(this.adjustmentsPanel.toggle()),
-      onToggleMetadata: () => this.metadataDrawer.toggle(),
+      onToggleMetadata: () => { if (!this.viewer.img) return; this.metadataDrawer.toggle(); },
       onToggleBgMode: () => this.cycleBgMode(),
       onTogglePixelated: () => {
         const isPix = !this.viewer.togglePixelSmoothing();

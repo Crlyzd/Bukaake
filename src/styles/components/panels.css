@@ -260,6 +260,20 @@ html[data-theme="light"] .panel-footer-actions #btnResetFilters:hover {
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
+.meta-table tr:last-child {
+  border-bottom: none;
+}
+
+body.light-theme .meta-table tr,
+html[data-theme="light"] .meta-table tr {
+  border-bottom: 1px solid rgba(26, 32, 44, 0.08);
+}
+
+body.light-theme .meta-table tr:last-child,
+html[data-theme="light"] .meta-table tr:last-child {
+  border-bottom: none;
+}
+
 .meta-table td {
   padding: 8px 0;
 }

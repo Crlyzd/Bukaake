@@ -16,6 +16,7 @@ export class Titlebar {
     this.btnMax = document.getElementById('winMax');
     this.btnClose = document.getElementById('winClose');
     this.btnTheme = document.getElementById('btnThemeToggle');
+    this.btnInfo = document.getElementById('btnToggleInfo');
 
     this.onOpenFile = options.onOpenFile || null;
     this.onPasteClipboard = options.onPasteClipboard || null;
@@ -31,6 +32,7 @@ export class Titlebar {
     this.bindWindowControls();
     this.bindActionButtons();
     this.syncMaximizedState();
+    this.setHasImage(false);
 
     if (this.btnTheme) {
       themeManager.bindToggleBtn(this.btnTheme);
@@ -72,7 +74,8 @@ export class Titlebar {
       this.onPasteClipboard?.();
     });
 
-    document.getElementById('btnToggleInfo')?.addEventListener('click', () => {
+    this.btnInfo?.addEventListener('click', () => {
+      if (this.btnInfo.disabled) return;
       this.onToggleMetadata?.();
     });
 
@@ -135,6 +138,13 @@ export class Titlebar {
         this.dimensionsBadge.textContent = '';
         this.dimensionsBadge.classList.add('hidden');
       }
+    }
+  }
+
+  setHasImage(hasImage) {
+    if (this.btnInfo) {
+      this.btnInfo.disabled = !hasImage;
+      this.btnInfo.title = hasImage ? 'Toggle Image Properties (I)' : 'Image Properties (Load an image first)';
     }
   }
 }

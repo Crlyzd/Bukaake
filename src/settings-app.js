@@ -24,6 +24,10 @@ class SettingsApp {
     this.bindUpdater();
     tauriBridge.initExternalLinks();
 
+    window.addEventListener('contextmenu', (e) => {
+      if (!Boolean(import.meta.env?.DEV) || !e.shiftKey) e.preventDefault();
+    });
+
     // Listen to theme or setting changes across windows
     window.addEventListener('storage', (e) => {
       if (e.key === 'bukaake_theme') {

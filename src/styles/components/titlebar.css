@@ -135,14 +135,25 @@ body.image-loaded .app-titlebar:hover {
   app-region: no-drag;
 }
 
-.titlebar-ghost-btn:hover {
+.titlebar-ghost-btn:hover:not(:disabled) {
   background: var(--glass-bg-hover);
   color: var(--text-main);
 }
 
-.titlebar-ghost-btn:active {
+.titlebar-ghost-btn:active:not(:disabled) {
   background: var(--glass-bg-active);
   transform: scale(0.95);
+}
+
+.titlebar-ghost-btn:focus,
+.titlebar-ghost-btn:focus-visible {
+  outline: none !important;
+}
+
+.titlebar-ghost-btn:disabled {
+  opacity: 0.28 !important;
+  cursor: not-allowed !important;
+  pointer-events: none !important;
 }
 
 .titlebar-divider {
