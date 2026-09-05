@@ -18,7 +18,7 @@
   position: fixed; pointer-events: none; border-radius: 50%;
   border: 1.5px solid rgba(255, 255, 255, 0.92);
   box-shadow: 0 0 2px rgba(0, 0, 0, 0.85), inset 0 0 1px rgba(0, 0, 0, 0.65);
-  transform: translate(-50%, -50%); z-index: 100;
+  transform: translate(-50%, -50%); z-index: 45;
   transition: width 0.05s ease, height 0.05s ease;
   will-change: left, top, width, height;
 }
@@ -37,6 +37,23 @@
   cursor: default !important;
 }
 body.mode-viewer .draw-toolbar { bottom: 132px !important; }
+
+/* Dock Cursor Normalization — Maintain Regular Pointer */
+.draw-toolbar,
+#floatingToolbar,
+.floating-toolbar {
+  cursor: default !important;
+}
+
+.draw-toolbar button,
+.draw-toolbar .draw-tool-btn,
+.draw-toolbar .draw-action-btn,
+.draw-toolbar .draw-size-trigger,
+.draw-toolbar .draw-color-trigger,
+.floating-toolbar button,
+.floating-toolbar .tool-btn {
+  cursor: pointer !important;
+}
 
 @keyframes slideUpDraw {
   from { opacity: 0; transform: translateX(-50%) translateY(16px); }

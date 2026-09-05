@@ -119,7 +119,14 @@ export class DrawingTool {
 
   updateCursor(e) {
     if (!this.active || this.isPanning || !e) return;
-    if (e.clientY <= 44 || e.target?.closest?.('#appTitlebar, .app-titlebar, #drawToolbar, .draw-popover, #toolbar, .context-menu, .modal-backdrop')) {
+    const hitEl = (e.clientX !== undefined && e.clientY !== undefined)
+      ? document.elementFromPoint(e.clientX, e.clientY) || e.target
+      : e.target;
+    const isOverChrome = Boolean(
+      e.clientY <= 44 ||
+      hitEl?.closest?.('#appTitlebar, .app-titlebar, #floatingToolbar, .floating-toolbar, #drawToolbar, .draw-toolbar, .draw-popover, .context-menu, .modal-backdrop, .dialog-card')
+    );
+    if (isOverChrome) {
       this.cursorRing?.classList.add('hidden');
       this.canvas.classList.remove('cursor-highlighter');
       return;
