@@ -4,6 +4,8 @@
  */
 
 import { tauriBridge } from './tauri-bridge.js';
+import { getCurrentWindow } from '@tauri-apps/api/window';
+import { getCurrentWebview } from '@tauri-apps/api/webview';
 
 export class FileLoader {
   constructor() {
@@ -12,16 +14,11 @@ export class FileLoader {
     this.currentImage = null;
     this.currentMeta = null;
 
-    this.onImageLoaded = null;
-    this.onListChanged = null;
-    this.onStatusMessage = null;
-    this.onStatusWarning = null;
-    this.onAllFilesCleared = null;
+    this.onImageLoaded = null; this.onListChanged = null;
+    this.onStatusMessage = null; this.onStatusWarning = null; this.onAllFilesCleared = null;
   }
 
-  get totalFiles() {
-    return this.items.length;
-  }
+  get totalFiles() { return this.items.length; }
 
   bindDropAndPaste(viewportEl, fileInputEl) {
     fileInputEl?.addEventListener('change', (e) => this.loadWebFiles(e.target.files));
@@ -30,27 +27,66 @@ export class FileLoader {
       else fileInputEl?.click();
     });
 
-    // Native Tauri v2 Window Drag-and-Drop
-    if (tauriBridge.isTauri() && window.__TAURI__?.event?.listen) {
-      window.__TAURI__.event.listen('tauri://drag-enter', () => viewportEl?.classList.add('drag-over'));
-      window.__TAURI__.event.listen('tauri://drag-over', () => viewportEl?.classList.add('drag-over'));
-      window.__TAURI__.event.listen('tauri://drag-leave', () => viewportEl?.classList.remove('drag-over'));
-      window.__TAURI__.event.listen('tauri://drag-drop', async (event) => {
-        viewportEl?.classList.remove('drag-over');
-        const paths = event.payload?.paths || [];
-        if (paths.length > 0) {
-          const payload = await tauriBridge.readImageContext(paths[0]);
-          if (payload) this.loadFromTauriContext(payload);
-          else this.onStatusWarning?.(`Unsupported file format: ${paths[0].split(/[/\\]/).pop()}`);
-        }
-      });
+    let lastDropTime = 0;
+    let lastDropFingerprint = '';
+
+    const handlePaths = async (paths) => {
+      viewportEl?.classList.remove('drag-over');
+      if (!paths || paths.length === 0) return;
+
+      const now = Date.now();
+      const fingerprint = paths.map((p) => p.replace(/\\/g, '/').toLowerCase()).join('|');
+      if (now - lastDropTime < 400 && lastDropFingerprint === fingerprint) return;
+      lastDropTime = now;
+      lastDropFingerprint = fingerprint;
+
+      const targetPath = paths[0];
+      const payload = await tauriBridge.readImageContext(targetPath);
+      if (payload) {
+        this.loadFromTauriContext(payload);
+      } else {
+        const fileName = targetPath.split(/[/\\]/).pop() || targetPath;
+        this.onStatusWarning?.(`Unsupported file format: ${fileName}`);
+      }
+    };
+
+    if (tauriBridge.isTauri()) {
+      const attachDrop = (target) => {
+        if (!target?.onDragDropEvent) return;
+        target.onDragDropEvent((event) => {
+          const p = event?.payload;
+          if (!p) return;
+          if (p.type === 'drop') {
+            viewportEl?.classList.remove('drag-over');
+            if (p.paths?.length > 0) handlePaths(p.paths);
+          } else if (p.type === 'enter' || p.type === 'over') {
+            viewportEl?.classList.add('drag-over');
+          } else if (p.type === 'leave' || p.type === 'cancel') {
+            viewportEl?.classList.remove('drag-over');
+          }
+        });
+      };
+      try { attachDrop(getCurrentWindow()); } catch (e) {}
+      try { attachDrop(getCurrentWebview()); } catch (e) {}
     }
 
-    window.addEventListener('dragover', (e) => { e.preventDefault(); viewportEl?.classList.add('drag-over'); });
+    const onDragOver = (e) => {
+      e.preventDefault();
+      if (e.dataTransfer) e.dataTransfer.dropEffect = 'copy';
+      viewportEl?.classList.add('drag-over');
+    };
+    window.addEventListener('dragenter', (e) => e.preventDefault());
+    window.addEventListener('dragover', onDragOver);
     window.addEventListener('dragleave', (e) => { if (e.relatedTarget === null) viewportEl?.classList.remove('drag-over'); });
     window.addEventListener('drop', (e) => {
-      e.preventDefault(); viewportEl?.classList.remove('drag-over');
-      if (e.dataTransfer?.files?.length > 0) this.loadWebFiles(e.dataTransfer.files);
+      e.preventDefault();
+      viewportEl?.classList.remove('drag-over');
+      if (e.dataTransfer?.files?.length > 0) {
+        const files = Array.from(e.dataTransfer.files);
+        const paths = files.map((f) => f.path).filter(Boolean);
+        if (paths.length > 0) return handlePaths(paths);
+        this.loadWebFiles(files);
+      }
     });
 
     window.addEventListener('paste', (e) => {
@@ -71,25 +107,10 @@ export class FileLoader {
   loadFromTauriContext(payload) {
     if (!payload || !payload.target_path) return;
 
-    if (payload.neighbors && payload.neighbors.length > 0) {
-      this.items = payload.neighbors.map((n) => ({
-        type: 'tauri',
-        path: n.path,
-        name: n.name,
-        sizeBytes: n.size_bytes,
-      }));
-      this.currentIndex = payload.current_index >= 0 ? payload.current_index : 0;
-    } else {
-      this.items = [
-        {
-          type: 'tauri',
-          path: payload.target_path,
-          name: payload.file_name,
-          sizeBytes: payload.size_bytes,
-        },
-      ];
-      this.currentIndex = 0;
-    }
+    this.items = payload.neighbors?.length > 0
+      ? payload.neighbors.map((n) => ({ type: 'tauri', path: n.path, name: n.name, sizeBytes: n.size_bytes }))
+      : [{ type: 'tauri', path: payload.target_path, name: payload.file_name, sizeBytes: payload.size_bytes }];
+    this.currentIndex = payload.neighbors?.length > 0 && payload.current_index >= 0 ? payload.current_index : 0;
 
     this.emitListChanged();
     this.createImageFromUrl(payload.data_url, {
@@ -103,18 +124,16 @@ export class FileLoader {
     });
   }
 
-  async navigateBatch(delta) {
-    if (this.items.length <= 1) return;
-
-    const nextIndex = (this.currentIndex + delta + this.items.length) % this.items.length;
-    this.currentIndex = nextIndex;
+  async loadItemAtIndex(index) {
+    if (index < 0 || index >= this.items.length) return;
+    this.currentIndex = index;
     this.emitListChanged();
 
-    const item = this.items[this.currentIndex];
+    const item = this.items[index];
     if (item.type === 'tauri') {
       try {
         const payload = await tauriBridge.readImageFile(item.path);
-        if (payload && payload.data_url) {
+        if (payload?.data_url) {
           this.createImageFromUrl(payload.data_url, {
             name: payload.file_name,
             path: payload.path,
@@ -131,6 +150,12 @@ export class FileLoader {
     } else if (item.type === 'file') {
       this.readWebFile(item.fileObj);
     }
+  }
+
+  async navigateBatch(delta) {
+    if (this.items.length <= 1) return;
+    const nextIndex = (this.currentIndex + delta + this.items.length) % this.items.length;
+    await this.loadItemAtIndex(nextIndex);
   }
 
   async deleteCurrent(toTrash = true) {
@@ -160,34 +185,17 @@ export class FileLoader {
       this.currentIndex = this.items.length - 1;
     }
 
-    this.emitListChanged();
-    const nextItem = this.items[this.currentIndex];
-    if (nextItem.type === 'tauri') {
-      try {
-        const payload = await tauriBridge.readImageFile(nextItem.path);
-        if (payload?.data_url) {
-          this.createImageFromUrl(payload.data_url, {
-            name: payload.file_name,
-            path: payload.path,
-            sizeBytes: payload.size_bytes,
-            dimensions: payload.dimensions,
-          });
-        }
-      } catch (err) {
-        this.onStatusMessage?.(`Failed to read ${nextItem.name}`);
-      }
-    } else if (nextItem.type === 'file') {
-      this.readWebFile(nextItem.fileObj);
-    }
-
+    await this.loadItemAtIndex(this.currentIndex);
     return { success: true, remaining: this.items.length, deletedName };
   }
 
   loadWebFiles(fileList) {
     if (!fileList || fileList.length === 0) return;
-    const valid = Array.from(fileList).filter((f) => f.type.startsWith('image/'));
+    const isImg = (f) => f.type.startsWith('image/') || /\.(jpe?g|png|webp|gif|avif|bmp|ico|svg|tiff?)$/i.test(f.name);
+    const valid = Array.from(fileList).filter(isImg);
     if (valid.length === 0) {
-      this.onStatusWarning?.('No valid image files selected.');
+      const fileName = fileList[0]?.name || 'file';
+      this.onStatusWarning?.(`Unsupported file format: ${fileName}`);
       return;
     }
     this.items = valid.map((f) => ({ type: 'file', fileObj: f, name: f.name, sizeBytes: f.size }));
@@ -198,23 +206,17 @@ export class FileLoader {
 
   readWebFile(fileObj) {
     const reader = new FileReader();
-    reader.onload = (e) => {
-      this.createImageFromUrl(e.target.result, {
-        name: fileObj.name,
-        path: null,
-        sizeBytes: fileObj.size,
-        fileObj,
-        mimeType: fileObj.type,
-        lastModified: fileObj.lastModified,
-      });
-    };
+    reader.onload = (e) => this.createImageFromUrl(e.target.result, {
+      name: fileObj.name, path: null, sizeBytes: fileObj.size,
+      fileObj, mimeType: fileObj.type, lastModified: fileObj.lastModified,
+    });
     reader.readAsDataURL(fileObj);
   }
 
-  loadDirectImage(imageElement, meta = {}) {
-    this.currentImage = imageElement;
+  loadDirectImage(img, meta = {}) {
+    this.currentImage = img;
     this.currentMeta = { ...(this.currentMeta || {}), ...meta };
-    this.onImageLoaded?.(imageElement, this.currentMeta);
+    this.onImageLoaded?.(img, this.currentMeta);
   }
 
   createImageFromUrl(url, meta) {

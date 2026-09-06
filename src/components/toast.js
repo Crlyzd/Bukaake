@@ -10,8 +10,22 @@ export class ToastManager {
     this.dismissTimer = null;
   }
 
+  getContainer() {
+    if (!this.container || !document.body.contains(this.container)) {
+      this.container = document.getElementById('toastContainer');
+      if (!this.container) {
+        this.container = document.createElement('div');
+        this.container.id = 'toastContainer';
+        this.container.className = 'toast-container';
+        document.body.appendChild(this.container);
+      }
+    }
+    return this.container;
+  }
+
   show(message, icon = 'ri-sparkles-fill', durationMs = 1800, type = 'info') {
-    if (!this.container) return;
+    const container = this.getContainer();
+    if (!container) return;
 
     if (this.dismissTimer) {
       clearTimeout(this.dismissTimer);
