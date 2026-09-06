@@ -9,14 +9,11 @@ import { toast } from '../components/toast.js';
 export const APP_VERSION = typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : '0.1.2';
 
 function compareVersions(v1, v2) {
-  const clean1 = (v1 || '').replace(/^v/i, '').split('.').map((n) => parseInt(n, 10) || 0);
-  const clean2 = (v2 || '').replace(/^v/i, '').split('.').map((n) => parseInt(n, 10) || 0);
-  const maxLen = Math.max(clean1.length, clean2.length);
-  for (let i = 0; i < maxLen; i++) {
-    const num1 = clean1[i] || 0;
-    const num2 = clean2[i] || 0;
-    if (num1 > num2) return 1;
-    if (num1 < num2) return -1;
+  const c1 = (v1 || '').replace(/^v/i, '').split('.').map((n) => parseInt(n, 10) || 0);
+  const c2 = (v2 || '').replace(/^v/i, '').split('.').map((n) => parseInt(n, 10) || 0);
+  for (let i = 0; i < Math.max(c1.length, c2.length); i++) {
+    const diff = (c1[i] || 0) - (c2[i] || 0);
+    if (diff !== 0) return diff > 0 ? 1 : -1;
   }
   return 0;
 }
@@ -36,29 +33,17 @@ class UpdaterService {
       const saved = localStorage.getItem(this.storageKey);
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (parsed.version === '0.2.0' && parsed.hasUpdate) {
+        if (parsed.hasUpdate && compareVersions(this.currentVersion, parsed.version) >= 0) {
           localStorage.removeItem(this.storageKey);
           localStorage.removeItem('bukaake_update_available');
         } else {
-          return {
-            ...parsed,
-            isUpdating: false,
-            updatePercent: 0,
-            updateStatus: 'idle',
-          };
+          return { ...parsed, isChecking: false, isUpdating: false, updatePercent: 0, updateStatus: 'idle' };
         }
       }
     } catch (_) {}
     return {
-      hasUpdate: false,
-      version: this.currentVersion,
-      releaseUrl: '',
-      assetUrl: '',
-      isChecking: false,
-      isUpdating: false,
-      updatePercent: 0,
-      updateStatus: 'idle',
-      lastChecked: 0,
+      hasUpdate: false, version: this.currentVersion, releaseUrl: '', assetUrl: '',
+      isChecking: false, isUpdating: false, updatePercent: 0, updateStatus: 'idle', lastChecked: 0,
     };
   }
 
@@ -77,23 +62,15 @@ class UpdaterService {
 
   broadcast() {
     this.saveState();
-    this.subscribers.forEach((fn) => {
-      try { fn(this.state); } catch (_) {}
-    });
-
+    this.subscribers.forEach((fn) => { try { fn(this.state); } catch (_) {} });
     document.dispatchEvent(new CustomEvent('bukaake:update-state', { detail: this.state }));
 
     if (window.__TAURI__?.event?.emit) {
       window.__TAURI__.event.emit('bukaake-update-state', this.state);
       window.__TAURI__.event.emit('settings-changed', {
-        type: 'update-status',
-        available: this.state.hasUpdate,
-        version: this.state.version,
-        releaseUrl: this.state.releaseUrl,
-        assetUrl: this.state.assetUrl,
-        isUpdating: this.state.isUpdating,
-        updatePercent: this.state.updatePercent,
-        updateStatus: this.state.updateStatus,
+        type: 'update-status', available: this.state.hasUpdate, version: this.state.version,
+        releaseUrl: this.state.releaseUrl, assetUrl: this.state.assetUrl, isUpdating: this.state.isUpdating,
+        updatePercent: this.state.updatePercent, updateStatus: this.state.updateStatus,
       });
     }
   }
@@ -166,10 +143,16 @@ class UpdaterService {
     this.state.isChecking = true;
     this.broadcast();
 
+    let timeoutId;
     try {
+      const controller = new AbortController();
+      timeoutId = setTimeout(() => controller.abort(), 8000);
+
       const res = await fetch(this.repoEndpoint, {
+        signal: controller.signal,
         headers: { 'Accept': 'application/vnd.github.v3+json' },
       });
+      clearTimeout(timeoutId);
 
       if (res.status === 404) {
         this.state.hasUpdate = false;
@@ -177,6 +160,9 @@ class UpdaterService {
         this.state.releaseUrl = '';
         this.state.assetUrl = '';
         if (!silent) toast.show(`You are on the latest version of Bukaake (v${this.currentVersion})`);
+      } else if (res.status === 403 || res.status === 429) {
+        this.state.hasUpdate = false;
+        if (!silent) toast.show('GitHub API rate limit reached. Please try again later.');
       } else if (res.ok) {
         const data = await res.json();
         const remoteTag = data.tag_name || data.name || '';
@@ -198,12 +184,16 @@ class UpdaterService {
         }
       } else {
         this.state.hasUpdate = false;
-        if (!silent) toast.show(`You are on the latest version of Bukaake (v${this.currentVersion})`);
+        if (!silent) toast.show(`Unable to check for updates (HTTP ${res.status}).`);
       }
-    } catch (_) {
+    } catch (err) {
       this.state.hasUpdate = false;
-      if (!silent) toast.show('Unable to connect to GitHub releases.');
+      if (!silent) {
+        const msg = err?.name === 'AbortError' ? 'Update check timed out.' : 'Unable to connect to GitHub releases.';
+        toast.show(msg);
+      }
     } finally {
+      if (timeoutId) clearTimeout(timeoutId);
       this.state.isChecking = false;
       this.state.lastChecked = Date.now();
       this.broadcast();
@@ -265,7 +255,13 @@ export function hydrateAppVersions(root = document) {
     el.textContent = `v${APP_VERSION} (x64) • Glass Image Viewer`;
   });
   root.querySelectorAll('#updateStatusText').forEach((el) => {
-    if (!updaterService.state.hasUpdate && !updaterService.state.isUpdating) {
+    if (updaterService.state.isUpdating) {
+      el.textContent = `Downloading Bukaake v${updaterService.state.version || APP_VERSION}...`;
+    } else if (updaterService.state.isChecking) {
+      el.textContent = 'Checking GitHub for updates...';
+    } else if (updaterService.state.hasUpdate) {
+      el.textContent = `Update available: Bukaake v${updaterService.state.version || APP_VERSION}`;
+    } else {
       el.textContent = `Bukaake v${APP_VERSION} (Latest Version)`;
     }
   });

@@ -15,6 +15,7 @@ export class SettingsModal {
     this.btnCheckUpdate = document.getElementById('btnCheckUpdate');
     this.btnReportBug = document.getElementById('btnReportBug');
     this.updateStatusText = document.getElementById('updateStatusText');
+    this.updateStatusIcon = this.modalEl?.querySelector('#updateStatusIcon');
     this.updateBanner = this.modalEl?.querySelector('.settings-update-banner');
     this.updateProgressTrack = document.getElementById('updateProgressTrack');
     this.updateProgressFill = document.getElementById('updateProgressFill');
@@ -64,6 +65,16 @@ export class SettingsModal {
         }
       }
 
+      if (this.updateStatusIcon) {
+        if (isUpdating || isChecking) {
+          this.updateStatusIcon.className = 'ri-loader-4-line ri-spin';
+        } else if (state.hasUpdate) {
+          this.updateStatusIcon.className = 'ri-download-cloud-line';
+        } else {
+          this.updateStatusIcon.className = 'ri-checkbox-circle-line';
+        }
+      }
+
       if (this.updateStatusText) {
         if (isUpdating) {
           if (state.updateStatus === 'installing') {
@@ -71,6 +82,8 @@ export class SettingsModal {
           } else {
             this.updateStatusText.textContent = `Downloading Bukaake v${state.version || APP_VERSION} — ${state.updatePercent || 0}%`;
           }
+        } else if (isChecking) {
+          this.updateStatusText.textContent = 'Checking GitHub for updates...';
         } else if (state.hasUpdate) {
           this.updateStatusText.textContent = `Update available: Bukaake v${state.version || APP_VERSION}`;
         } else {
