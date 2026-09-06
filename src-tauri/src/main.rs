@@ -20,7 +20,7 @@ use file_assoc::{
 };
 use file_ops::delete_file;
 use image_loader::{get_initial_image, read_image_context, read_image_file};
-use standby::{cancel_standby, enter_standby, is_standby_enabled, set_standby_enabled, show_main_window, StandbyManager};
+use standby::{enter_standby, is_standby_enabled, set_standby_enabled, show_main_window, StandbyManager};
 use tauri::{Emitter, Manager};
 use updater::{cleanup_old_update_artifacts, download_and_install_update, get_system_arch};
 
@@ -289,7 +289,7 @@ fn main() {
             download_and_install_update, get_system_arch, delete_file,
             check_association_status, register_file_associations,
             unregister_file_associations, launch_default_apps_settings,
-            enter_standby, cancel_standby, show_main_window,
+            enter_standby, show_main_window,
             set_standby_enabled, is_standby_enabled
         ])
         .run(tauri::generate_context!())

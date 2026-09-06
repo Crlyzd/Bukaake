@@ -5,7 +5,7 @@ use std::sync::{
 use std::time::{Duration, Instant};
 use tauri::{
     menu::{Menu, MenuItem, PredefinedMenuItem},
-    tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent},
+    tray::TrayIconBuilder,
     Emitter, Manager,
 };
 
@@ -80,12 +80,11 @@ pub fn trim_memory() {
 pub fn trim_memory() {}
 
 pub fn create_tray(app: &tauri::App) -> Result<(), Box<dyn std::error::Error>> {
-    let open_item = MenuItem::with_id(app, "tray_open", "Open Image...", true, None::<&str>)?;
     let settings_item = MenuItem::with_id(app, "tray_settings", "Settings", true, None::<&str>)?;
     let sep = PredefinedMenuItem::separator(app)?;
     let exit_item = MenuItem::with_id(app, "tray_exit", "Exit Bukaake", true, None::<&str>)?;
 
-    let menu = Menu::with_items(app, &[&open_item, &settings_item, &sep, &exit_item])?;
+    let menu = Menu::with_items(app, &[&settings_item, &sep, &exit_item])?;
     let icon = app.default_window_icon().cloned().ok_or("No default window icon")?;
 
     let _tray = TrayIconBuilder::new()
@@ -94,14 +93,6 @@ pub fn create_tray(app: &tauri::App) -> Result<(), Box<dyn std::error::Error>> {
         .tooltip("Bukaake — Photo Viewer")
         .show_menu_on_left_click(false)
         .on_menu_event(|app, event| match event.id.as_ref() {
-            "tray_open" => {
-                if let Some(win) = app.get_webview_window("main") {
-                    let _ = win.unminimize();
-                    let _ = win.show();
-                    let _ = win.set_focus();
-                    let _ = win.emit("bukaake://trigger-open-file", ());
-                }
-            }
             "tray_settings" => {
                 let _ = app.emit("bukaake://open-settings", ());
             }
@@ -109,21 +100,6 @@ pub fn create_tray(app: &tauri::App) -> Result<(), Box<dyn std::error::Error>> {
                 app.exit(0);
             }
             _ => {}
-        })
-        .on_tray_icon_event(|tray, event| {
-            if let TrayIconEvent::Click {
-                button: MouseButton::Left,
-                button_state: MouseButtonState::Up,
-                ..
-            } = event
-            {
-                let app = tray.app_handle();
-                if let Some(win) = app.get_webview_window("main") {
-                    let _ = win.unminimize();
-                    let _ = win.show();
-                    let _ = win.set_focus();
-                }
-            }
         })
         .build(app)?;
 
@@ -158,19 +134,6 @@ pub fn enter_standby(
     Ok(())
 }
 
-#[tauri::command]
-pub fn cancel_standby(
-    app_handle: tauri::AppHandle,
-    state: tauri::State<'_, StandbyManager>,
-) -> Result<(), String> {
-    state.cancel_countdown();
-    if let Some(win) = app_handle.get_webview_window("main") {
-        let _ = win.unminimize();
-        let _ = win.show();
-        let _ = win.set_focus();
-    }
-    Ok(())
-}
 
 #[tauri::command]
 pub fn show_main_window(app_handle: tauri::AppHandle) -> Result<(), String> {

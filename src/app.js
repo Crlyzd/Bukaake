@@ -201,7 +201,6 @@ class BukaakeApp {
         if (ctx) this.fileLoader.loadFromTauriContext(ctx);
         else { loadingIndicator.hide(); toast.warn(`Unsupported file format: ${name}`); }
       },
-      onTriggerOpenFile: () => this.openFile(),
       onOpenSettings: async () => { if (!(await tauriBridge.openSettingsWindow())) this.settingsModal.toggle(); },
     });
 

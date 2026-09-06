@@ -12,7 +12,7 @@ class StandbyService {
     this.enabled = localStorage.getItem(STORAGE_KEY) !== 'false';
   }
 
-  async init({ onOpenPath, onTriggerOpenFile, onOpenSettings } = {}) {
+  async init({ onOpenPath, onOpenSettings } = {}) {
     if (!tauriBridge.isTauri()) return;
 
     // Sync initial state to Rust backend
@@ -24,11 +24,6 @@ class StandbyService {
       if (path && onOpenPath) {
         await onOpenPath(path);
       }
-    });
-
-    // Listen for tray menu trigger open
-    window.__TAURI__?.event?.listen('bukaake://trigger-open-file', () => {
-      onTriggerOpenFile?.();
     });
 
     // Listen for tray menu open settings
