@@ -19,6 +19,7 @@ pub struct AssocStatus {
     pub is_path_matched: bool,
     pub registered_path: Option<String>,
     pub current_path: String,
+    pub format_count: usize,
 }
 
 fn get_current_exe_path() -> Result<String, String> {
@@ -84,6 +85,7 @@ pub fn check_association_status() -> Result<AssocStatus, String> {
         is_path_matched,
         registered_path,
         current_path,
+        format_count: SUPPORTED_EXTENSIONS.len(),
     })
 }
 

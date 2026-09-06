@@ -7,12 +7,7 @@ use serde::Serialize;
 use std::fs;
 use std::path::{Path, PathBuf};
 
-pub const SUPPORTED_EXTS: &[&str] = &[
-    "png", "jpg", "jpeg", "webp", "gif", "bmp", "ico", "tiff", "tif", "svg", "avif",
-    "heic", "heif", "hif", "heifs", "heics",
-    "arw", "srf", "sr2", "cr2", "cr3", "nef", "nrw", "dng", "raf", "rw2", "orf", "pef",
-    "hdr", "exr", "tga", "dds", "qoi", "ppm", "pgm", "pbm", "pnm",
-];
+pub use crate::file_assoc::SUPPORTED_EXTENSIONS as SUPPORTED_EXTS;
 
 #[derive(Debug, Serialize, Clone)]
 pub struct NeighborInfo {

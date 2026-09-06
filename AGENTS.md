@@ -290,14 +290,14 @@ The root control center provides an interactive 10-option manager:
 ### Windows Shell File Association & Auto-Healing Subsystem
 - **Registry Registration & Deep-Link (`src-tauri/src/file_assoc.rs`, `src/services/file-assoc-service.js`)**:
   - Registers ProgID `Bukaake.ImageViewer`, `Capabilities\FileAssociations`, and `RegisteredApplications` under `HKCU` (zero UAC elevation required).
-  - Registers 32 graphic formats (standard raster, camera RAW, HDR/VFX textures, SVG, animated formats) and Windows Explorer right-click context menu ("Open with Bukaake").
+  - Registers 37 graphic formats (standard raster, camera RAW, HDR/VFX textures, SVG, animated formats) and Windows Explorer right-click context menu ("Open with Bukaake").
   - Seamlessly triggers Windows Default Apps settings via `ms-settings:defaultapps?registeredAppUser=Bukaake`.
   - Supports full unregistration, cleanly pruning ProgID and Capabilities keys without touching unrelated configurations.
 - **Silent Startup Path Auto-Healing**:
   - On application startup (`auto_heal_or_sync_path` in `src-tauri/src/main.rs`), compares current binary path against registered registry command.
   - If the portable executable is moved or renamed, silently updates shell open command in place, preserving existing Windows `UserChoice` hashes without requiring the user to reassign defaults in Windows Settings.
 - **Glass Settings Banner & Interactive Switch (`src/styles/components/settings-assoc.css`, `src/settings-app.js`, `src/components/settings-modal.js`)**:
-  - Stroke-free frosted glass banner with vertically centered monochrome shield icon (`ri-shield-check-line`), 32 Formats tag, active executable path badge, and single-button toggle (`Register` / `Unregister`).
+  - Stroke-free frosted glass banner with vertically centered monochrome shield icon (`ri-shield-check-line`), 37 Formats tag, active executable path badge, and single-button toggle (`Register` / `Unregister`).
 
 ### Hardware-Accelerated WIC & HEIC/HEIF Subsystem
 - **Native WIC In-Memory Transcoding (`src-tauri/src/wic_decoder.rs`)**:

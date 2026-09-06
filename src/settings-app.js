@@ -193,13 +193,14 @@ class SettingsApp {
         this.btnSetDefault.classList.add('is-registered');
         this.btnSetDefault.innerHTML = '<i class="ri-delete-bin-line"></i> Unregister';
         this.btnSetDefault.title = 'Remove Bukaake from Windows file associations';
+        const formatLabel = `${status.format_count || 37} Formats`;
         if (this.assocSubText) {
           this.assocSubText.textContent = status.is_path_matched
-            ? 'Registered in Windows (35 Formats)'
+            ? `Registered in Windows (${formatLabel})`
             : 'Path updated — Click to unregister / re-apply';
         }
       } else {
-        this.assocBadge.textContent = '35 Formats';
+        this.assocBadge.textContent = `${status.format_count || 37} Formats`;
         this.assocBadge.classList.remove('matched');
         this.assocCard?.classList.remove('is-registered');
         this.btnSetDefault.classList.remove('is-registered');

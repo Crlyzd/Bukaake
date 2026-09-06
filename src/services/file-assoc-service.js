@@ -13,6 +13,7 @@ class FileAssocService {
       is_path_matched: false,
       registered_path: null,
       current_path: '',
+      format_count: 37,
     };
     this.listeners = new Set();
   }
