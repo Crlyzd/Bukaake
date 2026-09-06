@@ -5,6 +5,7 @@ node_modules/
 dist/
 dist-ssr/
 release-builds/
+test-samples/
 
 # Rust / Tauri build artifacts
 src-tauri/target/
