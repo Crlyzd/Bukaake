@@ -74,6 +74,7 @@ echo  ======================================================================
 echo    Compiling Ultra-Compact x64 Release (v%CURRENT_VER%)
 echo  ======================================================================
 call :STOP_LOCKS
+if not exist "node_modules" call npm install
 if not exist "release-builds" mkdir release-builds
 
 echo  [1/3] Bundling and minifying frontend assets...
@@ -105,6 +106,7 @@ echo  ======================================================================
 echo    Compiling Ultra-Compact ARM64 Release (v%CURRENT_VER%)
 echo  ======================================================================
 call :STOP_LOCKS
+if not exist "node_modules" call npm install
 if not exist "release-builds" mkdir release-builds
 
 echo  [+] Ensuring rustup ARM64 target is installed...

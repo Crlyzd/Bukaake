@@ -70,7 +70,7 @@ Reliving the iconic Google Picasa Photo Viewer experience with two tailored mode
   - High-performance 60 FPS HTML5 Canvas pan and zoom.
   - Smooth mouse wheel zoom anchored to cursor coordinates.
   - Arrow keys (Left/Right) for instant navigation across neighbor images in the current folder.
-  - Quick keys: `F` (Fit to screen), `1` (100% 1:1 Actual size), `Esc` (Exit fullscreen / Close), `C` (Crop), `D` (Draw), `E` (Filters), `I` (Metadata), `Ctrl+S` (Save), `Ctrl+Shift+S` (Save As), `Ctrl+Z` / `Ctrl+Y` (Undo/Redo drawing).
+  - Quick keys: `F` (Fit to screen), `1` (100% 1:1 Actual size), `,` / `.` (Rotate Left / Right), `Esc` (Exit fullscreen / Close), `C` (Crop), `D` (Draw), `E` (Filters), `I` (Metadata), `Ctrl+S` (Save), `Ctrl+Shift+S` (Save As), `Ctrl+Z` / `Ctrl+Y` (Undo/Redo drawing).
 
 ### Pillar 5: Strict Modularity Architecture (No Monoliths)
 - **Hard Rule — Maximum 300 Lines Per File**: No source code file (`.js`, `.css`, `.rs`) may exceed **300 lines of code**. Any file approaching this limit must be proactively refactored into focused submodules.

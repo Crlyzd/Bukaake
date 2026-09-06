@@ -64,15 +64,19 @@ export class ShortcutsRegistry {
         e.preventDefault();
         this.actions.onActualSize?.();
         break;
-      case 'r':
-      case 'R':
-        e.preventDefault();
-        this.actions.onRotateRight?.();
-        break;
+      case ',':
+      case '<':
       case 'l':
       case 'L':
         e.preventDefault();
         this.actions.onRotateLeft?.();
+        break;
+      case '.':
+      case '>':
+      case 'r':
+      case 'R':
+        e.preventDefault();
+        this.actions.onRotateRight?.();
         break;
       case 'h':
       case 'H':

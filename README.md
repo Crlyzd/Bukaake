@@ -104,6 +104,7 @@ Never worry about missing new features. Bukaake automatically checks for GitHub 
 | **`Mouse Wheel`** | Smooth zoom in / out (anchored to cursor) |
 | **`F`** | Fit image to window / screen |
 | **`1`** | View at 100% (1:1 actual pixels) |
+| **`,` / `.`** | Rotate Left / Right (90°) |
 | **`D`** | Toggle Freehand Drawing & Highlighting |
 | **`C`** | Toggle Crop tool |
 | **`E`** | Toggle Color Adjustments & Filters |

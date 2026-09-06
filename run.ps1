@@ -47,6 +47,10 @@ function Invoke-BuildX64 {
     Write-Host "    Compiling Ultra-Compact x64 Release (v$version)" -ForegroundColor BrightWhite
     Write-Host "  ======================================================================" -ForegroundColor Cyan
     Stop-Locks
+    if (-not (Test-Path "node_modules")) {
+        Write-Host "  [+] Installing frontend dependencies (npm install)..." -ForegroundColor Yellow
+        cmd /c "npm install"
+    }
     if (-not (Test-Path "release-builds")) { New-Item -ItemType Directory -Path "release-builds" | Out-Null }
 
     Write-Host "  [1/3] Bundling and minifying frontend assets..." -ForegroundColor Yellow
@@ -72,6 +76,10 @@ function Invoke-BuildArm64 {
     Write-Host "    Compiling Ultra-Compact ARM64 Release (v$version)" -ForegroundColor BrightWhite
     Write-Host "  ======================================================================" -ForegroundColor Cyan
     Stop-Locks
+    if (-not (Test-Path "node_modules")) {
+        Write-Host "  [+] Installing frontend dependencies (npm install)..." -ForegroundColor Yellow
+        cmd /c "npm install"
+    }
     if (-not (Test-Path "release-builds")) { New-Item -ItemType Directory -Path "release-builds" | Out-Null }
 
     Write-Host "  [+] Verifying rustup ARM64 target..." -ForegroundColor Yellow
