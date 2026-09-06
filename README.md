@@ -25,7 +25,7 @@ Most modern image viewers are either bloated, slow to start up, or trap your pho
 **Bukaake** revives the beloved viewing experience of the legendary **Google Picasa Photo Viewer**:
 - **Zero Distractions**: Borderless and translucent. Your desktop wallpaper stays visible softly dimmed in the background.
 - **Auto-Fading UI**: Look at your photo in pure peace. The moment your mouse stops moving, all toolbar buttons and titles fade away into complete transparency.
-- **Lightning Fast**: Launches in milliseconds and uses almost no RAM. A single ~4.7 MB portable file that doesn't need to be installed.
+- **Lightning Fast**: Launches in milliseconds and uses almost no RAM. A single ~5 MB portable file that doesn't need to be installed.
 - **Butter-Smooth Navigation**: Zoom smoothly right into details with your mouse wheel, pan effortlessly, and tap Left/Right arrows to flip through your photo album.
 
 ---
@@ -70,15 +70,18 @@ Designed specifically for Windows 10 and 11:
 
 ---
 
-### 🔄 5. Effortless Auto-Updates
-Never worry about missing new features. Bukaake automatically checks for GitHub releases quietly in the background (and stays completely silent while you're enjoying fullscreen viewing).
+### 🔄 5. Effortless In-App Self-Updating
+Never worry about missing new features or manually downloading new builds:
+- **Background Checks**: Quietly checks GitHub releases on launch (and stays completely disabled in Fullscreen Mode for distraction-free viewing).
+- **One-Click Native Update**: Click **Install** in the Settings window to stream the update with a real-time glowing progress bar.
+- **In-Place Seamless Relaunch**: Bukaake replaces its own executable in-place without breaking your taskbar pins, desktop shortcuts, or file associations, and relaunches into the new version instantly.
 
 ---
 
 ## ⚡ Quick Start (No Installation Needed!)
 
 1. Go to the **[Latest Release](https://github.com/Crlyzd/Bukaake/releases/latest)** page.
-2. Download **`bukaake-v0.1.0-x64.exe`** (or `arm64.exe` for ARM laptops like Surface Pro).
+2. Download the latest executable matching your architecture (e.g., **`bukaake-vX.Y.Z-x64.exe`** or **`arm64.exe`** for ARM laptops like Surface Pro).
 3. **Double-click to run!** That's it—no setup wizard, no extra dependencies, and no administrative rights required.
 
 > **Tip**: Right-click any photo (`.jpg`, `.png`, `.webp`, `.avif`, `.gif`), select **Open with...**, and choose **Bukaake** (check *"Always use this app"* to make it your permanent default photo viewer).
