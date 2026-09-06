@@ -98,9 +98,11 @@ body.mode-viewer .viewport-container {
 body.mode-viewer .app-titlebar {
   position: absolute !important;
   top: 18px !important;
-  left: 24px !important;
+  left: 50% !important;
   right: auto !important;
+  transform: translateX(-50%) !important;
   width: auto !important;
+  max-width: 85vw !important;
   height: auto !important;
   background: transparent !important;
   backdrop-filter: none !important;
@@ -110,21 +112,26 @@ body.mode-viewer .app-titlebar {
   padding: 0 !important;
   display: flex !important;
   align-items: center !important;
+  justify-content: center !important;
   gap: 8px !important;
   z-index: 50 !important;
-  transform: none !important;
 }
 
 body.mode-viewer .app-titlebar .titlebar-left {
   display: flex !important;
   align-items: center !important;
   gap: 8px !important;
+  min-width: 0 !important;
+  flex: 0 1 auto !important;
+  overflow: hidden !important;
 }
 
 body.mode-viewer .app-titlebar .titlebar-right {
   display: flex !important;
   align-items: center !important;
   gap: 4px !important;
+  margin-left: 0 !important;
+  flex-shrink: 0 !important;
 }
 
 /* Suppress all chrome, buttons, and branding in Mode 2 */
@@ -151,6 +158,7 @@ body.mode-viewer #fileNameBadge {
   color: #ffffff !important;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.95), 0 2px 10px rgba(0, 0, 0, 0.85);
   letter-spacing: 0.2px;
+  max-width: 45vw !important;
 }
 
 /* Pure text overlay: Dimensions */
@@ -187,6 +195,7 @@ body.mode-viewer #btnToggleInfo:hover {
 body.mode-viewer.image-loaded .app-titlebar {
   opacity: 0;
   pointer-events: none;
+  transform: translateX(-50%) !important;
   transition: opacity var(--transition-fast);
 }
 
@@ -194,6 +203,7 @@ body.mode-viewer.image-loaded .app-titlebar.visible,
 body.mode-viewer.image-loaded .app-titlebar:hover {
   opacity: 1;
   pointer-events: auto;
+  transform: translateX(-50%) !important;
 }
 
 body.mode-viewer.image-loaded .floating-toolbar {
