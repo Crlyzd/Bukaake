@@ -1,7 +1,7 @@
 /**
  * Bukaake Auto-Updater Service
  * Coordinates background launch checks (with Mode 2 Fullscreen Viewer exclusion),
- * manual checks, and bidirectional state synchronization across all windows (< 160 lines)
+ * manual checks, asset matching, in-place self-updating, and multi-window state synchronization (< 270 lines)
  */
 
 import { toast } from '../components/toast.js';
@@ -34,12 +34,16 @@ class UpdaterService {
       const saved = localStorage.getItem(this.storageKey);
       if (saved) {
         const parsed = JSON.parse(saved);
-        // Purge legacy mock toggle data claiming v0.2.0
         if (parsed.version === '0.2.0' && parsed.hasUpdate) {
           localStorage.removeItem(this.storageKey);
           localStorage.removeItem('bukaake_update_available');
         } else {
-          return parsed;
+          return {
+            ...parsed,
+            isUpdating: false,
+            updatePercent: 0,
+            updateStatus: 'idle',
+          };
         }
       }
     } catch (_) {}
@@ -47,7 +51,11 @@ class UpdaterService {
       hasUpdate: false,
       version: this.currentVersion,
       releaseUrl: '',
+      assetUrl: '',
       isChecking: false,
+      isUpdating: false,
+      updatePercent: 0,
+      updateStatus: 'idle',
       lastChecked: 0,
     };
   }
@@ -80,6 +88,10 @@ class UpdaterService {
         available: this.state.hasUpdate,
         version: this.state.version,
         releaseUrl: this.state.releaseUrl,
+        assetUrl: this.state.assetUrl,
+        isUpdating: this.state.isUpdating,
+        updatePercent: this.state.updatePercent,
+        updateStatus: this.state.updateStatus,
       });
     }
   }
@@ -101,42 +113,54 @@ class UpdaterService {
           this.subscribers.forEach((fn) => fn(this.state));
         }
       });
+
+      window.__TAURI__.event.listen('bukaake-update-progress', (e) => {
+        if (e.payload) {
+          const { status, percent } = e.payload;
+          this.state.isUpdating = status === 'downloading' || status === 'installing';
+          this.state.updateStatus = status || 'downloading';
+          if (typeof percent === 'number') {
+            this.state.updatePercent = Math.round(percent);
+          }
+          this.broadcast();
+        }
+      });
     }
   }
 
-  /**
-   * App Launch Check
-   * STRICT IMMERSION INVARIANT: Mode 2 (Fullscreen Viewer) is strictly excluded
-   * for zero loading delays and instant Picasa-style desktop photo viewing.
-   */
-  initLaunchCheck() {
-    if (document.body.classList.contains('mode-viewer')) {
-      return;
+  async getSystemArch() {
+    if (window.__TAURI__?.core?.invoke) {
+      try {
+        return await window.__TAURI__.core.invoke('get_system_arch');
+      } catch (_) {}
     }
+    return /arm64|aarch64/i.test(navigator.userAgent || '') ? 'arm64' : 'x64';
+  }
 
-    // Delayed by 1.5s in Regular App Mode so initial render stays at 60 FPS
+  selectAssetUrl(assets = [], arch = 'x64') {
+    if (!Array.isArray(assets) || assets.length === 0) return '';
+    const exeAssets = assets.filter((a) => (a.name || '').toLowerCase().endsWith('.exe'));
+    if (exeAssets.length === 0) return '';
+    const match = exeAssets.find((a) => (a.name || '').toLowerCase().includes(arch));
+    return match ? match.browser_download_url : exeAssets[0].browser_download_url || '';
+  }
+
+  initLaunchCheck() {
+    if (document.body.classList.contains('mode-viewer')) return;
     setTimeout(() => {
       if (document.body.classList.contains('mode-viewer')) return;
       this.checkUpdate({ silent: true });
     }, 1500);
   }
 
-  /**
-   * Called when Settings button is clicked in the main window
-   */
   onSettingsClick() {
-    // Only check if no check within the last hour to prevent rate limiting
     const ONE_HOUR = 60 * 60 * 1000;
     if (this.state.hasUpdate || (Date.now() - this.state.lastChecked < ONE_HOUR)) return;
     this.checkUpdate({ silent: true });
   }
 
-  /**
-   * Perform update check against GitHub Releases
-   */
   async checkUpdate({ silent = false } = {}) {
-    if (this.state.isChecking) return;
-
+    if (this.state.isChecking || this.state.isUpdating) return;
     this.state.isChecking = true;
     this.broadcast();
 
@@ -146,10 +170,10 @@ class UpdaterService {
       });
 
       if (res.status === 404) {
-        // No release published yet on GitHub repository
         this.state.hasUpdate = false;
         this.state.version = this.currentVersion;
         this.state.releaseUrl = '';
+        this.state.assetUrl = '';
         if (!silent) toast.show(`You are on the latest version of Bukaake (v${this.currentVersion})`);
       } else if (res.ok) {
         const data = await res.json();
@@ -157,18 +181,20 @@ class UpdaterService {
         const remoteVer = remoteTag.replace(/^v/i, '');
 
         if (compareVersions(remoteVer, this.currentVersion) > 0) {
+          const arch = await this.getSystemArch();
           this.state.hasUpdate = true;
           this.state.version = remoteVer;
           this.state.releaseUrl = data.html_url || 'https://github.com/Crlyzd/Bukaake/releases';
+          this.state.assetUrl = this.selectAssetUrl(data.assets, arch);
           toast.show(`New version v${this.state.version} is available!`);
         } else {
           this.state.hasUpdate = false;
           this.state.version = this.currentVersion;
           this.state.releaseUrl = '';
+          this.state.assetUrl = '';
           if (!silent) toast.show(`You are on the latest version of Bukaake (v${this.currentVersion})`);
         }
       } else {
-        // Rate-limited or other non-fatal HTTP response
         this.state.hasUpdate = false;
         if (!silent) toast.show(`You are on the latest version of Bukaake (v${this.currentVersion})`);
       }
@@ -182,9 +208,46 @@ class UpdaterService {
     }
   }
 
-  setUpdateAvailable(hasUpdate, version = '0.1.1') {
+  async installUpdate() {
+    if (this.state.isUpdating) return;
+    if (!this.state.hasUpdate) {
+      return this.checkUpdate({ silent: false });
+    }
+
+    const assetUrl = this.state.assetUrl;
+    if (!window.__TAURI__?.core?.invoke || !assetUrl) {
+      const url = this.state.releaseUrl || 'https://github.com/Crlyzd/Bukaake/releases';
+      window.open(url, '_blank');
+      return;
+    }
+
+    this.state.isUpdating = true;
+    this.state.updateStatus = 'downloading';
+    this.state.updatePercent = 0;
+    this.broadcast();
+    toast.show(`Downloading Bukaake v${this.state.version}...`);
+
+    try {
+      await window.__TAURI__.core.invoke('download_and_install_update', { assetUrl });
+    } catch (err) {
+      console.error('[UpdaterService] Install failed:', err);
+      this.state.isUpdating = false;
+      this.state.updateStatus = 'error';
+      this.broadcast();
+      toast.show(`Update failed: ${err}`);
+      const url = this.state.releaseUrl || 'https://github.com/Crlyzd/Bukaake/releases';
+      if (window.__TAURI__?.core?.invoke) {
+        window.__TAURI__.core.invoke('open_url', { url }).catch(() => window.open(url, '_blank'));
+      } else {
+        window.open(url, '_blank');
+      }
+    }
+  }
+
+  setUpdateAvailable(hasUpdate, version = '0.1.1', assetUrl = '') {
     this.state.hasUpdate = hasUpdate;
     this.state.version = version;
+    this.state.assetUrl = assetUrl;
     this.broadcast();
   }
 }

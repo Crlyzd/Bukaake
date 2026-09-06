@@ -38,14 +38,16 @@ The application must provide first-class support for both Dark and Light themes:
 - **Native Acrylic Tint Coordination**: The Rust backend applies native Windows Acrylic blur in coordination with the active theme (`Some((16, 19, 28, 248))` for dark, `Some((245, 247, 250, 140))` for light).
 - **Theme Switching**: Instant, flicker-free theme switching with persistence in local storage and automatic system preference detection (`prefers-color-scheme`).
 
-### Pillar 3: GitHub Releases Auto-Updater
-The application provides seamless background and interactive updates via GitHub Releases:
-- **Updater Architecture (`src/services/updater-service.js`)**: Powered by GitHub Releases API (`https://api.github.com/repos/Crlyzd/Bukaake/releases/latest`) with semver comparison.
+### Pillar 3: GitHub Releases Auto-Updater & Native Self-Updating
+The application provides seamless background checks and native in-place self-updating via GitHub Releases:
+- **Updater Architecture (`src/services/updater-service.js`, `src-tauri/src/updater.rs`)**: Powered by GitHub Releases API (`https://api.github.com/repos/Crlyzd/Bukaake/releases/latest`) with semver comparison and asset detection (x64 and arm64 binaries).
+- **Native In-Place Self-Updating**: Clicking "Install vX.Y.Z" triggers `download_and_install_update` in Rust. It downloads the update matching the system architecture using `curl.exe` (with PowerShell fallback), emits live progress percentage (`bukaake-update-progress`), replaces the running executable in-place via `self-replace` without breaking shortcuts or pinned links, relaunches the updated executable, and terminates the old process cleanly.
+- **Visual Progress Bar Track**: Update cards feature an embedded stroke-free rounded track with an animated glowing gradient fill (`#6366f1` to `#a855f7` to `#06b6d4`), displaying live download percentages and restarting status.
+- **Startup Artifact Cleanup**: Cleanly purges any lingering `.old` or `.tmp` binary artifacts from past updates on application startup.
 - **Multi-Window State Synchronization**: Broadcasts update state across main and settings windows via `localStorage` storage events, `bukaake-update-state` Tauri events, and custom DOM events.
 - **Strict Immersion Invariant (Mode 2 Fullscreen Exclusion)**: In Fullscreen Image Viewer Mode (`body.mode-viewer`), launch checks are completely skipped for instant, distraction-free viewing.
 - **Smooth Launch Performance (Mode 1)**: In Regular App Mode, background check is delayed by 1.5s after launch to keep startup at 60 FPS.
 - **Rate-Limit Mitigation**: Manual checks triggered on settings open enforce a 1-hour cooldown if an update was recently checked, with interactive fallback to open GitHub releases in browser.
-- **Updater Experience**: Non-intrusive glass notification toast when an update is available, with direct release page download integration in both Settings modal and standalone Settings window.
 
 ### Pillar 4: Dual-Mode & Picasa-Style Transparent Viewing
 Reliving the iconic Google Picasa Photo Viewer experience with two tailored modes:
@@ -153,9 +155,10 @@ bukaake/
     ├── Cargo.toml                 # Tauri v2 dependencies (`window-vibrancy`, `rfd`, `image`, `arboard`)
     ├── tauri.conf.json            # Multi-window config (main + settings)
     └── src/
-        ├── main.rs                # Native acrylic vibrancy + window IPC commands (~295 lines)
+        ├── main.rs                # Native acrylic vibrancy + window IPC commands (~275 lines)
         ├── image_loader.rs        # Fast native image decoding & metadata reading (~205 lines)
-        └── clipboard.rs           # Native OS clipboard engine, CF_HDROP & image IPC (~165 lines)
+        ├── clipboard.rs           # Native OS clipboard engine, CF_HDROP & image IPC (~165 lines)
+        └── updater.rs             # Native in-place self-updater, progress & relaunch (~170 lines)
 ```
 
 ---

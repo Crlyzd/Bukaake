@@ -432,11 +432,16 @@
 
           <!-- Update Banner -->
           <div class="settings-update-banner">
-            <div class="update-status-wrap">
-              <i class="ri-checkbox-circle-line"></i>
-              <span id="updateStatusText">Bukaake v0.1.1 (Latest Version)</span>
+            <div class="settings-update-header">
+              <div class="update-status-wrap">
+                <i class="ri-checkbox-circle-line" id="updateStatusIcon"></i>
+                <span id="updateStatusText">Bukaake v0.1.1 (Latest Version)</span>
+              </div>
+              <button class="btn-check-update" id="btnCheckUpdate"><i class="ri-refresh-line"></i> Check</button>
             </div>
-            <button class="btn-check-update" id="btnCheckUpdate"><i class="ri-refresh-line"></i> Check</button>
+            <div class="update-progress-track hidden" id="updateProgressTrack">
+              <div class="update-progress-fill" id="updateProgressFill" style="width: 0%;"></div>
+            </div>
           </div>
 
           <!-- Action Grid -->

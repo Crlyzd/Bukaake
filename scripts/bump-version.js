@@ -84,7 +84,7 @@ writeJson(tauriConfPath, tauriConf);
 
 // 5. Update src/services/updater-service.js
 updateFile(updaterServicePath, /this\.currentVersion\s*=\s*['"][^'"]+['"]/g, `this.currentVersion = '${newVer}'`);
-updateFile(updaterServicePath, /setUpdateAvailable\(hasUpdate,\s*version\s*=\s*['"][^'"]+['"]\)/g, `setUpdateAvailable(hasUpdate, version = '${newVer}')`);
+updateFile(updaterServicePath, /setUpdateAvailable\(hasUpdate,\s*version\s*=\s*['"][^'"]+['"]([^)]*)\)/g, `setUpdateAvailable(hasUpdate, version = '${newVer}'$1)`);
 
 // 6. Update settings UI scripts
 const statusRegex = /Bukaake v[0-9]+\.[0-9]+\.[0-9]+ \(Latest Version\)/g;

@@ -3,9 +3,11 @@
 
 mod clipboard;
 mod image_loader;
+mod updater;
 use clipboard::{read_clipboard, write_clipboard_image};
 use image_loader::{get_initial_image, read_image_context, read_image_file};
 use tauri::{Emitter, Manager};
+use updater::{cleanup_old_update_artifacts, download_and_install_update, get_system_arch};
 
 #[cfg(target_os = "windows")]
 use std::os::windows::process::CommandExt;
@@ -227,26 +229,22 @@ fn set_window_vibrancy(app_handle: tauri::AppHandle, is_dark: bool, is_viewer: O
 }
 
 fn main() {
+    cleanup_old_update_artifacts();
     tauri::Builder::default()
         .setup(|app| {
             #[cfg(target_os = "windows")]
             {
                 let tint = Some((16, 19, 28, 248));
                 if let Some(icon) = app.default_window_icon() {
-                    if let Some(window) = app.get_webview_window("main") {
-                        let _ = window.set_icon(icon.clone());
-                    }
-                    if let Some(settings_win) = app.get_webview_window("settings") {
-                        let _ = settings_win.set_icon(icon.clone());
+                    for name in ["main", "settings"] {
+                        if let Some(w) = app.get_webview_window(name) { let _ = w.set_icon(icon.clone()); }
                     }
                 }
-                if let Some(window) = app.get_webview_window("main") {
-                    let _ = window.set_shadow(true);
-                    let _ = window_vibrancy::apply_acrylic(&window, tint);
-                }
-                if let Some(settings_win) = app.get_webview_window("settings") {
-                    let _ = settings_win.set_shadow(true);
-                    let _ = window_vibrancy::apply_acrylic(&settings_win, tint);
+                for name in ["main", "settings"] {
+                    if let Some(w) = app.get_webview_window(name) {
+                        let _ = w.set_shadow(true);
+                        let _ = window_vibrancy::apply_acrylic(&w, tint);
+                    }
                 }
             }
             Ok(())
@@ -263,31 +261,14 @@ fn main() {
             }
         })
         .invoke_handler(tauri::generate_handler![
-            get_cli_args,
-            get_initial_image,
-            read_image_file,
-            read_image_context,
-            play_windows_ding,
-            open_url,
-            show_in_folder,
-            close_window,
-            exit_app,
-            prompt_save_file,
-            prompt_open_file,
-            save_image_bytes,
-            read_clipboard,
-            write_clipboard_image,
-            minimize_window,
-            toggle_maximize_window,
-            is_window_maximized,
-            unmaximize_window,
-            resize_and_center_window,
-            start_window_resize,
-            set_fullscreen_window,
-            is_window_fullscreen,
-            set_window_vibrancy,
-            open_settings_window,
-            hide_settings_window
+            get_cli_args, get_initial_image, read_image_file, read_image_context,
+            play_windows_ding, open_url, show_in_folder, close_window, exit_app,
+            prompt_save_file, prompt_open_file, save_image_bytes, read_clipboard,
+            write_clipboard_image, minimize_window, toggle_maximize_window,
+            is_window_maximized, unmaximize_window, resize_and_center_window,
+            start_window_resize, set_fullscreen_window, is_window_fullscreen,
+            set_window_vibrancy, open_settings_window, hide_settings_window,
+            download_and_install_update, get_system_arch
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

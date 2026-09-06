@@ -16,6 +16,8 @@ class SettingsApp {
     this.btnCheckUpdate = document.getElementById('btnCheckUpdate');
     this.updateStatusText = document.getElementById('updateStatusText');
     this.updateBanner = document.querySelector('.settings-update-banner');
+    this.updateProgressTrack = document.getElementById('updateProgressTrack');
+    this.updateProgressFill = document.getElementById('updateProgressFill');
 
     this.init();
   }
@@ -99,10 +101,26 @@ class SettingsApp {
 
   bindUpdater() {
     updaterService.subscribe((state) => {
+      const isUpdating = Boolean(state.isUpdating);
+      const isChecking = Boolean(state.isChecking);
       this.updateBanner?.classList.toggle('has-update', Boolean(state.hasUpdate));
+
+      if (this.updateProgressTrack) {
+        this.updateProgressTrack.classList.toggle('hidden', !isUpdating);
+      }
+      if (this.updateProgressFill) {
+        this.updateProgressFill.style.width = `${state.updatePercent || 0}%`;
+      }
+
       if (this.btnCheckUpdate) {
-        this.btnCheckUpdate.disabled = Boolean(state.isChecking);
-        if (state.isChecking) {
+        this.btnCheckUpdate.disabled = isChecking || isUpdating;
+        if (isUpdating) {
+          if (state.updateStatus === 'installing') {
+            this.btnCheckUpdate.innerHTML = '<i class="ri-refresh-line ri-spin"></i> Restarting...';
+          } else {
+            this.btnCheckUpdate.innerHTML = `<i class="ri-loader-4-line ri-spin"></i> Downloading (${state.updatePercent || 0}%)...`;
+          }
+        } else if (isChecking) {
           this.btnCheckUpdate.innerHTML = '<i class="ri-loader-4-line ri-spin"></i> Checking...';
         } else if (state.hasUpdate) {
           this.btnCheckUpdate.innerHTML = `<i class="ri-download-cloud-line"></i> Install v${state.version || '0.1.1'}`;
@@ -110,8 +128,15 @@ class SettingsApp {
           this.btnCheckUpdate.innerHTML = '<i class="ri-refresh-line"></i> Check';
         }
       }
+
       if (this.updateStatusText) {
-        if (state.hasUpdate) {
+        if (isUpdating) {
+          if (state.updateStatus === 'installing') {
+            this.updateStatusText.textContent = `Installing Bukaake v${state.version || '0.1.1'} & restarting...`;
+          } else {
+            this.updateStatusText.textContent = `Downloading Bukaake v${state.version || '0.1.1'} — ${state.updatePercent || 0}%`;
+          }
+        } else if (state.hasUpdate) {
           this.updateStatusText.textContent = `Update available: Bukaake v${state.version || '0.1.1'}`;
         } else {
           this.updateStatusText.textContent = 'Bukaake v0.1.1 (Latest Version)';
@@ -121,8 +146,7 @@ class SettingsApp {
 
     this.btnCheckUpdate?.addEventListener('click', () => {
       if (updaterService.state.hasUpdate) {
-        const url = updaterService.state.releaseUrl || 'https://github.com/Crlyzd/Bukaake/releases';
-        tauriBridge.openUrl(url);
+        updaterService.installUpdate();
       } else {
         updaterService.checkUpdate({ silent: false });
       }
