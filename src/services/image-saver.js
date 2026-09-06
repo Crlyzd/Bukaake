@@ -7,6 +7,12 @@ import { tauriBridge } from './tauri-bridge.js';
 import { changeTracker } from './change-tracker.js';
 import { toast } from '../components/toast.js';
 
+function getEditTimestamp() {
+  const d = new Date();
+  const pad = (n) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}_${pad(d.getHours())}-${pad(d.getMinutes())}-${pad(d.getSeconds())}`;
+}
+
 export async function exportImage(viewer, filters, fileLoader, isCropActive, isDrawActive) {
   if (!viewer.img) { toast.show('No image loaded to save'); return false; }
   if (isCropActive) { toast.show('Please apply or cancel crop before saving'); return false; }
@@ -16,7 +22,8 @@ export async function exportImage(viewer, filters, fileLoader, isCropActive, isD
   if (!off) return false;
 
   const base = fileLoader.currentMeta?.name?.replace(/\.[^/.]+$/, '') || 'bukaake_export';
-  const defaultName = `${base}_edited.png`;
+  const timestamp = getEditTimestamp();
+  const defaultName = `${base}_edited_${timestamp}.png`;
   const dataUrl = off.toDataURL('image/png');
 
   if (tauriBridge.isTauri()) {

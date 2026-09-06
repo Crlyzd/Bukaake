@@ -97,10 +97,10 @@ body.mode-viewer .viewport-container {
    -------------------------------------------------------------------------- */
 body.mode-viewer .app-titlebar {
   position: absolute !important;
-  top: 18px !important;
+  top: 6.25vh !important;
   left: 50% !important;
   right: auto !important;
-  transform: translateX(-50%) !important;
+  transform: translate(-50%, -50%) !important;
   width: auto !important;
   max-width: 85vw !important;
   height: auto !important;
@@ -113,14 +113,14 @@ body.mode-viewer .app-titlebar {
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
-  gap: 8px !important;
+  gap: 16px !important;
   z-index: 50 !important;
 }
 
 body.mode-viewer .app-titlebar .titlebar-left {
   display: flex !important;
   align-items: center !important;
-  gap: 8px !important;
+  gap: 12px !important;
   min-width: 0 !important;
   flex: 0 1 auto !important;
   overflow: hidden !important;
@@ -129,7 +129,7 @@ body.mode-viewer .app-titlebar .titlebar-left {
 body.mode-viewer .app-titlebar .titlebar-right {
   display: flex !important;
   align-items: center !important;
-  gap: 4px !important;
+  gap: 8px !important;
   margin-left: 0 !important;
   flex-shrink: 0 !important;
 }
@@ -148,42 +148,46 @@ body.mode-viewer #btnSettings {
   display: none !important;
 }
 
-/* Pure text overlay: Filename */
+/* Pure text overlay: Filename (100% larger) */
 body.mode-viewer #fileNameBadge {
   display: inline-block !important;
   background: transparent !important;
   padding: 0 !important;
-  font-size: 13px !important;
+  font-size: 26px !important;
   font-weight: 500 !important;
   color: #ffffff !important;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.95), 0 2px 10px rgba(0, 0, 0, 0.85);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.95), 0 3px 12px rgba(0, 0, 0, 0.85);
   letter-spacing: 0.2px;
-  max-width: 45vw !important;
+  max-width: 55vw !important;
 }
 
-/* Pure text overlay: Dimensions */
+/* Pure text overlay: Dimensions (100% larger) */
 body.mode-viewer #titlebarDimensions {
   display: inline-block !important;
   background: transparent !important;
   padding: 0 !important;
-  font-size: 11px !important;
+  font-size: 22px !important;
   color: rgba(255, 255, 255, 0.65) !important;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.95), 0 2px 8px rgba(0, 0, 0, 0.85);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.95), 0 3px 10px rgba(0, 0, 0, 0.85);
 }
 
-/* Minimalist ! / Info icon */
+/* Minimalist ! / Info icon (100% larger, crisp vector) */
 body.mode-viewer #btnToggleInfo {
   display: inline-flex !important;
   background: transparent !important;
   border: none !important;
   box-shadow: none !important;
-  width: 22px !important;
-  height: 22px !important;
+  width: 44px !important;
+  height: 44px !important;
   padding: 0 !important;
   color: rgba(255, 255, 255, 0.85) !important;
-  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.9));
+  filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.9));
   cursor: pointer !important;
   transition: transform var(--transition-fast), color var(--transition-fast);
+}
+
+body.mode-viewer #btnToggleInfo i {
+  font-size: 28px !important;
 }
 
 body.mode-viewer #btnToggleInfo:hover {
@@ -191,19 +195,18 @@ body.mode-viewer #btnToggleInfo:hover {
   transform: scale(1.15);
 }
 
-/* Picasa idle fade compatibility */
+/* Mode 2 Titlebar: Always Visible */
 body.mode-viewer.image-loaded .app-titlebar {
-  opacity: 0;
-  pointer-events: none;
-  transform: translateX(-50%) !important;
-  transition: opacity var(--transition-fast);
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  transform: translate(-50%, -50%) !important;
 }
 
 body.mode-viewer.image-loaded .app-titlebar.visible,
 body.mode-viewer.image-loaded .app-titlebar:hover {
-  opacity: 1;
-  pointer-events: auto;
-  transform: translateX(-50%) !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  transform: translate(-50%, -50%) !important;
 }
 
 body.mode-viewer.image-loaded .floating-toolbar {
