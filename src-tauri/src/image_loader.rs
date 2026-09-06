@@ -1,4 +1,5 @@
 use crate::exif_reader::{self, ExifPayload};
+use crate::heif_reader;
 use crate::pro_decoder;
 use crate::raw_reader;
 use base64::prelude::*;
@@ -8,6 +9,7 @@ use std::path::{Path, PathBuf};
 
 pub const SUPPORTED_EXTS: &[&str] = &[
     "png", "jpg", "jpeg", "webp", "gif", "bmp", "ico", "tiff", "tif", "svg", "avif",
+    "heic", "heif", "hif", "heifs", "heics",
     "arw", "srf", "sr2", "cr2", "cr3", "nef", "nrw", "dng", "raf", "rw2", "orf", "pef",
     "hdr", "exr", "tga", "dds", "qoi", "ppm", "pgm", "pbm", "pnm",
 ];
@@ -67,6 +69,7 @@ pub fn get_mime_type(ext: &str) -> &'static str {
         "tiff" | "tif" => "image/tiff",
         "svg" => "image/svg+xml",
         "avif" => "image/avif",
+        "heic" | "heif" | "hif" | "heifs" | "heics" => "image/heic",
         "hdr" => "image/vnd.radiance",
         "exr" => "image/x-exr",
         "tga" => "image/x-tga",
@@ -90,6 +93,12 @@ pub fn file_to_data_url(path: &Path) -> Result<(String, Option<(u32, u32)>), Str
         if let Some(jpeg_bytes) = raw_reader::extract_raw_preview(path) {
             let b64 = BASE64_STANDARD.encode(&jpeg_bytes);
             return Ok((format!("data:image/jpeg;base64,{}", b64), None));
+        }
+    }
+
+    if heif_reader::is_heif_file(path) {
+        if let Ok((data_url, dims)) = heif_reader::decode_heif_image(path) {
+            return Ok((data_url, Some(dims)));
         }
     }
 
@@ -191,6 +200,35 @@ pub fn find_cli_file_arg() -> Option<PathBuf> {
     None
 }
 
+fn build_initial_payload(path: &Path) -> Result<InitialImagePayload, String> {
+    let abs_path = path.canonicalize().unwrap_or_else(|_| path.to_path_buf());
+    let file_name = abs_path
+        .file_name()
+        .and_then(|n| n.to_str())
+        .unwrap_or("image")
+        .to_string();
+    let parent_dir = abs_path
+        .parent()
+        .map(|p| p.to_string_lossy().to_string())
+        .unwrap_or_default();
+    let (neighbors, current_index) = scan_directory_neighbors(&abs_path);
+    let info = gather_file_info(&abs_path)?;
+
+    Ok(InitialImagePayload {
+        target_path: abs_path.to_string_lossy().to_string(),
+        file_name,
+        parent_dir,
+        neighbors,
+        current_index,
+        data_url: info.data_url,
+        size_bytes: info.size_bytes,
+        dimensions: info.dimensions,
+        mime_type: info.mime_type,
+        last_modified: info.last_modified,
+        exif: info.exif,
+    })
+}
+
 #[tauri::command]
 pub fn get_initial_image() -> Result<Option<InitialImagePayload>, String> {
     let image_path = match find_cli_file_arg() {
@@ -206,33 +244,7 @@ pub fn get_initial_image() -> Result<Option<InitialImagePayload>, String> {
         return Err(format!("Unsupported file format: {}", name));
     }
 
-    let abs_path = image_path.canonicalize().unwrap_or_else(|_| image_path.clone());
-    let file_name = abs_path
-        .file_name()
-        .and_then(|n| n.to_str())
-        .unwrap_or("image")
-        .to_string();
-    let parent_dir = abs_path
-        .parent()
-        .map(|p| p.to_string_lossy().to_string())
-        .unwrap_or_default();
-
-    let (neighbors, current_index) = scan_directory_neighbors(&abs_path);
-    let info = gather_file_info(&abs_path)?;
-
-    Ok(Some(InitialImagePayload {
-        target_path: abs_path.to_string_lossy().to_string(),
-        file_name,
-        parent_dir,
-        neighbors,
-        current_index,
-        data_url: info.data_url,
-        size_bytes: info.size_bytes,
-        dimensions: info.dimensions,
-        mime_type: info.mime_type,
-        last_modified: info.last_modified,
-        exif: info.exif,
-    }))
+    build_initial_payload(&image_path).map(Some)
 }
 
 #[tauri::command]
@@ -267,30 +279,5 @@ pub fn read_image_context(path: String) -> Result<InitialImagePayload, String> {
     if !is_image_file(&p) {
         return Err(format!("Not a recognized image file: {}", path));
     }
-    let abs_path = p.canonicalize().unwrap_or_else(|_| p.clone());
-    let file_name = abs_path
-        .file_name()
-        .and_then(|n| n.to_str())
-        .unwrap_or("image")
-        .to_string();
-    let parent_dir = abs_path
-        .parent()
-        .map(|p| p.to_string_lossy().to_string())
-        .unwrap_or_default();
-    let (neighbors, current_index) = scan_directory_neighbors(&abs_path);
-    let info = gather_file_info(&abs_path)?;
-
-    Ok(InitialImagePayload {
-        target_path: abs_path.to_string_lossy().to_string(),
-        file_name,
-        parent_dir,
-        neighbors,
-        current_index,
-        data_url: info.data_url,
-        size_bytes: info.size_bytes,
-        dimensions: info.dimensions,
-        mime_type: info.mime_type,
-        last_modified: info.last_modified,
-        exif: info.exif,
-    })
+    build_initial_payload(&p)
 }

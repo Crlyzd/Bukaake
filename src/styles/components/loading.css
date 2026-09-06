@@ -1,0 +1,91 @@
+/* ==========================================================================
+   Bukaake Frosted Glass Loading Pill Styles
+   Modern stroke-free obsidian glassmorphism with 60 FPS vector spinner
+   ========================================================================== */
+
+.glass-loading-pill {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.92);
+  z-index: 1200;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 20px;
+  border-radius: 9999px;
+  border: none;
+  outline: none !important;
+  pointer-events: none;
+  user-select: none;
+  background: rgba(14, 18, 27, 0.92);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6), 0 2px 10px rgba(0, 0, 0, 0.4);
+  color: #f1f5f9;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  opacity: 0;
+  transition: opacity 0.18s cubic-bezier(0.16, 1, 0.3, 1), transform 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.glass-loading-pill.visible {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+}
+
+.glass-loading-pill.hidden {
+  display: none;
+}
+
+/* Monochrome Rotating Vector Spinner */
+.loading-spinner {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  animation: bukaake-spin 0.8s linear infinite;
+}
+
+.spinner-track {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.18);
+  stroke-width: 3;
+}
+
+.spinner-head {
+  fill: none;
+  stroke: #60a5fa;
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-dasharray: 56;
+  stroke-dashoffset: 40;
+}
+
+.loading-text {
+  white-space: nowrap;
+  color: #f1f5f9;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+/* Light Theme: Refined dark obsidian slate with optical isolation */
+body.glass-theme.light .glass-loading-pill {
+  background: #242938;
+  color: #f8fafc;
+  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.45), 0 2px 10px rgba(15, 23, 42, 0.25);
+}
+
+body.glass-theme.light .spinner-head {
+  stroke: #93c5fd;
+}
+
+/* Spinner Keyframes */
+@keyframes bukaake-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}

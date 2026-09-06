@@ -5,8 +5,11 @@ mod clipboard;
 mod file_assoc;
 mod file_ops;
 pub mod exif_reader;
+pub mod heif_reader;
 pub mod pro_decoder;
 pub mod raw_reader;
+#[cfg(target_os = "windows")]
+pub mod wic_decoder;
 mod image_loader;
 mod updater;
 use clipboard::{read_clipboard, write_clipboard_image};
@@ -94,10 +97,12 @@ fn prompt_open_file() -> Result<Option<String>, String> {
             "All Supported Images",
             &[
                 "png", "jpg", "jpeg", "webp", "gif", "bmp", "ico", "tiff", "tif", "svg", "avif",
+                "heic", "heif", "hif", "heifs", "heics",
                 "arw", "srf", "sr2", "cr2", "cr3", "nef", "nrw", "dng", "raf", "rw2", "orf", "pef",
                 "hdr", "exr", "tga", "dds", "qoi", "ppm", "pgm", "pbm", "pnm",
             ],
         )
+        .add_filter("High Efficiency", &["heic", "heif", "hif", "heifs", "heics"])
         .add_filter(
             "Camera RAW",
             &["arw", "srf", "sr2", "cr2", "cr3", "nef", "nrw", "dng", "raf", "rw2", "orf", "pef"],

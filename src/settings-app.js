@@ -195,11 +195,11 @@ class SettingsApp {
         this.btnSetDefault.title = 'Remove Bukaake from Windows file associations';
         if (this.assocSubText) {
           this.assocSubText.textContent = status.is_path_matched
-            ? 'Registered in Windows (32 Formats)'
+            ? 'Registered in Windows (35 Formats)'
             : 'Path updated — Click to unregister / re-apply';
         }
       } else {
-        this.assocBadge.textContent = '32 Formats';
+        this.assocBadge.textContent = '35 Formats';
         this.assocBadge.classList.remove('matched');
         this.assocCard?.classList.remove('is-registered');
         this.btnSetDefault.classList.remove('is-registered');

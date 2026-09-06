@@ -76,6 +76,15 @@
   <!-- Main Viewing Container -->
   <main class="viewport-container" id="viewportContainer">
     
+    <!-- Frosted Glass Animated Loading Pill -->
+    <div class="glass-loading-pill hidden" id="loadingPill">
+      <svg class="loading-spinner" viewBox="0 0 24 24">
+        <circle class="spinner-track" cx="12" cy="12" r="9" />
+        <circle class="spinner-head" cx="12" cy="12" r="9" />
+      </svg>
+      <span class="loading-text">Loading image...</span>
+    </div>
+
     <!-- Empty Drop Zone Placeholder -->
     <div class="drop-zone" id="dropZone">
       <div class="drop-card glass-card">
@@ -111,53 +120,6 @@
           </span>
         </div>
 
-        <div class="format-showcase">
-          <div class="format-showcase-header">
-            <span class="format-showcase-title"><i class="ri-image-2-line"></i> 27+ FORMATS SUPPORTED</span>
-            <span class="format-showcase-badge"><i class="ri-flashlight-line"></i> 15ms RAW Engine</span>
-          </div>
-
-          <div class="format-row">
-            <span class="format-tag tag-raw">RAW</span>
-            <div class="format-chips-cluster">
-              <span class="format-chip chip-raw">ARW</span>
-              <span class="format-chip chip-raw">CR2/3</span>
-              <span class="format-chip chip-raw">NEF</span>
-              <span class="format-chip chip-raw">DNG</span>
-              <span class="format-chip chip-raw">RAF</span>
-              <span class="format-chip chip-raw">RW2</span>
-              <span class="format-chip chip-raw">ORF</span>
-              <span class="format-chip chip-raw">PEF</span>
-            </div>
-          </div>
-
-          <div class="format-row">
-            <span class="format-tag tag-vfx">VFX</span>
-            <div class="format-chips-cluster">
-              <span class="format-chip chip-vfx">HDR</span>
-              <span class="format-chip chip-vfx">EXR</span>
-              <span class="format-chip chip-vfx">DDS</span>
-              <span class="format-chip chip-vfx">TGA</span>
-              <span class="format-chip chip-vfx">QOI</span>
-              <span class="format-chip chip-vfx">PNM</span>
-            </div>
-          </div>
-
-          <div class="format-row">
-            <span class="format-tag tag-web">WEB</span>
-            <div class="format-chips-cluster">
-              <span class="format-chip">AVIF</span>
-              <span class="format-chip">WEBP</span>
-              <span class="format-chip">PNG</span>
-              <span class="format-chip">JPG</span>
-              <span class="format-chip">GIF</span>
-              <span class="format-chip">SVG</span>
-              <span class="format-chip">BMP</span>
-              <span class="format-chip">ICO</span>
-              <span class="format-chip">TIFF</span>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
 
@@ -500,7 +462,7 @@
                 <div class="settings-assoc-text-col">
                   <div class="settings-assoc-headline">
                     <span class="settings-assoc-title">Default Image Viewer</span>
-                    <span class="settings-assoc-chip" id="assocStatusBadge">32 Formats</span>
+                    <span class="settings-assoc-chip" id="assocStatusBadge">35 Formats</span>
                   </div>
                   <span class="settings-assoc-sub" id="assocSubText">Set as default for photos, RAW & VFX</span>
                   <span class="settings-assoc-location" id="assocPathText">Locating...</span>

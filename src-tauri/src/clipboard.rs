@@ -17,6 +17,7 @@ fn is_image_path(path_str: &str) -> bool {
         matches!(
             ext_lower.as_str(),
             "png" | "jpg" | "jpeg" | "webp" | "gif" | "bmp" | "ico" | "avif" | "tiff"
+                | "heic" | "heif" | "hif" | "heifs" | "heics"
         )
     } else {
         false

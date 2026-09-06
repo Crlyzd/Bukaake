@@ -26,6 +26,7 @@ import { ContextMenu } from './components/context-menu.js';
 import { CanvasToolsManager } from './services/canvas-tools-manager.js';
 import { exportImage, copyProcessedImage } from './services/image-saver.js';
 import { toast } from './components/toast.js';
+import { loadingIndicator } from './components/loading-indicator.js';
 
 class BukaakeApp {
   constructor() {
@@ -45,10 +46,7 @@ class BukaakeApp {
     this.deleteModal = new DeleteModal();
     this.bgModes = ['bg-transparent', 'bg-checkerboard'];
     this.currentBgIndex = 0;
-
-    this.initComponents();
-    this.initServices();
-    this.init();
+    this.initComponents(); this.initServices(); this.init();
   }
 
   initComponents() {
@@ -96,12 +94,9 @@ class BukaakeApp {
       hasImage: () => Boolean(this.viewer.img),
       isEditing: () => this.toolsManager.isEditing(),
       actions: {
-        onCopyImage: () => this.copyImage(),
-        onSaveImage: () => this.saveImage(),
-        onRotateRight: () => this.handleRotate(90),
-        onFlipH: () => this.handleFlip('h'),
-        onFitScreen: () => this.viewer.fitToScreen(),
-        onCrop: () => this.toolsManager.toggleCrop(true),
+        onCopyImage: () => this.copyImage(), onSaveImage: () => this.saveImage(),
+        onRotateRight: () => this.handleRotate(90), onFlipH: () => this.handleFlip('h'),
+        onFitScreen: () => this.viewer.fitToScreen(), onCrop: () => this.toolsManager.toggleCrop(true),
         onToggleMetadata: () => { if (this.viewer.img) this.metadataDrawer.toggle(); },
         onDeleteFile: () => this.deleteCurrentFile(false),
       },
@@ -132,6 +127,8 @@ class BukaakeApp {
     this.fileLoader.onListChanged = (t, i) => this.toolbar.updateCounter(t, i);
     this.fileLoader.onStatusMessage = (m) => toast.show(m);
     this.fileLoader.onStatusWarning = (m) => toast.warn(m);
+    this.fileLoader.onLoadingStart = (m) => loadingIndicator.show(m);
+    this.fileLoader.onLoadingEnd = () => loadingIndicator.hide();
     this.fileLoader.onPromptOpen = () => this.confirmModal.promptIfDirty(() => this.openFile(), () => this.saveImage());
     this.fileLoader.onAllFilesCleared = () => (this.windowModeManager?.currentMode === MODE_VIEWER ? tauriBridge.exitApp() : this.handleEmptyState());
     this.viewer.onTransformChange = () => { this.updateStatusBadges(); if (this.drawingTool?.active) this.drawingTool.redraw(); if (this.cropper?.active) this.cropper.onTransform(); };

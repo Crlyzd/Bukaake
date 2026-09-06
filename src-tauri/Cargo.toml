@@ -20,6 +20,7 @@ arboard = "3.4"
 self-replace = "1.5.0"
 kamadak-exif = "0.6"
 winreg = "0.52"
+heif-oxide = "0.1.0"
 
 [features]
 default = ["custom-protocol"]
@@ -31,3 +32,13 @@ lto = true
 codegen-units = 1
 panic = "abort"
 strip = true
+
+[profile.dev.package."*"]
+opt-level = 3
+
+[target.'cfg(windows)'.dependencies]
+windows = { version = "0.58", features = [
+    "Win32_Foundation",
+    "Win32_Graphics_Imaging",
+    "Win32_System_Com",
+] }

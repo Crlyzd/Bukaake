@@ -14,8 +14,8 @@ export class FileLoader {
     this.currentImage = null;
     this.currentMeta = null;
 
-    this.onImageLoaded = null; this.onListChanged = null;
-    this.onStatusMessage = null; this.onStatusWarning = null; this.onAllFilesCleared = null;
+    this.onImageLoaded = null; this.onListChanged = null; this.onAllFilesCleared = null;
+    this.onStatusMessage = null; this.onStatusWarning = null; this.onLoadingStart = null; this.onLoadingEnd = null;
   }
 
   get totalFiles() { return this.items.length; }
@@ -42,12 +42,14 @@ export class FileLoader {
       lastDropFingerprint = fingerprint;
 
       const targetPath = paths[0];
+      const targetName = targetPath.split(/[/\\]/).pop() || 'image';
+      this.onLoadingStart?.(`Loading ${targetName}...`);
       const payload = await tauriBridge.readImageContext(targetPath);
       if (payload) {
         this.loadFromTauriContext(payload);
       } else {
-        const fileName = targetPath.split(/[/\\]/).pop() || targetPath;
-        this.onStatusWarning?.(`Unsupported file format: ${fileName}`);
+        this.onLoadingEnd?.();
+        this.onStatusWarning?.(`Unsupported file format: ${targetName}`);
       }
     };
 
@@ -131,21 +133,21 @@ export class FileLoader {
     this.emitListChanged();
 
     const item = this.items[index];
+    this.onLoadingStart?.(`Loading ${item.name}...`);
     if (item.type === 'tauri') {
       try {
         const payload = await tauriBridge.readImageFile(item.path);
         if (payload?.data_url) {
           this.createImageFromUrl(payload.data_url, {
-            name: payload.file_name,
-            path: payload.path,
-            sizeBytes: payload.size_bytes,
-            dimensions: payload.dimensions,
-            mimeType: payload.mime_type,
-            lastModified: payload.last_modified,
-            exif: payload.exif,
+            name: payload.file_name, path: payload.path, sizeBytes: payload.size_bytes,
+            dimensions: payload.dimensions, mimeType: payload.mime_type,
+            lastModified: payload.last_modified, exif: payload.exif,
           });
+        } else {
+          this.onLoadingEnd?.();
         }
       } catch (err) {
+        this.onLoadingEnd?.();
         this.onStatusMessage?.(`Failed to read ${item.name}`);
       }
     } else if (item.type === 'file') {
@@ -192,7 +194,7 @@ export class FileLoader {
 
   loadWebFiles(fileList) {
     if (!fileList || fileList.length === 0) return;
-    const isImg = (f) => f.type.startsWith('image/') || /\.(jpe?g|png|webp|gif|avif|bmp|ico|svg|tiff?)$/i.test(f.name);
+    const isImg = (f) => f.type.startsWith('image/') || /\.(jpe?g|png|webp|gif|avif|bmp|ico|svg|tiff?|heic|heif|hif)$/i.test(f.name);
     const valid = Array.from(fileList).filter(isImg);
     if (valid.length === 0) {
       const fileName = fileList[0]?.name || 'file';
@@ -229,9 +231,11 @@ export class FileLoader {
         naturalWidth: img.naturalWidth || img.width,
         naturalHeight: img.naturalHeight || img.height,
       };
+      this.onLoadingEnd?.();
       this.onImageLoaded?.(img, this.currentMeta);
     };
     img.onerror = () => {
+      this.onLoadingEnd?.();
       this.onStatusMessage?.(`Failed to display ${meta.name || 'image'}`);
     };
     img.src = url;
@@ -271,13 +275,11 @@ export class FileLoader {
         this.onStatusMessage?.('Clipboard API unsupported in browser');
         return false;
       }
-      const items = await navigator.clipboard.read();
-      for (const item of items) {
+      for (const item of await navigator.clipboard.read()) {
         for (const type of item.types) {
           if (type.startsWith('image/')) {
             const blob = await item.getType(type);
-            const file = new File([blob], 'clipboard_image.png', { type: 'image/png' });
-            this.loadWebFiles([file]);
+            this.loadWebFiles([new File([blob], 'clipboard_image.png', { type: 'image/png' })]);
             return true;
           }
         }
