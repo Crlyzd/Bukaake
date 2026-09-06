@@ -86,7 +86,7 @@ Reliving the iconic Google Picasa Photo Viewer experience with two tailored mode
 
 ## 2. Directory Structure & Module Standards
 
-All 59 source files in the project strictly respect the < 300 lines per file budget:
+All 63 source files in the project strictly respect the < 300 lines per file budget:
 
 ```
 bukaake/
@@ -97,7 +97,7 @@ bukaake/
 │       ├── coding-specialist.md   # Code executor (~80 lines)
 │       └── code-reviewer.md       # Quality & 5-pillar auditor (~75 lines)
 ├── AGENTS.md                      # Authoritative project rules manual
-├── package.json                   # Version 0.4.0 single source of truth
+├── package.json                   # Version 0.4.1 single source of truth
 ├── index.html                     # Main viewer entrypoint
 ├── settings.html                  # Dedicated standalone settings window
 ├── scripts/
@@ -132,6 +132,7 @@ bukaake/
 │   │   ├── image-prefetch-cache.js# Asymmetric 5-slot prefetch cache with LRU eviction (~140 lines)
 │   │   ├── image-saver.js         # Tauri & web image saving, copy to clipboard (~90 lines)
 │   │   ├── shortcuts.js           # Keyboard hotkeys registry (~140 lines)
+│   │   ├── standby-service.js     # Background standby, tray lifecycle & memory trim (~85 lines)
 │   │   ├── tauri-bridge.js        # Tauri v2 window, args, fs IPC wrapper (~265 lines)
 │   │   ├── theme-manager.js       # Dark & light theme switcher + acrylic tint (~85 lines)
 │   │   ├── updater-service.js     # GitHub releases updater & multi-window sync (~250 lines)
@@ -172,6 +173,7 @@ bukaake/
         ├── exif_reader.rs         # Native EXIF camera telemetry & GPS extraction (~140 lines)
         ├── file_ops.rs            # Native Win32 Recycle Bin & permanent deletion (~70 lines)
         ├── clipboard.rs           # Native OS clipboard engine, CF_HDROP & image IPC (~150 lines)
+        ├── standby.rs             # Tray standby lifecycle, working set trim & auto-quit (~150 lines)
         └── updater.rs             # Native in-place self-updater, progress & relaunch (~145 lines)
 ```
 
@@ -311,6 +313,17 @@ The root control center provides an interactive 10-option manager:
   - Maintains an in-memory prefetch cache of decoded base64 image data during folder navigation.
   - Implements asymmetric directional biasing: preloads +3 images ahead in the active traversal direction and +1 image behind.
   - Automated LRU eviction bounds memory usage strictly to 5 cached images, guaranteeing instant, 0ms latency on `Left`/`Right` arrow keys without memory bloat.
+
+### Background Standby & Process Lifecycle Subsystem
+- **Tray Standby & Memory Trim (`src-tauri/src/standby.rs`, `src/services/standby-service.js`)**:
+  - Keeps Bukaake running warm in the Windows system notification tray for sub-10ms subsequent image launches.
+  - Performs native Win32 working set memory trimming via `K32EmptyWorkingSet` upon entering standby, dropping resident RAM footprint to ~8-15 MB.
+  - Auto-quits standby cleanly after 5 minutes of inactivity (`STANDBY_TIMEOUT_SECS = 300`) to preserve host system resources.
+  - Stroke-free system tray menu featuring **Settings** and **Exit Bukaake**.
+  - Configurable via user setting toggle (`bukaake_standby_enabled`), synchronized across windows and persisted in `localStorage`.
+- **Cold Mode 2 Spawn & Decoding Feedback (`src/app.js`, `src/components/toast.js`)**:
+  - Direct spawn into Mode 2 Fullscreen Viewer on cold image launch or Explorer single-instance invocation, bypassing startpage or Mode 1 window jitter.
+  - Immediate loading indicator feedback during high-resolution RAW / HEIC / VFX decoding.
 
 ### Fast Multi-Core Compilation Architecture
 - **Dedicated Fast Profile (`src-tauri/Cargo.toml`)**:

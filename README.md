@@ -70,30 +70,39 @@ Designed specifically for Windows 10 and 11:
 
 ---
 
-### 🛡️ 5. 1-Click Windows Default App & Path Auto-Healing
-Set Bukaake as your primary Windows photo viewer in a single click:
-- **37 Format Registrations**: Effortlessly associates standard formats, Apple HEIC/HEIF containers, camera RAWs, and HDR/VFX textures with Windows.
-- **Windows Explorer Context Menu**: Adds a handy *"Open with Bukaake"* right-click entry for fast access.
-- **Silent Path Auto-Healing**: Bukaake is 100% portable. If you move `bukaake.exe` to another folder, it automatically detects the change on launch and silently updates your shell paths in the background—your file associations never break.
-- **Easy Switcher**: Manage it anytime from Settings (`Ctrl+,`) with a single merged toggle (`Register` / `Unregister`).
+### 🛡️ 5. 1-Click Windows Default App & Move-Anywhere Portability
+Set Bukaake as your main photo viewer with a single click:
+- **Default Viewer in 1 Click**: Make Bukaake your primary app for all your photos and graphic files directly from Settings.
+- **Right-Click Shortcut**: Adds a handy *"Open with Bukaake"* option to your Windows right-click menu for quick access.
+- **Move It Anywhere Without Breaking**: Bukaake is 100% portable. If you move `bukaake.exe` to a new folder or USB drive, your file shortcuts automatically stay connected.
+- **Easy Toggle**: Turn associations on or off anytime in Settings (`Ctrl+,`).
 
 ---
 
-### 📷 6. 37+ Formats, Instant Camera RAW, HEIC & EXIF Telemetry
-More than just standard photos:
-- **Apple & Mobile HEIC/HEIF**: Native decoding for `.heic`, `.heif`, `.hif`, `.heifs`, and `.heics` files using hardware-accelerated Windows Imaging Component (WIC) and container extraction—zero third-party codecs or Windows Store extensions needed.
-- **Camera RAW Previews**: Instant ~15ms full-resolution previews for Sony (`.arw`, `.srf`, `.sr2`), Canon (`.cr2`, `.cr3`), Nikon (`.nef`, `.nrw`), Adobe/DJI (`.dng`), Fujifilm (`.raf`), Panasonic Lumix (`.rw2`), Olympus (`.orf`), and Pentax (`.pef`).
-- **Game & VFX Textures**: Native decoding for HDR (`.hdr`), OpenEXR (`.exr`), DirectDraw Surface (`.dds`), Truevision Targa (`.tga`), Netpbm (`.pnm`, `.ppm`, `.pgm`, `.pbm`), and QOI (`.qoi`).
-- **Asymmetric 5-Slot Prefetch Cache**: 60 FPS zero-latency photo flipping with smart directional preloading (+3 forward / +1 backward) and bounded LRU eviction.
-- **Hardware Telemetry (`I`)**: Deep EXIF inspection revealing camera make/model, lens, aperture ($f$-stop), shutter speed, ISO, focal length, and precision GPS coordinates.
+### 📷 6. Support for 37+ Formats, iPhone Photos & Pro Camera RAW
+Opens virtually anything you throw at it:
+- **iPhone & Phone Photos (HEIC)**: Opens `.heic` and `.heif` photos out of the box—no paid Windows Store extensions or extra downloads needed.
+- **Pro Camera RAW Previews**: Blazing-fast full-resolution previews for camera photos from Sony, Canon, Nikon, Fujifilm, Panasonic, Olympus, Pentax, and DJI/Adobe DNG.
+- **Game & 3D Textures**: Native viewing for HDR, OpenEXR, DDS, TGA, and modern graphic formats without launching heavy editing software.
+- **Zero-Lag Photo Flipping**: Next and previous photos load ahead of time in the background so browsing through folders feels completely instant.
+- **Photo Details & Camera Info (`I`)**: Press **`I`** to view camera model, lens, aperture, shutter speed, ISO, and GPS location.
 
 ---
 
-### 🔄 7. Effortless In-App Self-Updating
-Never worry about missing new features or manually downloading new builds:
-- **Background Checks**: Quietly checks GitHub releases on launch (and stays completely disabled in Fullscreen Mode for distraction-free viewing).
-- **One-Click Native Update**: Click **Install** in the Settings window to stream the update with a real-time glowing progress bar.
-- **In-Place Seamless Relaunch**: Bukaake replaces its own executable in-place without breaking your taskbar pins, desktop shortcuts, or file associations, and relaunches into the new version instantly.
+### 🔄 7. Effortless In-App Updates
+Never worry about missing out on new features:
+- **Quiet Update Notifications**: Gently lets you know when a new version is available without interrupting your viewing.
+- **1-Click Update**: Click **Install** in Settings to update directly inside the app with a smooth progress bar.
+- **Restarts Seamlessly**: Updates directly in place without breaking your taskbar pins or desktop shortcuts.
+
+---
+
+### ⚡ 8. Instant Opening & Battery-Friendly Standby
+- **Opens Instantly**: Keeps Bukaake ready in your system tray so double-clicking photos opens them with zero waiting.
+- **Uses Almost Zero Memory**: Frees up memory while resting in the background (~10 MB RAM), keeping your PC completely smooth.
+- **Auto-Closes When Idle**: If you haven't opened any photos for 5 minutes, Bukaake quietly exits to save battery and system resources.
+- **Simple Tray Menu**: Right-click the tray icon to quickly open **Settings** or close the app.
+- **Totally Optional**: Turn background standby on or off anytime with a simple switch in Settings (`Ctrl+,`).
 
 ---
 
