@@ -70,7 +70,24 @@ Designed specifically for Windows 10 and 11:
 
 ---
 
-### 🔄 5. Effortless In-App Self-Updating
+### 🛡️ 5. 1-Click Windows Default App & Path Auto-Healing
+Set Bukaake as your primary Windows photo viewer in a single click:
+- **32 Format Registrations**: Effortlessly associates standard formats, camera RAWs, and HDR/VFX textures with Windows.
+- **Windows Explorer Context Menu**: Adds a handy *"Open with Bukaake"* right-click entry for fast access.
+- **Silent Path Auto-Healing**: Bukaake is 100% portable. If you move `bukaake.exe` to another folder, it automatically detects the change on launch and silently updates your shell paths in the background—your file associations never break.
+- **Easy Switcher**: Manage it anytime from Settings (`Ctrl+,`) with a single merged toggle (`Register` / `Unregister`).
+
+---
+
+### 📷 6. 32+ Formats, Instant Camera RAW & EXIF Telemetry
+More than just standard photos:
+- **Camera RAW Previews**: Instant ~15ms full-resolution previews for Sony (`.arw`), Canon (`.cr2`, `.cr3`), Nikon (`.nef`), Adobe/DJI (`.dng`), Fujifilm (`.raf`), Panasonic Lumix (`.rw2`), Olympus (`.orf`), and Pentax (`.pef`).
+- **Game & VFX Textures**: Native decoding for HDR (`.hdr`), OpenEXR (`.exr`), DirectDraw Surface (`.dds`), Truevision Targa (`.tga`), Netpbm (`.pnm`), and QOI (`.qoi`).
+- **Hardware Telemetry (`I`)**: Deep EXIF inspection revealing camera make/model, lens, aperture ($f$-stop), shutter speed, ISO, focal length, and precision GPS coordinates.
+
+---
+
+### 🔄 7. Effortless In-App Self-Updating
 Never worry about missing new features or manually downloading new builds:
 - **Background Checks**: Quietly checks GitHub releases on launch (and stays completely disabled in Fullscreen Mode for distraction-free viewing).
 - **One-Click Native Update**: Click **Install** in the Settings window to stream the update with a real-time glowing progress bar.
@@ -83,8 +100,7 @@ Never worry about missing new features or manually downloading new builds:
 1. Go to the **[Latest Release](https://github.com/Crlyzd/Bukaake/releases/latest)** page.
 2. Download the latest executable matching your architecture (e.g., **`bukaake-vX.Y.Z-x64.exe`** or **`arm64.exe`** for ARM laptops like Surface Pro).
 3. **Double-click to run!** That's it—no setup wizard, no extra dependencies, and no administrative rights required.
-
-> **Tip**: Right-click any photo (`.jpg`, `.png`, `.webp`, `.avif`, `.gif`), select **Open with...**, and choose **Bukaake** (check *"Always use this app"* to make it your permanent default photo viewer).
+4. Open **Settings** (`Ctrl+,`) and click **Register** to make Bukaake your default photo viewer across all 32 image formats in seconds!
 
 ---
 
