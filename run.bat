@@ -26,7 +26,7 @@ echo    [1] Live Dev: Native Desktop Window (Tauri Live Dev ^& Hot-Reload)
 echo    [2] Live Dev: Instant Web/Edge Window (Fast UI Preview)
 echo    [3] Build Production x64 App (Smallest Size -^> release-builds/)
 echo    [4] Build Production ARM64 App (Smallest Size -^> release-builds/)
-echo    [5] Build Both Architectures (x64 + ARM64)
+echo    [5] Build Both Architectures (x64 + ARM64 -^> release-builds/)
 echo    [6] Bump Version (Patch, Minor, Major, or Custom)
 echo    [7] Quick Run: Latest Compiled Release Executable
 echo    [8] Clean Build Artifacts ^& Locks
@@ -56,19 +56,54 @@ echo  [+] Cleaning background locks...
 call :STOP_LOCKS
 if not exist "node_modules" call npm install
 echo  [+] Launching Live Hot-Reloading Tauri Window...
-call npx tauri dev -- -j 1
+call npm run tauri:dev
 pause
 goto MENU
 
 :DEV_WEB
 echo.
 echo  [+] Starting preview server ^& opening Edge standalone window...
-start "" "msedge.exe" --app="http://localhost:3000/?sample=true" --window-size=1100,720
-call npx vite --port 3000 --host
+start "" "msedge.exe" --app="http://localhost:3000/" --window-size=1100,720
+call npm run dev
 pause
 goto MENU
 
 :BUILD_X64
+call :COMPILE_X64
+pause
+goto MENU
+
+:BUILD_ARM64
+call :COMPILE_ARM64
+pause
+goto MENU
+
+:BUILD_BOTH
+echo.
+echo  ======================================================================
+echo    Building Both Architectures (x64 + ARM64) (v%CURRENT_VER%)
+echo  ======================================================================
+call :COMPILE_X64
+if errorlevel 1 (
+    echo [-] x64 build failed! Aborting ARM64 build.
+    pause
+    goto MENU
+)
+call :COMPILE_ARM64
+if errorlevel 1 (
+    echo [-] ARM64 build failed!
+    pause
+    goto MENU
+)
+echo.
+echo  ======================================================================
+echo    [+] Both x64 and ARM64 releases successfully built!
+echo  ======================================================================
+echo.
+pause
+goto MENU
+
+:COMPILE_X64
 echo.
 echo  ======================================================================
 echo    Compiling Ultra-Compact x64 Release (v%CURRENT_VER%)
@@ -79,11 +114,17 @@ if not exist "release-builds" mkdir release-builds
 
 echo  [1/3] Bundling and minifying frontend assets...
 call npm run build
-if errorlevel 1 ( echo [-] Frontend build failed! & pause & goto MENU )
+if errorlevel 1 (
+    echo [-] Frontend build failed!
+    exit /b 1
+)
 
 echo  [2/3] Compiling Rust release binary (opt-level=z, LTO, strip, abort)...
 cargo build --release --manifest-path src-tauri/Cargo.toml
-if errorlevel 1 ( echo [-] Rust build failed! & pause & goto MENU )
+if errorlevel 1 (
+    echo [-] Rust build failed!
+    exit /b 1
+)
 
 echo  [3/3] Packaging into release-builds/...
 set "OUT_FILE=release-builds\bukaake-v%CURRENT_VER%-x64.exe"
@@ -97,10 +138,9 @@ echo.
 echo    [+] Successfully compiled: %OUT_FILE%
 echo    [+] File Size: %SIZE_MB% MB (%SIZE_KB% KB)
 echo.
-pause
-goto MENU
+exit /b 0
 
-:BUILD_ARM64
+:COMPILE_ARM64
 echo.
 echo  ======================================================================
 echo    Compiling Ultra-Compact ARM64 Release (v%CURRENT_VER%)
@@ -112,13 +152,19 @@ if not exist "release-builds" mkdir release-builds
 echo  [+] Ensuring rustup ARM64 target is installed...
 call rustup target add aarch64-pc-windows-msvc
 
-echo  [1/3] Bundling frontend assets...
+echo  [1/3] Bundling and minifying frontend assets...
 call npm run build
-if errorlevel 1 ( echo [-] Frontend build failed! & pause & goto MENU )
+if errorlevel 1 (
+    echo [-] Frontend build failed!
+    exit /b 1
+)
 
 echo  [2/3] Cross-compiling for Windows on ARM64...
 cargo build --release --target aarch64-pc-windows-msvc --manifest-path src-tauri/Cargo.toml
-if errorlevel 1 ( echo [-] ARM64 build failed! & pause & goto MENU )
+if errorlevel 1 (
+    echo [-] ARM64 build failed!
+    exit /b 1
+)
 
 echo  [3/3] Packaging into release-builds/...
 set "OUT_FILE=release-builds\bukaake-v%CURRENT_VER%-arm64.exe"
@@ -132,13 +178,7 @@ echo.
 echo    [+] Successfully compiled: %OUT_FILE%
 echo    [+] File Size: %SIZE_MB% MB (%SIZE_KB% KB)
 echo.
-pause
-goto MENU
-
-:BUILD_BOTH
-call :BUILD_X64
-call :BUILD_ARM64
-goto MENU
+exit /b 0
 
 :BUMP_VER
 echo.
@@ -165,12 +205,17 @@ if "%BUMP_CHOICE%"=="4" (
 goto MENU
 
 :RUN_RELEASE
-set "TARGET_EXE=release-builds\bukaake-v%CURRENT_VER%-x64.exe"
-if not exist "%TARGET_EXE%" set "TARGET_EXE=src-tauri\target\release\bukaake.exe"
-if not exist "%TARGET_EXE%" set "TARGET_EXE=src-tauri\target\debug\bukaake.exe"
+set "TARGET_EXE="
+if exist "release-builds\*.exe" (
+    for /f "delims=" %%F in ('dir /b /a:-d /o:d "release-builds\*.exe"') do (
+        set "TARGET_EXE=release-builds\%%F"
+    )
+)
+if "%TARGET_EXE%"=="" if exist "src-tauri\target\release\bukaake.exe" set "TARGET_EXE=src-tauri\target\release\bukaake.exe"
+if "%TARGET_EXE%"=="" if exist "src-tauri\target\debug\bukaake.exe" set "TARGET_EXE=src-tauri\target\debug\bukaake.exe"
 
-if not exist "%TARGET_EXE%" (
-    echo [-] No compiled executable found! Please compile with Option [3] first.
+if "%TARGET_EXE%"=="" (
+    echo [-] No compiled executable found! Please build with Option [3], [4], or [5] first.
     pause
     goto MENU
 )
