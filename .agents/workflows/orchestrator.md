@@ -27,9 +27,9 @@ You are the Orchestrator for **Bukaake**, the lightweight portable Windows image
 2. **Hand Off with Complete Bukaake Context**:
    When delegating, specify:
    - Target mode (`/architect`, `/coding-specialist`, `/code-reviewer`).
-   - Exact files to create/modify across the 42 project modules in `src/components/`, `src/services/`, `src/core/`, `src/styles/components/`, or `src-tauri/`.
+   - Exact files to create/modify across the 43 project modules in `src/components/`, `src/services/`, `src/core/`, `src/styles/components/`, or `src-tauri/`.
    - The specific 5-pillar constraints applicable to this step (e.g., "Ensure all CSS uses `--glass-*` tokens, no border strokes, obsidian slate in light mode, and verify line counts remain < 300 lines").
-   - Subsystem boundaries: Drawing engine (`src/core/drawing-tool.js`, `src/styles/components/draw.css`), Change Tracking (`src/services/change-tracker.js`, `src/components/confirm-modal.js`), Auto-Updater (`src/services/updater-service.js`).
+   - Subsystem boundaries: Drawing engine (`src/core/drawing-tool.js`, `src/styles/components/draw.css`), Change Tracking (`src/services/change-tracker.js`, `src/components/confirm-modal.js`), Auto-Updater (`src/services/updater-service.js`), Native Clipboard (`src-tauri/src/clipboard.rs`).
    - A strict scope limit: the specialist must not deviate or modify unrelated modules.
 
 3. **Enforce Modularity at Every Phase**:

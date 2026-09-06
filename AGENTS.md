@@ -84,7 +84,7 @@ Reliving the iconic Google Picasa Photo Viewer experience with two tailored mode
 
 ## 2. Directory Structure & Module Standards
 
-All 42 source files in the project strictly respect the < 300 lines per file budget:
+All 43 source files in the project strictly respect the < 300 lines per file budget:
 
 ```
 bukaake/
@@ -119,13 +119,13 @@ bukaake/
 │   │   ├── drawing-tool.js        # Freehand pen, highlighter, cursor ring & baking (~260 lines)
 │   │   ├── filters.js             # Color adjustment processor (~95 lines)
 │   │   └── metadata.js            # EXIF parser & dimension reader (~60 lines)
-│   ├── services/                  # External & platform services (< 260 lines each)
+│   ├── services/                  # External & platform services (< 300 lines each)
 │   │   ├── change-tracker.js      # Unsaved edits state tracking (~50 lines)
-│   │   ├── file-loader.js         # Image file loader, drag & drop, clipboard (~215 lines)
+│   │   ├── file-loader.js         # Image file loader, drag & drop, clipboard (~265 lines)
 │   │   ├── idle-controller.js     # Picasa-style idle mouse fade controller (~105 lines)
-│   │   ├── image-saver.js         # Tauri & web image saving, copy to clipboard (~70 lines)
-│   │   ├── shortcuts.js           # Keyboard hotkeys registry (~130 lines)
-│   │   ├── tauri-bridge.js        # Tauri v2 window, args, fs IPC wrapper (~260 lines)
+│   │   ├── image-saver.js         # Tauri & web image saving, copy to clipboard (~100 lines)
+│   │   ├── shortcuts.js           # Keyboard hotkeys registry (~145 lines)
+│   │   ├── tauri-bridge.js        # Tauri v2 window, args, fs IPC wrapper (~295 lines)
 │   │   ├── theme-manager.js       # Dark & light theme switcher + acrylic tint (~85 lines)
 │   │   ├── updater-service.js     # GitHub releases updater & multi-window sync (~175 lines)
 │   │   └── window-mode-manager.js # Regular vs Fullscreen mode coordinator (~125 lines)
@@ -147,14 +147,15 @@ bukaake/
 │   │       ├── toast.css          # Stroke-free floating glass toast pill (~50 lines)
 │   │       ├── toolbar.css        # Responsive floating control dock (~170 lines)
 │   │       └── vibrancy.css       # Window vibrancy & background layer overrides (~70 lines)
-│   ├── app.js                     # Main window bootstrap coordinator (~270 lines)
+│   ├── app.js                     # Main window bootstrap coordinator (~295 lines)
 │   └── settings-app.js            # Standalone settings window coordinator (~115 lines)
 └── src-tauri/
-    ├── Cargo.toml                 # Tauri v2 dependencies (`window-vibrancy`, `rfd`, `image`)
+    ├── Cargo.toml                 # Tauri v2 dependencies (`window-vibrancy`, `rfd`, `image`, `arboard`)
     ├── tauri.conf.json            # Multi-window config (main + settings)
     └── src/
-        ├── main.rs                # Native acrylic vibrancy + window IPC commands (~290 lines)
-        └── image_loader.rs        # Fast native image decoding & metadata reading (~205 lines)
+        ├── main.rs                # Native acrylic vibrancy + window IPC commands (~295 lines)
+        ├── image_loader.rs        # Fast native image decoding & metadata reading (~205 lines)
+        └── clipboard.rs           # Native OS clipboard engine, CF_HDROP & image IPC (~165 lines)
 ```
 
 ---
@@ -168,6 +169,7 @@ bukaake/
 | **Windows Acrylic** | `window-vibrancy` | 0.6.0 (`apply_acrylic`, `clear_acrylic`) |
 | **Native Dialogs** | `rfd` | 0.15 (Native file open and save dialogs) |
 | **Image Processing** | `image` | 0.25 (Fast native decoding, EXIF orientation, thumbnailing) |
+| **Clipboard Engine** | `arboard` & Win32 APIs | 3.4 (`CF_HDROP`, `CF_DIB`, zero browser permission prompts) |
 | **Auto-Updater** | Custom GitHub Service | `src/services/updater-service.js` querying GitHub Releases API |
 | **Frontend Bundler** | Vite | ^5.4.0 (Multi-page ES Modules: `index.html`, `settings.html`) |
 | **Frontend Core** | Vanilla JavaScript | ES6+ Modules, No Heavy Frameworks |
@@ -188,6 +190,16 @@ bukaake/
 ---
 
 ## 4. Subsystem Architectures
+
+### Native OS Clipboard Subsystem
+- **Core Native Engine (`src-tauri/src/clipboard.rs`)**:
+  - Completely eliminates WebView2 browser permission popups (`http://tauri.localhost wants to...`) by managing clipboard operations directly via native Windows OS APIs.
+  - Supports Windows File Explorer clipboard files (`CF_HDROP`), extracting image file paths and automatically indexing folder siblings for Left/Right arrow navigation.
+  - Decodes raster clipboard images (`CF_DIB`) via `arboard`, serializing to PNG base64 data URLs for seamless viewer loading.
+  - Provides native clipboard image writing for `Ctrl+C` and processed image exports.
+- **Frontend IPC Integration (`src/services/tauri-bridge.js`, `src/services/file-loader.js`, `src/services/image-saver.js`)**:
+  - `tauriBridge.readClipboard()` and `writeClipboardImage()` invoke native backend commands with graceful web fallbacks.
+  - Direct `Ctrl+V` and titlebar paste triggers protected by `confirmModal.promptIfDirty()`.
 
 ### Interactive Drawing & Highlighting Subsystem
 - **Core Tool (`src/core/drawing-tool.js`)**:
@@ -210,10 +222,10 @@ bukaake/
   - Guards destructive actions (opening another image, navigating to neighbor image, closing window).
   - Offers "Save", "Discard", or "Cancel" actions with keyboard focus.
 - **Image Saver (`src/services/image-saver.js`)**:
-  - Exports combined canvas with active filters applied.
+  - Exports combined canvas with active filters applied and formatted date-time stamp.
   - In Tauri: invokes native `prompt_save_file` via `rfd` and writes binary bytes via `save_image_bytes`.
   - In Web: supports `showSaveFilePicker` and anchor fallback.
-  - Supports instant clipboard copying of processed images via `copyProcessedImage`.
+  - Supports instant clipboard copying of processed images via `copyProcessedImage` (routed through native `writeClipboardImage` in Tauri).
 
 ---
 
