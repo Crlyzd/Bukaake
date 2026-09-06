@@ -101,33 +101,26 @@
   position: absolute;
   pointer-events: none;
   display: none;
-  z-index: 8;
+  opacity: 0;
+  z-index: 45;
+  transition: opacity 0.08s ease;
+}
+
+.crop-snap-line.visible {
+  display: block;
+  opacity: 1;
 }
 
 .crop-snap-line.snap-h {
-  top: 50%;
-  left: 0;
-  right: 0;
   height: 1px;
   background: #00f0ff;
-  box-shadow: 0 0 8px rgba(0, 240, 255, 0.6);
+  box-shadow: 0 0 8px rgba(0, 240, 255, 0.7);
 }
 
 .crop-snap-line.snap-v {
-  left: 50%;
-  top: 0;
-  bottom: 0;
   width: 1px;
   background: #00f0ff;
-  box-shadow: 0 0 8px rgba(0, 240, 255, 0.6);
-}
-
-.crop-box.snapped-center-x .crop-snap-line.snap-v {
-  display: block;
-}
-
-.crop-box.snapped-center-y .crop-snap-line.snap-h {
-  display: block;
+  box-shadow: 0 0 8px rgba(0, 240, 255, 0.7);
 }
 
 @keyframes slideUpCrop {
