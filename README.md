@@ -72,17 +72,19 @@ Designed specifically for Windows 10 and 11:
 
 ### 🛡️ 5. 1-Click Windows Default App & Path Auto-Healing
 Set Bukaake as your primary Windows photo viewer in a single click:
-- **32 Format Registrations**: Effortlessly associates standard formats, camera RAWs, and HDR/VFX textures with Windows.
+- **37 Format Registrations**: Effortlessly associates standard formats, Apple HEIC/HEIF containers, camera RAWs, and HDR/VFX textures with Windows.
 - **Windows Explorer Context Menu**: Adds a handy *"Open with Bukaake"* right-click entry for fast access.
 - **Silent Path Auto-Healing**: Bukaake is 100% portable. If you move `bukaake.exe` to another folder, it automatically detects the change on launch and silently updates your shell paths in the background—your file associations never break.
 - **Easy Switcher**: Manage it anytime from Settings (`Ctrl+,`) with a single merged toggle (`Register` / `Unregister`).
 
 ---
 
-### 📷 6. 32+ Formats, Instant Camera RAW & EXIF Telemetry
+### 📷 6. 37+ Formats, Instant Camera RAW, HEIC & EXIF Telemetry
 More than just standard photos:
-- **Camera RAW Previews**: Instant ~15ms full-resolution previews for Sony (`.arw`), Canon (`.cr2`, `.cr3`), Nikon (`.nef`), Adobe/DJI (`.dng`), Fujifilm (`.raf`), Panasonic Lumix (`.rw2`), Olympus (`.orf`), and Pentax (`.pef`).
-- **Game & VFX Textures**: Native decoding for HDR (`.hdr`), OpenEXR (`.exr`), DirectDraw Surface (`.dds`), Truevision Targa (`.tga`), Netpbm (`.pnm`), and QOI (`.qoi`).
+- **Apple & Mobile HEIC/HEIF**: Native decoding for `.heic`, `.heif`, `.hif`, `.heifs`, and `.heics` files using hardware-accelerated Windows Imaging Component (WIC) and container extraction—zero third-party codecs or Windows Store extensions needed.
+- **Camera RAW Previews**: Instant ~15ms full-resolution previews for Sony (`.arw`, `.srf`, `.sr2`), Canon (`.cr2`, `.cr3`), Nikon (`.nef`, `.nrw`), Adobe/DJI (`.dng`), Fujifilm (`.raf`), Panasonic Lumix (`.rw2`), Olympus (`.orf`), and Pentax (`.pef`).
+- **Game & VFX Textures**: Native decoding for HDR (`.hdr`), OpenEXR (`.exr`), DirectDraw Surface (`.dds`), Truevision Targa (`.tga`), Netpbm (`.pnm`, `.ppm`, `.pgm`, `.pbm`), and QOI (`.qoi`).
+- **Asymmetric 5-Slot Prefetch Cache**: 60 FPS zero-latency photo flipping with smart directional preloading (+3 forward / +1 backward) and bounded LRU eviction.
 - **Hardware Telemetry (`I`)**: Deep EXIF inspection revealing camera make/model, lens, aperture ($f$-stop), shutter speed, ISO, focal length, and precision GPS coordinates.
 
 ---
@@ -100,7 +102,7 @@ Never worry about missing new features or manually downloading new builds:
 1. Go to the **[Latest Release](https://github.com/Crlyzd/Bukaake/releases/latest)** page.
 2. Download the latest executable matching your architecture (e.g., **`bukaake-vX.Y.Z-x64.exe`** or **`arm64.exe`** for ARM laptops like Surface Pro).
 3. **Double-click to run!** That's it—no setup wizard, no extra dependencies, and no administrative rights required.
-4. Open **Settings** (`Ctrl+,`) and click **Register** to make Bukaake your default photo viewer across all 32 image formats in seconds!
+4. Open **Settings** (`Ctrl+,`) and click **Register** to make Bukaake your default photo viewer across all 37 image formats in seconds!
 
 ---
 
@@ -139,7 +141,11 @@ cd Bukaake
 # or double-click run.bat
 ```
 
-The built-in Control Center handles live development with hot reload, one-key version bumping, and ultra-compact compilation.
+The built-in Control Center provides an interactive 10-option manager:
+- **Live Development**: Native desktop window (`npm run tauri:dev`) or instant web dev server (`npm run dev`).
+- **Fast Multi-Core Builds**: Option `[3]` compiles an incremental `bukaake-vX.Y.Z-x64-fast.exe` with uncapped CPU threads and zero LTO bottleneck.
+- **Production Builds**: Options `[4]` and `[5]` produce maximum-compression, symbol-stripped binaries for x64 and ARM64.
+- **One-Key Version Bumping**: Syncs versions atomically across `package.json`, `Cargo.toml`, and `tauri.conf.json`.
 
 ---
 
