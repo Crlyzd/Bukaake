@@ -4,7 +4,7 @@ setlocal enabledelayedexpansion
 title Bukaake — Desktop Image Viewer Manager
 cd /d "%~dp0"
 
-set CARGO_BUILD_JOBS=1
+set "CARGO_BUILD_JOBS=%NUMBER_OF_PROCESSORS%"
 
 :MENU
 cls
@@ -24,25 +24,27 @@ echo  ======================================================================
 echo.
 echo    [1] Live Dev: Native Desktop Window (Tauri Live Dev ^& Hot-Reload)
 echo    [2] Live Dev: Instant Web/Edge Window (Fast UI Preview)
-echo    [3] Build Production x64 App (Smallest Size -^> release-builds/)
-echo    [4] Build Production ARM64 App (Smallest Size -^> release-builds/)
-echo    [5] Build Both Architectures (x64 + ARM64 -^> release-builds/)
-echo    [6] Bump Version (Patch, Minor, Major, or Custom)
-echo    [7] Quick Run: Latest Compiled Release Executable
-echo    [8] Clean Build Artifacts ^& Locks
-echo    [9] Exit
+echo    [3] Build Fast x64 App (Fastest Compile, Larger Size -^> release-builds/)
+echo    [4] Build Production x64 App (Smallest Size -^> release-builds/)
+echo    [5] Build Production ARM64 App (Smallest Size -^> release-builds/)
+echo    [6] Build Both Architectures (x64 + ARM64 -^> release-builds/)
+echo    [7] Bump Version (Patch, Minor, Major, or Custom)
+echo    [8] Quick Run: Latest Compiled Release Executable
+echo    [9] Clean Build Artifacts ^& Locks
+echo    [10] Exit
 echo.
-set /p CHOICE="  Select an option [1-9]: "
+set /p CHOICE="  Select an option [1-10]: "
 
 if "%CHOICE%"=="1" goto DEV_TAURI
 if "%CHOICE%"=="2" goto DEV_WEB
-if "%CHOICE%"=="3" goto BUILD_X64
-if "%CHOICE%"=="4" goto BUILD_ARM64
-if "%CHOICE%"=="5" goto BUILD_BOTH
-if "%CHOICE%"=="6" goto BUMP_VER
-if "%CHOICE%"=="7" goto RUN_RELEASE
-if "%CHOICE%"=="8" goto CLEAN_CACHE
-if "%CHOICE%"=="9" goto EXIT_APP
+if "%CHOICE%"=="3" goto BUILD_FAST_X64
+if "%CHOICE%"=="4" goto BUILD_X64
+if "%CHOICE%"=="5" goto BUILD_ARM64
+if "%CHOICE%"=="6" goto BUILD_BOTH
+if "%CHOICE%"=="7" goto BUMP_VER
+if "%CHOICE%"=="8" goto RUN_RELEASE
+if "%CHOICE%"=="9" goto CLEAN_CACHE
+if "%CHOICE%"=="10" goto EXIT_APP
 goto MENU
 
 :STOP_LOCKS
@@ -65,6 +67,11 @@ echo.
 echo  [+] Starting preview server ^& opening Edge standalone window...
 start "" "msedge.exe" --app="http://localhost:3000/" --window-size=1100,720
 call npm run dev
+pause
+goto MENU
+
+:BUILD_FAST_X64
+call :COMPILE_FAST_X64
 pause
 goto MENU
 
@@ -102,6 +109,46 @@ echo  ======================================================================
 echo.
 pause
 goto MENU
+
+:COMPILE_FAST_X64
+echo.
+echo  ======================================================================
+echo    Compiling Fast x64 Build (Multi-Core, Zero-LTO) (v%CURRENT_VER%)
+echo  ======================================================================
+call :STOP_LOCKS
+if not exist "node_modules" call npm install
+if not exist "release-builds" mkdir release-builds
+
+:: Utilize all CPU cores for maximum compilation speed
+set "CARGO_BUILD_JOBS=%NUMBER_OF_PROCESSORS%"
+
+echo  [1/3] Bundling frontend assets...
+call npm run build
+if errorlevel 1 (
+    echo [-] Frontend build failed!
+    exit /b 1
+)
+
+echo  [2/3] Compiling Rust binary (Fast profile, multi-core, incremental)...
+cargo build --profile fast --manifest-path src-tauri/Cargo.toml
+if errorlevel 1 (
+    echo [-] Rust build failed!
+    exit /b 1
+)
+
+echo  [3/3] Packaging into release-builds/...
+set "OUT_FILE=release-builds\bukaake-v%CURRENT_VER%-x64-fast.exe"
+copy /y "src-tauri\target\fast\bukaake.exe" "%OUT_FILE%" >nul
+
+for %%I in ("%OUT_FILE%") do set "SIZE_BYTES=%%~zI"
+set /a SIZE_MB=%SIZE_BYTES% / 1048576
+set /a SIZE_KB=(%SIZE_BYTES% %% 1048576) / 1024
+
+echo.
+echo    [+] Successfully compiled: %OUT_FILE%
+echo    [+] File Size: %SIZE_MB% MB (%SIZE_KB% KB)
+echo.
+exit /b 0
 
 :COMPILE_X64
 echo.
@@ -211,11 +258,12 @@ if exist "release-builds\*.exe" (
         set "TARGET_EXE=release-builds\%%F"
     )
 )
+if "%TARGET_EXE%"=="" if exist "src-tauri\target\fast\bukaake.exe" set "TARGET_EXE=src-tauri\target\fast\bukaake.exe"
 if "%TARGET_EXE%"=="" if exist "src-tauri\target\release\bukaake.exe" set "TARGET_EXE=src-tauri\target\release\bukaake.exe"
 if "%TARGET_EXE%"=="" if exist "src-tauri\target\debug\bukaake.exe" set "TARGET_EXE=src-tauri\target\debug\bukaake.exe"
 
 if "%TARGET_EXE%"=="" (
-    echo [-] No compiled executable found! Please build with Option [3], [4], or [5] first.
+    echo [-] No compiled executable found! Please build with Option [3], [4], [5], or [6] first.
     pause
     goto MENU
 )

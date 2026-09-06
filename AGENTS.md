@@ -97,7 +97,7 @@ bukaake/
 │       ├── coding-specialist.md   # Code executor (~80 lines)
 │       └── code-reviewer.md       # Quality & 5-pillar auditor (~75 lines)
 ├── AGENTS.md                      # Authoritative project rules manual
-├── package.json                   # Version 0.2.0 single source of truth
+├── package.json                   # Version 0.3.0 single source of truth
 ├── index.html                     # Main viewer entrypoint
 ├── settings.html                  # Dedicated standalone settings window
 ├── scripts/
@@ -129,6 +129,7 @@ bukaake/
 │   │   ├── file-assoc-service.js  # Windows Shell capability registration & deep link (~85 lines)
 │   │   ├── file-loader.js         # Image file loader, drag & drop, clipboard (~265 lines)
 │   │   ├── idle-controller.js     # Picasa-style idle mouse fade controller (~105 lines)
+│   │   ├── image-prefetch-cache.js# Asymmetric 5-slot prefetch cache with LRU eviction (~140 lines)
 │   │   ├── image-saver.js         # Tauri & web image saving, copy to clipboard (~90 lines)
 │   │   ├── shortcuts.js           # Keyboard hotkeys registry (~140 lines)
 │   │   ├── tauri-bridge.js        # Tauri v2 window, args, fs IPC wrapper (~265 lines)
@@ -158,13 +159,15 @@ bukaake/
 │   ├── app.js                     # Main window bootstrap coordinator (~270 lines)
 │   └── settings-app.js            # Standalone settings window coordinator (~230 lines)
 └── src-tauri/
-    ├── Cargo.toml                 # Tauri v2 dependencies (`window-vibrancy`, `rfd`, `image`, `kamadak-exif`, `winreg`)
+    ├── Cargo.toml                 # Tauri v2 dependencies (`window-vibrancy`, `rfd`, `image`, `kamadak-exif`, `winreg`, `heif-oxide`)
     ├── tauri.conf.json            # Multi-window config (main + settings)
     └── src/
         ├── main.rs                # Native acrylic vibrancy + window IPC commands (~260 lines)
         ├── file_assoc.rs          # Windows registry capabilities, auto-heal & deep link (~145 lines)
         ├── image_loader.rs        # Fast native image decoding & metadata reading (~270 lines)
         ├── raw_reader.rs          # 15ms embedded preview extractor for 8 RAW formats (~60 lines)
+        ├── heif_reader.rs         # Native HEIC/HEIF container and thumbnail extractor (~70 lines)
+        ├── wic_decoder.rs         # Windows Imaging Component hardware-accelerated transcoding (~145 lines)
         ├── pro_decoder.rs         # VFX & texture decoders (HDR, EXR, DDS, TGA, QOI) (~25 lines)
         ├── exif_reader.rs         # Native EXIF camera telemetry & GPS extraction (~140 lines)
         ├── file_ops.rs            # Native Win32 Recycle Bin & permanent deletion (~70 lines)
@@ -194,10 +197,23 @@ bukaake/
 
 ### Common CLI Commands
 - `npm run dev` — Launch Vite local dev server (port 3000)
-- `npm run tauri:dev` — Launch Tauri v2 desktop application in development mode
+- `npm run tauri:dev` — Launch Tauri v2 desktop application in development mode (uncapped multi-core)
 - `npm run build` — Compile production Vite bundle
-- `npm run tauri:build` — Build standalone portable Windows release executable
+- `npm run tauri:build` — Build standalone portable Windows release executable (uncapped multi-core)
 - `npm run bump` — Atomically bump version across `package.json`, `Cargo.toml`, and `tauri.conf.json`
+
+### Control Center (`run.bat` / `run.ps1`)
+The root control center provides an interactive 10-option manager:
+- `[1]` Live Dev: Native Desktop Window (`npm run tauri:dev`)
+- `[2]` Live Dev: Instant Web/Edge Window (`npm run dev`)
+- `[3]` **Build Fast x64 App** — Zero LTO, 16 codegen units, multi-core parallel, incremental (`cargo build --profile fast`) -> `release-builds/bukaake-v<ver>-x64-fast.exe`
+- `[4]` **Build Production x64 App** — Multi-core dependency build, `opt-level=z`, fat LTO, symbol strip, panic abort -> `release-builds/bukaake-v<ver>-x64.exe`
+- `[5]` **Build Production ARM64 App** — Cross-compiles for `aarch64-pc-windows-msvc`
+- `[6]` **Build Both Architectures** — Sequential x64 and ARM64 release builds
+- `[7]` **Bump Version** — Patch, minor, major, or custom version synchronizer
+- `[8]` **Quick Run** — Launches the latest compiled executable (checks fast, release, and debug targets)
+- `[9]` **Clean Build Artifacts & Locks** — Purges `dist/`, cargo cache, and stale process locks
+- `[10]` **Exit**
 
 ### Compilation Rule
 - **No Automatic Production Binary Builds**: Agents must **NOT** automatically compile the full desktop application (`cargo build --release` / `tauri build`) once a task is finished. Use fast validation (`npm run build` for frontend bundle and `cargo check` for Rust type-checking). Full binary compilation is reserved for when the user explicitly requests it or executes it via `run.bat` / `run.ps1`.
@@ -282,6 +298,25 @@ bukaake/
   - If the portable executable is moved or renamed, silently updates shell open command in place, preserving existing Windows `UserChoice` hashes without requiring the user to reassign defaults in Windows Settings.
 - **Glass Settings Banner & Interactive Switch (`src/styles/components/settings-assoc.css`, `src/settings-app.js`, `src/components/settings-modal.js`)**:
   - Stroke-free frosted glass banner with vertically centered monochrome shield icon (`ri-shield-check-line`), 32 Formats tag, active executable path badge, and single-button toggle (`Register` / `Unregister`).
+
+### Hardware-Accelerated WIC & HEIC/HEIF Subsystem
+- **Native WIC In-Memory Transcoding (`src-tauri/src/wic_decoder.rs`)**:
+  - Leverages Windows Imaging Component COM interfaces (`IWICImagingFactory`, `IWICBitmapDecoder`) to decode system-supported codecs directly on GPU/hardware.
+  - Transcodes frames to standard JPEG/PNG in-memory memory streams (`CreateStreamOnHGlobal`) without disk I/O, serving immediate DataURLs to the canvas.
+- **HEIC / HEIF Container Extraction (`src-tauri/src/heif_reader.rs`)**:
+  - Integrates `heif-oxide` for container parsing and embedded preview extraction, falling back seamlessly to WIC native HEIF extensions.
+
+### Asymmetric Directional Prefetch Cache Subsystem
+- **Directional 5-Slot Window (`src/services/image-prefetch-cache.js`)**:
+  - Maintains an in-memory prefetch cache of decoded base64 image data during folder navigation.
+  - Implements asymmetric directional biasing: preloads +3 images ahead in the active traversal direction and +1 image behind.
+  - Automated LRU eviction bounds memory usage strictly to 5 cached images, guaranteeing instant, 0ms latency on `Left`/`Right` arrow keys without memory bloat.
+
+### Fast Multi-Core Compilation Architecture
+- **Dedicated Fast Profile (`src-tauri/Cargo.toml`)**:
+  - `[profile.fast]` inherits from `release`, with `opt-level = 1`, `lto = false`, `codegen-units = 16`, and `incremental = true`. Eliminates the multi-minute LTO linking bottleneck while keeping runtime performance fast.
+- **Dynamic Multi-Core CPU Allocation**:
+  - `run.bat` and `run.ps1` dynamically assign `CARGO_BUILD_JOBS` to all available CPU threads (`%NUMBER_OF_PROCESSORS%` / `ProcessorCount`), utilizing 12+ cores for parallel dependency compilation across both Fast and Production builds.
 
 ---
 

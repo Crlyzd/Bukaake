@@ -4,7 +4,7 @@
 
 $Host.UI.RawUI.WindowTitle = "Bukaake - Desktop Image Viewer Manager"
 Set-Location -Path $PSScriptRoot
-$env:CARGO_BUILD_JOBS = "1"
+$env:CARGO_BUILD_JOBS = [System.Environment]::ProcessorCount
 
 function Get-AppVersion {
     if (Test-Path "package.json") {
@@ -39,6 +39,37 @@ function Stop-Locks {
     Get-Process -ErrorAction SilentlyContinue | Where-Object { 
         $_.ProcessName -like "*bukaake*" -or $_.ProcessName -in @("cargo", "rustc", "tauri") 
     } | Stop-Process -Force -ErrorAction SilentlyContinue
+}
+
+function Invoke-BuildFastX64 {
+    param([string]$version)
+    Write-Host "`n  ======================================================================" -ForegroundColor Cyan
+    Write-Host "    Compiling Fast x64 Build (Multi-Core, Zero-LTO) (v$version)" -ForegroundColor BrightWhite
+    Write-Host "  ======================================================================" -ForegroundColor Cyan
+    Stop-Locks
+    if (-not (Test-Path "node_modules")) {
+        Write-Host "  [+] Installing frontend dependencies (npm install)..." -ForegroundColor Yellow
+        cmd /c "npm install"
+    }
+    if (-not (Test-Path "release-builds")) { New-Item -ItemType Directory -Path "release-builds" | Out-Null }
+
+    $env:CARGO_BUILD_JOBS = [System.Environment]::ProcessorCount
+
+    Write-Host "  [1/3] Bundling frontend assets..." -ForegroundColor Yellow
+    cmd /c "npm run build"
+    if ($LASTEXITCODE -ne 0) { Write-Host "[-] Frontend build failed!" -ForegroundColor Red; return $false }
+
+    Write-Host "  [2/3] Compiling Rust binary (Fast profile, multi-core, incremental)..." -ForegroundColor Yellow
+    cmd /c "cargo build --profile fast --manifest-path src-tauri/Cargo.toml"
+    if ($LASTEXITCODE -ne 0) { Write-Host "[-] Rust build failed!" -ForegroundColor Red; return $false }
+
+    $outFile = "release-builds\bukaake-v$version-x64-fast.exe"
+    Copy-Item -Path "src-tauri\target\fast\bukaake.exe" -Destination $outFile -Force
+    $sizeStr = Format-FileSize -filePath $outFile
+
+    Write-Host "`n  [+] Successfully compiled: $outFile" -ForegroundColor Green
+    Write-Host "  [+] Executable File Size: $sizeStr`n" -ForegroundColor BrightGreen
+    return $true
 }
 
 function Invoke-BuildX64 {
@@ -108,16 +139,17 @@ while ($true) {
 
     Write-Host "    [1] Live Dev: Native Desktop Window (Tauri Live Dev & Hot-Reload)" -ForegroundColor Yellow
     Write-Host "    [2] Live Dev: Instant Web/Edge Window (Fast UI Preview)" -ForegroundColor DarkYellow
-    Write-Host "    [3] Build Production x64 App (Smallest Size -> release-builds/)" -ForegroundColor Green
-    Write-Host "    [4] Build Production ARM64 App (Smallest Size -> release-builds/)" -ForegroundColor Green
-    Write-Host "    [5] Build Both Architectures (x64 + ARM64 -> release-builds/)" -ForegroundColor BrightGreen
-    Write-Host "    [6] Bump Version (Patch / Minor / Major / Custom)" -ForegroundColor Magenta
-    Write-Host "    [7] Quick Run: Latest Compiled Release Executable" -ForegroundColor Cyan
-    Write-Host "    [8] Clean Build Artifacts & Locks" -ForegroundColor Gray
-    Write-Host "    [9] Exit" -ForegroundColor DarkGray
+    Write-Host "    [3] Build Fast x64 App (Fastest Compile, Larger Size -> release-builds/)" -ForegroundColor BrightCyan
+    Write-Host "    [4] Build Production x64 App (Smallest Size -> release-builds/)" -ForegroundColor Green
+    Write-Host "    [5] Build Production ARM64 App (Smallest Size -> release-builds/)" -ForegroundColor Green
+    Write-Host "    [6] Build Both Architectures (x64 + ARM64 -> release-builds/)" -ForegroundColor BrightGreen
+    Write-Host "    [7] Bump Version (Patch / Minor / Major / Custom)" -ForegroundColor Magenta
+    Write-Host "    [8] Quick Run: Latest Compiled Release Executable" -ForegroundColor Cyan
+    Write-Host "    [9] Clean Build Artifacts & Locks" -ForegroundColor Gray
+    Write-Host "    [10] Exit" -ForegroundColor DarkGray
     Write-Host ""
 
-    $choice = Read-Host "  Select an option [1-9]"
+    $choice = Read-Host "  Select an option [1-10]"
 
     switch ($choice) {
         "1" {
@@ -138,14 +170,18 @@ while ($true) {
             Read-Host "`n  Press Enter to return to menu..."
         }
         "3" {
-            Invoke-BuildX64 -version $currentVer
+            Invoke-BuildFastX64 -version $currentVer
             Read-Host "  Press Enter to return to menu..."
         }
         "4" {
-            Invoke-BuildArm64 -version $currentVer
+            Invoke-BuildX64 -version $currentVer
             Read-Host "  Press Enter to return to menu..."
         }
         "5" {
+            Invoke-BuildArm64 -version $currentVer
+            Read-Host "  Press Enter to return to menu..."
+        }
+        "6" {
             Write-Host "`n  ======================================================================" -ForegroundColor Cyan
             Write-Host "    Building Both Architectures (x64 + ARM64) (v$currentVer)" -ForegroundColor BrightWhite
             Write-Host "  ======================================================================" -ForegroundColor Cyan
@@ -157,7 +193,7 @@ while ($true) {
             }
             Read-Host "  Press Enter to return to menu..."
         }
-        "6" {
+        "7" {
             Write-Host "`n  ======================================================================" -ForegroundColor Cyan
             Write-Host "    Bukaake Version Manager  (Current: v$currentVer)" -ForegroundColor BrightWhite
             Write-Host "  ======================================================================" -ForegroundColor Cyan
@@ -180,13 +216,15 @@ while ($true) {
                 }
             }
         }
-        "7" {
+        "8" {
             $targetExe = $null
             $releaseExe = Get-ChildItem -Path "release-builds\*.exe" -ErrorAction SilentlyContinue |
                 Sort-Object LastWriteTime -Descending |
                 Select-Object -First 1
             if ($releaseExe) {
                 $targetExe = $releaseExe.FullName
+            } elseif (Test-Path "src-tauri\target\fast\bukaake.exe") {
+                $targetExe = "src-tauri\target\fast\bukaake.exe"
             } elseif (Test-Path "src-tauri\target\release\bukaake.exe") {
                 $targetExe = "src-tauri\target\release\bukaake.exe"
             } elseif (Test-Path "src-tauri\target\debug\bukaake.exe") {
@@ -197,11 +235,11 @@ while ($true) {
                 Write-Host "`n  [+] Launching: $targetExe" -ForegroundColor Green
                 Start-Process $targetExe
             } else {
-                Write-Host "`n  [-] No compiled executable found! Please build with Option [3], [4], or [5] first." -ForegroundColor Red
+                Write-Host "`n  [-] No compiled executable found! Please build with Option [3], [4], [5], or [6] first." -ForegroundColor Red
                 Read-Host "  Press Enter to return to menu..."
             }
         }
-        "8" {
+        "9" {
             Write-Host "`n  [+] Cleaning build artifacts and locks..." -ForegroundColor Yellow
             Stop-Locks
             cmd /c "cargo clean --manifest-path src-tauri/Cargo.toml"
@@ -209,7 +247,7 @@ while ($true) {
             Write-Host "  [+] Clean complete!`n" -ForegroundColor Green
             Read-Host "  Press Enter to return to menu..."
         }
-        "9" {
+        "10" {
             exit 0
         }
     }

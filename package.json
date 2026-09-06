@@ -8,8 +8,8 @@
     "build": "vite build",
     "preview": "vite preview",
     "tauri": "tauri",
-    "tauri:dev": "tauri dev -- -j 1",
-    "tauri:build": "tauri build -- -j 1",
+    "tauri:dev": "tauri dev",
+    "tauri:build": "tauri build",
     "bump": "node scripts/bump-version.js"
   },
   "dependencies": {
