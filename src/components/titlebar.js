@@ -5,7 +5,7 @@
 
 import { tauriBridge } from '../services/tauri-bridge.js';
 import { themeManager } from '../services/theme-manager.js';
-import { updaterService } from '../services/updater-service.js';
+import { updaterService, hydrateAppVersions } from '../services/updater-service.js';
 
 export class Titlebar {
   constructor(options = {}) {
@@ -32,6 +32,7 @@ export class Titlebar {
   }
 
   init() {
+    hydrateAppVersions(this.container || document);
     this.bindWindowControls();
     this.bindActionButtons();
     this.syncMaximizedState();

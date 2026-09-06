@@ -6,7 +6,7 @@
 import './styles/main.css';
 import { tauriBridge } from './services/tauri-bridge.js';
 import { toast } from './components/toast.js';
-import { updaterService } from './services/updater-service.js';
+import { updaterService, APP_VERSION, hydrateAppVersions } from './services/updater-service.js';
 
 class SettingsApp {
   constructor() {
@@ -23,6 +23,7 @@ class SettingsApp {
   }
 
   init() {
+    hydrateAppVersions(document);
     this.syncThemeFromStorage();
     this.bindWindowControls();
     this.bindAppearanceControls();
@@ -123,7 +124,7 @@ class SettingsApp {
         } else if (isChecking) {
           this.btnCheckUpdate.innerHTML = '<i class="ri-loader-4-line ri-spin"></i> Checking...';
         } else if (state.hasUpdate) {
-          this.btnCheckUpdate.innerHTML = `<i class="ri-download-cloud-line"></i> Install v${state.version || '0.1.1'}`;
+          this.btnCheckUpdate.innerHTML = `<i class="ri-download-cloud-line"></i> Install v${state.version || APP_VERSION}`;
         } else {
           this.btnCheckUpdate.innerHTML = '<i class="ri-refresh-line"></i> Check';
         }
@@ -132,14 +133,14 @@ class SettingsApp {
       if (this.updateStatusText) {
         if (isUpdating) {
           if (state.updateStatus === 'installing') {
-            this.updateStatusText.textContent = `Installing Bukaake v${state.version || '0.1.1'} & restarting...`;
+            this.updateStatusText.textContent = `Installing Bukaake v${state.version || APP_VERSION} & restarting...`;
           } else {
-            this.updateStatusText.textContent = `Downloading Bukaake v${state.version || '0.1.1'} — ${state.updatePercent || 0}%`;
+            this.updateStatusText.textContent = `Downloading Bukaake v${state.version || APP_VERSION} — ${state.updatePercent || 0}%`;
           }
         } else if (state.hasUpdate) {
-          this.updateStatusText.textContent = `Update available: Bukaake v${state.version || '0.1.1'}`;
+          this.updateStatusText.textContent = `Update available: Bukaake v${state.version || APP_VERSION}`;
         } else {
-          this.updateStatusText.textContent = 'Bukaake v0.1.1 (Latest Version)';
+          this.updateStatusText.textContent = `Bukaake v${APP_VERSION} (Latest Version)`;
         }
       }
     });

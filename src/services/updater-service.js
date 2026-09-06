@@ -6,6 +6,8 @@
 
 import { toast } from '../components/toast.js';
 
+export const APP_VERSION = typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : '0.1.2';
+
 function compareVersions(v1, v2) {
   const clean1 = (v1 || '').replace(/^v/i, '').split('.').map((n) => parseInt(n, 10) || 0);
   const clean2 = (v2 || '').replace(/^v/i, '').split('.').map((n) => parseInt(n, 10) || 0);
@@ -23,7 +25,7 @@ class UpdaterService {
   constructor() {
     this.storageKey = 'bukaake_update_state';
     this.subscribers = new Set();
-    this.currentVersion = '0.1.1';
+    this.currentVersion = APP_VERSION;
     this.repoEndpoint = 'https://api.github.com/repos/Crlyzd/Bukaake/releases/latest';
     this.state = this.loadInitialState();
     this.bindStorageSync();
@@ -244,7 +246,7 @@ class UpdaterService {
     }
   }
 
-  setUpdateAvailable(hasUpdate, version = '0.1.1', assetUrl = '') {
+  setUpdateAvailable(hasUpdate, version = APP_VERSION, assetUrl = '') {
     this.state.hasUpdate = hasUpdate;
     this.state.version = version;
     this.state.assetUrl = assetUrl;
@@ -252,7 +254,25 @@ class UpdaterService {
   }
 }
 
+export function hydrateAppVersions(root = document) {
+  root.querySelectorAll('.app-version, .settings-win-version').forEach((el) => {
+    el.textContent = `v${APP_VERSION}`;
+  });
+  root.querySelectorAll('.settings-hero-subtitle').forEach((el) => {
+    el.textContent = `v${APP_VERSION} • Portable Edition`;
+  });
+  root.querySelectorAll('.settings-subtitle').forEach((el) => {
+    el.textContent = `v${APP_VERSION} (x64) • Glass Image Viewer`;
+  });
+  root.querySelectorAll('#updateStatusText').forEach((el) => {
+    if (!updaterService.state.hasUpdate && !updaterService.state.isUpdating) {
+      el.textContent = `Bukaake v${APP_VERSION} (Latest Version)`;
+    }
+  });
+}
+
 export const updaterService = new UpdaterService();
 if (typeof window !== 'undefined') {
   window.updaterService = updaterService;
+  window.hydrateAppVersions = hydrateAppVersions;
 }
