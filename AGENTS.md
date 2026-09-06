@@ -97,7 +97,7 @@ bukaake/
 │       ├── coding-specialist.md   # Code executor (~80 lines)
 │       └── code-reviewer.md       # Quality & 5-pillar auditor (~75 lines)
 ├── AGENTS.md                      # Authoritative project rules manual
-├── package.json                   # Version 0.3.0 single source of truth
+├── package.json                   # Version 0.4.0 single source of truth
 ├── index.html                     # Main viewer entrypoint
 ├── settings.html                  # Dedicated standalone settings window
 ├── scripts/
