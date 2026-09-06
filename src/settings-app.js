@@ -7,6 +7,7 @@ import './styles/main.css';
 import { tauriBridge } from './services/tauri-bridge.js';
 import { toast } from './components/toast.js';
 import { updaterService, APP_VERSION, hydrateAppVersions } from './services/updater-service.js';
+import { fileAssocService } from './services/file-assoc-service.js';
 
 class SettingsApp {
   constructor() {
@@ -19,6 +20,10 @@ class SettingsApp {
     this.updateBanner = document.querySelector('.settings-update-banner');
     this.updateProgressTrack = document.getElementById('updateProgressTrack');
     this.updateProgressFill = document.getElementById('updateProgressFill');
+    this.btnSetDefault = document.getElementById('btnSetDefaultApp');
+    this.btnUnregisterAssoc = document.getElementById('btnUnregisterAssoc');
+    this.assocBadge = document.getElementById('assocStatusBadge');
+    this.assocPathChip = document.getElementById('assocPathChip');
 
     this.init();
   }
@@ -29,6 +34,7 @@ class SettingsApp {
     this.bindWindowControls();
     this.bindAppearanceControls();
     this.bindUpdater();
+    this.bindFileAssociations();
     tauriBridge.initExternalLinks();
 
     window.addEventListener('contextmenu', (e) => {
@@ -163,6 +169,55 @@ class SettingsApp {
         updaterService.installUpdate();
       } else {
         updaterService.checkUpdate({ silent: false });
+      }
+    });
+  }
+
+  bindFileAssociations() {
+    this.assocPathText = document.getElementById('assocPathText');
+    this.assocSubText = document.getElementById('assocSubText');
+    this.assocCard = document.getElementById('cardFileAssoc');
+
+    fileAssocService.subscribe((status) => {
+      if (!this.assocBadge || !this.btnSetDefault) return;
+
+      if (this.assocPathText) {
+        this.assocPathText.textContent = status.current_path || 'Portable location';
+        this.assocPathText.title = status.current_path || '';
+      }
+
+      if (status.is_registered) {
+        this.assocBadge.textContent = status.is_path_matched ? 'Active' : 'Relocated';
+        this.assocBadge.classList.toggle('matched', Boolean(status.is_path_matched));
+        this.assocCard?.classList.add('is-registered');
+        this.btnSetDefault.classList.add('is-registered');
+        this.btnSetDefault.innerHTML = '<i class="ri-delete-bin-line"></i> Unregister';
+        this.btnSetDefault.title = 'Remove Bukaake from Windows file associations';
+        if (this.assocSubText) {
+          this.assocSubText.textContent = status.is_path_matched
+            ? 'Registered in Windows (32 Formats)'
+            : 'Path updated — Click to unregister / re-apply';
+        }
+      } else {
+        this.assocBadge.textContent = '32 Formats';
+        this.assocBadge.classList.remove('matched');
+        this.assocCard?.classList.remove('is-registered');
+        this.btnSetDefault.classList.remove('is-registered');
+        this.btnSetDefault.innerHTML = '<i class="ri-check-line"></i> Register';
+        this.btnSetDefault.title = 'Register Bukaake in Windows';
+        if (this.assocSubText) {
+          this.assocSubText.textContent = 'Set as default for photos, RAW & VFX';
+        }
+      }
+    });
+
+    fileAssocService.checkStatus();
+
+    this.btnSetDefault?.addEventListener('click', () => {
+      if (fileAssocService.status.is_registered) {
+        fileAssocService.unregister();
+      } else {
+        fileAssocService.registerAndOpenDefaultApps();
       }
     });
   }

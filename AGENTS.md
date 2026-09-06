@@ -86,7 +86,7 @@ Reliving the iconic Google Picasa Photo Viewer experience with two tailored mode
 
 ## 2. Directory Structure & Module Standards
 
-All 56 source files in the project strictly respect the < 300 lines per file budget:
+All 59 source files in the project strictly respect the < 300 lines per file budget:
 
 ```
 bukaake/
@@ -109,7 +109,7 @@ bukaake/
 │   │   ├── context-menu.js        # Glass desktop right-click context menu (~215 lines)
 │   │   ├── delete-modal.js        # Stroke-free Recycle Bin & delete dialog (~80 lines)
 │   │   ├── metadata-drawer.js     # EXIF, camera telemetry, dimensions drawer (~40 lines)
-│   │   ├── settings-modal.js      # Glass settings & updater modal overlay (~115 lines)
+│   │   ├── settings-modal.js      # Glass settings & updater modal overlay (~205 lines)
 │   │   ├── shortcuts-modal.js     # Keyboard shortcuts cheat sheet (~40 lines)
 │   │   ├── titlebar.js            # Window controls, filename badge, image info (~155 lines)
 │   │   ├── toast.js               # Single-toast lifecycle notification pill (~60 lines)
@@ -126,6 +126,7 @@ bukaake/
 │   ├── services/                  # External & platform services (< 270 lines each)
 │   │   ├── canvas-tools-manager.js# Tool mutual exclusivity & interaction lockout (~110 lines)
 │   │   ├── change-tracker.js      # Unsaved edits state tracking (~50 lines)
+│   │   ├── file-assoc-service.js  # Windows Shell capability registration & deep link (~85 lines)
 │   │   ├── file-loader.js         # Image file loader, drag & drop, clipboard (~265 lines)
 │   │   ├── idle-controller.js     # Picasa-style idle mouse fade controller (~105 lines)
 │   │   ├── image-saver.js         # Tauri & web image saving, copy to clipboard (~90 lines)
@@ -137,7 +138,7 @@ bukaake/
 │   ├── styles/                    # Modular CSS design system (< 245 lines each)
 │   │   ├── base.css               # Typography, reset, SVG checkerboard (~110 lines)
 │   │   ├── glass.css              # Core glassmorphism classes & ambient shadows (~80 lines)
-│   │   ├── main.css               # Master stylesheet bundling component submodules (~20 lines)
+│   │   ├── main.css               # Master stylesheet bundling component submodules (~25 lines)
 │   │   ├── tokens.css             # Stroke-free glass tokens (dark & light) (~115 lines)
 │   │   └── components/            # Component-specific stylesheets
 │   │       ├── confirm-modal.css  # Glass confirmation dialogs (unsaved & delete) (~180 lines)
@@ -147,6 +148,7 @@ bukaake/
 │   │       ├── modes.css          # Mode 1 regular vs Mode 2 fullscreen viewer (~235 lines)
 │   │       ├── panels.css         # Adjustments, metadata, and glass pill buttons (~230 lines)
 │   │       ├── settings.css       # Standalone settings window & modal styling (~245 lines)
+│   │       ├── settings-assoc.css # Default image viewer banner & toggle button (~155 lines)
 │   │       ├── shortcuts.css      # Keyboard shortcuts modal styling (~60 lines)
 │   │       ├── startpage.css      # Empty drop zone, capabilities strip & format matrix (~220 lines)
 │   │       ├── titlebar.css       # Frameless ghost titlebar & disabled states (~230 lines)
@@ -154,12 +156,13 @@ bukaake/
 │   │       ├── toolbar.css        # Responsive floating control dock (~175 lines)
 │   │       └── vibrancy.css       # Window vibrancy & background layer overrides (~70 lines)
 │   ├── app.js                     # Main window bootstrap coordinator (~270 lines)
-│   └── settings-app.js            # Standalone settings window coordinator (~140 lines)
+│   └── settings-app.js            # Standalone settings window coordinator (~230 lines)
 └── src-tauri/
-    ├── Cargo.toml                 # Tauri v2 dependencies (`window-vibrancy`, `rfd`, `image`, `kamadak-exif`)
+    ├── Cargo.toml                 # Tauri v2 dependencies (`window-vibrancy`, `rfd`, `image`, `kamadak-exif`, `winreg`)
     ├── tauri.conf.json            # Multi-window config (main + settings)
     └── src/
-        ├── main.rs                # Native acrylic vibrancy + window IPC commands (~270 lines)
+        ├── main.rs                # Native acrylic vibrancy + window IPC commands (~260 lines)
+        ├── file_assoc.rs          # Windows registry capabilities, auto-heal & deep link (~145 lines)
         ├── image_loader.rs        # Fast native image decoding & metadata reading (~270 lines)
         ├── raw_reader.rs          # 15ms embedded preview extractor for 8 RAW formats (~60 lines)
         ├── pro_decoder.rs         # VFX & texture decoders (HDR, EXR, DDS, TGA, QOI) (~25 lines)
@@ -267,6 +270,18 @@ bukaake/
   - Guards destructive actions (opening images, folder navigation, window closing).
 - **Image Saver (`src/services/image-saver.js`)**:
   - Supports instant clipboard copying of processed images via `copyProcessedImage` (routed through native `writeClipboardImage` in Tauri).
+
+### Windows Shell File Association & Auto-Healing Subsystem
+- **Registry Registration & Deep-Link (`src-tauri/src/file_assoc.rs`, `src/services/file-assoc-service.js`)**:
+  - Registers ProgID `Bukaake.ImageViewer`, `Capabilities\FileAssociations`, and `RegisteredApplications` under `HKCU` (zero UAC elevation required).
+  - Registers 32 graphic formats (standard raster, camera RAW, HDR/VFX textures, SVG, animated formats) and Windows Explorer right-click context menu ("Open with Bukaake").
+  - Seamlessly triggers Windows Default Apps settings via `ms-settings:defaultapps?registeredAppUser=Bukaake`.
+  - Supports full unregistration, cleanly pruning ProgID and Capabilities keys without touching unrelated configurations.
+- **Silent Startup Path Auto-Healing**:
+  - On application startup (`auto_heal_or_sync_path` in `src-tauri/src/main.rs`), compares current binary path against registered registry command.
+  - If the portable executable is moved or renamed, silently updates shell open command in place, preserving existing Windows `UserChoice` hashes without requiring the user to reassign defaults in Windows Settings.
+- **Glass Settings Banner & Interactive Switch (`src/styles/components/settings-assoc.css`, `src/settings-app.js`, `src/components/settings-modal.js`)**:
+  - Stroke-free frosted glass banner with vertically centered monochrome shield icon (`ri-shield-check-line`), 32 Formats tag, active executable path badge, and single-button toggle (`Register` / `Unregister`).
 
 ---
 

@@ -2,6 +2,7 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 mod clipboard;
+mod file_assoc;
 mod file_ops;
 pub mod exif_reader;
 pub mod pro_decoder;
@@ -9,6 +10,10 @@ pub mod raw_reader;
 mod image_loader;
 mod updater;
 use clipboard::{read_clipboard, write_clipboard_image};
+use file_assoc::{
+    auto_heal_or_sync_path, check_association_status, launch_default_apps_settings,
+    register_file_associations, unregister_file_associations,
+};
 use file_ops::delete_file;
 use image_loader::{get_initial_image, read_image_context, read_image_file};
 use tauri::{Emitter, Manager};
@@ -117,9 +122,7 @@ fn save_image_bytes(path: String, base64_data: String) -> Result<(), String> {
 }
 
 #[tauri::command]
-fn minimize_window(window: tauri::Window) {
-    let _ = window.minimize();
-}
+fn minimize_window(window: tauri::Window) { let _ = window.minimize(); }
 
 #[tauri::command]
 fn toggle_maximize_window(window: tauri::Window) {
@@ -129,32 +132,21 @@ fn toggle_maximize_window(window: tauri::Window) {
 }
 
 #[tauri::command]
-fn is_window_maximized(window: tauri::Window) -> bool {
-    window.is_maximized().unwrap_or(false)
-}
+fn is_window_maximized(window: tauri::Window) -> bool { window.is_maximized().unwrap_or(false) }
 
 #[tauri::command]
-fn unmaximize_window(window: tauri::Window) {
-    let _ = window.unmaximize();
-}
+fn unmaximize_window(window: tauri::Window) { let _ = window.unmaximize(); }
 
 #[tauri::command]
 fn resize_and_center_window(window: tauri::Window, width: u32, height: u32) -> Result<(), String> {
     let _ = window.unmaximize();
-    window
-        .set_size(tauri::Size::Logical(tauri::LogicalSize {
-            width: width as f64,
-            height: height as f64,
-        }))
-        .map_err(|e| e.to_string())?;
-    window.center().map_err(|e| e.to_string())?;
-    Ok(())
+    window.set_size(tauri::Size::Logical(tauri::LogicalSize { width: width as f64, height: height as f64 })).map_err(|e| e.to_string())?;
+    window.center().map_err(|e| e.to_string())
 }
 
 #[tauri::command]
 fn start_window_resize(window: tauri::Window, direction: String) -> Result<(), String> {
-    let _ = direction;
-    let _ = window;
+    let _ = (window, direction);
     Ok(())
 }
 
@@ -164,9 +156,7 @@ fn set_fullscreen_window(window: tauri::Window, fullscreen: bool) -> Result<(), 
 }
 
 #[tauri::command]
-fn is_window_fullscreen(window: tauri::Window) -> bool {
-    window.is_fullscreen().unwrap_or(false)
-}
+fn is_window_fullscreen(window: tauri::Window) -> bool { window.is_fullscreen().unwrap_or(false) }
 
 #[tauri::command]
 fn play_windows_ding() {
@@ -252,6 +242,7 @@ fn main() {
         .setup(|app| {
             #[cfg(target_os = "windows")]
             {
+                let _ = auto_heal_or_sync_path();
                 let tint = Some((16, 19, 28, 248));
                 if let Some(icon) = app.default_window_icon() {
                     for name in ["main", "settings"] {
@@ -286,7 +277,9 @@ fn main() {
             is_window_maximized, unmaximize_window, resize_and_center_window,
             start_window_resize, set_fullscreen_window, is_window_fullscreen,
             set_window_vibrancy, open_settings_window, hide_settings_window,
-            download_and_install_update, get_system_arch, delete_file
+            download_and_install_update, get_system_arch, delete_file,
+            check_association_status, register_file_associations,
+            unregister_file_associations, launch_default_apps_settings
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

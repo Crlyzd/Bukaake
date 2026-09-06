@@ -1,0 +1,154 @@
+/* ==========================================================================
+   Bukaake File Association & Default App Styles
+   Stroke-free Frosted Glass System adhering to Pillars 1 & 2 (< 100 lines)
+   ========================================================================== */
+
+/* Sleek Horizontal Banner matching settings-update-banner */
+.settings-assoc-banner {
+  width: 100%; box-sizing: border-box; display: flex;
+  flex-direction: column; gap: 8px;
+  background: var(--glass-card-bg);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: none !important; border-radius: var(--radius-md);
+  padding: 12px 16px; box-shadow: var(--glass-card-shadow);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+}
+
+.settings-assoc-main {
+  width: 100%; display: flex; align-items: center; justify-content: space-between;
+  gap: 12px;
+}
+
+/* Option C: Shield Icon vertically centered against the 3-line text stack */
+.settings-assoc-status-wrap {
+  display: flex; align-items: center; gap: 12px; min-width: 0; flex: 1;
+}
+
+.settings-assoc-status-wrap > i {
+  width: 22px; font-size: 22px; text-align: center;
+  color: #818cf8; flex-shrink: 0; line-height: 1;
+  transition: color var(--transition-fast);
+}
+
+html[data-theme="light"] .settings-assoc-status-wrap > i {
+  color: #6366f1;
+}
+
+.settings-assoc-banner.is-registered .settings-assoc-status-wrap > i {
+  color: #10b981;
+}
+
+/* Strictly left-aligned text column */
+.settings-assoc-text-col {
+  display: flex; flex-direction: column; align-items: flex-start !important;
+  text-align: left !important; gap: 2px; min-width: 0; flex: 1;
+}
+
+.settings-assoc-headline {
+  display: flex; align-items: center; gap: 6px;
+  margin: 0 !important; padding: 0 !important; text-align: left !important;
+}
+
+.settings-assoc-title {
+  margin: 0 !important; padding: 0 !important;
+  font-size: 12.5px; font-weight: 600; color: var(--text-main);
+  letter-spacing: 0.2px; white-space: nowrap; text-align: left !important;
+}
+
+/* Chip is protected from word-wrapping */
+.settings-assoc-chip {
+  font-family: 'JetBrains Mono', monospace; font-size: 9.5px; font-weight: 500;
+  padding: 1.5px 6px; border-radius: var(--radius-pill);
+  background: rgba(99, 102, 241, 0.16); color: #a5b4fc;
+  line-height: 1.2; white-space: nowrap !important; flex-shrink: 0;
+}
+
+.settings-assoc-chip.matched {
+  background: rgba(16, 185, 129, 0.16); color: #34d399;
+}
+
+html[data-theme="light"] .settings-assoc-chip {
+  background: rgba(99, 102, 241, 0.12); color: #4f46e5;
+}
+
+html[data-theme="light"] .settings-assoc-chip.matched {
+  background: rgba(16, 185, 129, 0.12); color: #059669;
+}
+
+/* Strictly left-aligned subtitle matching line 1 exactly */
+.settings-assoc-sub {
+  margin: 0 !important; padding: 0 !important;
+  font-size: 11px; color: var(--text-muted); text-align: left !important;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  display: block; width: 100%;
+}
+
+/* Strictly left-aligned location text */
+.settings-assoc-location {
+  margin: 1px 0 0 0 !important; padding: 0 !important;
+  font-family: 'JetBrains Mono', monospace; font-size: 9.5px;
+  color: var(--text-dim); text-align: left !important;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  user-select: text; -webkit-user-select: text;
+  display: block; width: 100%;
+}
+
+.settings-assoc-btn-group {
+  display: flex; align-items: center; flex-shrink: 0;
+  align-self: center;
+}
+
+.btn-assoc-action {
+  padding: 6px 14px; font-size: 11px; font-weight: 600;
+  border-radius: var(--radius-sm); background: var(--action-bg);
+  color: var(--action-text); border: none !important; outline: none !important;
+  cursor: pointer; display: flex; align-items: center; gap: 5px;
+  box-shadow: var(--btn-shadow); transition: all var(--transition-fast);
+  white-space: nowrap;
+}
+
+.btn-assoc-action i {
+  font-size: 13px;
+  line-height: 1;
+}
+
+.btn-assoc-action:hover {
+  background: var(--action-hover-bg); box-shadow: var(--btn-shadow-hover);
+  transform: translateY(-1px);
+}
+
+.btn-assoc-action:active { transform: translateY(0); }
+
+/* Pillar 2: Zero pure black in light mode */
+html[data-theme="light"] .btn-assoc-action {
+  background: #242938 !important;
+  color: #ffffff !important;
+}
+
+html[data-theme="light"] .btn-assoc-action:hover {
+  background: #2a3142 !important;
+}
+
+/* Toggle Switch State: Unregister button */
+.btn-assoc-action.is-registered {
+  background: rgba(239, 68, 68, 0.16) !important;
+  color: #f87171 !important;
+  box-shadow: none !important;
+}
+
+.btn-assoc-action.is-registered:hover {
+  background: rgba(239, 68, 68, 0.26) !important;
+  color: #fca5a5 !important;
+  transform: translateY(-1px);
+}
+
+html[data-theme="light"] .btn-assoc-action.is-registered {
+  background: rgba(239, 68, 68, 0.12) !important;
+  color: #dc2626 !important;
+}
+
+html[data-theme="light"] .btn-assoc-action.is-registered:hover {
+  background: rgba(239, 68, 68, 0.20) !important;
+}
