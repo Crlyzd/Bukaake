@@ -15,7 +15,6 @@
   overflow: hidden;
   transition: all var(--transition-normal);
   -webkit-app-region: no-drag;
-  app-region: no-drag;
   background: var(--glass-panel-bg);
   backdrop-filter: blur(32px) saturate(190%);
   -webkit-backdrop-filter: blur(32px) saturate(190%);
@@ -247,4 +246,15 @@ html[data-theme="light"] .meta-table tr:last-child {
   color: var(--text-main);
   text-align: right;
   word-break: break-all;
+}
+
+.meta-section-divider {
+  margin-top: 15px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+body.light-theme .meta-section-divider,
+html[data-theme="light"] .meta-section-divider {
+  border-top: 1px solid rgba(26, 32, 44, 0.08);
 }

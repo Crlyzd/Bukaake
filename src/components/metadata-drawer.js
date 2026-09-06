@@ -22,7 +22,7 @@ export class MetadataDrawer {
 
   update(meta, img) {
     if (this.metadataInspector) {
-      this.metadataInspector.update(meta?.fileObj || null, img);
+      this.metadataInspector.update(meta, img);
     }
   }
 

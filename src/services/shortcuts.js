@@ -133,6 +133,10 @@ export class ShortcutsRegistry {
         e.preventDefault();
         this.actions.onEscape?.();
         break;
+      case 'Delete':
+        e.preventDefault();
+        this.actions.onDeleteFile?.(Boolean(e.shiftKey));
+        break;
       case '?':
         e.preventDefault();
         this.actions.onToggleHelp?.();

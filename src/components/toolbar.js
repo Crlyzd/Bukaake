@@ -261,7 +261,10 @@ export class Toolbar {
   _setLocked(ids, active) {
     for (const id of ids) {
       const el = document.getElementById(id);
-      if (el) { el.disabled = active; el.style.opacity = active ? '0.28' : ''; el.style.pointerEvents = active ? 'none' : ''; }
+      if (el) {
+        el.disabled = active;
+        el.classList.toggle('tool-locked', active);
+      }
     }
   }
 
@@ -269,7 +272,8 @@ export class Toolbar {
     if (this.btnCropMode) this.btnCropMode.classList.toggle('active', active);
     if (this.cropToolbar) this.cropToolbar.classList.toggle('hidden', !active);
     if (this.container) this.container.classList.toggle('crop-locked', active);
-    this._setLocked(['btnPrevImage', 'btnNextImage', 'btnRotateLeft', 'btnRotateRight', 'btnFlipH', 'btnFlipV', 'btnDrawMode', 'btnAdjustments', 'btnPixelated', 'btnBgMode', 'btnSaveAs'], active);
+    // Transforms remain enabled in crop mode per user preference
+    this._setLocked(['btnPrevImage', 'btnNextImage', 'btnDrawMode', 'btnAdjustments', 'btnPixelated', 'btnBgMode', 'btnSaveAs'], active);
   }
 
   setDrawActive(active) {
@@ -287,5 +291,7 @@ export class Toolbar {
 
   setAdjustmentsActive(active) {
     if (this.btnAdjustments) this.btnAdjustments.classList.toggle('active', active);
+    if (this.container) this.container.classList.toggle('adjustments-locked', active);
+    this._setLocked(['btnPrevImage', 'btnNextImage', 'btnRotateLeft', 'btnRotateRight', 'btnFlipH', 'btnFlipV', 'btnCropMode', 'btnDrawMode', 'btnPixelated', 'btnBgMode', 'btnSaveAs'], active);
   }
 }

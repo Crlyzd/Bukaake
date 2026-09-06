@@ -43,6 +43,19 @@ html[data-theme="light"] .toast {
   color: var(--accent-cyan);
 }
 
+.toast.toast-warning {
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35), 0 0 20px rgba(245, 158, 11, 0.16);
+}
+
+body.light-theme .toast.toast-warning,
+html[data-theme="light"] .toast.toast-warning {
+  box-shadow: 0 8px 24px rgba(26, 32, 44, 0.12), 0 0 18px rgba(245, 158, 11, 0.22);
+}
+
+.toast.toast-warning i {
+  color: #f59e0b;
+}
+
 @keyframes toastIn {
   from {
     opacity: 0;

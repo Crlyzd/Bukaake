@@ -10,7 +10,7 @@ export class ToastManager {
     this.dismissTimer = null;
   }
 
-  show(message, icon = 'ri-sparkles-fill', durationMs = 1800) {
+  show(message, icon = 'ri-sparkles-fill', durationMs = 1800, type = 'info') {
     if (!this.container) return;
 
     if (this.dismissTimer) {
@@ -24,7 +24,7 @@ export class ToastManager {
     }
 
     const toast = document.createElement('div');
-    toast.className = 'toast';
+    toast.className = `toast toast-${type}`;
     toast.innerHTML = `<i class="${icon}"></i> <span>${message}</span>`;
     this.container.appendChild(toast);
     this.currentToast = toast;
@@ -40,6 +40,14 @@ export class ToastManager {
         }
       }, 220);
     }, durationMs);
+  }
+
+  warn(message, durationMs = 2600) {
+    this.show(message, 'ri-error-warning-line', durationMs, 'warning');
+  }
+
+  info(message, durationMs = 1800) {
+    this.show(message, 'ri-information-line', durationMs, 'info');
   }
 }
 

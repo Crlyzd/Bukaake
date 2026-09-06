@@ -29,7 +29,7 @@
   position: absolute; bottom: 72px; left: 50%;
   transform: translateX(-50%); padding: 4px 6px;
   border-radius: var(--radius-pill); display: flex; align-items: center; gap: 3px;
-  z-index: 52; -webkit-app-region: no-drag; app-region: no-drag;
+  z-index: 52; -webkit-app-region: no-drag;
   background: var(--glass-island-bg); backdrop-filter: blur(28px) saturate(180%);
   -webkit-backdrop-filter: blur(28px) saturate(180%); border: none !important;
   box-shadow: var(--glass-island-shadow);

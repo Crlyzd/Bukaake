@@ -480,6 +480,7 @@
           <div class="shortcut-item"><kbd>P</kbd> <span>Toggle Pixel Smoothing</span></div>
           <div class="shortcut-item"><kbd>Ctrl</kbd> + <kbd>V</kbd> <span>Paste Image from Clipboard</span></div>
           <div class="shortcut-item"><kbd>Ctrl</kbd> + <kbd>S</kbd> <span>Save / Export Image</span></div>
+          <div class="shortcut-item"><kbd>Delete</kbd> <span>Move to Recycle Bin</span></div>
           <div class="shortcut-item"><kbd>Esc</kbd> <span>Cancel Crop / Close Modals</span></div>
         </div>
       </div>
@@ -502,6 +503,24 @@
           <button class="confirm-btn btn-cancel" id="btnConfirmCancel">Cancel</button>
           <button class="confirm-btn btn-discard" id="btnConfirmDiscard">Don't Save</button>
           <button class="confirm-btn btn-save" id="btnConfirmSave">Save</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="confirm-modal-overlay hidden" id="deleteModalOverlay">
+      <div class="confirm-modal-card glass-panel">
+        <div class="confirm-modal-header">
+          <div class="confirm-modal-icon danger-icon"><i class="ri-delete-bin-line"></i></div>
+          <div class="confirm-modal-title-wrap">
+            <h3 class="confirm-modal-title" id="deleteModalTitle">Move to Recycle Bin?</h3>
+            <p class="confirm-modal-desc" id="deleteModalDesc">Are you sure you want to move this file to the Windows Recycle Bin?</p>
+            <span class="delete-filename-tag" id="deleteModalFileName"></span>
+          </div>
+        </div>
+        <div class="confirm-modal-actions">
+          <button class="confirm-btn btn-cancel" id="btnDeleteCancel">Cancel</button>
+          <button class="confirm-btn btn-danger" id="btnDeleteConfirm">Move to Recycle Bin</button>
         </div>
       </div>
     </div>

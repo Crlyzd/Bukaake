@@ -89,7 +89,6 @@
   gap: 3px;
   z-index: 52;
   -webkit-app-region: no-drag;
-  app-region: no-drag;
   background: var(--glass-island-bg);
   backdrop-filter: blur(28px) saturate(180%);
   -webkit-backdrop-filter: blur(28px) saturate(180%);

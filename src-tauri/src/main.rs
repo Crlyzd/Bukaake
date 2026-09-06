@@ -2,9 +2,14 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 mod clipboard;
+mod file_ops;
+pub mod exif_reader;
+pub mod pro_decoder;
+pub mod raw_reader;
 mod image_loader;
 mod updater;
 use clipboard::{read_clipboard, write_clipboard_image};
+use file_ops::delete_file;
 use image_loader::{get_initial_image, read_image_context, read_image_file};
 use tauri::{Emitter, Manager};
 use updater::{cleanup_old_update_artifacts, download_and_install_update, get_system_arch};
@@ -80,7 +85,20 @@ fn prompt_save_file(default_name: String, filter_ext: String) -> Result<Option<S
 #[tauri::command]
 fn prompt_open_file() -> Result<Option<String>, String> {
     let dialog = rfd::FileDialog::new()
-        .add_filter("Image Files", &["png", "jpg", "jpeg", "webp", "gif", "bmp", "ico", "avif", "tiff"]);
+        .add_filter(
+            "All Supported Images",
+            &[
+                "png", "jpg", "jpeg", "webp", "gif", "bmp", "ico", "tiff", "tif", "svg", "avif",
+                "arw", "srf", "sr2", "cr2", "cr3", "nef", "nrw", "dng", "raf", "rw2", "orf", "pef",
+                "hdr", "exr", "tga", "dds", "qoi", "ppm", "pgm", "pbm", "pnm",
+            ],
+        )
+        .add_filter(
+            "Camera RAW",
+            &["arw", "srf", "sr2", "cr2", "cr3", "nef", "nrw", "dng", "raf", "rw2", "orf", "pef"],
+        )
+        .add_filter("VFX & 3D Textures", &["hdr", "exr", "tga", "dds", "qoi", "ppm", "pgm", "pbm", "pnm"])
+        .add_filter("Standard Images", &["png", "jpg", "jpeg", "webp", "gif", "bmp", "ico", "tiff", "svg", "avif"]);
     let res = dialog.pick_file();
     Ok(res.map(|p| p.to_string_lossy().to_string()))
 }
@@ -268,7 +286,7 @@ fn main() {
             is_window_maximized, unmaximize_window, resize_and_center_window,
             start_window_resize, set_fullscreen_window, is_window_fullscreen,
             set_window_vibrancy, open_settings_window, hide_settings_window,
-            download_and_install_update, get_system_arch
+            download_and_install_update, get_system_arch, delete_file
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

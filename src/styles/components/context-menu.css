@@ -75,8 +75,17 @@ html[data-theme="light"] .glass-context-menu {
   transform: translateX(1px);
 }
 
+.context-menu-item.danger:hover:not(.disabled) {
+  background: var(--danger-bg);
+  color: #ffffff;
+}
+
 .context-menu-item:hover:not(.disabled) .context-menu-icon {
   color: inherit;
+}
+
+.context-menu-item.danger:hover:not(.disabled) .context-menu-icon {
+  color: #ffffff;
 }
 
 .context-menu-item.disabled {

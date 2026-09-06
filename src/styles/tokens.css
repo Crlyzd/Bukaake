@@ -55,6 +55,9 @@
   --action-bg: #ffffff;
   --action-text: #181b24;
   --action-hover-bg: #f0f2f5;
+  --danger-bg: rgba(239, 68, 68, 0.88);
+  --danger-hover-bg: rgba(220, 38, 38, 0.96);
+  --danger-text: #ffffff;
   --btn-shadow: 0 2px 8px rgba(0, 0, 0, 0.20);
   --btn-shadow-hover: 0 4px 14px rgba(0, 0, 0, 0.30);
   --active-highlight: rgba(255, 255, 255, 0.18);
@@ -111,6 +114,9 @@ body.light-theme {
   --action-bg: #242938;
   --action-text: #ffffff;
   --action-hover-bg: #32394d;
+  --danger-bg: rgba(220, 38, 38, 0.90);
+  --danger-hover-bg: rgba(185, 28, 28, 0.96);
+  --danger-text: #ffffff;
   --btn-shadow: 0 2px 6px rgba(26, 32, 44, 0.10);
   --btn-shadow-hover: 0 4px 10px rgba(26, 32, 44, 0.15);
   --active-highlight: rgba(26, 32, 44, 0.08);

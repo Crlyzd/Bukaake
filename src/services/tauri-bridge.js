@@ -86,8 +86,7 @@ export class TauriBridge {
     try {
       if (this.isTauri()) {
         const win = window.__TAURI__.window?.getCurrentWindow?.();
-        if (win?.minimize) await win.minimize();
-        else await this.invoke('minimize_window');
+        if (win?.minimize) await win.minimize(); else await this.invoke('minimize_window');
       }
     } catch (e) {}
   }
@@ -96,8 +95,7 @@ export class TauriBridge {
     try {
       if (this.isTauri()) {
         const win = window.__TAURI__.window?.getCurrentWindow?.();
-        if (win?.toggleMaximize) await win.toggleMaximize();
-        else await this.invoke('toggle_maximize_window');
+        if (win?.toggleMaximize) await win.toggleMaximize(); else await this.invoke('toggle_maximize_window');
         return;
       }
     } catch (e) {}
@@ -123,8 +121,7 @@ export class TauriBridge {
     try {
       if (this.isTauri()) {
         const win = window.__TAURI__.window?.getCurrentWindow?.();
-        if (win?.setFullscreen) await win.setFullscreen(fullscreen);
-        else await this.invoke('set_fullscreen_window', { fullscreen });
+        if (win?.setFullscreen) await win.setFullscreen(fullscreen); else await this.invoke('set_fullscreen_window', { fullscreen });
         return;
       }
     } catch (e) {}
@@ -160,8 +157,7 @@ export class TauriBridge {
     try {
       if (this.isTauri()) {
         const win = window.__TAURI__.window?.getCurrentWindow?.();
-        if (win?.unmaximize) await win.unmaximize();
-        else await this.invoke('unmaximize_window');
+        if (win?.unmaximize) await win.unmaximize(); else await this.invoke('unmaximize_window');
         return;
       }
     } catch (e) {}
@@ -194,8 +190,7 @@ export class TauriBridge {
     try {
       return await this.invoke('get_initial_image');
     } catch (err) {
-      console.warn('[TauriBridge] get_initial_image failed:', err);
-      return null;
+      return { error: typeof err === 'string' ? err : 'Unsupported file format' };
     }
   }
 
@@ -270,11 +265,20 @@ export class TauriBridge {
     }
   }
 
+  async deleteFile(path, toTrash = true) {
+    if (!this.isTauri() || !path) return false;
+    try {
+      await this.invoke('delete_file', { path, toTrash });
+      return true;
+    } catch (err) {
+      console.warn(`[TauriBridge] delete_file failed for '${path}':`, err);
+      throw err;
+    }
+  }
+
   onSettingsModalState(callback) {
     if (this.isTauri() && window.__TAURI__?.event?.listen) {
-      window.__TAURI__.event.listen('settings-modal-state', (event) => {
-        callback(Boolean(event.payload));
-      });
+      window.__TAURI__.event.listen('settings-modal-state', (event) => callback(Boolean(event.payload)));
     }
   }
 

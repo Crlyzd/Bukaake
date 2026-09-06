@@ -12,6 +12,7 @@ export class ContextMenu {
     this.getFilePath = options.getFilePath || (() => null);
     this.hasImage = options.hasImage || (() => false);
     this.isCropActive = options.isCropActive || (() => false);
+    this.isEditing = options.isEditing || (() => false);
     this.actions = options.actions || {};
 
     this.menuEl = null;
@@ -40,6 +41,11 @@ export class ContextMenu {
     // Right-click on viewport / canvas
     this.container?.addEventListener('contextmenu', (e) => {
       if (!this.hasImage()) return;
+      if (this.isEditing()) {
+        e.preventDefault();
+        e.stopPropagation();
+        return;
+      }
       // In dev mode, Shift + Right-Click opens native browser context menu
       if (this.isDev && e.shiftKey) return;
 
@@ -171,6 +177,16 @@ export class ContextMenu {
         shortcut: 'I',
         action: () => this.actions.onToggleMetadata?.(),
       },
+      { type: 'divider' },
+      {
+        id: 'delete-file',
+        label: 'Move to Recycle Bin',
+        icon: 'ri-delete-bin-line',
+        shortcut: 'Del',
+        danger: true,
+        disabled: !this.hasImage(),
+        action: () => this.actions.onDeleteFile?.(),
+      },
     ];
 
     if (this.isDev) {
@@ -192,9 +208,10 @@ export class ContextMenu {
       .map((item) => {
         if (item.type === 'divider') return '<div class="context-menu-divider"></div>';
         const disabledClass = item.disabled ? 'disabled' : '';
+        const dangerClass = item.danger ? 'danger' : '';
         const shortcutHtml = item.shortcut ? `<span class="context-menu-shortcut">${item.shortcut}</span>` : '';
         return `
-          <div class="context-menu-item ${disabledClass}" data-action="${item.id}">
+          <div class="context-menu-item ${disabledClass} ${dangerClass}" data-action="${item.id}">
             <i class="${item.icon} context-menu-icon"></i>
             <span class="context-menu-label">${item.label}</span>
             ${shortcutHtml}

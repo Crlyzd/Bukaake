@@ -18,7 +18,6 @@
   z-index: 50;
   transition: opacity var(--transition-fast), transform var(--transition-fast);
   -webkit-app-region: no-drag;
-  app-region: no-drag;
   background: var(--glass-island-bg);
   backdrop-filter: blur(28px) saturate(180%);
   -webkit-backdrop-filter: blur(28px) saturate(180%);
@@ -185,5 +184,12 @@ body.image-loaded .floating-toolbar:hover {
   #btnBgMode {
     display: none !important;
   }
+}
+
+.toolbar-btn.tool-locked,
+.file-counter.tool-locked {
+  opacity: 0.25 !important;
+  cursor: not-allowed !important;
+  pointer-events: none !important;
 }
 

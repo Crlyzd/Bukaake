@@ -167,3 +167,38 @@
 .confirm-btn.btn-cancel:active {
   transform: translateY(0);
 }
+
+.confirm-btn.btn-danger {
+  background: var(--danger-bg);
+  color: var(--danger-text);
+  font-weight: 600;
+  box-shadow: 0 4px 14px rgba(239, 68, 68, 0.35);
+}
+
+.confirm-btn.btn-danger:hover {
+  background: var(--danger-hover-bg);
+  box-shadow: 0 6px 18px rgba(239, 68, 68, 0.45);
+  transform: translateY(-1px);
+}
+
+.confirm-btn.btn-danger:active {
+  transform: translateY(0);
+}
+
+.confirm-modal-icon.danger-icon {
+  color: #ef4444;
+  background: rgba(239, 68, 68, 0.14);
+}
+
+.delete-filename-tag {
+  display: inline-block;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  padding: 3px 8px;
+  border-radius: var(--radius-xs);
+  background: var(--glass-btn-bg);
+  color: var(--text-main);
+  word-break: break-all;
+  margin-top: 6px;
+  max-width: 100%;
+}

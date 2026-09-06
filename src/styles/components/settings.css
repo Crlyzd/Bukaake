@@ -29,12 +29,12 @@ body.settings-window {
   background: transparent !important;
   backdrop-filter: none !important; -webkit-backdrop-filter: none !important;
   border: none !important; box-shadow: none !important;
-  -webkit-app-region: drag; app-region: drag; z-index: 10;
+  -webkit-app-region: drag; z-index: 10;
 }
 
 .settings-title-left {
   display: flex; align-items: center; gap: 8px;
-  -webkit-app-region: drag; app-region: drag;
+  -webkit-app-region: drag;
 }
 
 .settings-title-left .app-logo {
@@ -56,7 +56,7 @@ body.settings-window {
 
 .settings-win-controls {
   display: flex; align-items: center; gap: 4px;
-  -webkit-app-region: no-drag; app-region: no-drag;
+  -webkit-app-region: no-drag;
 }
 
 .settings-win-btn {

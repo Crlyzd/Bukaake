@@ -21,7 +21,6 @@
   z-index: 100;
   transition: opacity var(--transition-fast), transform var(--transition-fast);
   -webkit-app-region: drag;
-  app-region: drag;
 }
 
 body.image-loaded .app-titlebar {
@@ -116,7 +115,6 @@ body.image-loaded .app-titlebar:hover {
   align-items: center;
   gap: 2px;
   -webkit-app-region: no-drag;
-  app-region: no-drag;
   height: 100%;
   flex-shrink: 0;
   margin-left: auto;
@@ -137,7 +135,6 @@ body.image-loaded .app-titlebar:hover {
   justify-content: center;
   transition: all var(--transition-fast);
   -webkit-app-region: no-drag;
-  app-region: no-drag;
 }
 
 .titlebar-ghost-btn:hover:not(:disabled) {
@@ -188,7 +185,6 @@ body.image-loaded .app-titlebar:hover {
   font-size: 13px;
   transition: background var(--transition-fast), color var(--transition-fast);
   -webkit-app-region: no-drag !important;
-  app-region: no-drag !important;
 }
 
 .win-btn * {
