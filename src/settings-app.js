@@ -105,16 +105,16 @@ class SettingsApp {
         if (state.isChecking) {
           this.btnCheckUpdate.innerHTML = '<i class="ri-loader-4-line ri-spin"></i> Checking...';
         } else if (state.hasUpdate) {
-          this.btnCheckUpdate.innerHTML = `<i class="ri-download-cloud-line"></i> Install v${state.version || '0.1.0'}`;
+          this.btnCheckUpdate.innerHTML = `<i class="ri-download-cloud-line"></i> Install v${state.version || '0.1.1'}`;
         } else {
           this.btnCheckUpdate.innerHTML = '<i class="ri-refresh-line"></i> Check';
         }
       }
       if (this.updateStatusText) {
         if (state.hasUpdate) {
-          this.updateStatusText.textContent = `Update available: Bukaake v${state.version || '0.1.0'}`;
+          this.updateStatusText.textContent = `Update available: Bukaake v${state.version || '0.1.1'}`;
         } else {
-          this.updateStatusText.textContent = 'Bukaake v0.1.0 (Latest Version)';
+          this.updateStatusText.textContent = 'Bukaake v0.1.1 (Latest Version)';
         }
       }
     });

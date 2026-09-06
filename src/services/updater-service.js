@@ -23,7 +23,7 @@ class UpdaterService {
   constructor() {
     this.storageKey = 'bukaake_update_state';
     this.subscribers = new Set();
-    this.currentVersion = '0.1.0';
+    this.currentVersion = '0.1.1';
     this.repoEndpoint = 'https://api.github.com/repos/Crlyzd/Bukaake/releases/latest';
     this.state = this.loadInitialState();
     this.bindStorageSync();
@@ -182,7 +182,7 @@ class UpdaterService {
     }
   }
 
-  setUpdateAvailable(hasUpdate, version = '0.1.0') {
+  setUpdateAvailable(hasUpdate, version = '0.1.1') {
     this.state.hasUpdate = hasUpdate;
     this.state.version = version;
     this.broadcast();
