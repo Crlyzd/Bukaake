@@ -89,6 +89,10 @@ pub fn file_to_data_url(path: &Path) -> Result<(String, Option<(u32, u32)>), Str
             let b64 = BASE64_STANDARD.encode(&jpeg_bytes);
             return Ok((format!("data:image/jpeg;base64,{}", b64), None));
         }
+        #[cfg(target_os = "windows")]
+        if let Ok((data_url, dims)) = crate::wic_decoder::decode_wic_image(path) {
+            return Ok((data_url, Some(dims)));
+        }
     }
 
     if heif_reader::is_heif_file(path) {

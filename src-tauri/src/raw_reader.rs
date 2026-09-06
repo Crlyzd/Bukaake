@@ -3,7 +3,7 @@ use std::io::Read;
 use std::path::Path;
 
 pub const RAW_EXTS: &[&str] = &[
-    "arw", "srf", "sr2", "cr2", "cr3", "nef", "nrw", "dng", "raf", "rw2", "orf", "pef",
+    "arw", "srf", "sr2", "cr2", "cr3", "nef", "nrw", "dng", "raf", "rw2", "orf", "pef", "3fr",
 ];
 
 pub fn is_raw_file(path: &Path) -> bool {
