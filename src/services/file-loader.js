@@ -108,6 +108,7 @@ export class FileLoader {
     this.currentIndex = payload.neighbors?.length > 0 && payload.current_index >= 0 ? payload.current_index : 0;
 
     this.emitListChanged();
+    this.onLoadingStart?.(`Loading ${payload.file_name}...`);
     this.createImageFromUrl(payload.data_url, {
       name: payload.file_name, path: payload.target_path, sizeBytes: payload.size_bytes,
       dimensions: payload.dimensions, mimeType: payload.mime_type,

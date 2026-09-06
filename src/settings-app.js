@@ -24,6 +24,8 @@ class SettingsApp {
     this.btnUnregisterAssoc = document.getElementById('btnUnregisterAssoc');
     this.assocBadge = document.getElementById('assocStatusBadge');
     this.assocPathChip = document.getElementById('assocPathChip');
+    this.toggleStandby = document.getElementById('toggleStandby');
+    this.standbyBadge = document.getElementById('standbyStatusBadge');
 
     this.init();
   }
@@ -35,6 +37,7 @@ class SettingsApp {
     this.bindAppearanceControls();
     this.bindUpdater();
     this.bindFileAssociations();
+    this.bindStandbySettings();
     tauriBridge.initExternalLinks();
 
     window.addEventListener('contextmenu', (e) => {
@@ -221,6 +224,36 @@ class SettingsApp {
         fileAssocService.registerAndOpenDefaultApps();
       }
     });
+  }
+
+  bindStandbySettings() {
+    const isEnabled = localStorage.getItem('bukaake_standby_enabled') !== 'false';
+    if (this.toggleStandby) {
+      this.toggleStandby.checked = isEnabled;
+      this.updateStandbyUI(isEnabled);
+      this.toggleStandby.addEventListener('change', () => {
+        const checked = this.toggleStandby.checked;
+        localStorage.setItem('bukaake_standby_enabled', checked ? 'true' : 'false');
+        this.updateStandbyUI(checked);
+        tauriBridge.invoke('set_standby_enabled', { enabled: checked });
+        window.__TAURI__?.event?.emit('bukaake-standby-setting-changed', checked);
+      });
+    }
+
+    window.addEventListener('storage', (e) => {
+      if (e.key === 'bukaake_standby_enabled' && this.toggleStandby) {
+        const checked = e.newValue !== 'false';
+        this.toggleStandby.checked = checked;
+        this.updateStandbyUI(checked);
+      }
+    });
+  }
+
+  updateStandbyUI(enabled) {
+    if (this.standbyBadge) {
+      this.standbyBadge.textContent = enabled ? '5m Warm' : 'Disabled';
+      this.standbyBadge.classList.toggle('matched', enabled);
+    }
   }
 }
 

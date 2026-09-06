@@ -134,7 +134,8 @@ body.mode-viewer .app-titlebar .titlebar-right {
   flex-shrink: 0 !important;
 }
 
-/* Suppress all chrome, buttons, and branding in Mode 2 */
+/* Suppress all chrome, buttons, branding, and startpage drop-zone in Mode 2 */
+body.mode-viewer .drop-zone,
 body.mode-viewer .app-logo,
 body.mode-viewer .app-name,
 body.mode-viewer .app-version,

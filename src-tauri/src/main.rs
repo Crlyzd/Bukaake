@@ -8,6 +8,7 @@ pub mod exif_reader;
 pub mod heif_reader;
 pub mod pro_decoder;
 pub mod raw_reader;
+pub mod standby;
 #[cfg(target_os = "windows")]
 pub mod wic_decoder;
 mod image_loader;
@@ -19,6 +20,7 @@ use file_assoc::{
 };
 use file_ops::delete_file;
 use image_loader::{get_initial_image, read_image_context, read_image_file};
+use standby::{cancel_standby, enter_standby, is_standby_enabled, set_standby_enabled, show_main_window, StandbyManager};
 use tauri::{Emitter, Manager};
 use updater::{cleanup_old_update_artifacts, download_and_install_update, get_system_arch};
 
@@ -28,9 +30,7 @@ use std::os::windows::process::CommandExt;
 const CREATE_NO_WINDOW: u32 = 0x08000000;
 
 #[tauri::command]
-fn get_cli_args() -> Vec<String> {
-    std::env::args().collect()
-}
+fn get_cli_args() -> Vec<String> { std::env::args().collect() }
 
 #[tauri::command]
 fn open_url(url: String) -> Result<(), String> {
@@ -59,68 +59,49 @@ fn show_in_folder(path: String) -> Result<(), String> {
         cmd.spawn().map_err(|e| e.to_string())?;
     }
     #[cfg(not(target_os = "windows"))]
-    {
-        let _ = path;
-    }
+    { let _ = path; }
     Ok(())
 }
 
 #[tauri::command]
-fn close_window(window: tauri::Window) {
+fn close_window(window: tauri::Window, state: tauri::State<'_, StandbyManager>) {
     if window.label() == "main" {
-        window.app_handle().exit(0);
+        let _ = standby::enter_standby(window.app_handle().clone(), state);
     } else {
         let _ = window.close();
     }
 }
 
 #[tauri::command]
-fn exit_app(app_handle: tauri::AppHandle) {
-    app_handle.exit(0);
-}
+fn exit_app(app_handle: tauri::AppHandle) { app_handle.exit(0); }
 
 #[tauri::command]
 fn prompt_save_file(default_name: String, filter_ext: String) -> Result<Option<String>, String> {
     let mut dialog = rfd::FileDialog::new().set_file_name(&default_name);
-    if !filter_ext.is_empty() {
-        let exts = [filter_ext.as_str()];
-        dialog = dialog.add_filter("Image", &exts);
-    }
-    let res = dialog.save_file();
-    Ok(res.map(|p| p.to_string_lossy().to_string()))
+    if !filter_ext.is_empty() { dialog = dialog.add_filter("Image", &[filter_ext.as_str()]); }
+    Ok(dialog.save_file().map(|p| p.to_string_lossy().to_string()))
 }
 
 #[tauri::command]
 fn prompt_open_file() -> Result<Option<String>, String> {
     let dialog = rfd::FileDialog::new()
-        .add_filter(
-            "All Supported Images",
-            &[
-                "png", "jpg", "jpeg", "webp", "gif", "bmp", "ico", "tiff", "tif", "svg", "avif",
-                "heic", "heif", "hif", "heifs", "heics",
-                "arw", "srf", "sr2", "cr2", "cr3", "nef", "nrw", "dng", "raf", "rw2", "orf", "pef",
-                "hdr", "exr", "tga", "dds", "qoi", "ppm", "pgm", "pbm", "pnm",
-            ],
-        )
+        .add_filter("All Supported Images", &[
+            "png", "jpg", "jpeg", "webp", "gif", "bmp", "ico", "tiff", "tif", "svg", "avif",
+            "heic", "heif", "hif", "heifs", "heics", "arw", "srf", "sr2", "cr2", "cr3",
+            "nef", "nrw", "dng", "raf", "rw2", "orf", "pef", "hdr", "exr", "tga", "dds", "qoi",
+            "ppm", "pgm", "pbm", "pnm",
+        ])
         .add_filter("High Efficiency", &["heic", "heif", "hif", "heifs", "heics"])
-        .add_filter(
-            "Camera RAW",
-            &["arw", "srf", "sr2", "cr2", "cr3", "nef", "nrw", "dng", "raf", "rw2", "orf", "pef"],
-        )
+        .add_filter("Camera RAW", &["arw", "srf", "sr2", "cr2", "cr3", "nef", "nrw", "dng", "raf", "rw2", "orf", "pef"])
         .add_filter("VFX & 3D Textures", &["hdr", "exr", "tga", "dds", "qoi", "ppm", "pgm", "pbm", "pnm"])
         .add_filter("Standard Images", &["png", "jpg", "jpeg", "webp", "gif", "bmp", "ico", "tiff", "svg", "avif"]);
-    let res = dialog.pick_file();
-    Ok(res.map(|p| p.to_string_lossy().to_string()))
+    Ok(dialog.pick_file().map(|p| p.to_string_lossy().to_string()))
 }
 
 #[tauri::command]
 fn save_image_bytes(path: String, base64_data: String) -> Result<(), String> {
     use base64::prelude::*;
-    let cleaned = if let Some(idx) = base64_data.find(',') {
-        &base64_data[idx + 1..]
-    } else {
-        &base64_data
-    };
+    let cleaned = if let Some(idx) = base64_data.find(',') { &base64_data[idx + 1..] } else { &base64_data };
     let data = BASE64_STANDARD.decode(cleaned).map_err(|e| e.to_string())?;
     std::fs::write(&path, data).map_err(|e| e.to_string())?;
     Ok(())
@@ -150,15 +131,10 @@ fn resize_and_center_window(window: tauri::Window, width: u32, height: u32) -> R
 }
 
 #[tauri::command]
-fn start_window_resize(window: tauri::Window, direction: String) -> Result<(), String> {
-    let _ = (window, direction);
-    Ok(())
-}
+fn start_window_resize(window: tauri::Window, direction: String) -> Result<(), String> { let _ = (window, direction); Ok(()) }
 
 #[tauri::command]
-fn set_fullscreen_window(window: tauri::Window, fullscreen: bool) -> Result<(), String> {
-    window.set_fullscreen(fullscreen).map_err(|e| e.to_string())
-}
+fn set_fullscreen_window(window: tauri::Window, fullscreen: bool) -> Result<(), String> { window.set_fullscreen(fullscreen).map_err(|e| e.to_string()) }
 
 #[tauri::command]
 fn is_window_fullscreen(window: tauri::Window) -> bool { window.is_fullscreen().unwrap_or(false) }
@@ -168,9 +144,7 @@ fn play_windows_ding() {
     #[cfg(target_os = "windows")]
     unsafe {
         #[link(name = "user32")]
-        extern "system" {
-            fn MessageBeep(uType: u32) -> i32;
-        }
+        extern "system" { fn MessageBeep(uType: u32) -> i32; }
         MessageBeep(0);
     }
 }
@@ -209,8 +183,8 @@ fn open_settings_window(app_handle: tauri::AppHandle) -> Result<(), String> {
 
 #[tauri::command]
 fn hide_settings_window(app_handle: tauri::AppHandle) -> Result<(), String> {
-    if let Some(settings_win) = app_handle.get_webview_window("settings") {
-        let _ = settings_win.hide();
+    if let Some(w) = app_handle.get_webview_window("settings") {
+        let _ = w.hide();
         let _ = app_handle.emit("settings-modal-state", false);
     }
     Ok(())
@@ -221,20 +195,12 @@ fn set_window_vibrancy(app_handle: tauri::AppHandle, is_dark: bool, is_viewer: O
     #[cfg(target_os = "windows")]
     {
         use window_vibrancy::{apply_acrylic, clear_acrylic};
-        let dark_tint = Some((16, 19, 28, 248));
-        let light_tint = Some((245, 247, 250, 140));
-        let tint = if is_dark { dark_tint } else { light_tint };
-
-        if let Some(main_win) = app_handle.get_webview_window("main") {
-            if is_viewer.unwrap_or(false) {
-                let _ = clear_acrylic(&main_win);
-            } else {
-                let _ = apply_acrylic(&main_win, tint);
-            }
+        let tint = if is_dark { Some((16, 19, 28, 248)) } else { Some((245, 247, 250, 140)) };
+        if let Some(w) = app_handle.get_webview_window("main") {
+            if is_viewer.unwrap_or(false) { let _ = clear_acrylic(&w); } else { let _ = apply_acrylic(&w, tint); }
         }
-
-        if let Some(settings_win) = app_handle.get_webview_window("settings") {
-            let _ = apply_acrylic(&settings_win, tint);
+        if let Some(w) = app_handle.get_webview_window("settings") {
+            let _ = apply_acrylic(&w, tint);
         }
     }
     let _ = (app_handle, is_dark, is_viewer);
@@ -244,7 +210,28 @@ fn set_window_vibrancy(app_handle: tauri::AppHandle, is_dark: bool, is_viewer: O
 fn main() {
     cleanup_old_update_artifacts();
     tauri::Builder::default()
+        .plugin(tauri_plugin_single_instance::init(|app, argv, _cwd| {
+            if let Some(win) = app.get_webview_window("main") {
+                let standby = app.state::<StandbyManager>();
+                standby.cancel_countdown();
+                let mut target_file: Option<String> = None;
+                for arg in argv.into_iter().skip(1) {
+                    let p = std::path::Path::new(&arg);
+                    if p.is_file() && image_loader::is_image_file(p) { target_file = Some(arg); break; }
+                }
+                if let Some(path) = target_file {
+                    let _ = win.set_fullscreen(true);
+                    #[cfg(target_os = "windows")]
+                    let _ = window_vibrancy::clear_acrylic(&win);
+                    let _ = win.emit("bukaake://open-path", path);
+                } else { let _ = win.unminimize(); }
+                let _ = win.show();
+                let _ = win.set_focus();
+            }
+        }))
         .setup(|app| {
+            app.manage(StandbyManager::new());
+            let _ = standby::create_tray(app);
             #[cfg(target_os = "windows")]
             {
                 let _ = auto_heal_or_sync_path();
@@ -254,19 +241,36 @@ fn main() {
                         if let Some(w) = app.get_webview_window(name) { let _ = w.set_icon(icon.clone()); }
                     }
                 }
-                for name in ["main", "settings"] {
-                    if let Some(w) = app.get_webview_window(name) {
-                        let _ = w.set_shadow(true);
-                        let _ = window_vibrancy::apply_acrylic(&w, tint);
+                let has_img = std::env::args().skip(1).any(|a| {
+                    let p = std::path::Path::new(&a);
+                    p.is_file() && image_loader::is_image_file(p)
+                });
+                if let Some(main_win) = app.get_webview_window("main") {
+                    let _ = main_win.set_shadow(true);
+                    if has_img {
+                        let _ = main_win.set_fullscreen(true);
+                        let _ = window_vibrancy::clear_acrylic(&main_win);
+                    } else {
+                        let _ = window_vibrancy::apply_acrylic(&main_win, tint);
                     }
+                }
+                if let Some(w) = app.get_webview_window("settings") {
+                    let _ = w.set_shadow(true);
+                    let _ = window_vibrancy::apply_acrylic(&w, tint);
                 }
             }
             Ok(())
         })
         .on_window_event(|window, event| {
             if window.label() == "main" {
-                if let tauri::WindowEvent::CloseRequested { .. } | tauri::WindowEvent::Destroyed = event {
-                    window.app_handle().exit(0);
+                if let tauri::WindowEvent::CloseRequested { api, .. } = event {
+                    if standby::is_standby_enabled() {
+                        api.prevent_close();
+                        let state = window.state::<StandbyManager>();
+                        let _ = standby::enter_standby(window.app_handle().clone(), state);
+                    } else {
+                        window.app_handle().exit(0);
+                    }
                 }
             } else if window.label() == "settings" {
                 if let tauri::WindowEvent::CloseRequested { .. } = event {
@@ -284,7 +288,9 @@ fn main() {
             set_window_vibrancy, open_settings_window, hide_settings_window,
             download_and_install_update, get_system_arch, delete_file,
             check_association_status, register_file_associations,
-            unregister_file_associations, launch_default_apps_settings
+            unregister_file_associations, launch_default_apps_settings,
+            enter_standby, cancel_standby, show_main_window,
+            set_standby_enabled, is_standby_enabled
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

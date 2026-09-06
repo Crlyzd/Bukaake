@@ -27,6 +27,7 @@ import { CanvasToolsManager } from './services/canvas-tools-manager.js';
 import { exportImage, copyProcessedImage } from './services/image-saver.js';
 import { toast } from './components/toast.js';
 import { loadingIndicator } from './components/loading-indicator.js';
+import { standbyService } from './services/standby-service.js';
 
 class BukaakeApp {
   constructor() {
@@ -42,8 +43,7 @@ class BukaakeApp {
     this.metadataInspector = new MetadataInspector(document.getElementById('metadataBody'));
 
     this.fileLoader = new FileLoader();
-    this.confirmModal = new ConfirmModal();
-    this.deleteModal = new DeleteModal();
+    this.confirmModal = new ConfirmModal(); this.deleteModal = new DeleteModal();
     this.bgModes = ['bg-transparent', 'bg-checkerboard'];
     this.currentBgIndex = 0;
     this.initComponents(); this.initServices(); this.init();
@@ -61,7 +61,7 @@ class BukaakeApp {
       onToggleSettings: async () => { if (!(await tauriBridge.openSettingsWindow())) this.settingsModal.toggle(); },
       onToggleHelp: () => this.shortcutsModal.toggle(),
       onToggleMode: () => this.windowModeManager?.toggleMode(),
-      onClose: () => this.confirmModal.promptIfDirty(() => tauriBridge.closeWindow(), () => this.saveImage()),
+      onClose: () => this.confirmModal.promptIfDirty(() => standbyService.enterStandby({ viewer: this.viewer, fileLoader: this.fileLoader, windowModeManager: this.windowModeManager }), () => this.saveImage()),
     });
 
     this.toolbar = new Toolbar({
@@ -130,7 +130,7 @@ class BukaakeApp {
     this.fileLoader.onLoadingStart = (m) => loadingIndicator.show(m);
     this.fileLoader.onLoadingEnd = () => loadingIndicator.hide();
     this.fileLoader.onPromptOpen = () => this.confirmModal.promptIfDirty(() => this.openFile(), () => this.saveImage());
-    this.fileLoader.onAllFilesCleared = () => (this.windowModeManager?.currentMode === MODE_VIEWER ? tauriBridge.exitApp() : this.handleEmptyState());
+    this.fileLoader.onAllFilesCleared = () => (this.windowModeManager?.currentMode === MODE_VIEWER ? standbyService.enterStandby({ viewer: this.viewer, fileLoader: this.fileLoader, windowModeManager: this.windowModeManager }) : this.handleEmptyState());
     this.viewer.onTransformChange = () => { this.updateStatusBadges(); if (this.drawingTool?.active) this.drawingTool.redraw(); if (this.cropper?.active) this.cropper.onTransform(); };
 
     this.windowModeManager = new WindowModeManager({
@@ -178,8 +178,7 @@ class BukaakeApp {
         if (this.cropper.active) return this.toolsManager.toggleCrop(false);
         if (this.adjustmentsPanel.isOpen()) return this.toolsManager.closeAdjustments();
         for (const m of [this.metadataDrawer, this.settingsModal, this.shortcutsModal]) if (m.isOpen()) return m.hide();
-        const action = this.windowModeManager?.currentMode === MODE_VIEWER ? () => tauriBridge.exitApp() : () => tauriBridge.closeWindow();
-        this.confirmModal.promptIfDirty(action, () => this.saveImage());
+        this.confirmModal.promptIfDirty(() => standbyService.enterStandby({ viewer: this.viewer, fileLoader: this.fileLoader, windowModeManager: this.windowModeManager }), () => this.saveImage());
       },
     });
   }
@@ -192,14 +191,29 @@ class BukaakeApp {
     shield?.addEventListener('mousedown', (e) => { e.preventDefault(); e.stopPropagation(); tauriBridge.playWindowsDing(); tauriBridge.openSettingsWindow(); });
     document.body.classList.add('bg-transparent');
     this.titlebar.syncMaximizedState(await tauriBridge.isFullscreen());
+    await standbyService.init({
+      onOpenPath: async (p) => {
+        this.dropZoneEl.style.display = 'none';
+        await this.windowModeManager.setMode(MODE_VIEWER);
+        const name = p.split(/[/\\]/).pop() || 'image';
+        loadingIndicator.show(`Loading ${name}...`);
+        const ctx = await tauriBridge.readImageContext(p);
+        if (ctx) this.fileLoader.loadFromTauriContext(ctx);
+        else { loadingIndicator.hide(); toast.warn(`Unsupported file format: ${name}`); }
+      },
+      onTriggerOpenFile: () => this.openFile(),
+      onOpenSettings: async () => { if (!(await tauriBridge.openSettingsWindow())) this.settingsModal.toggle(); },
+    });
 
     try {
       const initial = await tauriBridge.getInitialImage();
       if (initial?.target_path) {
         await this.windowModeManager.setMode(MODE_VIEWER);
-        return this.fileLoader.loadFromTauriContext(initial);
+        loadingIndicator.show(`Loading ${initial.file_name}...`);
+        this.fileLoader.loadFromTauriContext(initial);
       } else if (initial?.error) toast.warn(initial.error);
     } catch (err) { console.warn('[Bukaake] Startup check failed:', err); }
+    await tauriBridge.invoke('show_main_window');
   }
 
   updateStatusBadges() {
@@ -235,17 +249,12 @@ class BukaakeApp {
     document.body.classList.remove('image-loaded');
     this.dropZoneEl.style.display = 'flex';
     this.viewer.setImage(null);
-    this.filters.reset();
-    changeTracker.reset();
-    this.drawingTool?.clear();
+    this.filters.reset(); changeTracker.reset(); this.drawingTool?.clear();
     if (this.drawingTool?.active) this.toolsManager?.toggleDraw(false);
     if (this.cropper?.active) this.toolsManager?.toggleCrop(false);
-    this.adjustmentsPanel.syncSliderUI();
-    this.metadataDrawer.hide();
-    this.titlebar.setFileName('');
-    this.titlebar.setHasImage(false);
-    this.toolbar.updateCounter(0, -1);
-    this.idleController?.refreshState();
+    this.adjustmentsPanel.syncSliderUI(); this.metadataDrawer.hide();
+    this.titlebar.setFileName(''); this.titlebar.setHasImage(false);
+    this.toolbar.updateCounter(0, -1); this.idleController?.refreshState();
   }
 
   handleNavigateBatch(delta) {
@@ -254,17 +263,13 @@ class BukaakeApp {
   }
 
   handleRotate(deg) {
-    if (this.drawingTool?.active || this.adjustmentsPanel?.isOpen()) {
-      return toast.show('Please finish or cancel active edits before transforming canvas');
-    }
+    if (this.drawingTool?.active || this.adjustmentsPanel?.isOpen()) return toast.show('Please finish or cancel active edits before transforming canvas');
     this.viewer.rotate(deg, this.cropper.active);
     this.toolsManager?.onTransformWhileCropping();
   }
 
   handleFlip(dir) {
-    if (this.drawingTool?.active || this.adjustmentsPanel?.isOpen()) {
-      return toast.show('Please finish or cancel active edits before transforming canvas');
-    }
+    if (this.drawingTool?.active || this.adjustmentsPanel?.isOpen()) return toast.show('Please finish or cancel active edits before transforming canvas');
     if (dir === 'h') this.viewer.toggleFlipH(); else this.viewer.toggleFlipV();
     this.toolsManager?.onTransformWhileCropping();
   }
@@ -274,18 +279,12 @@ class BukaakeApp {
     const meta = this.fileLoader.currentMeta;
     if (!this.viewer.img || !meta) return;
     this.deleteModal.prompt({
-      fileName: meta.name,
-      isPermanent: permanent,
+      fileName: meta.name, isPermanent: permanent,
       onConfirm: async () => {
         try {
           const res = await this.fileLoader.deleteCurrent(!permanent);
-          if (res?.success) {
-            changeTracker.reset();
-            toast.show(permanent ? `Deleted ${res.deletedName}` : `Moved ${res.deletedName} to Recycle Bin`);
-          }
-        } catch (err) {
-          toast.show(`Failed to delete: ${err}`);
-        }
+          if (res?.success) { changeTracker.reset(); toast.show(permanent ? `Deleted ${res.deletedName}` : `Moved ${res.deletedName} to Recycle Bin`); }
+        } catch (err) { toast.show(`Failed to delete: ${err}`); }
       },
     });
   }

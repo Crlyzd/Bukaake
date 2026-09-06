@@ -8,6 +8,7 @@ import { toast } from './toast.js';
 import { themeManager } from '../services/theme-manager.js';
 import { updaterService, APP_VERSION, hydrateAppVersions } from '../services/updater-service.js';
 import { fileAssocService } from '../services/file-assoc-service.js';
+import { tauriBridge } from '../services/tauri-bridge.js';
 
 export class SettingsModal {
   constructor(options = {}) {
@@ -25,6 +26,8 @@ export class SettingsModal {
     this.btnUnregisterAssoc = this.modalEl?.querySelector('#btnUnregisterAssoc');
     this.assocBadge = this.modalEl?.querySelector('#assocStatusBadge');
     this.assocPathChip = this.modalEl?.querySelector('#assocPathChip');
+    this.toggleStandby = this.modalEl?.querySelector('#toggleStandbyModal');
+    this.standbyBadge = this.modalEl?.querySelector('#standbyStatusBadgeModal');
 
     this.sliderWindowOpacity = document.getElementById('sliderWindowOpacity');
     this.valWindowOpacity = document.getElementById('valWindowOpacity');
@@ -32,6 +35,7 @@ export class SettingsModal {
     this.init();
     this.initAppearanceSettings();
     this.bindFileAssociations();
+    this.bindStandbySettings();
   }
 
   init() {
@@ -199,5 +203,43 @@ export class SettingsModal {
         fileAssocService.registerAndOpenDefaultApps();
       }
     });
+  }
+
+  bindStandbySettings() {
+    const isEnabled = localStorage.getItem('bukaake_standby_enabled') !== 'false';
+    if (this.toggleStandby) {
+      this.toggleStandby.checked = isEnabled;
+      this.updateStandbyUI(isEnabled);
+      this.toggleStandby.addEventListener('change', () => {
+        const checked = this.toggleStandby.checked;
+        localStorage.setItem('bukaake_standby_enabled', checked ? 'true' : 'false');
+        this.updateStandbyUI(checked);
+        tauriBridge.invoke('set_standby_enabled', { enabled: checked });
+        window.__TAURI__?.event?.emit('bukaake-standby-setting-changed', checked);
+      });
+    }
+
+    window.addEventListener('storage', (e) => {
+      if (e.key === 'bukaake_standby_enabled' && this.toggleStandby) {
+        const checked = e.newValue !== 'false';
+        this.toggleStandby.checked = checked;
+        this.updateStandbyUI(checked);
+      }
+    });
+
+    window.__TAURI__?.event?.listen?.('bukaake-standby-setting-changed', (e) => {
+      if (this.toggleStandby) {
+        const checked = Boolean(e.payload);
+        this.toggleStandby.checked = checked;
+        this.updateStandbyUI(checked);
+      }
+    });
+  }
+
+  updateStandbyUI(enabled) {
+    if (this.standbyBadge) {
+      this.standbyBadge.textContent = enabled ? '5m Warm' : 'Disabled';
+      this.standbyBadge.classList.toggle('matched', enabled);
+    }
   }
 }
