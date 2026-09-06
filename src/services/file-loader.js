@@ -4,6 +4,7 @@
  */
 
 import { tauriBridge } from './tauri-bridge.js';
+import { ImagePrefetchCache } from './image-prefetch-cache.js';
 import { getCurrentWindow } from '@tauri-apps/api/window';
 import { getCurrentWebview } from '@tauri-apps/api/webview';
 
@@ -13,6 +14,7 @@ export class FileLoader {
     this.currentIndex = -1;
     this.currentImage = null;
     this.currentMeta = null;
+    this.prefetchCache = new ImagePrefetchCache();
 
     this.onImageLoaded = null; this.onListChanged = null; this.onAllFilesCleared = null;
     this.onStatusMessage = null; this.onStatusWarning = null; this.onLoadingStart = null; this.onLoadingEnd = null;
@@ -23,8 +25,7 @@ export class FileLoader {
   bindDropAndPaste(viewportEl, fileInputEl) {
     fileInputEl?.addEventListener('change', (e) => this.loadWebFiles(e.target.files));
     document.getElementById('dropOpenBtn')?.addEventListener('click', () => {
-      if (this.onPromptOpen) this.onPromptOpen();
-      else fileInputEl?.click();
+      if (this.onPromptOpen) this.onPromptOpen(); else fileInputEl?.click();
     });
     document.getElementById('dropPasteBtn')?.addEventListener('click', () => this.loadFromClipboard());
 
@@ -33,13 +34,12 @@ export class FileLoader {
 
     const handlePaths = async (paths) => {
       viewportEl?.classList.remove('drag-over');
-      if (!paths || paths.length === 0) return;
-
+      if (!paths?.length) return;
       const now = Date.now();
-      const fingerprint = paths.map((p) => p.replace(/\\/g, '/').toLowerCase()).join('|');
-      if (now - lastDropTime < 400 && lastDropFingerprint === fingerprint) return;
+      const fp = paths.map((p) => p.replace(/\\/g, '/').toLowerCase()).join('|');
+      if (now - lastDropTime < 400 && lastDropFingerprint === fp) return;
       lastDropTime = now;
-      lastDropFingerprint = fingerprint;
+      lastDropFingerprint = fp;
 
       const targetPath = paths[0];
       const targetName = targetPath.split(/[/\\]/).pop() || 'image';
@@ -59,25 +59,18 @@ export class FileLoader {
         target.onDragDropEvent((event) => {
           const p = event?.payload;
           if (!p) return;
-          if (p.type === 'drop') {
+          if (p.type === 'drop' && p.paths?.length > 0) {
             viewportEl?.classList.remove('drag-over');
-            if (p.paths?.length > 0) handlePaths(p.paths);
-          } else if (p.type === 'enter' || p.type === 'over') {
-            viewportEl?.classList.add('drag-over');
-          } else if (p.type === 'leave' || p.type === 'cancel') {
-            viewportEl?.classList.remove('drag-over');
-          }
+            handlePaths(p.paths);
+          } else if (p.type === 'enter' || p.type === 'over') viewportEl?.classList.add('drag-over');
+          else if (p.type === 'leave' || p.type === 'cancel') viewportEl?.classList.remove('drag-over');
         });
       };
-      try { attachDrop(getCurrentWindow()); } catch (e) {}
-      try { attachDrop(getCurrentWebview()); } catch (e) {}
+      try { attachDrop(getCurrentWindow()); } catch (_) {}
+      try { attachDrop(getCurrentWebview()); } catch (_) {}
     }
 
-    const onDragOver = (e) => {
-      e.preventDefault();
-      if (e.dataTransfer) e.dataTransfer.dropEffect = 'copy';
-      viewportEl?.classList.add('drag-over');
-    };
+    const onDragOver = (e) => { e.preventDefault(); if (e.dataTransfer) e.dataTransfer.dropEffect = 'copy'; viewportEl?.classList.add('drag-over'); };
     window.addEventListener('dragenter', (e) => e.preventDefault());
     window.addEventListener('dragover', onDragOver);
     window.addEventListener('dragleave', (e) => { if (e.relatedTarget === null) viewportEl?.classList.remove('drag-over'); });
@@ -108,8 +101,7 @@ export class FileLoader {
   }
 
   loadFromTauriContext(payload) {
-    if (!payload || !payload.target_path) return;
-
+    if (!payload?.target_path) return;
     this.items = payload.neighbors?.length > 0
       ? payload.neighbors.map((n) => ({ type: 'tauri', path: n.path, name: n.name, sizeBytes: n.size_bytes }))
       : [{ type: 'tauri', path: payload.target_path, name: payload.file_name, sizeBytes: payload.size_bytes }];
@@ -117,13 +109,9 @@ export class FileLoader {
 
     this.emitListChanged();
     this.createImageFromUrl(payload.data_url, {
-      name: payload.file_name,
-      path: payload.target_path,
-      sizeBytes: payload.size_bytes,
-      dimensions: payload.dimensions,
-      mimeType: payload.mime_type,
-      lastModified: payload.last_modified,
-      exif: payload.exif,
+      name: payload.file_name, path: payload.target_path, sizeBytes: payload.size_bytes,
+      dimensions: payload.dimensions, mimeType: payload.mime_type,
+      lastModified: payload.last_modified, exif: payload.exif,
     });
   }
 
@@ -133,6 +121,11 @@ export class FileLoader {
     this.emitListChanged();
 
     const item = this.items[index];
+    if (item.type === 'tauri' && item.path) {
+      const cached = this.prefetchCache.get(item.path);
+      if (cached) return this.loadDirectImage(cached.img, cached.meta);
+    }
+
     this.onLoadingStart?.(`Loading ${item.name}...`);
     if (item.type === 'tauri') {
       try {
@@ -143,16 +136,12 @@ export class FileLoader {
             dimensions: payload.dimensions, mimeType: payload.mime_type,
             lastModified: payload.last_modified, exif: payload.exif,
           });
-        } else {
-          this.onLoadingEnd?.();
-        }
-      } catch (err) {
+        } else this.onLoadingEnd?.();
+      } catch (_) {
         this.onLoadingEnd?.();
         this.onStatusMessage?.(`Failed to read ${item.name}`);
       }
-    } else if (item.type === 'file') {
-      this.readWebFile(item.fileObj);
-    }
+    } else if (item.type === 'file') this.readWebFile(item.fileObj);
   }
 
   async navigateBatch(delta) {
@@ -168,39 +157,32 @@ export class FileLoader {
 
     const item = this.items[this.currentIndex];
     const deletedName = item.name || 'image';
-
     if (item.type === 'tauri' && item.path) {
+      this.prefetchCache.evict(item.path);
       await tauriBridge.deleteFile(item.path, toTrash);
     }
 
     this.items.splice(this.currentIndex, 1);
-
     if (this.items.length === 0) {
       this.currentIndex = -1;
       this.currentImage = null;
       this.currentMeta = null;
+      this.prefetchCache.clear();
       this.emitListChanged();
       this.onAllFilesCleared?.();
       return { success: true, remaining: 0, deletedName };
     }
 
-    if (this.currentIndex >= this.items.length) {
-      this.currentIndex = this.items.length - 1;
-    }
-
+    if (this.currentIndex >= this.items.length) this.currentIndex = this.items.length - 1;
     await this.loadItemAtIndex(this.currentIndex);
     return { success: true, remaining: this.items.length, deletedName };
   }
 
   loadWebFiles(fileList) {
-    if (!fileList || fileList.length === 0) return;
+    if (!fileList?.length) return;
     const isImg = (f) => f.type.startsWith('image/') || /\.(jpe?g|png|webp|gif|avif|bmp|ico|svg|tiff?|heic|heif|hif)$/i.test(f.name);
     const valid = Array.from(fileList).filter(isImg);
-    if (valid.length === 0) {
-      const fileName = fileList[0]?.name || 'file';
-      this.onStatusWarning?.(`Unsupported file format: ${fileName}`);
-      return;
-    }
+    if (valid.length === 0) return this.onStatusWarning?.(`Unsupported file format: ${fileList[0]?.name || 'file'}`);
     this.items = valid.map((f) => ({ type: 'file', fileObj: f, name: f.name, sizeBytes: f.size }));
     this.currentIndex = 0;
     this.emitListChanged();
@@ -219,20 +201,19 @@ export class FileLoader {
   loadDirectImage(img, meta = {}) {
     this.currentImage = img;
     this.currentMeta = { ...(this.currentMeta || {}), ...meta };
+    this.onLoadingEnd?.();
     this.onImageLoaded?.(img, this.currentMeta);
+    this.prefetchCache.update(this.items, this.currentIndex);
   }
 
   createImageFromUrl(url, meta) {
     const img = new Image();
     img.onload = () => {
       this.currentImage = img;
-      this.currentMeta = {
-        ...meta,
-        naturalWidth: img.naturalWidth || img.width,
-        naturalHeight: img.naturalHeight || img.height,
-      };
+      this.currentMeta = { ...meta, naturalWidth: img.naturalWidth || img.width, naturalHeight: img.naturalHeight || img.height };
       this.onLoadingEnd?.();
       this.onImageLoaded?.(img, this.currentMeta);
+      this.prefetchCache.update(this.items, this.currentIndex);
     };
     img.onerror = () => {
       this.onLoadingEnd?.();
@@ -245,36 +226,27 @@ export class FileLoader {
     if (tauriBridge.isTauri()) {
       try {
         const payload = await tauriBridge.readClipboard();
-        if (payload) {
-          if (payload.payload_type === 'path' && payload.data) {
-            const ctx = await tauriBridge.readImageContext(payload.data);
-            if (ctx) {
-              this.loadFromTauriContext(ctx);
-              return true;
-            }
-          } else if (payload.payload_type === 'image' && payload.data) {
-            const approxBytes = Math.round((payload.data.length * 3) / 4);
-            this.items = [{ type: 'clipboard', name: 'Clipboard Image', sizeBytes: approxBytes }];
-            this.currentIndex = 0;
-            this.emitListChanged();
-            this.createImageFromUrl(payload.data, { name: 'Clipboard Image', path: null, sizeBytes: approxBytes });
-            return true;
-          }
+        if (payload?.payload_type === 'path' && payload.data) {
+          const ctx = await tauriBridge.readImageContext(payload.data);
+          if (ctx) { this.loadFromTauriContext(ctx); return true; }
+        } else if (payload?.payload_type === 'image' && payload.data) {
+          const approxBytes = Math.round((payload.data.length * 3) / 4);
+          this.items = [{ type: 'clipboard', name: 'Clipboard Image', sizeBytes: approxBytes }];
+          this.currentIndex = 0;
+          this.emitListChanged();
+          this.createImageFromUrl(payload.data, { name: 'Clipboard Image', path: null, sizeBytes: approxBytes });
+          return true;
         }
         this.onStatusWarning?.('No image found in clipboard');
         return false;
-      } catch (err) {
-        console.warn('Native clipboard read error:', err);
+      } catch (_) {
         this.onStatusWarning?.('Unable to read clipboard');
         return false;
       }
     }
 
     try {
-      if (!navigator.clipboard?.read) {
-        this.onStatusMessage?.('Clipboard API unsupported in browser');
-        return false;
-      }
+      if (!navigator.clipboard?.read) return this.onStatusMessage?.('Clipboard API unsupported in browser');
       for (const item of await navigator.clipboard.read()) {
         for (const type of item.types) {
           if (type.startsWith('image/')) {
