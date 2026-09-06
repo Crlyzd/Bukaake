@@ -12,7 +12,7 @@
 
 <!-- HERO SCREENSHOT PLACEHOLDER -->
 <div align="center">
-  <img src="docs/screenshots/hero_viewer_preview.png" alt="Bukaake Transparent Photo Viewer Preview" width="880" />
+  <img width="2559" height="1440" alt="image" src="https://github.com/user-attachments/assets/6626a09e-23c3-41d3-8796-6fe82474fb0d" />
   <p><em>Desktop-immersive viewing: Dimmed wallpaper background, centered floating titlebar, and zero window borders.</em></p>
 </div>
 
@@ -35,10 +35,7 @@ Most modern image viewers are either bloated, slow to start up, or trap your pho
 ### 🪟 1. Picasa-Style Transparent Immersion
 When you open an image, Bukaake lets your desktop wallpaper shine through with gentle dimming and zero blur. The photo floats elegantly at a comfortable 75% screen scale so it never overpowers your workspace.
 
-```
-[ 📸 SCREENSHOT PLACEHOLDER: Transparent Fullscreen Mode with dim desktop background ]
-Suggested file: docs/screenshots/feature_transparent_mode.png
-```
+<img width="2560" height="1440" alt="image" src="https://github.com/user-attachments/assets/c29df440-32b0-49dd-b3d6-a25a9567b370">
 
 ---
 
@@ -49,10 +46,7 @@ Need to circle a detail, highlight a line on a receipt, or jot a quick note?
 - Pick curated vibrant colors and stroke thicknesses with an interactive cursor preview ring.
 - Full **Undo (`Ctrl+Z`)** and **Redo (`Ctrl+Y`)** support.
 
-```
-[ 📸 SCREENSHOT PLACEHOLDER: Freehand Pen & Highlighter popover drawing over photo ]
-Suggested file: docs/screenshots/feature_drawing_tool.png
-```
+<img width="787" height="442" alt="Cropped Image_edited" src="https://github.com/user-attachments/assets/846ec474-a1e3-440e-9c35-ac00fe7116cb" />
 
 ---
 
@@ -61,10 +55,8 @@ Suggested file: docs/screenshots/feature_drawing_tool.png
 - **Enhance (`E`)**: Fine-tune Brightness, Contrast, Saturation, Exposure, and Warmth with real-time sliders or one-click preset styles.
 - **Safe Editing**: Unsaved changes are automatically tracked so you never accidentally lose your work when switching photos.
 
-```
-[ 📸 SCREENSHOT PLACEHOLDER: Crop handles & glass adjustment slider panel ]
-Suggested file: docs/screenshots/feature_crop_adjustments.png
-```
+<img width="1892" height="1065" alt="image" src="https://github.com/user-attachments/assets/ff3deac8-318a-43b0-8b37-29205394a73b" />
+<img width="1681" height="948" alt="image" src="https://github.com/user-attachments/assets/b5e28977-d018-4b7c-aaa5-c1f35bce8315" />
 
 ---
 
@@ -74,10 +66,7 @@ Designed specifically for Windows 10 and 11:
 - **Deep Obsidian Dark Mode** for late-night viewing and **Clean Frosted Slate Light Mode** for daylight.
 - Seamless one-click theme toggle.
 
-```
-[ 📸 SCREENSHOT PLACEHOLDER: Side-by-side Dark Obsidian vs Light Frosted theme ]
-Suggested file: docs/screenshots/feature_dual_themes.png
-```
+<img width="2559" height="1440" alt="image" src="https://github.com/user-attachments/assets/5ec39b3a-28b5-468b-86e9-73beeb451728" />
 
 ---
 
@@ -137,4 +126,4 @@ The built-in Control Center handles live development with hot reload, one-key ve
 
 ## 📄 License
 
-Bukaake is open source under the **[GPL-3.0 License](LICENSE)**.
+Bukaake is open source under the **[GPL-3.0 License](LICENSE)**.
