@@ -86,79 +86,87 @@ Reliving the iconic Google Picasa Photo Viewer experience with two tailored mode
 
 ## 2. Directory Structure & Module Standards
 
-All 43 source files in the project strictly respect the < 300 lines per file budget:
+All 56 source files in the project strictly respect the < 300 lines per file budget:
 
 ```
 bukaake/
 ├── .agents/
 │   └── workflows/                 # Specialized Agent Workflows
 │       ├── orchestrator.md        # Multi-phase task coordinator (~50 lines)
-│       ├── architect.md           # Planning & system design (~65 lines)
-│       ├── coding-specialist.md   # Code executor (~75 lines)
-│       └── code-reviewer.md       # Quality & 5-pillar auditor (~70 lines)
+│       ├── architect.md           # Planning & system design (~70 lines)
+│       ├── coding-specialist.md   # Code executor (~80 lines)
+│       └── code-reviewer.md       # Quality & 5-pillar auditor (~75 lines)
 ├── AGENTS.md                      # Authoritative project rules manual
-├── package.json
+├── package.json                   # Version 0.2.0 single source of truth
 ├── index.html                     # Main viewer entrypoint
 ├── settings.html                  # Dedicated standalone settings window
 ├── scripts/
-│   └── bump-version.js            # Atomic version synchronizer across json/toml (~70 lines)
+│   └── bump-version.js            # Atomic version synchronizer across json/toml (~65 lines)
 ├── src/
 │   ├── components/                # Isolated UI modules (< 250 lines each)
 │   │   ├── adjustments-panel.js   # Color sliders, preset chips (~115 lines)
 │   │   ├── confirm-modal.js       # Unsaved changes confirmation dialog (~70 lines)
-│   │   ├── context-menu.js        # Glass desktop right-click context menu (~195 lines)
-│   │   ├── metadata-drawer.js     # EXIF, file size, dimensions drawer (~40 lines)
-│   │   ├── settings-modal.js      # Glass settings & updater modal overlay (~95 lines)
+│   │   ├── context-menu.js        # Glass desktop right-click context menu (~215 lines)
+│   │   ├── delete-modal.js        # Stroke-free Recycle Bin & delete dialog (~80 lines)
+│   │   ├── metadata-drawer.js     # EXIF, camera telemetry, dimensions drawer (~40 lines)
+│   │   ├── settings-modal.js      # Glass settings & updater modal overlay (~115 lines)
 │   │   ├── shortcuts-modal.js     # Keyboard shortcuts cheat sheet (~40 lines)
 │   │   ├── titlebar.js            # Window controls, filename badge, image info (~155 lines)
-│   │   ├── toast.js               # Single-toast lifecycle notification pill (~40 lines)
-│   │   └── toolbar.js             # Responsive floating control dock & draw popover (~245 lines)
+│   │   ├── toast.js               # Single-toast lifecycle notification pill (~60 lines)
+│   │   └── toolbar.js             # Responsive floating control dock & draw popover (~250 lines)
 │   ├── core/                      # Core canvas, drawing & image math engines (< 260 lines each)
 │   │   ├── canvas-events.js       # Pan/zoom mouse & drag event handler (~105 lines)
-│   │   ├── canvas-helpers.js      # Coordinate transforms & math utilities (~55 lines)
+│   │   ├── canvas-helpers.js      # Coordinate transforms & math utilities (~65 lines)
 │   │   ├── canvas-viewer.js       # 60fps pan/zoom canvas engine & fit logic (~250 lines)
-│   │   ├── cropper.js             # Interactive crop overlay engine (~240 lines)
+│   │   ├── crop-snapping.js       # Edge/center laser magnet snapping guides (~145 lines)
+│   │   ├── cropper.js             # Precision crop overlay, sandwich contrast (~200 lines)
 │   │   ├── drawing-tool.js        # Freehand pen, highlighter, cursor ring & baking (~260 lines)
 │   │   ├── filters.js             # Color adjustment processor (~95 lines)
-│   │   └── metadata.js            # EXIF parser & dimension reader (~60 lines)
-│   ├── services/                  # External & platform services (< 300 lines each)
+│   │   └── metadata.js            # EXIF parser, camera telemetry & GPS reader (~195 lines)
+│   ├── services/                  # External & platform services (< 270 lines each)
+│   │   ├── canvas-tools-manager.js# Tool mutual exclusivity & interaction lockout (~110 lines)
 │   │   ├── change-tracker.js      # Unsaved edits state tracking (~50 lines)
 │   │   ├── file-loader.js         # Image file loader, drag & drop, clipboard (~265 lines)
 │   │   ├── idle-controller.js     # Picasa-style idle mouse fade controller (~105 lines)
-│   │   ├── image-saver.js         # Tauri & web image saving, copy to clipboard (~100 lines)
-│   │   ├── shortcuts.js           # Keyboard hotkeys registry (~145 lines)
-│   │   ├── tauri-bridge.js        # Tauri v2 window, args, fs IPC wrapper (~295 lines)
+│   │   ├── image-saver.js         # Tauri & web image saving, copy to clipboard (~90 lines)
+│   │   ├── shortcuts.js           # Keyboard hotkeys registry (~140 lines)
+│   │   ├── tauri-bridge.js        # Tauri v2 window, args, fs IPC wrapper (~265 lines)
 │   │   ├── theme-manager.js       # Dark & light theme switcher + acrylic tint (~85 lines)
-│   │   ├── updater-service.js     # GitHub releases updater & multi-window sync (~175 lines)
+│   │   ├── updater-service.js     # GitHub releases updater & multi-window sync (~250 lines)
 │   │   └── window-mode-manager.js # Regular vs Fullscreen mode coordinator (~125 lines)
-│   ├── styles/                    # Modular CSS design system (< 240 lines each)
+│   ├── styles/                    # Modular CSS design system (< 245 lines each)
 │   │   ├── base.css               # Typography, reset, SVG checkerboard (~110 lines)
-│   │   ├── glass.css              # Core glassmorphism classes & ambient shadows (~200 lines)
+│   │   ├── glass.css              # Core glassmorphism classes & ambient shadows (~80 lines)
 │   │   ├── main.css               # Master stylesheet bundling component submodules (~20 lines)
-│   │   ├── tokens.css             # Stroke-free glass tokens (dark & light) (~110 lines)
+│   │   ├── tokens.css             # Stroke-free glass tokens (dark & light) (~115 lines)
 │   │   └── components/            # Component-specific stylesheets
-│   │       ├── confirm-modal.css  # Unsaved changes glass confirmation dialog (~150 lines)
-│   │       ├── context-menu.css   # Glass context menu with high-contrast backing (~100 lines)
-│   │       ├── crop.css           # Crop tool overlay & controls (~225 lines)
+│   │       ├── confirm-modal.css  # Glass confirmation dialogs (unsaved & delete) (~180 lines)
+│   │       ├── context-menu.css   # Glass context menu with high-contrast backing (~110 lines)
+│   │       ├── crop.css           # Precision crop box, sandwich contrast, guides (~240 lines)
 │   │       ├── draw.css           # Floating drawing toolbar & popover styling (~195 lines)
-│   │       ├── modes.css          # Mode 1 regular vs Mode 2 fullscreen viewer (~230 lines)
-│   │       ├── panels.css         # Adjustments, metadata, and glass pill buttons (~220 lines)
-│   │       ├── settings.css       # Standalone settings window & modal styling (~225 lines)
+│   │       ├── modes.css          # Mode 1 regular vs Mode 2 fullscreen viewer (~235 lines)
+│   │       ├── panels.css         # Adjustments, metadata, and glass pill buttons (~230 lines)
+│   │       ├── settings.css       # Standalone settings window & modal styling (~245 lines)
 │   │       ├── shortcuts.css      # Keyboard shortcuts modal styling (~60 lines)
-│   │       ├── titlebar.css       # Frameless ghost titlebar & disabled states (~235 lines)
-│   │       ├── toast.css          # Stroke-free floating glass toast pill (~50 lines)
-│   │       ├── toolbar.css        # Responsive floating control dock (~170 lines)
+│   │       ├── startpage.css      # Empty drop zone, capabilities strip & format matrix (~220 lines)
+│   │       ├── titlebar.css       # Frameless ghost titlebar & disabled states (~230 lines)
+│   │       ├── toast.css          # Stroke-free floating glass toast pill (~60 lines)
+│   │       ├── toolbar.css        # Responsive floating control dock (~175 lines)
 │   │       └── vibrancy.css       # Window vibrancy & background layer overrides (~70 lines)
-│   ├── app.js                     # Main window bootstrap coordinator (~295 lines)
-│   └── settings-app.js            # Standalone settings window coordinator (~115 lines)
+│   ├── app.js                     # Main window bootstrap coordinator (~270 lines)
+│   └── settings-app.js            # Standalone settings window coordinator (~140 lines)
 └── src-tauri/
-    ├── Cargo.toml                 # Tauri v2 dependencies (`window-vibrancy`, `rfd`, `image`, `arboard`)
+    ├── Cargo.toml                 # Tauri v2 dependencies (`window-vibrancy`, `rfd`, `image`, `kamadak-exif`)
     ├── tauri.conf.json            # Multi-window config (main + settings)
     └── src/
-        ├── main.rs                # Native acrylic vibrancy + window IPC commands (~275 lines)
-        ├── image_loader.rs        # Fast native image decoding & metadata reading (~205 lines)
-        ├── clipboard.rs           # Native OS clipboard engine, CF_HDROP & image IPC (~165 lines)
-        └── updater.rs             # Native in-place self-updater, progress & relaunch (~170 lines)
+        ├── main.rs                # Native acrylic vibrancy + window IPC commands (~270 lines)
+        ├── image_loader.rs        # Fast native image decoding & metadata reading (~270 lines)
+        ├── raw_reader.rs          # 15ms embedded preview extractor for 8 RAW formats (~60 lines)
+        ├── pro_decoder.rs         # VFX & texture decoders (HDR, EXR, DDS, TGA, QOI) (~25 lines)
+        ├── exif_reader.rs         # Native EXIF camera telemetry & GPS extraction (~140 lines)
+        ├── file_ops.rs            # Native Win32 Recycle Bin & permanent deletion (~70 lines)
+        ├── clipboard.rs           # Native OS clipboard engine, CF_HDROP & image IPC (~150 lines)
+        └── updater.rs             # Native in-place self-updater, progress & relaunch (~145 lines)
 ```
 
 ---
@@ -171,8 +179,9 @@ bukaake/
 | **Backend Language** | Rust | Edition 2021 |
 | **Windows Acrylic** | `window-vibrancy` | 0.6.0 (`apply_acrylic`, `clear_acrylic`) |
 | **Native Dialogs** | `rfd` | 0.15 (Native file open and save dialogs) |
-| **Image Processing** | `image` | 0.25 (Fast native decoding, EXIF orientation, thumbnailing) |
+| **Image Processing** | `image` & `kamadak-exif` | 0.25 (Image decoding) & 0.6 (Camera EXIF telemetry) |
 | **Clipboard Engine** | `arboard` & Win32 APIs | 3.4 (`CF_HDROP`, `CF_DIB`, zero browser permission prompts) |
+| **File Operations** | Win32 Shell API | `SHFileOperationW` for safe Recycle Bin deletion |
 | **Auto-Updater** | Custom GitHub Service | `src/services/updater-service.js` querying GitHub Releases API |
 | **Frontend Bundler** | Vite | ^5.4.0 (Multi-page ES Modules: `index.html`, `settings.html`) |
 | **Frontend Core** | Vanilla JavaScript | ES6+ Modules, No Heavy Frameworks |
@@ -194,40 +203,69 @@ bukaake/
 
 ## 4. Subsystem Architectures
 
+### Native Multi-Format & RAW Decoder Subsystem
+- **Instant RAW Preview Extraction (`src-tauri/src/raw_reader.rs`)**:
+  - Extracts full-resolution embedded JPEG previews from camera RAW files in ~15ms without slow demosaicing.
+  - Supports: Sony (`.arw`), Canon (`.cr2`, `.cr3`), Nikon (`.nef`), Adobe DNG / DJI (`.dng`), Fujifilm (`.raf`), Panasonic Lumix (`.rw2`), Olympus (`.orf`), Pentax (`.pef`).
+- **VFX & Texture Decoders (`src-tauri/src/pro_decoder.rs`)**:
+  - Direct decoding of HDR (`.hdr`), OpenEXR (`.exr`), Truevision Targa (`.tga`), DirectDraw Surface (`.dds`), Netpbm (`.pnm`), Quite OK Image (`.qoi`).
+- **Directory Traversal**:
+  - Indices all 27+ formats in `image_loader.rs` for seamless `Left`/`Right` arrow navigation across mixed directories.
+
+### Camera EXIF Telemetry Subsystem
+- **Native Telemetry Engine (`src-tauri/src/exif_reader.rs`, `src/core/metadata.js`)**:
+  - Extracts hardware profile: Camera Make/Model, Lens Model.
+  - Exposure telemetry: Aperture ($f$-number), Shutter Speed, ISO, Exposure Bias.
+  - Optical metrics: 35mm equivalent Focal Length, Metering Mode, Flash status.
+  - Environmental data: Date/Time captured and precision GPS Coordinates.
+  - Preserves original disk metadata across in-memory Crop and Draw edits.
+
+### Precision Crop & Snapping Subsystem
+- **Dual-Stroke Sandwich Contrast Layering (`src/styles/components/crop.css`)**:
+  - High-luminance 1px core flanked by bilateral dark casing shadows on `.crop-box` and `.crop-grid-line` to guarantee visibility over pure white, deep black, and textured photos.
+  - White-fill rounded handles (`.crop-handle`) with dark outlines and ambient drop shadows.
+- **Image-Spanning Magnetic Guides (`src/core/crop-snapping.js`)**:
+  - Detects image edges and centers, projecting high-intensity cyan laser guidelines across the entire image.
+- **In-Crop Ergonomics (`src/core/cropper.js`)**:
+  - Scroll-wheel zoom while cropping with boundary clamping.
+  - Synchronizes dynamic in-crop rotation and flipping via two-pass offscreen canvas rendering.
+
+### Editing Exclusivity & Safety Guardrails
+- **Tool Exclusivity Engine (`src/services/canvas-tools-manager.js`)**:
+  - Enforces mutual exclusivity between Crop (`C`), Draw (`D`), and Adjustments (`E`).
+  - Interaction lockout: suppresses context menus, folder navigation (`Left`/`Right`), and file deletion hotkeys while an active editing session is open.
+
+### Native Win32 File Deletion Subsystem
+- **Native Operations (`src-tauri/src/file_ops.rs`, `src/components/delete-modal.js`)**:
+  - Safe Recycle Bin deletion (`Delete` key) via `SHFileOperationW` (`FO_DELETE`, `FOF_ALLOWUNDO`).
+  - Permanent file destruction (`Shift + Delete`).
+  - Stroke-free frosted glass confirmation dialog with ambient drop shadows and automatic neighbor image navigation upon deletion.
+
 ### Native OS Clipboard Subsystem
 - **Core Native Engine (`src-tauri/src/clipboard.rs`)**:
-  - Completely eliminates WebView2 browser permission popups (`http://tauri.localhost wants to...`) by managing clipboard operations directly via native Windows OS APIs.
-  - Supports Windows File Explorer clipboard files (`CF_HDROP`), extracting image file paths and automatically indexing folder siblings for Left/Right arrow navigation.
-  - Decodes raster clipboard images (`CF_DIB`) via `arboard`, serializing to PNG base64 data URLs for seamless viewer loading.
+  - Eliminates WebView2 permission popups by handling clipboard access via Windows OS APIs.
+  - Extracts image file paths from Explorer files (`CF_HDROP`) and indexes sibling folder images.
+  - Decodes raster images (`CF_DIB`) via `arboard`, serializing to PNG base64 data URLs.
   - Provides native clipboard image writing for `Ctrl+C` and processed image exports.
 - **Frontend IPC Integration (`src/services/tauri-bridge.js`, `src/services/file-loader.js`, `src/services/image-saver.js`)**:
-  - `tauriBridge.readClipboard()` and `writeClipboardImage()` invoke native backend commands with graceful web fallbacks.
-  - Direct `Ctrl+V` and titlebar paste triggers protected by `confirmModal.promptIfDirty()`.
+  - `tauriBridge.readClipboard()` and `writeClipboardImage()` invoke native backend commands.
+  - `Ctrl+V` and titlebar paste triggers protected by `confirmModal.promptIfDirty()`.
 
 ### Interactive Drawing & Highlighting Subsystem
 - **Core Tool (`src/core/drawing-tool.js`)**:
-  - Operates on a dedicated overlay canvas synchronized to viewport size.
-  - Supports two primary drawing modes: `pen` (sharp, opaque, round joins) and `highlighter` (40% translucent, wide chisel stroke).
-  - Maintains a discrete stroke stack enabling full Undo (`Ctrl+Z`) and Redo (`Ctrl+Y`).
-  - Transforms viewport screen coordinates to image-space coordinates via `canvasViewer.screenToImageCoords`.
-  - Strictly clips all strokes to image dimensions (`ctx.clip()`) to prevent bleed.
-  - Supports non-destructive drawing overlay and permanent baking via `bakeToImage()` onto an offscreen canvas.
-- **UI & Popover (`src/styles/components/draw.css`, `src/components/toolbar.js`)**:
-  - Tool popover docked to toolbar with stroke widths (8px, 16px, 24px, 32px, 48px) and curated vibrant palette.
-  - Custom dynamic cursor ring (`#drawCursorRing`) reflecting pen stroke size in real time.
+  - Dedicated overlay canvas synchronized to viewport size.
+  - Dual modes: `pen` (sharp, opaque, round joins) and `highlighter` (40% translucent, wide chisel stroke).
+  - Undo (`Ctrl+Z`) and Redo (`Ctrl+Y`) discrete stroke stacks.
+  - Viewport-to-image coordinate mapping via `canvasViewer.screenToImageCoords` with `ctx.clip()` containment.
+  - Dynamic cursor preview ring reflecting pen stroke size in real time.
 
 ### Change Tracking & Safe Export Lifecycle
 - **Change Tracker (`src/services/change-tracker.js`)**:
   - Tracks dirty status across Crop, Color adjustments, and Drawing.
-  - Explicitly ignores pure viewport transforms (rotation, flipping, pan, zoom) per design pillars.
-  - Broadcasts dirty state changes to listeners.
-- **Unsaved Changes Dialog (`src/components/confirm-modal.js`, `src/styles/components/confirm-modal.css`)**:
-  - Guards destructive actions (opening another image, navigating to neighbor image, closing window).
-  - Offers "Save", "Discard", or "Cancel" actions with keyboard focus.
+  - Ignores pure viewport transforms (rotation, flipping, pan, zoom) per design pillars.
+- **Unsaved Changes Dialog (`src/components/confirm-modal.js`)**:
+  - Guards destructive actions (opening images, folder navigation, window closing).
 - **Image Saver (`src/services/image-saver.js`)**:
-  - Exports combined canvas with active filters applied and formatted date-time stamp.
-  - In Tauri: invokes native `prompt_save_file` via `rfd` and writes binary bytes via `save_image_bytes`.
-  - In Web: supports `showSaveFilePicker` and anchor fallback.
   - Supports instant clipboard copying of processed images via `copyProcessedImage` (routed through native `writeClipboardImage` in Tauri).
 
 ---

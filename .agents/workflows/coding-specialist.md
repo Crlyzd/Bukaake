@@ -21,10 +21,10 @@ You are the Senior Software Engineer for **Bukaake**, the lightweight, high-perf
 1. **Strict Modularity (< 300 Lines Limit)**:
    - **Hard Rule**: No file you create or edit may exceed **300 lines**.
    - NEVER dump hundreds of lines into `src/app.js` or `src/styles/main.css`.
-   - Place UI components in `src/components/` (e.g., `toolbar.js`, `titlebar.js`, `confirm-modal.js`, `adjustments-panel.js`, `settings-modal.js`).
-   - Place background and platform services in `src/services/` (e.g., `tauri-bridge.js`, `window-mode-manager.js`, `updater-service.js`, `change-tracker.js`, `image-saver.js`, `theme-manager.js`, `idle-controller.js`).
-   - Place canvas computation, drawing, and image math in `src/core/` (e.g., `canvas-viewer.js`, `drawing-tool.js`, `cropper.js`, `filters.js`).
-   - Split stylesheets into `src/styles/components/` (e.g., `toolbar.css`, `crop.css`, `draw.css`, `confirm-modal.css`, `modes.css`).
+    - Place UI components in `src/components/` (e.g., `toolbar.js`, `titlebar.js`, `confirm-modal.js`, `delete-modal.js`, `adjustments-panel.js`, `settings-modal.js`).
+    - Place background and platform services in `src/services/` (e.g., `canvas-tools-manager.js`, `tauri-bridge.js`, `window-mode-manager.js`, `updater-service.js`, `change-tracker.js`, `image-saver.js`, `theme-manager.js`, `idle-controller.js`).
+    - Place canvas computation, drawing, and image math in `src/core/` (e.g., `canvas-viewer.js`, `drawing-tool.js`, `cropper.js`, `crop-snapping.js`, `filters.js`, `metadata.js`).
+    - Split stylesheets into `src/styles/components/` (e.g., `toolbar.css`, `crop.css`, `draw.css`, `confirm-modal.css`, `modes.css`).
 
 2. **Modern Stroke-Free Glassmorphism Component Construction**:
    Whenever creating buttons, dropdowns, menus, modals, cards, popovers, or inputs:
@@ -56,8 +56,11 @@ You are the Senior Software Engineer for **Bukaake**, the lightweight, high-perf
    - Mode 2 Dock Elevation: Floating toolbar dock positioned at `bottom: 80px !important;` to clear the Windows taskbar, with a 140px bottom mouse-hover wake threshold.
    - Implement the 2.5-second mouse idle timer: fade all UI controls to `opacity: 0` during inactivity; instantly restore on mouse motion.
 
-6. **Interactive Drawing & Change Safety Implementation**:
+6. **Interactive Drawing, Precision Crop, Exclusivity & Safety**:
    - **Drawing Engine (`drawing-tool.js`)**: Handle screen-to-image coordinate mapping, clip strokes within image bounds, and maintain discrete undo/redo histories.
+   - **Precision Crop (`cropper.js`, `crop-snapping.js`)**: Implement dual-stroke contrast layering on crop box and grid lines, laser magnetic guides, scroll wheel zoom while cropping, and dynamic transform synchronization.
+   - **Tool Exclusivity (`canvas-tools-manager.js`)**: Maintain strict mutual exclusivity between Crop, Draw, and Adjustments; lock out navigation and deletion during active edits.
+   - **Native File Deletion (`file_ops.rs`, `delete-modal.js`)**: Safely prompt and invoke Win32 Recycle Bin or permanent deletion, navigating automatically upon completion.
    - **Change Tracker (`change-tracker.js`)**: Notify listeners when crop, color adjustments, or drawing modifications occur. Reset only upon explicit save or discard.
    - **Confirm Modal (`confirm-modal.js`)**: Intercept image transitions and window closures to prevent loss of unsaved changes.
 

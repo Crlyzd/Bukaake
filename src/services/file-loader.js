@@ -26,6 +26,7 @@ export class FileLoader {
       if (this.onPromptOpen) this.onPromptOpen();
       else fileInputEl?.click();
     });
+    document.getElementById('dropPasteBtn')?.addEventListener('click', () => this.loadFromClipboard());
 
     let lastDropTime = 0;
     let lastDropFingerprint = '';
