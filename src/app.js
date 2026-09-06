@@ -134,7 +134,7 @@ class BukaakeApp {
     this.fileLoader.onStatusWarning = (m) => toast.warn(m);
     this.fileLoader.onPromptOpen = () => this.confirmModal.promptIfDirty(() => this.openFile(), () => this.saveImage());
     this.fileLoader.onAllFilesCleared = () => (this.windowModeManager?.currentMode === MODE_VIEWER ? tauriBridge.exitApp() : this.handleEmptyState());
-    this.viewer.onTransformChange = () => { this.updateStatusBadges(); if (this.drawingTool?.active) this.drawingTool.redraw(); };
+    this.viewer.onTransformChange = () => { this.updateStatusBadges(); if (this.drawingTool?.active) this.drawingTool.redraw(); if (this.cropper?.active) this.cropper.onTransform(); };
 
     this.windowModeManager = new WindowModeManager({
       viewer: this.viewer, titlebar: this.titlebar,
@@ -260,7 +260,7 @@ class BukaakeApp {
     if (this.drawingTool?.active || this.adjustmentsPanel?.isOpen()) {
       return toast.show('Please finish or cancel active edits before transforming canvas');
     }
-    this.viewer.rotate(deg);
+    this.viewer.rotate(deg, this.cropper.active);
     this.toolsManager?.onTransformWhileCropping();
   }
 

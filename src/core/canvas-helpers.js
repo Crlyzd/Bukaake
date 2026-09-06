@@ -11,25 +11,35 @@ export function screenToImage(screenX, screenY, panX, panY, scale) {
 
 export function renderOffscreenCanvas(img, { rotation, flipH, flipV, pixelSmoothing, cropRect, filterCss }) {
   if (!img) return null;
-  const off = document.createElement('canvas');
-  const ctx = off.getContext('2d');
 
-  const w = cropRect ? cropRect.width : img.width;
-  const h = cropRect ? cropRect.height : img.height;
-  const isRot = (rotation === 90 || rotation === 270);
+  const isRot  = (rotation === 90 || rotation === 270);
+  const transW = isRot ? img.height : img.width;
+  const transH = isRot ? img.width  : img.height;
 
-  off.width = isRot ? h : w;
-  off.height = isRot ? w : h;
+  // Pass 1: Render the full rotated+flipped image onto a transW×transH intermediate canvas
+  const tmp    = document.createElement('canvas');
+  tmp.width    = transW;
+  tmp.height   = transH;
+  const tctx   = tmp.getContext('2d');
+  tctx.imageSmoothingEnabled = pixelSmoothing;
+  if (filterCss) tctx.filter = filterCss;
+  tctx.translate(transW / 2, transH / 2);
+  tctx.rotate((rotation * Math.PI) / 180);
+  tctx.scale(flipH ? -1 : 1, flipV ? -1 : 1);
+  tctx.drawImage(img, -img.width / 2, -img.height / 2);
+
+  // Pass 2: Copy the crop region (in transformed space) to the output canvas
+  const cropX = cropRect ? cropRect.x : 0;
+  const cropY = cropRect ? cropRect.y : 0;
+  const cropW = cropRect ? cropRect.width  : transW;
+  const cropH = cropRect ? cropRect.height : transH;
+
+  const off   = document.createElement('canvas');
+  off.width   = cropW;
+  off.height  = cropH;
+  const ctx   = off.getContext('2d');
   ctx.imageSmoothingEnabled = pixelSmoothing;
-  if (filterCss) ctx.filter = filterCss;
-
-  ctx.translate(off.width / 2, off.height / 2);
-  ctx.rotate((rotation * Math.PI) / 180);
-  ctx.scale(flipH ? -1 : 1, flipV ? -1 : 1);
-
-  const dx = cropRect ? -cropRect.x - cropRect.width / 2 : -img.width / 2;
-  const dy = cropRect ? -cropRect.y - cropRect.height / 2 : -img.height / 2;
-  ctx.drawImage(img, dx, dy);
+  ctx.drawImage(tmp, cropX, cropY, cropW, cropH, 0, 0, cropW, cropH);
   return off;
 }
 

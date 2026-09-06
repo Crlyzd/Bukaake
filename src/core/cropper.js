@@ -53,8 +53,7 @@ export class CropperTool {
       let { left, top, width, height } = this.startBoxState;
       const img = this.getImageScreenBounds();
       const SNAP = 14;
-      let snappedX = false;
-      let snappedY = false;
+      let snappedX = false, snappedY = false;
 
       if (this.isDraggingBox) {
         left += dx;
@@ -161,10 +160,26 @@ export class CropperTool {
     });
 
     window.addEventListener('keyup', (e) => {
-      if (e.key === 'Shift') {
-        this.box.classList.remove('snapped-center-x', 'snapped-center-y');
-      }
+      if (e.key === 'Shift') this.box.classList.remove('snapped-center-x', 'snapped-center-y');
     });
+
+    // Forward wheel events on the crop box to the viewer so zoom works while cropping
+    this.box.addEventListener('wheel', (e) => {
+      if (!this.active || !this.viewer.img) return;
+      e.preventDefault();
+      e.stopPropagation();
+      const zoomFactor = e.deltaY < 0 ? 1.16 : 0.86;
+      const rect = this.viewer.canvas.getBoundingClientRect();
+      const mx = e.clientX - rect.left;
+      const my = e.clientY - rect.top;
+      this.viewer.cursorX = mx;
+      this.viewer.cursorY = my;
+      const nextScale = Math.max(0.05, Math.min(this.viewer.targetScale * zoomFactor, 50.0));
+      this.viewer.targetPanX = mx - (mx - this.viewer.targetPanX) * (nextScale / this.viewer.targetScale);
+      this.viewer.targetPanY = my - (my - this.viewer.targetPanY) * (nextScale / this.viewer.targetScale);
+      this.viewer.targetScale = nextScale;
+      this.viewer.snapBackToBounds();
+    }, { passive: false });
   }
 
   getImageScreenBounds() {
@@ -172,29 +187,15 @@ export class CropperTool {
     const isVert = (this.viewer.rotation === 90 || this.viewer.rotation === 270);
     const w = (isVert ? this.viewer.img.height : this.viewer.img.width) * this.viewer.scale;
     const h = (isVert ? this.viewer.img.width : this.viewer.img.height) * this.viewer.scale;
-    return {
-      left: this.viewer.panX,
-      top: this.viewer.panY,
-      right: this.viewer.panX + w,
-      bottom: this.viewer.panY + h,
-      width: w,
-      height: h,
-    };
+    const { panX, panY } = this.viewer;
+    return { left: panX, top: panY, right: panX + w, bottom: panY + h, width: w, height: h };
   }
 
   setAspectRatio(ratioStr) {
-    if (ratioStr === 'free') {
-      this.aspectRatio = null;
-      this.resetCropBoxToImage();
-      return;
-    }
+    if (ratioStr === 'free') { this.aspectRatio = null; this.resetCropBoxToImage(); return; }
     const parts = ratioStr.split(':');
-    if (parts.length === 2) {
-      this.aspectRatio = parseFloat(parts[0]) / parseFloat(parts[1]);
-    }
-    if (this.active) {
-      this.fitCropToAspect();
-    }
+    if (parts.length === 2) this.aspectRatio = parseFloat(parts[0]) / parseFloat(parts[1]);
+    if (this.active) this.fitCropToAspect();
   }
 
   resetCropBoxToImage() {
@@ -202,12 +203,9 @@ export class CropperTool {
     const boxW = img ? Math.max(40, img.width * 0.9) : this.container.clientWidth * 0.7;
     const boxH = img ? Math.max(40, img.height * 0.9) : this.container.clientHeight * 0.7;
     const left = img ? img.left + (img.width - boxW) / 2 : (this.container.clientWidth - boxW) / 2;
-    const top = img ? img.top + (img.height - boxH) / 2 : (this.container.clientHeight - boxH) / 2;
-
-    this.box.style.width = `${Math.round(boxW)}px`;
-    this.box.style.height = `${Math.round(boxH)}px`;
-    this.box.style.left = `${Math.round(left)}px`;
-    this.box.style.top = `${Math.round(top)}px`;
+    const top  = img ? img.top + (img.height - boxH) / 2 : (this.container.clientHeight - boxH) / 2;
+    this.box.style.width = `${Math.round(boxW)}px`; this.box.style.height = `${Math.round(boxH)}px`;
+    this.box.style.left  = `${Math.round(left)}px`; this.box.style.top    = `${Math.round(top)}px`;
     this.updateDimensionsTag();
   }
 
@@ -237,11 +235,7 @@ export class CropperTool {
     if (!this.viewer.img) return;
     this.active = true;
     this.container.classList.remove('hidden');
-    if (this.aspectRatio) {
-      this.fitCropToAspect();
-    } else {
-      this.resetCropBoxToImage();
-    }
+    if (this.aspectRatio) this.fitCropToAspect(); else this.resetCropBoxToImage();
   }
 
   hide() {
@@ -251,27 +245,50 @@ export class CropperTool {
   }
 
   updateDimensionsTag() {
-    const cropRect = this.getCropImageRect();
-    if (cropRect) {
-      this.tag.textContent = `${cropRect.width} × ${cropRect.height} px`;
-    }
+    const r = this.getCropTransformedRect();
+    if (r) this.tag.textContent = `${r.width} × ${r.height} px`;
   }
 
   getCropImageRect() {
     if (!this.viewer.img) return null;
-    const boxLeft = this.box.offsetLeft;
-    const boxTop = this.box.offsetTop;
-    const boxW = this.box.offsetWidth;
-    const boxH = this.box.offsetHeight;
-
+    const boxLeft = this.box.offsetLeft, boxTop = this.box.offsetTop;
+    const boxW = this.box.offsetWidth, boxH = this.box.offsetHeight;
     const imgTopLeft = this.viewer.screenToImageCoords(boxLeft, boxTop);
     const imgBottomRight = this.viewer.screenToImageCoords(boxLeft + boxW, boxTop + boxH);
-
     const x = Math.max(0, Math.min(this.viewer.img.width, imgTopLeft.x));
     const y = Math.max(0, Math.min(this.viewer.img.height, imgTopLeft.y));
     const width = Math.max(1, Math.min(this.viewer.img.width - x, imgBottomRight.x - x));
     const height = Math.max(1, Math.min(this.viewer.img.height - y, imgBottomRight.y - y));
 
     return { x, y, width, height };
+  }
+
+  getCropTransformedRect() {
+    if (!this.viewer.img) return null;
+    const isVert = (this.viewer.rotation === 90 || this.viewer.rotation === 270);
+    const transW = isVert ? this.viewer.img.height : this.viewer.img.width;
+    const transH = isVert ? this.viewer.img.width  : this.viewer.img.height;
+    const scale  = this.viewer.scale;
+
+    const rawX = (this.box.offsetLeft - this.viewer.panX) / scale;
+    const rawY = (this.box.offsetTop  - this.viewer.panY) / scale;
+    const rawW = this.box.offsetWidth  / scale;
+    const rawH = this.box.offsetHeight / scale;
+
+    // Mirror coordinates when image is flipped so crop maps to the correct pixel region
+    const relX = this.viewer.flipH ? transW - rawX - rawW : rawX;
+    const relY = this.viewer.flipV ? transH - rawY - rawH : rawY;
+
+    const x      = Math.max(0, Math.min(transW,     Math.round(relX)));
+    const y      = Math.max(0, Math.min(transH,     Math.round(relY)));
+    const width  = Math.max(1, Math.min(transW - x, Math.round(rawW)));
+    const height = Math.max(1, Math.min(transH - y, Math.round(rawH)));
+
+    return { x, y, width, height, transW, transH };
+  }
+
+  onTransform() {
+    if (!this.active) return;
+    if (this.aspectRatio) this.fitCropToAspect(); else this.resetCropBoxToImage();
   }
 }

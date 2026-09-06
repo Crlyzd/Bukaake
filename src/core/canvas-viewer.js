@@ -210,10 +210,10 @@ export class CanvasViewer {
     this.startSmoothAnimation();
   }
 
-  rotate(deg) {
+  rotate(deg, instant = false) {
     if (!this.img) return;
     this.rotation = (this.rotation + deg + 360) % 360;
-    this.fitToScreen(false);
+    this.fitToScreen(instant);
   }
 
   toggleFlipH() { this.flipH = !this.flipH; this.render(); this.onTransformChange?.(); }

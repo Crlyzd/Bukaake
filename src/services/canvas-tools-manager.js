@@ -61,12 +61,12 @@ export class CanvasToolsManager {
 
   onTransformWhileCropping() {
     if (this.cropper?.active) {
-      requestAnimationFrame(() => this.cropper.resetCropBoxToImage());
+      this.cropper.onTransform();
     }
   }
 
   applyCrop(filters) {
-    const rect = this.cropper.getCropImageRect();
+    const rect = this.cropper.getCropTransformedRect();
     if (!rect || rect.width <= 0 || rect.height <= 0) return toast.show('Invalid crop area');
     const offCanvas = this.viewer.getProcessedCanvas(rect, filters.getFilterCssString());
     if (!offCanvas) return;
