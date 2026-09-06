@@ -73,6 +73,21 @@ export function copyProcessedImage(viewer, filters) {
   if (!viewer.img) return toast.show('No image loaded to copy');
   const off = viewer.getProcessedCanvas(null, filters.getFilterCssString());
   if (!off) return;
+
+  if (tauriBridge.isTauri()) {
+    const dataUrl = off.toDataURL('image/png');
+    tauriBridge.writeClipboardImage(dataUrl).then((ok) => {
+      if (ok) {
+        toast.show('Image copied to clipboard');
+      } else {
+        toast.show('Clipboard copy unsupported');
+      }
+    }).catch(() => {
+      toast.show('Clipboard copy unsupported');
+    });
+    return;
+  }
+
   off.toBlob(async (b) => {
     try {
       await navigator.clipboard.write([new ClipboardItem({ 'image/png': b })]);

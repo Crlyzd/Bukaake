@@ -32,6 +32,12 @@ export class ShortcutsRegistry {
       } else if (e.key === 'z' || e.key === 'Z') {
         e.preventDefault();
         this.actions.onDrawUndo?.();
+      } else if (e.key === 'c' || e.key === 'C') {
+        e.preventDefault();
+        this.actions.onCopyImage?.();
+      } else if (e.key === 'v' || e.key === 'V') {
+        e.preventDefault();
+        this.actions.onPasteClipboard?.();
       }
       return;
     }

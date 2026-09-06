@@ -68,6 +68,7 @@ export class FileLoader {
     });
 
     window.addEventListener('paste', (e) => {
+      if (['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName)) return;
       if (e.clipboardData?.files?.length > 0) {
         this.loadWebFiles(e.clipboardData.files);
         return;
@@ -82,6 +83,9 @@ export class FileLoader {
             }
           }
         }
+      }
+      if (tauriBridge.isTauri()) {
+        this.loadFromClipboard();
       }
     });
   }
@@ -195,22 +199,47 @@ export class FileLoader {
   }
 
   async loadFromClipboard() {
-    try {
-      if (navigator.permissions?.query) {
-        try {
-          const perm = await navigator.permissions.query({ name: 'clipboard-read' });
-          if (perm.state === 'prompt' || perm.state === 'denied') {
-            this.onStatusMessage?.('Press Ctrl+V to paste image directly');
-            return false;
+    if (tauriBridge.isTauri()) {
+      try {
+        const payload = await tauriBridge.readClipboard();
+        if (payload) {
+          if (payload.payload_type === 'path' && payload.data) {
+            const ctx = await tauriBridge.readImageContext(payload.data);
+            if (ctx) {
+              this.loadFromTauriContext(ctx);
+              return true;
+            }
+          } else if (payload.payload_type === 'image' && payload.data) {
+            const approxBytes = Math.round((payload.data.length * 3) / 4);
+            this.items = [{
+              type: 'clipboard',
+              name: 'Clipboard Image',
+              sizeBytes: approxBytes,
+            }];
+            this.currentIndex = 0;
+            this.emitListChanged();
+            this.createImageFromUrl(payload.data, {
+              name: 'Clipboard Image',
+              path: null,
+              sizeBytes: approxBytes,
+            });
+            return true;
           }
-        } catch (_) {}
-      }
-
-      if (!navigator.clipboard?.read) {
-        this.onStatusMessage?.('Press Ctrl+V to paste image directly');
+        }
+        this.onStatusMessage?.('No image found in clipboard');
+        return false;
+      } catch (err) {
+        console.warn('Native clipboard read error:', err);
+        this.onStatusMessage?.('Unable to read clipboard');
         return false;
       }
+    }
 
+    try {
+      if (!navigator.clipboard?.read) {
+        this.onStatusMessage?.('Clipboard API unsupported in browser');
+        return false;
+      }
       const items = await navigator.clipboard.read();
       for (const item of items) {
         for (const type of item.types) {
@@ -225,7 +254,7 @@ export class FileLoader {
       this.onStatusMessage?.('No image found in clipboard');
       return false;
     } catch (_) {
-      this.onStatusMessage?.('Press Ctrl+V to paste image directly');
+      this.onStatusMessage?.('Clipboard access unavailable');
       return false;
     }
   }

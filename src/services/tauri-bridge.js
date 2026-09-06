@@ -61,6 +61,27 @@ export class TauriBridge {
     return false;
   }
 
+  async readClipboard() {
+    if (!this.isTauri()) return null;
+    try {
+      return await this.invoke('read_clipboard');
+    } catch (e) {
+      console.warn('[TauriBridge] read_clipboard failed:', e);
+      return null;
+    }
+  }
+
+  async writeClipboardImage(base64Data) {
+    if (!this.isTauri()) return false;
+    try {
+      await this.invoke('write_clipboard_image', { base64Data });
+      return true;
+    } catch (e) {
+      console.warn('[TauriBridge] write_clipboard_image failed:', e);
+      return false;
+    }
+  }
+
   async minimizeWindow() {
     try {
       if (this.isTauri()) {
@@ -154,22 +175,10 @@ export class TauriBridge {
           width: Math.round(width),
           height: Math.round(height),
         });
-        return;
       }
     } catch (e) {
       console.warn('[TauriBridge] resize_and_center_window failed:', e);
     }
-
-    try {
-      if (this.isTauri() && window.__TAURI__.window?.getCurrentWindow) {
-        const win = window.__TAURI__.window.getCurrentWindow();
-        await win.unmaximize();
-        if (window.__TAURI__.window.LogicalSize) {
-          await win.setSize(new window.__TAURI__.window.LogicalSize(width, height));
-        }
-        await win.center();
-      }
-    } catch (e) {}
   }
 
   async startResizeDragging(direction) {
@@ -224,18 +233,11 @@ export class TauriBridge {
 
   async openSettingsWindow() {
     if (!this.isTauri()) return false;
-    try {
-      await this.invoke('open_settings_window');
-      return true;
-    } catch (e) {
-      return false;
-    }
+    try { await this.invoke('open_settings_window'); return true; } catch (e) { return false; }
   }
 
   async hideSettingsWindow() {
-    if (this.isTauri()) {
-      try { await this.invoke('hide_settings_window'); } catch (e) {}
-    }
+    if (this.isTauri()) { try { await this.invoke('hide_settings_window'); } catch (e) {} }
   }
 
   async promptOpenFile() {

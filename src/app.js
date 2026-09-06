@@ -157,7 +157,8 @@ class BukaakeApp {
 
     this.shortcuts = new ShortcutsRegistry({
       onOpenFile: () => this.confirmModal.promptIfDirty(() => this.openFile(), () => this.saveImage()),
-      onSaveImage: () => this.saveImage(),
+      onPasteClipboard: () => this.confirmModal.promptIfDirty(() => this.fileLoader.loadFromClipboard(), () => this.saveImage()),
+      onCopyImage: () => this.copyImage(), onSaveImage: () => this.saveImage(),
       onNavigateBatch: (d) => this.confirmModal.promptIfDirty(() => this.fileLoader.navigateBatch(d), () => this.saveImage()),
       onZoomIn: () => this.viewer.zoomTo(this.viewer.scale * 1.2), onZoomOut: () => this.viewer.zoomTo(this.viewer.scale * 0.8),
       onFitScreen: () => this.viewer.fitToScreen(), onActualSize: () => this.viewer.zoomTo(1.0),
@@ -287,9 +288,7 @@ class BukaakeApp {
     } else { this.fileInput?.click(); }
   }
 
-  async saveImage() {
-    return await exportImage(this.viewer, this.filters, this.fileLoader, this.cropper.active, this.drawingTool.active);
-  }
+  async saveImage() { return await exportImage(this.viewer, this.filters, this.fileLoader, this.cropper.active, this.drawingTool.active); }
 }
 
 document.addEventListener('DOMContentLoaded', () => {

@@ -1,7 +1,9 @@
 // Prevents additional console window on Windows in release
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+mod clipboard;
 mod image_loader;
+use clipboard::{read_clipboard, write_clipboard_image};
 use image_loader::{get_initial_image, read_image_context, read_image_file};
 use tauri::{Emitter, Manager};
 
@@ -273,6 +275,8 @@ fn main() {
             prompt_save_file,
             prompt_open_file,
             save_image_bytes,
+            read_clipboard,
+            write_clipboard_image,
             minimize_window,
             toggle_maximize_window,
             is_window_maximized,
