@@ -111,7 +111,7 @@ Never worry about missing out on new features:
 1. Go to the **[Latest Release](https://github.com/Crlyzd/Bukaake/releases/latest)** page.
 2. Download the latest executable matching your architecture (e.g., **`bukaake-vX.Y.Z-x64.exe`** or **`arm64.exe`** for ARM laptops like Surface Pro).
 3. **Double-click to run!** That's it—no setup wizard, no extra dependencies, and no administrative rights required.
-4. Open **Settings** (`Ctrl+,`) and click **Register** to make Bukaake your default photo viewer across all 37 image formats in seconds!
+4. Open **Settings** (`Ctrl+,`) and click **Register** to make Bukaake your default photo viewer across all 38 image formats in seconds!
 
 ---
 

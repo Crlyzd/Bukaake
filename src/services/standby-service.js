@@ -12,7 +12,7 @@ class StandbyService {
     this.enabled = localStorage.getItem(STORAGE_KEY) !== 'false';
   }
 
-  async init({ onOpenPath, onOpenSettings } = {}) {
+  async init({ onOpenPath, onOpenSettings, onWakeFromStandby } = {}) {
     if (!tauriBridge.isTauri()) return;
 
     // Sync initial state to Rust backend
@@ -29,6 +29,11 @@ class StandbyService {
     // Listen for tray menu open settings
     window.__TAURI__?.event?.listen('bukaake://open-settings', () => {
       onOpenSettings?.();
+    });
+
+    // Listen for bare exe/shortcut re-launch while in tray (no file argument)
+    window.__TAURI__?.event?.listen('bukaake://wake-from-standby', () => {
+      onWakeFromStandby?.();
     });
 
     // Cross-window sync (e.g. from standalone settings window)
@@ -55,7 +60,7 @@ class StandbyService {
     }
   }
 
-  async enterStandby({ viewer, fileLoader, windowModeManager }) {
+  async enterStandby({ viewer, fileLoader }) {
     if (!this.enabled) {
       return await tauriBridge.exitApp();
     }
@@ -66,11 +71,6 @@ class StandbyService {
       viewer?.setImage(null);
       if (fileLoader) {
         fileLoader.currentMeta = null;
-      }
-      const dz = document.getElementById('dropZone');
-      if (dz) dz.style.display = 'none';
-      if (windowModeManager) {
-        windowModeManager.updateModeClasses('mode-viewer');
       }
     } catch (err) {
       console.warn('[StandbyService] Error clearing buffers:', err);

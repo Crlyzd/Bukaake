@@ -9,6 +9,7 @@ pub mod heif_reader;
 pub mod pro_decoder;
 pub mod raw_reader;
 pub mod standby;
+pub mod window_commands;
 #[cfg(target_os = "windows")]
 pub mod wic_decoder;
 mod image_loader;
@@ -23,189 +24,13 @@ use image_loader::{get_initial_image, read_image_context, read_image_file};
 use standby::{enter_standby, is_standby_enabled, set_standby_enabled, show_main_window, StandbyManager};
 use tauri::{Emitter, Manager};
 use updater::{cleanup_old_update_artifacts, download_and_install_update, get_system_arch};
-
-#[cfg(target_os = "windows")]
-use std::os::windows::process::CommandExt;
-
-const CREATE_NO_WINDOW: u32 = 0x08000000;
-
-#[tauri::command]
-fn get_cli_args() -> Vec<String> { std::env::args().collect() }
-
-#[tauri::command]
-fn open_url(url: String) -> Result<(), String> {
-    #[cfg(target_os = "windows")]
-    {
-        let mut cmd = std::process::Command::new("rundll32");
-        cmd.args(["url.dll,FileProtocolHandler", &url]);
-        cmd.creation_flags(CREATE_NO_WINDOW);
-        cmd.spawn().map_err(|e| e.to_string())?;
-    }
-    #[cfg(not(target_os = "windows"))]
-    {
-        let cmd = if cfg!(target_os = "macos") { "open" } else { "xdg-open" };
-        std::process::Command::new(cmd).arg(&url).spawn().map_err(|e| e.to_string())?;
-    }
-    Ok(())
-}
-
-#[tauri::command]
-fn show_in_folder(path: String) -> Result<(), String> {
-    #[cfg(target_os = "windows")]
-    {
-        let mut cmd = std::process::Command::new("explorer");
-        cmd.args(["/select,", &path]);
-        cmd.creation_flags(CREATE_NO_WINDOW);
-        cmd.spawn().map_err(|e| e.to_string())?;
-    }
-    #[cfg(not(target_os = "windows"))]
-    { let _ = path; }
-    Ok(())
-}
-
-#[tauri::command]
-fn close_window(window: tauri::Window, state: tauri::State<'_, StandbyManager>) {
-    if window.label() == "main" {
-        let _ = standby::enter_standby(window.app_handle().clone(), state);
-    } else {
-        let _ = window.close();
-    }
-}
-
-#[tauri::command]
-fn exit_app(app_handle: tauri::AppHandle) { app_handle.exit(0); }
-
-#[tauri::command]
-fn prompt_save_file(default_name: String, filter_ext: String) -> Result<Option<String>, String> {
-    let mut dialog = rfd::FileDialog::new().set_file_name(&default_name);
-    if !filter_ext.is_empty() { dialog = dialog.add_filter("Image", &[filter_ext.as_str()]); }
-    Ok(dialog.save_file().map(|p| p.to_string_lossy().to_string()))
-}
-
-#[tauri::command]
-fn prompt_open_file() -> Result<Option<String>, String> {
-    let dialog = rfd::FileDialog::new()
-        .add_filter("All Supported Images", &[
-            "png", "jpg", "jpeg", "webp", "gif", "bmp", "ico", "tiff", "tif", "svg", "avif",
-            "heic", "heif", "hif", "heifs", "heics", "arw", "srf", "sr2", "cr2", "cr3",
-            "nef", "nrw", "dng", "raf", "rw2", "orf", "pef", "hdr", "exr", "tga", "dds", "qoi",
-            "ppm", "pgm", "pbm", "pnm",
-        ])
-        .add_filter("High Efficiency", &["heic", "heif", "hif", "heifs", "heics"])
-        .add_filter("Camera RAW", &["arw", "srf", "sr2", "cr2", "cr3", "nef", "nrw", "dng", "raf", "rw2", "orf", "pef"])
-        .add_filter("VFX & 3D Textures", &["hdr", "exr", "tga", "dds", "qoi", "ppm", "pgm", "pbm", "pnm"])
-        .add_filter("Standard Images", &["png", "jpg", "jpeg", "webp", "gif", "bmp", "ico", "tiff", "svg", "avif"]);
-    Ok(dialog.pick_file().map(|p| p.to_string_lossy().to_string()))
-}
-
-#[tauri::command]
-fn save_image_bytes(path: String, base64_data: String) -> Result<(), String> {
-    use base64::prelude::*;
-    let cleaned = if let Some(idx) = base64_data.find(',') { &base64_data[idx + 1..] } else { &base64_data };
-    let data = BASE64_STANDARD.decode(cleaned).map_err(|e| e.to_string())?;
-    std::fs::write(&path, data).map_err(|e| e.to_string())?;
-    Ok(())
-}
-
-#[tauri::command]
-fn minimize_window(window: tauri::Window) { let _ = window.minimize(); }
-
-#[tauri::command]
-fn toggle_maximize_window(window: tauri::Window) {
-    if let Ok(is_max) = window.is_maximized() {
-        if is_max { let _ = window.unmaximize(); } else { let _ = window.maximize(); }
-    }
-}
-
-#[tauri::command]
-fn is_window_maximized(window: tauri::Window) -> bool { window.is_maximized().unwrap_or(false) }
-
-#[tauri::command]
-fn unmaximize_window(window: tauri::Window) { let _ = window.unmaximize(); }
-
-#[tauri::command]
-fn resize_and_center_window(window: tauri::Window, width: u32, height: u32) -> Result<(), String> {
-    let _ = window.unmaximize();
-    window.set_size(tauri::Size::Logical(tauri::LogicalSize { width: width as f64, height: height as f64 })).map_err(|e| e.to_string())?;
-    window.center().map_err(|e| e.to_string())
-}
-
-#[tauri::command]
-fn start_window_resize(window: tauri::Window, direction: String) -> Result<(), String> { let _ = (window, direction); Ok(()) }
-
-#[tauri::command]
-fn set_fullscreen_window(window: tauri::Window, fullscreen: bool) -> Result<(), String> { window.set_fullscreen(fullscreen).map_err(|e| e.to_string()) }
-
-#[tauri::command]
-fn is_window_fullscreen(window: tauri::Window) -> bool { window.is_fullscreen().unwrap_or(false) }
-
-#[tauri::command]
-fn play_windows_ding() {
-    #[cfg(target_os = "windows")]
-    unsafe {
-        #[link(name = "user32")]
-        extern "system" { fn MessageBeep(uType: u32) -> i32; }
-        MessageBeep(0);
-    }
-}
-
-#[tauri::command]
-fn open_settings_window(app_handle: tauri::AppHandle) -> Result<(), String> {
-    if let Some(settings_win) = app_handle.get_webview_window("settings") {
-        let is_visible = settings_win.is_visible().unwrap_or(false);
-        if !is_visible {
-            if let Some(main_win) = app_handle.get_webview_window("main") {
-                if let (Ok(main_pos), Ok(main_size), Ok(settings_size)) = (
-                    main_win.outer_position(),
-                    main_win.outer_size(),
-                    settings_win.outer_size(),
-                ) {
-                    let center_x = main_pos.x + (main_size.width as i32 - settings_size.width as i32) / 2;
-                    let center_y = main_pos.y + (main_size.height as i32 - settings_size.height as i32) / 2;
-                    let _ = settings_win.set_position(tauri::Position::Physical(tauri::PhysicalPosition {
-                        x: center_x,
-                        y: center_y,
-                    }));
-                } else {
-                    let _ = settings_win.center();
-                }
-            } else {
-                let _ = settings_win.center();
-            }
-        }
-        let _ = settings_win.unminimize();
-        let _ = settings_win.show();
-        let _ = settings_win.set_focus();
-        let _ = app_handle.emit("settings-modal-state", true);
-    }
-    Ok(())
-}
-
-#[tauri::command]
-fn hide_settings_window(app_handle: tauri::AppHandle) -> Result<(), String> {
-    if let Some(w) = app_handle.get_webview_window("settings") {
-        let _ = w.hide();
-        let _ = app_handle.emit("settings-modal-state", false);
-    }
-    Ok(())
-}
-
-#[tauri::command]
-fn set_window_vibrancy(app_handle: tauri::AppHandle, is_dark: bool, is_viewer: Option<bool>) -> Result<(), String> {
-    #[cfg(target_os = "windows")]
-    {
-        use window_vibrancy::{apply_acrylic, clear_acrylic};
-        let tint = if is_dark { Some((16, 19, 28, 248)) } else { Some((245, 247, 250, 140)) };
-        if let Some(w) = app_handle.get_webview_window("main") {
-            if is_viewer.unwrap_or(false) { let _ = clear_acrylic(&w); } else { let _ = apply_acrylic(&w, tint); }
-        }
-        if let Some(w) = app_handle.get_webview_window("settings") {
-            let _ = apply_acrylic(&w, tint);
-        }
-    }
-    let _ = (app_handle, is_dark, is_viewer);
-    Ok(())
-}
+use window_commands::{
+    get_cli_args, open_url, show_in_folder, close_window, exit_app,
+    prompt_save_file, prompt_open_file, save_image_bytes,
+    minimize_window, toggle_maximize_window, is_window_maximized, unmaximize_window,
+    resize_and_center_window, start_window_resize, set_fullscreen_window, is_window_fullscreen,
+    play_windows_ding, open_settings_window, hide_settings_window, set_window_vibrancy,
+};
 
 fn main() {
     cleanup_old_update_artifacts();
@@ -220,11 +45,17 @@ fn main() {
                     if p.is_file() && image_loader::is_image_file(p) { target_file = Some(arg); break; }
                 }
                 if let Some(path) = target_file {
+                    // File association path: switch to fullscreen viewer and load image
                     let _ = win.set_fullscreen(true);
                     #[cfg(target_os = "windows")]
                     let _ = window_vibrancy::clear_acrylic(&win);
                     let _ = win.emit("bukaake://open-path", path);
-                } else { let _ = win.unminimize(); }
+                } else {
+                    // Bare exe/shortcut re-launch: restore to Mode 1 and signal JS to reset UI
+                    let _ = win.set_fullscreen(false);
+                    let _ = win.unminimize();
+                    let _ = win.emit("bukaake://wake-from-standby", ());
+                }
                 let _ = win.show();
                 let _ = win.set_focus();
             }

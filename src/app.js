@@ -61,7 +61,7 @@ class BukaakeApp {
       onToggleSettings: async () => { if (!(await tauriBridge.openSettingsWindow())) this.settingsModal.toggle(); },
       onToggleHelp: () => this.shortcutsModal.toggle(),
       onToggleMode: () => this.windowModeManager?.toggleMode(),
-      onClose: () => this.confirmModal.promptIfDirty(() => standbyService.enterStandby({ viewer: this.viewer, fileLoader: this.fileLoader, windowModeManager: this.windowModeManager }), () => this.saveImage()),
+      onClose: () => this.confirmModal.promptIfDirty(() => standbyService.enterStandby({ viewer: this.viewer, fileLoader: this.fileLoader }), () => this.saveImage()),
     });
 
     this.toolbar = new Toolbar({
@@ -130,7 +130,7 @@ class BukaakeApp {
     this.fileLoader.onLoadingStart = (m) => loadingIndicator.show(m);
     this.fileLoader.onLoadingEnd = () => loadingIndicator.hide();
     this.fileLoader.onPromptOpen = () => this.confirmModal.promptIfDirty(() => this.openFile(), () => this.saveImage());
-    this.fileLoader.onAllFilesCleared = () => (this.windowModeManager?.currentMode === MODE_VIEWER ? standbyService.enterStandby({ viewer: this.viewer, fileLoader: this.fileLoader, windowModeManager: this.windowModeManager }) : this.handleEmptyState());
+    this.fileLoader.onAllFilesCleared = () => (this.windowModeManager?.currentMode === MODE_VIEWER ? standbyService.enterStandby({ viewer: this.viewer, fileLoader: this.fileLoader }) : this.handleEmptyState());
     this.viewer.onTransformChange = () => { this.updateStatusBadges(); if (this.drawingTool?.active) this.drawingTool.redraw(); if (this.cropper?.active) this.cropper.onTransform(); };
 
     this.windowModeManager = new WindowModeManager({
@@ -178,7 +178,7 @@ class BukaakeApp {
         if (this.cropper.active) return this.toolsManager.toggleCrop(false);
         if (this.adjustmentsPanel.isOpen()) return this.toolsManager.closeAdjustments();
         for (const m of [this.metadataDrawer, this.settingsModal, this.shortcutsModal]) if (m.isOpen()) return m.hide();
-        this.confirmModal.promptIfDirty(() => standbyService.enterStandby({ viewer: this.viewer, fileLoader: this.fileLoader, windowModeManager: this.windowModeManager }), () => this.saveImage());
+        this.confirmModal.promptIfDirty(() => standbyService.enterStandby({ viewer: this.viewer, fileLoader: this.fileLoader }), () => this.saveImage());
       },
     });
   }
@@ -202,6 +202,7 @@ class BukaakeApp {
         else { loadingIndicator.hide(); toast.warn(`Unsupported file format: ${name}`); }
       },
       onOpenSettings: async () => { if (!(await tauriBridge.openSettingsWindow())) this.settingsModal.toggle(); },
+      onWakeFromStandby: () => this.wakeFromStandby(),
     });
 
     try {
@@ -290,6 +291,13 @@ class BukaakeApp {
         } catch (err) { toast.show(`Failed to delete: ${err}`); }
       },
     });
+  }
+
+  async wakeFromStandby() {
+    // Restore Mode 1: resets body.mode-regular CSS, re-applies acrylic via setWindowVibrancy
+    await this.windowModeManager.setMode(MODE_REGULAR);
+    // Restore start page drop zone if no image is currently loaded
+    if (!this.viewer.img) this.handleEmptyState();
   }
 }
 

@@ -76,17 +76,18 @@ Reliving the iconic Google Picasa Photo Viewer experience with two tailored mode
 
 ### Pillar 5: Strict Modularity Architecture (No Monoliths)
 - **Hard Rule — Maximum 300 Lines Per File**: No source code file (`.js`, `.css`, `.rs`) may exceed **300 lines of code**. Any file approaching this limit must be proactively refactored into focused submodules.
+  - **Coordinator Exception**: Pure bootstrap and orchestration entry-points that only wire up existing modules — specifically `src/app.js`, `src/settings-app.js`, and `src-tauri/src/main.rs` — are permitted up to **350 lines**. These files contain no business logic of their own; they exclusively instantiate, inject, and connect focused submodules. Feature logic must never be added inline to justify this exception.
 - **Single Responsibility Principle**: Each file must do one thing well:
   - UI components manage only DOM rendering and user interaction events.
   - Services handle external concerns (Tauri IPC, updater, filesystem, shortcuts, window modes, change tracking, image saving).
   - Core engines handle computation, drawing, filters, and canvas rendering.
-- **Never Dump Code into `app.js` or `style.css`**: Feature additions must create dedicated, importable modules.
+- **Never Dump Feature Code into `app.js` or `style.css`**: Feature additions must create dedicated, importable modules. `app.js` and `settings-app.js` may only contain wiring (instantiation, callback binding, delegation) — never business logic, styling, or self-contained feature implementations.
 
 ---
 
 ## 2. Directory Structure & Module Standards
 
-All 63 source files in the project strictly respect the < 300 lines per file budget:
+All source files in the project strictly respect the < 300 lines per file budget (coordinator entry-points up to 350 lines):
 
 ```
 bukaake/
@@ -157,13 +158,14 @@ bukaake/
 │   │       ├── toast.css          # Stroke-free floating glass toast pill (~60 lines)
 │   │       ├── toolbar.css        # Responsive floating control dock (~175 lines)
 │   │       └── vibrancy.css       # Window vibrancy & background layer overrides (~70 lines)
-│   ├── app.js                     # Main window bootstrap coordinator (~270 lines)
+│   ├── app.js                     # Main window bootstrap coordinator (≤ 350 lines, coordinator exception)
 │   └── settings-app.js            # Standalone settings window coordinator (~230 lines)
 └── src-tauri/
     ├── Cargo.toml                 # Tauri v2 dependencies (`window-vibrancy`, `rfd`, `image`, `kamadak-exif`, `winreg`, `heif-oxide`)
     ├── tauri.conf.json            # Multi-window config (main + settings)
     └── src/
-        ├── main.rs                # Native acrylic vibrancy + window IPC commands (~260 lines)
+        ├── main.rs                # App entry-point: plugin setup, lifecycle, window events (≤ 350 lines, coordinator exception)
+        ├── window_commands.rs     # All #[tauri::command] window/dialog/vibrancy IPC handlers (~185 lines)
         ├── file_assoc.rs          # Windows registry capabilities, auto-heal & deep link (~145 lines)
         ├── image_loader.rs        # Fast native image decoding & metadata reading (~270 lines)
         ├── raw_reader.rs          # 15ms embedded preview extractor for 8 RAW formats (~60 lines)
@@ -292,14 +294,14 @@ The root control center provides an interactive 10-option manager:
 ### Windows Shell File Association & Auto-Healing Subsystem
 - **Registry Registration & Deep-Link (`src-tauri/src/file_assoc.rs`, `src/services/file-assoc-service.js`)**:
   - Registers ProgID `Bukaake.ImageViewer`, `Capabilities\FileAssociations`, and `RegisteredApplications` under `HKCU` (zero UAC elevation required).
-  - Registers 37 graphic formats (standard raster, camera RAW, HDR/VFX textures, SVG, animated formats) and Windows Explorer right-click context menu ("Open with Bukaake").
+  - Registers 38 graphic formats (standard raster, camera RAW, HDR/VFX textures, SVG, animated formats) and Windows Explorer right-click context menu ("Open with Bukaake").
   - Seamlessly triggers Windows Default Apps settings via `ms-settings:defaultapps?registeredAppUser=Bukaake`.
   - Supports full unregistration, cleanly pruning ProgID and Capabilities keys without touching unrelated configurations.
 - **Silent Startup Path Auto-Healing**:
   - On application startup (`auto_heal_or_sync_path` in `src-tauri/src/main.rs`), compares current binary path against registered registry command.
   - If the portable executable is moved or renamed, silently updates shell open command in place, preserving existing Windows `UserChoice` hashes without requiring the user to reassign defaults in Windows Settings.
 - **Glass Settings Banner & Interactive Switch (`src/styles/components/settings-assoc.css`, `src/settings-app.js`, `src/components/settings-modal.js`)**:
-  - Stroke-free frosted glass banner with vertically centered monochrome shield icon (`ri-shield-check-line`), 37 Formats tag, active executable path badge, and single-button toggle (`Register` / `Unregister`).
+  - Stroke-free frosted glass banner with vertically centered monochrome shield icon (`ri-shield-check-line`), 38 Formats tag, active executable path badge, and single-button toggle (`Register` / `Unregister`).
 
 ### Hardware-Accelerated WIC & HEIC/HEIF Subsystem
 - **Native WIC In-Memory Transcoding (`src-tauri/src/wic_decoder.rs`)**:
