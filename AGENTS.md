@@ -72,7 +72,7 @@ Reliving the iconic Google Picasa Photo Viewer experience with two tailored mode
   - High-performance 60 FPS HTML5 Canvas pan and zoom.
   - Smooth mouse wheel zoom anchored to cursor coordinates.
   - Arrow keys (Left/Right) for instant navigation across neighbor images in the current folder.
-  - Quick keys: `F` (Fit to screen), `1` (100% 1:1 Actual size), `,` / `.` (Rotate Left / Right), `Esc` (Exit fullscreen / Close), `C` (Crop), `D` (Draw), `E` (Filters), `I` (Metadata), `Ctrl+S` (Save), `Ctrl+Shift+S` (Save As), `Ctrl+Z` / `Ctrl+Y` (Undo/Redo drawing).
+  - Quick keys: `F` (Fit to screen), `1` (100% 1:1 Actual size), `,` / `.` (Rotate Left / Right), `Esc` (Exit fullscreen / Close), `C` (Crop), `D` (Draw), `E` (Filters), `I` (Metadata), `Q` (Load Full Sensor RAW Decode), `Delete` (Move to Recycle Bin), `Shift+Delete` (Permanent Delete), `Ctrl+V` (Paste from Clipboard), `Ctrl+S` (Save), `Ctrl+Shift+S` (Save As), `Ctrl+Z` / `Ctrl+Y` (Undo/Redo drawing).
 
 ### Pillar 5: Strict Modularity Architecture (No Monoliths)
 - **Hard Rule — Maximum 300 Lines Per File**: No source code file (`.js`, `.css`, `.rs`) may exceed **300 lines of code**. Any file approaching this limit must be proactively refactored into focused submodules.
@@ -87,7 +87,7 @@ Reliving the iconic Google Picasa Photo Viewer experience with two tailored mode
 
 ## 2. Directory Structure & Module Standards
 
-All source files in the project strictly respect the < 300 lines per file budget (coordinator entry-points up to 350 lines):
+All source files in the project strictly respect the < 300 lines per file budget (coordinator entry-points up to 350 lines). The project currently contains **67 modular source files**:
 
 ```
 bukaake/
@@ -98,47 +98,48 @@ bukaake/
 │       ├── coding-specialist.md   # Code executor (~80 lines)
 │       └── code-reviewer.md       # Quality & 5-pillar auditor (~75 lines)
 ├── AGENTS.md                      # Authoritative project rules manual
-├── package.json                   # Version 0.4.1 single source of truth
+├── package.json                   # Version 0.4.2 single source of truth
 ├── index.html                     # Main viewer entrypoint
 ├── settings.html                  # Dedicated standalone settings window
 ├── scripts/
-│   └── bump-version.js            # Atomic version synchronizer across json/toml (~65 lines)
+│   └── bump-version.js            # Atomic version synchronizer across json/toml/docs (~100 lines)
 ├── src/
-│   ├── components/                # Isolated UI modules (< 250 lines each)
+│   ├── components/                # Isolated UI modules (< 270 lines each)
 │   │   ├── adjustments-panel.js   # Color sliders, preset chips (~115 lines)
-│   │   ├── confirm-modal.js       # Unsaved changes confirmation dialog (~70 lines)
-│   │   ├── context-menu.js        # Glass desktop right-click context menu (~215 lines)
+│   │   ├── confirm-modal.js       # Unsaved changes confirmation dialog (~65 lines)
+│   │   ├── context-menu.js        # Glass desktop right-click context menu (~220 lines)
 │   │   ├── delete-modal.js        # Stroke-free Recycle Bin & delete dialog (~80 lines)
+│   │   ├── loading-indicator.js   # Stroke-free circular spinner & status feedback (~50 lines)
 │   │   ├── metadata-drawer.js     # EXIF, camera telemetry, dimensions drawer (~40 lines)
-│   │   ├── settings-modal.js      # Glass settings & updater modal overlay (~205 lines)
-│   │   ├── shortcuts-modal.js     # Keyboard shortcuts cheat sheet (~40 lines)
+│   │   ├── settings-modal.js      # Glass settings & updater modal overlay (~215 lines)
+│   │   ├── shortcuts-modal.js     # Keyboard shortcuts cheat sheet (~35 lines)
 │   │   ├── titlebar.js            # Window controls, filename badge, image info (~155 lines)
 │   │   ├── toast.js               # Single-toast lifecycle notification pill (~60 lines)
-│   │   └── toolbar.js             # Responsive floating control dock & draw popover (~250 lines)
-│   ├── core/                      # Core canvas, drawing & image math engines (< 260 lines each)
+│   │   └── toolbar.js             # Responsive floating control dock & RAW decode trigger (~265 lines)
+│   ├── core/                      # Core canvas, drawing & image math engines (< 265 lines each)
 │   │   ├── canvas-events.js       # Pan/zoom mouse & drag event handler (~105 lines)
 │   │   ├── canvas-helpers.js      # Coordinate transforms & math utilities (~65 lines)
-│   │   ├── canvas-viewer.js       # 60fps pan/zoom canvas engine & fit logic (~250 lines)
+│   │   ├── canvas-viewer.js       # 60fps pan/zoom canvas engine & fit logic (~255 lines)
 │   │   ├── crop-snapping.js       # Edge/center laser magnet snapping guides (~145 lines)
 │   │   ├── cropper.js             # Precision crop overlay, sandwich contrast (~200 lines)
 │   │   ├── drawing-tool.js        # Freehand pen, highlighter, cursor ring & baking (~260 lines)
 │   │   ├── filters.js             # Color adjustment processor (~95 lines)
-│   │   └── metadata.js            # EXIF parser, camera telemetry & GPS reader (~195 lines)
-│   ├── services/                  # External & platform services (< 270 lines each)
+│   │   └── metadata.js            # EXIF parser, camera telemetry & GPS reader (~200 lines)
+│   ├── services/                  # External & platform services (< 280 lines each)
 │   │   ├── canvas-tools-manager.js# Tool mutual exclusivity & interaction lockout (~110 lines)
 │   │   ├── change-tracker.js      # Unsaved edits state tracking (~50 lines)
 │   │   ├── file-assoc-service.js  # Windows Shell capability registration & deep link (~85 lines)
-│   │   ├── file-loader.js         # Image file loader, drag & drop, clipboard (~265 lines)
+│   │   ├── file-loader.js         # Image file loader, drag & drop, clipboard (~245 lines)
 │   │   ├── idle-controller.js     # Picasa-style idle mouse fade controller (~105 lines)
-│   │   ├── image-prefetch-cache.js# Asymmetric 5-slot prefetch cache with LRU eviction (~140 lines)
+│   │   ├── image-prefetch-cache.js# Asymmetric 5-slot prefetch cache with RAW memory accounting (~135 lines)
 │   │   ├── image-saver.js         # Tauri & web image saving, copy to clipboard (~90 lines)
-│   │   ├── shortcuts.js           # Keyboard hotkeys registry (~140 lines)
-│   │   ├── standby-service.js     # Background standby, tray lifecycle & memory trim (~85 lines)
-│   │   ├── tauri-bridge.js        # Tauri v2 window, args, fs IPC wrapper (~265 lines)
+│   │   ├── shortcuts.js           # Keyboard hotkeys registry (~145 lines)
+│   │   ├── standby-service.js     # Background standby, tray lifecycle & memory trim (~70 lines)
+│   │   ├── tauri-bridge.js        # Tauri v2 window, args, fs & RAW decode IPC wrapper (~275 lines)
 │   │   ├── theme-manager.js       # Dark & light theme switcher + acrylic tint (~85 lines)
 │   │   ├── updater-service.js     # GitHub releases updater & multi-window sync (~250 lines)
 │   │   └── window-mode-manager.js # Regular vs Fullscreen mode coordinator (~125 lines)
-│   ├── styles/                    # Modular CSS design system (< 245 lines each)
+│   ├── styles/                    # Modular CSS design system (< 250 lines each)
 │   │   ├── base.css               # Typography, reset, SVG checkerboard (~110 lines)
 │   │   ├── glass.css              # Core glassmorphism classes & ambient shadows (~80 lines)
 │   │   ├── main.css               # Master stylesheet bundling component submodules (~25 lines)
@@ -148,32 +149,36 @@ bukaake/
 │   │       ├── context-menu.css   # Glass context menu with high-contrast backing (~110 lines)
 │   │       ├── crop.css           # Precision crop box, sandwich contrast, guides (~240 lines)
 │   │       ├── draw.css           # Floating drawing toolbar & popover styling (~195 lines)
+│   │       ├── loading.css        # Smooth rotating stroke-free spinner styling (~80 lines)
 │   │       ├── modes.css          # Mode 1 regular vs Mode 2 fullscreen viewer (~235 lines)
 │   │       ├── panels.css         # Adjustments, metadata, and glass pill buttons (~230 lines)
+│   │       ├── settings-assoc.css # Default image viewer banner & toggle button (~175 lines)
 │   │       ├── settings.css       # Standalone settings window & modal styling (~245 lines)
-│   │       ├── settings-assoc.css # Default image viewer banner & toggle button (~155 lines)
 │   │       ├── shortcuts.css      # Keyboard shortcuts modal styling (~60 lines)
-│   │       ├── startpage.css      # Empty drop zone, capabilities strip & format matrix (~220 lines)
+│   │       ├── startpage.css      # Empty drop zone, capabilities strip & format matrix (~175 lines)
 │   │       ├── titlebar.css       # Frameless ghost titlebar & disabled states (~230 lines)
 │   │       ├── toast.css          # Stroke-free floating glass toast pill (~60 lines)
-│   │       ├── toolbar.css        # Responsive floating control dock (~175 lines)
+│   │       ├── toolbar.css        # Responsive floating control dock & RAW action (~190 lines)
 │   │       └── vibrancy.css       # Window vibrancy & background layer overrides (~70 lines)
 │   ├── app.js                     # Main window bootstrap coordinator (≤ 350 lines, coordinator exception)
 │   └── settings-app.js            # Standalone settings window coordinator (~230 lines)
 └── src-tauri/
     ├── Cargo.toml                 # Tauri v2 dependencies (`window-vibrancy`, `rfd`, `image`, `kamadak-exif`, `winreg`, `heif-oxide`)
+    ├── build.rs                   # Custom MSVC build script compiling vendored LibRaw into static library (~70 lines)
     ├── tauri.conf.json            # Multi-window config (main + settings)
+    ├── vendor/                    # Statically linked external libraries
+    │   └── LibRaw/                # Vendored LibRaw 0.21.2 C++ static decoding engine
     └── src/
-        ├── main.rs                # App entry-point: plugin setup, lifecycle, window events (≤ 350 lines, coordinator exception)
-        ├── window_commands.rs     # All #[tauri::command] window/dialog/vibrancy IPC handlers (~185 lines)
-        ├── file_assoc.rs          # Windows registry capabilities, auto-heal & deep link (~145 lines)
-        ├── image_loader.rs        # Fast native image decoding & metadata reading (~270 lines)
-        ├── raw_reader.rs          # 15ms embedded preview extractor for 8 RAW formats (~60 lines)
-        ├── heif_reader.rs         # Native HEIC/HEIF container and thumbnail extractor (~70 lines)
-        ├── wic_decoder.rs         # Windows Imaging Component hardware-accelerated transcoding (~145 lines)
+        ├── main.rs                # App entry-point: plugin setup, lifecycle, single instance (≤ 350 lines, coordinator exception)
+        ├── window_commands.rs     # All #[tauri::command] window, dialog, and vibrancy IPC handlers (~166 lines)
+        ├── file_assoc.rs          # Windows registry 49 format capabilities, auto-heal & deep link (~150 lines)
+        ├── image_loader.rs        # Fast native image decoding & metadata reading (~298 lines)
+        ├── raw_reader.rs          # 4-tier LibRaw 0.21.2 camera RAW pipeline & full sensor unpack (~295 lines core)
+        ├── heif_reader.rs         # Native HEIC/HEIF container and thumbnail extractor (~60 lines)
+        ├── wic_decoder.rs         # Windows Imaging Component hardware-accelerated transcoding (~120 lines)
         ├── pro_decoder.rs         # VFX & texture decoders (HDR, EXR, DDS, TGA, QOI) (~25 lines)
         ├── exif_reader.rs         # Native EXIF camera telemetry & GPS extraction (~140 lines)
-        ├── file_ops.rs            # Native Win32 Recycle Bin & permanent deletion (~70 lines)
+        ├── file_ops.rs            # Native Win32 Recycle Bin & permanent deletion (~60 lines)
         ├── clipboard.rs           # Native OS clipboard engine, CF_HDROP & image IPC (~150 lines)
         ├── standby.rs             # Tray standby lifecycle, working set trim & auto-quit (~150 lines)
         └── updater.rs             # Native in-place self-updater, progress & relaunch (~145 lines)
@@ -186,7 +191,8 @@ bukaake/
 | Component | Technology | Version / Notes |
 | :--- | :--- | :--- |
 | **Desktop Framework** | Tauri v2 | `@tauri-apps/cli` ^2.0.0, `tauri` ^2.0.0 |
-| **Backend Language** | Rust | Edition 2021 |
+| **Backend Language** | Rust & C++ | Edition 2021 + C++14 (MSVC static compilation via `cc`) |
+| **Camera RAW Engine** | LibRaw | 0.21.2 (Statically compiled, zero external DLL dependencies) |
 | **Windows Acrylic** | `window-vibrancy` | 0.6.0 (`apply_acrylic`, `clear_acrylic`) |
 | **Native Dialogs** | `rfd` | 0.15 (Native file open and save dialogs) |
 | **Image Processing** | `image` & `kamadak-exif` | 0.25 (Image decoding) & 0.6 (Camera EXIF telemetry) |
@@ -226,14 +232,28 @@ The root control center provides an interactive 10-option manager:
 
 ## 4. Subsystem Architectures
 
-### Native Multi-Format & RAW Decoder Subsystem
-- **Instant RAW Preview Extraction (`src-tauri/src/raw_reader.rs`)**:
-  - Extracts full-resolution embedded JPEG previews from camera RAW files in ~15ms without slow demosaicing.
-  - Supports: Sony (`.arw`), Canon (`.cr2`, `.cr3`), Nikon (`.nef`), Adobe DNG / DJI (`.dng`), Fujifilm (`.raf`), Panasonic Lumix (`.rw2`), Olympus (`.orf`), Pentax (`.pef`).
+### Native Multi-Tier Camera RAW Decoder Subsystem
+- **Statically Compiled LibRaw Engine (`src-tauri/vendor/LibRaw`, `src-tauri/build.rs`)**:
+  - Compiles LibRaw 0.21.2 statically into `raw_static.lib` via `cc` in `build.rs` using MSVC flags (`/MP`, `/EHsc`, `/W0`, `LIBRAW_NODLL`, `NO_LCMS`).
+  - Completely eliminates external DLL dependencies, preserving 100% portable single-file binary distribution.
+- **4-Tier RAW Decoding Pipeline (`src-tauri/src/raw_reader.rs`)**:
+  - **Tier 1 (Instant Thumbnail Extraction)**: Extracts full-resolution embedded JPEG previews via LibRaw in ~15ms without demosaicing, giving instant opening speeds on folder navigation.
+  - **Tier 2 (Full Sensor Unpack & Bayer Demosaicing)**: On-demand complete sensor unpack (`libraw_unpack`), demosaicing (`libraw_dcraw_process`), and RGB mem image generation (`libraw_dcraw_make_mem_image`).
+  - **Tier 3 (Byte-Stream JPEG Scanner)**: Fallback byte-stream scanner searching for embedded EXIF/JPEG markers for legacy or unusual formats (GoPro GPR, Sigma X3F).
+  - **Tier 4 (Pure Rust DNG Fallback)**: Direct linear DNG decoding through the `image` crate.
+- **On-Demand "Load Full Sensor Decode" Action**:
+  - Triggered via shortcut **`Q`**, toolbar button (`#btnRawFull` with `ri-focus-2-fill`), or right-click glass context menu.
+  - Dynamically displayed only when active file is a supported RAW format (`body.is-raw`).
+  - In-flight decoding indicator with smooth rotating spinner (`raw-sensor-spin`) and toast notifications.
+  - Mutual exclusivity: locked out during active crop, draw, or color adjustment modes.
+- **Comprehensive RAW Camera Coverage (24+ Formats)**:
+  - Canon (`.cr2`, `.cr3`), Nikon (`.nef`, `.nrw`), Sony (`.arw`, `.srf`, `.sr2`), Fujifilm (`.raf`), Olympus (`.orf`), Panasonic Lumix (`.rw2`), Pentax (`.pef`), Samsung (`.srw`), Adobe DNG / DJI (`.dng`), GoPro (`.gpr`), Sigma (`.x3f`), Hasselblad (`.3fr`), Minolta (`.mrw`), Leaf (`.mos`), Mamiya (`.mef`), Kodak (`.dcr`, `.kdc`), Leica (`.rwl`), Phase One (`.iiq`), Epson (`.erf`), generic (`.raw`).
+- **Memory-Bounded Prefetch Cache Integration (`src/services/image-prefetch-cache.js`)**:
+  - Incorporates `decoded_size_bytes` telemetry from backend to enforce a 150 MB per-file ceiling and 140 MB total cache pool, preventing high-res RAW sequences from causing memory exhaustion.
 - **VFX & Texture Decoders (`src-tauri/src/pro_decoder.rs`)**:
   - Direct decoding of HDR (`.hdr`), OpenEXR (`.exr`), Truevision Targa (`.tga`), DirectDraw Surface (`.dds`), Netpbm (`.pnm`), Quite OK Image (`.qoi`).
 - **Directory Traversal**:
-  - Indices all 27+ formats in `image_loader.rs` for seamless `Left`/`Right` arrow navigation across mixed directories.
+  - Indexes all 49 formats in `image_loader.rs` for seamless `Left`/`Right` arrow navigation across mixed directories.
 
 ### Camera EXIF Telemetry Subsystem
 - **Native Telemetry Engine (`src-tauri/src/exif_reader.rs`, `src/core/metadata.js`)**:
@@ -294,14 +314,14 @@ The root control center provides an interactive 10-option manager:
 ### Windows Shell File Association & Auto-Healing Subsystem
 - **Registry Registration & Deep-Link (`src-tauri/src/file_assoc.rs`, `src/services/file-assoc-service.js`)**:
   - Registers ProgID `Bukaake.ImageViewer`, `Capabilities\FileAssociations`, and `RegisteredApplications` under `HKCU` (zero UAC elevation required).
-  - Registers 38 graphic formats (standard raster, camera RAW, HDR/VFX textures, SVG, animated formats) and Windows Explorer right-click context menu ("Open with Bukaake").
+  - Registers 49 graphic formats (standard raster, camera RAW, HDR/VFX textures, SVG, animated formats) and Windows Explorer right-click context menu ("Open with Bukaake").
   - Seamlessly triggers Windows Default Apps settings via `ms-settings:defaultapps?registeredAppUser=Bukaake`.
   - Supports full unregistration, cleanly pruning ProgID and Capabilities keys without touching unrelated configurations.
 - **Silent Startup Path Auto-Healing**:
   - On application startup (`auto_heal_or_sync_path` in `src-tauri/src/main.rs`), compares current binary path against registered registry command.
   - If the portable executable is moved or renamed, silently updates shell open command in place, preserving existing Windows `UserChoice` hashes without requiring the user to reassign defaults in Windows Settings.
 - **Glass Settings Banner & Interactive Switch (`src/styles/components/settings-assoc.css`, `src/settings-app.js`, `src/components/settings-modal.js`)**:
-  - Stroke-free frosted glass banner with vertically centered monochrome shield icon (`ri-shield-check-line`), 38 Formats tag, active executable path badge, and single-button toggle (`Register` / `Unregister`).
+  - Stroke-free frosted glass banner with vertically centered monochrome shield icon (`ri-shield-check-line`), 49 Formats tag, active executable path badge, and single-button toggle (`Register` / `Unregister`).
 
 ### Hardware-Accelerated WIC & HEIC/HEIF Subsystem
 - **Native WIC In-Memory Transcoding (`src-tauri/src/wic_decoder.rs`)**:
@@ -314,7 +334,8 @@ The root control center provides an interactive 10-option manager:
 - **Directional 5-Slot Window (`src/services/image-prefetch-cache.js`)**:
   - Maintains an in-memory prefetch cache of decoded base64 image data during folder navigation.
   - Implements asymmetric directional biasing: preloads +3 images ahead in the active traversal direction and +1 image behind.
-  - Automated LRU eviction bounds memory usage strictly to 5 cached images, guaranteeing instant, 0ms latency on `Left`/`Right` arrow keys without memory bloat.
+  - Memory-Bounded Accounting: Enforces a 150 MB per-image ceiling and 140 MB total cache pool using backend `decoded_size_bytes` telemetry to protect against OOM with high-resolution RAW / VFX sequences.
+  - Automated LRU eviction bounds memory usage strictly, guaranteeing 0ms latency on `Left`/`Right` arrow keys.
 
 ### Background Standby & Process Lifecycle Subsystem
 - **Tray Standby & Memory Trim (`src-tauri/src/standby.rs`, `src/services/standby-service.js`)**:
@@ -322,9 +343,12 @@ The root control center provides an interactive 10-option manager:
   - Performs native Win32 working set memory trimming via `K32EmptyWorkingSet` upon entering standby, dropping resident RAM footprint to ~8-15 MB.
   - Auto-quits standby cleanly after 5 minutes of inactivity (`STANDBY_TIMEOUT_SECS = 300`) to preserve host system resources.
   - Stroke-free system tray menu featuring **Settings** and **Exit Bukaake**.
+  - Left-click tray activation: Listening for `TrayIconEvent::Click` with `MouseButton::Left` immediately cancels standby auto-quit countdown, unminimizes, shows, and focuses the main window.
+  - Smart wake restoration: Emits `bukaake://wake-from-standby` on single-instance wake or tray activation without file arguments, smoothly reverting the window to Mode 1 Regular App Mode and rendering the startpage drop zone instead of staying trapped in fullscreen Mode 2.
   - Configurable via user setting toggle (`bukaake_standby_enabled`), synchronized across windows and persisted in `localStorage`.
-- **Cold Mode 2 Spawn & Decoding Feedback (`src/app.js`, `src/components/toast.js`)**:
+- **Cold Mode 2 Spawn & Zero-Flash Launch (`src/app.js`, `src/components/loading-indicator.js`, `src/components/toast.js`)**:
   - Direct spawn into Mode 2 Fullscreen Viewer on cold image launch or Explorer single-instance invocation, bypassing startpage or Mode 1 window jitter.
+  - Zero-flash startpage: Eagerly applies `image-loaded` and hides the drop zone on cold start with CLI arguments before async image decode resolves, eliminating 5-frame white/startpage flicker.
   - Immediate loading indicator feedback during high-resolution RAW / HEIC / VFX decoding.
 
 ### Fast Multi-Core Compilation Architecture
