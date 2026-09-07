@@ -5,7 +5,7 @@ use std::sync::{
 use std::time::{Duration, Instant};
 use tauri::{
     menu::{Menu, MenuItem, PredefinedMenuItem},
-    tray::TrayIconBuilder,
+    tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent},
     Emitter, Manager,
 };
 
@@ -79,6 +79,24 @@ pub fn trim_memory() {
 #[cfg(not(target_os = "windows"))]
 pub fn trim_memory() {}
 
+pub fn activate_main_window(app: &tauri::AppHandle) {
+    if let Some(win) = app.get_webview_window("main") {
+        let standby = app.state::<StandbyManager>();
+        standby.cancel_countdown();
+
+        let is_visible = win.is_visible().unwrap_or(false);
+
+        let _ = win.unminimize();
+        let _ = win.show();
+        let _ = win.set_focus();
+
+        if !is_visible {
+            let _ = win.set_fullscreen(false);
+            let _ = win.emit("bukaake://wake-from-standby", ());
+        }
+    }
+}
+
 pub fn create_tray(app: &tauri::App) -> Result<(), Box<dyn std::error::Error>> {
     let settings_item = MenuItem::with_id(app, "tray_settings", "Settings", true, None::<&str>)?;
     let sep = PredefinedMenuItem::separator(app)?;
@@ -100,6 +118,16 @@ pub fn create_tray(app: &tauri::App) -> Result<(), Box<dyn std::error::Error>> {
                 app.exit(0);
             }
             _ => {}
+        })
+        .on_tray_icon_event(|tray, event| {
+            if let TrayIconEvent::Click {
+                button: MouseButton::Left,
+                button_state: MouseButtonState::Up,
+                ..
+            } = event
+            {
+                activate_main_window(tray.app_handle());
+            }
         })
         .build(app)?;
 
