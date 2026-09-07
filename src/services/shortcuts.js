@@ -124,6 +124,11 @@ export class ShortcutsRegistry {
         e.preventDefault();
         this.actions.onTogglePixelated?.();
         break;
+      case 'q':
+      case 'Q':
+        e.preventDefault();
+        this.actions.onLoadFullRaw?.();
+        break;
       case 'Enter':
       case 'F11':
         e.preventDefault();

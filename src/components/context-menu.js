@@ -13,6 +13,7 @@ export class ContextMenu {
     this.hasImage = options.hasImage || (() => false);
     this.isCropActive = options.isCropActive || (() => false);
     this.isEditing = options.isEditing || (() => false);
+    this.isRaw = options.isRaw || (() => false);
     this.actions = options.actions || {};
 
     this.menuEl = null;
@@ -162,6 +163,13 @@ export class ContextMenu {
         shortcut: 'F',
         action: () => this.actions.onFitScreen?.(),
       },
+      ...(this.isRaw() ? [{
+        id: 'raw-full-sensor',
+        label: 'Load Full Sensor Decode',
+        icon: 'ri-focus-2-fill',
+        shortcut: 'Q',
+        action: () => this.actions.onLoadFullRaw?.(),
+      }] : []),
       {
         id: 'crop',
         label: 'Crop Image',

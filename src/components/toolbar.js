@@ -88,6 +88,10 @@ export class Toolbar {
       this.actions.onToggleBgMode?.();
     });
 
+    document.getElementById('btnRawFull')?.addEventListener('click', () => {
+      this.actions.onLoadFullRaw?.();
+    });
+
     this.btnAdjustments?.addEventListener('click', () => {
       this.actions.onToggleAdjustments?.();
     });
@@ -273,7 +277,7 @@ export class Toolbar {
     if (this.cropToolbar) this.cropToolbar.classList.toggle('hidden', !active);
     if (this.container) this.container.classList.toggle('crop-locked', active);
     // Transforms remain enabled in crop mode per user preference
-    this._setLocked(['btnPrevImage', 'btnNextImage', 'btnDrawMode', 'btnAdjustments', 'btnPixelated', 'btnBgMode', 'btnSaveAs'], active);
+    this._setLocked(['btnPrevImage', 'btnNextImage', 'btnDrawMode', 'btnAdjustments', 'btnPixelated', 'btnBgMode', 'btnRawFull', 'btnSaveAs'], active);
   }
 
   setDrawActive(active) {
@@ -286,12 +290,25 @@ export class Toolbar {
       document.getElementById('btnDrawColorPop')?.classList.remove('active');
       document.getElementById('btnDrawSizePop')?.classList.remove('active');
     }
-    this._setLocked(['btnPrevImage', 'btnNextImage', 'btnRotateLeft', 'btnRotateRight', 'btnFlipH', 'btnFlipV', 'btnCropMode', 'btnAdjustments', 'btnPixelated', 'btnBgMode', 'btnSaveAs'], active);
+    this._setLocked(['btnPrevImage', 'btnNextImage', 'btnRotateLeft', 'btnRotateRight', 'btnFlipH', 'btnFlipV', 'btnCropMode', 'btnAdjustments', 'btnPixelated', 'btnBgMode', 'btnRawFull', 'btnSaveAs'], active);
   }
 
   setAdjustmentsActive(active) {
     if (this.btnAdjustments) this.btnAdjustments.classList.toggle('active', active);
     if (this.container) this.container.classList.toggle('adjustments-locked', active);
-    this._setLocked(['btnPrevImage', 'btnNextImage', 'btnRotateLeft', 'btnRotateRight', 'btnFlipH', 'btnFlipV', 'btnCropMode', 'btnDrawMode', 'btnPixelated', 'btnBgMode', 'btnSaveAs'], active);
+    this._setLocked(['btnPrevImage', 'btnNextImage', 'btnRotateLeft', 'btnRotateRight', 'btnFlipH', 'btnFlipV', 'btnCropMode', 'btnDrawMode', 'btnPixelated', 'btnBgMode', 'btnRawFull', 'btnSaveAs'], active);
+  }
+
+  /** Show / hide the Full Sensor Decode button based on whether a RAW file is active. */
+  setRawFile(isRaw) {
+    document.body.classList.toggle('is-raw', Boolean(isRaw));
+  }
+
+  /** Toggle the in-flight spinner on #btnRawFull during the decode IPC call. */
+  setRawDecoding(loading) {
+    const btn = document.getElementById('btnRawFull');
+    if (!btn) return;
+    btn.classList.toggle('loading', loading);
+    btn.disabled = loading;
   }
 }

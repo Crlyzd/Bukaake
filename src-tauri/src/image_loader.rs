@@ -293,3 +293,36 @@ pub fn read_image_context(path: String) -> Result<InitialImagePayload, String> {
     }
     build_initial_payload(&p)
 }
+
+/// Forces LibRaw full-sensor Bayer decode (Tier 2), skipping the embedded
+/// thumbnail fast path. Returns the same ImagePayload as read_image_file.
+#[tauri::command]
+pub fn read_raw_full_sensor(path: String) -> Result<ImagePayload, String> {
+    let p = PathBuf::from(&path);
+    if !raw_reader::is_raw_file(&p) {
+        return Err(format!("Not a RAW file: {}", path));
+    }
+    let file_name = p.file_name().and_then(|n| n.to_str()).unwrap_or("image").to_string();
+    let (data_url, dims) = raw_reader::decode_raw_full_sensor(&p)?;
+    let metadata = fs::metadata(&p).ok();
+    let size_bytes = metadata.as_ref().map(|m| m.len()).unwrap_or(0);
+    let decoded_size_bytes = (data_url.len() * 3 / 4) as u64;
+    let last_modified = metadata
+        .and_then(|m| m.modified().ok())
+        .and_then(|t| t.duration_since(std::time::UNIX_EPOCH).ok())
+        .map(|d| d.as_millis() as u64);
+    let ext = p.extension().and_then(|e| e.to_str()).unwrap_or("raw");
+    let exif = exif_reader::read_exif(&p);
+    Ok(ImagePayload {
+        path,
+        file_name,
+        data_url,
+        size_bytes,
+        decoded_size_bytes,
+        dimensions: Some(dims),
+        mime_type: get_mime_type(ext).to_string(),
+        last_modified,
+        exif,
+    })
+}
+

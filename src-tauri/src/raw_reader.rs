@@ -256,6 +256,44 @@ pub fn decode_raw_image(path: &Path) -> Result<(String, (u32, u32)), String> {
     fallback_thumb.ok_or_else(|| "Failed to decode RAW image".to_string())
 }
 
+/// Forces Tier 2 full sensor unpack + Bayer demosaicing, skipping the embedded
+/// thumbnail (Tier 1). Falls through to Tier 3 byte-stream scanner and Tier 4
+/// image-crate fallback if LibRaw sensor decode fails.
+pub fn decode_raw_full_sensor(path: &Path) -> Result<(String, (u32, u32)), String> {
+    let lr = unsafe { libraw_init(0) };
+    if !lr.is_null() {
+        let guard = LibRawGuard(lr);
+        #[cfg(windows)]
+        let ret = {
+            let wide: Vec<u16> = path.as_os_str().encode_wide().chain(std::iter::once(0)).collect();
+            unsafe { libraw_open_wfile(guard.0, wide.as_ptr()) }
+        };
+        #[cfg(not(windows))]
+        let ret = {
+            let c_str = std::ffi::CString::new(path.to_string_lossy().as_bytes())
+                .map_err(|e| e.to_string())?;
+            unsafe { libraw_open_file(guard.0, c_str.as_ptr()) }
+        };
+        if ret == 0
+            && unsafe { libraw_unpack(guard.0) } == 0
+            && unsafe { libraw_dcraw_process(guard.0) } == 0
+        {
+            let mut errc = 0;
+            let pi = unsafe { libraw_dcraw_make_mem_image(guard.0, &mut errc) };
+            if !pi.is_null() {
+                let g = MemImageGuard(pi);
+                if let Some(res) = extract_processed_image(unsafe { &*g.0 }) {
+                    return Ok(res);
+                }
+            }
+        }
+    }
+    // Tier 3 → Tier 4 fallbacks
+    find_embedded_jpeg_stream(path)
+        .or_else(|| try_image_crate_fallback(path))
+        .ok_or_else(|| "Full sensor decode failed for this RAW file".to_string())
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

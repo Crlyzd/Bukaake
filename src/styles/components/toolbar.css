@@ -193,3 +193,22 @@ body.image-loaded .floating-toolbar:hover {
   pointer-events: none !important;
 }
 
+/* RAW Full Sensor Decode button — hidden unless a RAW file is active */
+#btnRawFull {
+  display: none;
+}
+
+body.is-raw #btnRawFull {
+  display: flex;
+}
+
+/* In-flight loading spin on the icon */
+@keyframes raw-sensor-spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+#btnRawFull.loading i {
+  animation: raw-sensor-spin 0.9s linear infinite;
+  opacity: 0.7;
+}

@@ -20,7 +20,7 @@ use file_assoc::{
     register_file_associations, unregister_file_associations,
 };
 use file_ops::delete_file;
-use image_loader::{get_initial_image, read_image_context, read_image_file};
+use image_loader::{get_initial_image, read_image_context, read_image_file, read_raw_full_sensor};
 use standby::{enter_standby, is_standby_enabled, set_standby_enabled, show_main_window, StandbyManager};
 use tauri::{Emitter, Manager};
 use updater::{cleanup_old_update_artifacts, download_and_install_update, get_system_arch};
@@ -110,7 +110,7 @@ fn main() {
             }
         })
         .invoke_handler(tauri::generate_handler![
-            get_cli_args, get_initial_image, read_image_file, read_image_context,
+            get_cli_args, get_initial_image, read_image_file, read_image_context, read_raw_full_sensor,
             play_windows_ding, open_url, show_in_folder, close_window, exit_app,
             prompt_save_file, prompt_open_file, save_image_bytes, read_clipboard,
             write_clipboard_image, minimize_window, toggle_maximize_window,

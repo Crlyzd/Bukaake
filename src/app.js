@@ -29,6 +29,11 @@ import { toast } from './components/toast.js';
 import { loadingIndicator } from './components/loading-indicator.js';
 import { standbyService } from './services/standby-service.js';
 
+const RAW_EXTS = new Set([
+  'arw','srf','sr2','cr2','cr3','nef','nrw','dng','raf','rw2','orf','pef','3fr',
+  'mrw','srw','x3f','mos','mef','raw','kdc','dcr','rwl','iiq','erf',
+]);
+
 class BukaakeApp {
   constructor() {
     this.canvasEl = document.getElementById('imageCanvas');
@@ -75,6 +80,7 @@ class BukaakeApp {
         onTogglePixelated: () => !this.viewer.togglePixelSmoothing(), onToggleBgMode: () => this.cycleBgMode(),
         onToggleAdjustments: () => this.toolsManager.toggleAdjustments(),
         onSaveImage: () => this.saveImage(),
+        onLoadFullRaw: () => this.handleLoadFullRaw(),
         onToggleCrop: () => this.toolsManager.toggleCrop(), onCancelCrop: () => this.toolsManager.toggleCrop(false), onApplyCrop: () => this.toolsManager.applyCrop(this.filters),
         onCropPreset: (r) => this.cropper.setAspectRatio(r),
         onToggleDraw: () => this.toolsManager.toggleDraw(), onCancelDraw: () => this.toolsManager.toggleDraw(false), onApplyDraw: () => this.toolsManager.applyDraw(),
@@ -93,12 +99,14 @@ class BukaakeApp {
       getFilePath: () => this.fileLoader.currentMeta?.path || null,
       hasImage: () => Boolean(this.viewer.img),
       isEditing: () => this.toolsManager.isEditing(),
+      isRaw: () => document.body.classList.contains('is-raw'),
       actions: {
         onCopyImage: () => this.copyImage(), onSaveImage: () => this.saveImage(),
         onRotateRight: () => this.handleRotate(90), onFlipH: () => this.handleFlip('h'),
         onFitScreen: () => this.viewer.fitToScreen(), onCrop: () => this.toolsManager.toggleCrop(true),
         onToggleMetadata: () => { if (this.viewer.img) this.metadataDrawer.toggle(); },
         onDeleteFile: () => this.deleteCurrentFile(false),
+        onLoadFullRaw: () => this.handleLoadFullRaw(),
       },
     });
   }
@@ -118,6 +126,8 @@ class BukaakeApp {
       this.titlebar.setHasImage(true);
       this.updateStatusBadges();
       this.idleController?.refreshState();
+      const ext = (meta.name || '').split('.').pop().toLowerCase();
+      this.toolbar.setRawFile(RAW_EXTS.has(ext));
 
       if (this.windowModeManager.currentMode !== MODE_VIEWER) {
         this.windowModeManager?.applyImageAspectSize(img.naturalWidth || img.width, img.naturalHeight || img.height, 820);
@@ -171,6 +181,7 @@ class BukaakeApp {
       },
       onToggleMaximize: () => this.windowModeManager?.toggleMode(), onToggleHelp: () => this.shortcutsModal.toggle(),
       onDeleteFile: (perm) => this.deleteCurrentFile(perm),
+      onLoadFullRaw: () => this.handleLoadFullRaw(),
       onEscape: () => {
         if (this.deleteModal.isOpen()) return this.deleteModal.hide();
         if (this.confirmModal.isOpen()) return this.confirmModal.hide();
@@ -249,6 +260,34 @@ class BukaakeApp {
 
   async saveImage() { return await exportImage(this.viewer, this.filters, this.fileLoader, this.cropper.active, this.drawingTool.active); }
 
+  async handleLoadFullRaw() {
+    const path = this.fileLoader.currentMeta?.path;
+    if (!path || !document.body.classList.contains('is-raw')) {
+      return toast.show('No RAW file is currently loaded');
+    }
+    if (this.toolsManager?.isEditing()) {
+      return toast.show('Please finish or cancel active edits before reloading');
+    }
+    this.toolbar.setRawDecoding(true);
+    toast.show('Loading full sensor decode…');
+    try {
+      const payload = await tauriBridge.readRawFullSensor(path);
+      if (payload?.data_url) {
+        const img = new Image();
+        img.onload = () => {
+          this.viewer.setImage(img);
+          this.updateStatusBadges();
+          toast.show('Full sensor decode loaded');
+        };
+        img.src = payload.data_url;
+      }
+    } catch (err) {
+      toast.warn(`Full sensor decode failed: ${err}`);
+    } finally {
+      this.toolbar.setRawDecoding(false);
+    }
+  }
+
   handleEmptyState() {
     document.body.classList.remove('image-loaded');
     this.dropZoneEl.style.display = 'flex';
@@ -259,6 +298,7 @@ class BukaakeApp {
     this.adjustmentsPanel.syncSliderUI(); this.metadataDrawer.hide();
     this.titlebar.setFileName(''); this.titlebar.setHasImage(false);
     this.toolbar.updateCounter(0, -1); this.idleController?.refreshState();
+    this.toolbar.setRawFile(false);
   }
 
   handleNavigateBatch(delta) {

@@ -259,6 +259,16 @@ export class TauriBridge {
     }
   }
 
+  async readRawFullSensor(path) {
+    if (!this.isTauri()) return null;
+    try {
+      return await this.invoke('read_raw_full_sensor', { path });
+    } catch (err) {
+      console.warn(`[TauriBridge] read_raw_full_sensor failed for '${path}':`, err);
+      throw err;
+    }
+  }
+
   async playWindowsDing() {
     if (this.isTauri()) {
       try { await this.invoke('play_windows_ding'); } catch (e) {}
