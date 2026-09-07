@@ -4,7 +4,7 @@ use std::io::Cursor;
 use std::path::Path;
 
 pub const PRO_EXTS: &[&str] = &[
-    "hdr", "exr", "tga", "dds", "qoi", "ppm", "pgm", "pbm", "pnm",
+    "hdr", "exr", "tga", "dds", "qoi", "ppm", "pgm", "pbm", "pnm", "tif", "tiff",
 ];
 
 pub fn is_pro_file(path: &Path) -> bool {

@@ -10,6 +10,7 @@ pub const SUPPORTED_EXTENSIONS: &[&str] = &[
     "png", "jpg", "jpeg", "webp", "gif", "bmp", "ico", "tiff", "tif", "svg", "avif",
     "heic", "heif", "hif", "heifs", "heics",
     "arw", "srf", "sr2", "cr2", "cr3", "nef", "nrw", "dng", "raf", "rw2", "orf", "pef", "3fr",
+    "mrw", "srw", "x3f", "mos", "mef", "raw", "kdc", "dcr", "rwl", "iiq", "erf",
     "hdr", "exr", "tga", "dds", "qoi", "ppm", "pgm", "pbm", "pnm",
 ];
 

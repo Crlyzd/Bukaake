@@ -25,6 +25,7 @@ pub struct InitialImagePayload {
     pub current_index: usize,
     pub data_url: String,
     pub size_bytes: u64,
+    pub decoded_size_bytes: u64,
     pub dimensions: Option<(u32, u32)>,
     pub mime_type: String,
     pub last_modified: Option<u64>,
@@ -37,6 +38,7 @@ pub struct ImagePayload {
     pub file_name: String,
     pub data_url: String,
     pub size_bytes: u64,
+    pub decoded_size_bytes: u64,
     pub dimensions: Option<(u32, u32)>,
     pub mime_type: String,
     pub last_modified: Option<u64>,
@@ -79,18 +81,24 @@ pub fn get_mime_type(ext: &str) -> &'static str {
         "rw2" => "image/x-panasonic-rw2",
         "orf" => "image/x-olympus-orf",
         "pef" => "image/x-pentax-pef",
+        "mrw" => "image/x-minolta-mrw",
+        "srw" => "image/x-samsung-srw",
+        "x3f" => "image/x-sigma-x3f",
+        "mos" => "image/x-creo-mos",
+        "mef" => "image/x-mamiya-mef",
+        "raw" => "image/x-panasonic-raw",
+        "kdc" => "image/x-kodak-kdc",
+        "dcr" => "image/x-kodak-dcr",
+        "rwl" => "image/x-leica-rwl",
+        "iiq" => "image/x-phaseone-iiq",
+        "erf" => "image/x-epson-erf",
         _ => "application/octet-stream",
     }
 }
 
 pub fn file_to_data_url(path: &Path) -> Result<(String, Option<(u32, u32)>), String> {
     if raw_reader::is_raw_file(path) {
-        if let Some(jpeg_bytes) = raw_reader::extract_raw_preview(path) {
-            let b64 = BASE64_STANDARD.encode(&jpeg_bytes);
-            return Ok((format!("data:image/jpeg;base64,{}", b64), None));
-        }
-        #[cfg(target_os = "windows")]
-        if let Ok((data_url, dims)) = crate::wic_decoder::decode_wic_image(path) {
+        if let Ok((data_url, dims)) = raw_reader::decode_raw_image(path) {
             return Ok((data_url, Some(dims)));
         }
     }
@@ -117,6 +125,7 @@ pub fn file_to_data_url(path: &Path) -> Result<(String, Option<(u32, u32)>), Str
 struct ImageFileInfo {
     data_url: String,
     size_bytes: u64,
+    decoded_size_bytes: u64,
     last_modified: Option<u64>,
     mime_type: String,
     dimensions: Option<(u32, u32)>,
@@ -127,6 +136,7 @@ fn gather_file_info(path: &Path) -> Result<ImageFileInfo, String> {
     let (data_url, pro_dims) = file_to_data_url(path)?;
     let metadata = fs::metadata(path).ok();
     let size_bytes = metadata.as_ref().map(|m| m.len()).unwrap_or(0);
+    let decoded_size_bytes = (data_url.len() * 3 / 4) as u64;
     let last_modified = metadata
         .as_ref()
         .and_then(|m| m.modified().ok())
@@ -140,6 +150,7 @@ fn gather_file_info(path: &Path) -> Result<ImageFileInfo, String> {
     Ok(ImageFileInfo {
         data_url,
         size_bytes,
+        decoded_size_bytes,
         last_modified,
         mime_type,
         dimensions,
@@ -221,6 +232,7 @@ fn build_initial_payload(path: &Path) -> Result<InitialImagePayload, String> {
         current_index,
         data_url: info.data_url,
         size_bytes: info.size_bytes,
+        decoded_size_bytes: info.decoded_size_bytes,
         dimensions: info.dimensions,
         mime_type: info.mime_type,
         last_modified: info.last_modified,
@@ -265,6 +277,7 @@ pub fn read_image_file(path: String) -> Result<ImagePayload, String> {
         file_name,
         data_url: info.data_url,
         size_bytes: info.size_bytes,
+        decoded_size_bytes: info.decoded_size_bytes,
         dimensions: info.dimensions,
         mime_type: info.mime_type,
         last_modified: info.last_modified,

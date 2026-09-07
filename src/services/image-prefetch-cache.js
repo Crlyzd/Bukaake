@@ -7,8 +7,21 @@
 import { tauriBridge } from './tauri-bridge.js';
 
 const MAX_PREFETCH_FILE_SIZE = 40 * 1024 * 1024; // 40 MB single-file prefetch limit
+const MAX_RAW_PREFETCH_FILE_SIZE = 150 * 1024 * 1024; // 150 MB for camera RAW files
 const MAX_TOTAL_CACHE_BYTES = 140 * 1024 * 1024; // 140 MB cumulative safety ceiling
 const HEAVY_FILE_THRESHOLD = 30 * 1024 * 1024;   // 30 MB threshold to throttle runway
+
+const RAW_EXTS = new Set([
+  'cr2', 'cr3', 'nef', 'nrw', 'arw', 'srf', 'sr2', 'dng', 'raf',
+  'rw2', 'orf', 'pef', '3fr', 'mrw', 'srw', 'x3f', 'mos', 'mef',
+  'raw', 'kdc', 'dcr', 'rwl', 'iiq', 'erf'
+]);
+
+function isRawFile(nameOrPath) {
+  if (!nameOrPath) return false;
+  const ext = nameOrPath.split('.').pop().toLowerCase();
+  return RAW_EXTS.has(ext);
+}
 
 export class ImagePrefetchCache {
   constructor() {
@@ -29,7 +42,7 @@ export class ImagePrefetchCache {
   getEstimatedCacheBytes() {
     let total = 0;
     for (const entry of this.cache.values()) {
-      total += entry?.meta?.sizeBytes || (4 * 1024 * 1024);
+      total += entry?.meta?.decodedSizeBytes || entry?.meta?.sizeBytes || (4 * 1024 * 1024);
     }
     return total;
   }
@@ -42,9 +55,11 @@ export class ImagePrefetchCache {
 
     const currentItem = items[currentIndex];
     const currentSize = currentItem?.sizeBytes || 0;
+    const isCurrentRaw = isRawFile(currentItem?.path || currentItem?.name);
 
-    // Strict Monolith Protection: If active file exceeds 120MB, skip prefetching entirely
-    if (currentSize > MAX_TOTAL_CACHE_BYTES) {
+    // Strict Monolith Protection: If active file exceeds limit, skip prefetching entirely
+    const activeLimit = isCurrentRaw ? MAX_RAW_PREFETCH_FILE_SIZE : MAX_TOTAL_CACHE_BYTES;
+    if (currentSize > activeLimit) {
       this.evictExcept(new Set([currentItem.path]));
       return;
     }
@@ -73,10 +88,12 @@ export class ImagePrefetchCache {
         if (!item || item.type !== 'tauri' || !item.path || this.cache.has(item.path)) continue;
 
         const itemSize = item.sizeBytes || 0;
+        const isRaw = isRawFile(item.path || item.name);
+        const diskLimit = isRaw ? MAX_RAW_PREFETCH_FILE_SIZE : MAX_PREFETCH_FILE_SIZE;
 
-        // Skip massive files individually (> 40MB) or if cumulative cache exceeds ceiling
-        if (itemSize > MAX_PREFETCH_FILE_SIZE) continue;
-        if (cumulativeBytes + itemSize > MAX_TOTAL_CACHE_BYTES) break;
+        // Skip massive files individually (> 40MB normal, > 150MB RAW) or if cumulative cache exceeds ceiling
+        if (itemSize > diskLimit) continue;
+        if (cumulativeBytes + (isRaw ? 3 * 1024 * 1024 : itemSize) > MAX_TOTAL_CACHE_BYTES) break;
 
         try {
           const payload = await tauriBridge.readImageFile(item.path);
@@ -91,13 +108,15 @@ export class ImagePrefetchCache {
 
           if (sessionId !== this.currentSessionId) break;
 
-          cumulativeBytes += payload.size_bytes || itemSize;
+          const previewBytes = payload.decoded_size_bytes || (payload.data_url?.length * 0.75) || itemSize;
+          cumulativeBytes += previewBytes;
           this.cache.set(item.path, {
             img,
             meta: {
               name: payload.file_name,
               path: payload.path,
               sizeBytes: payload.size_bytes,
+              decodedSizeBytes: payload.decoded_size_bytes || previewBytes,
               dimensions: payload.dimensions,
               mimeType: payload.mime_type,
               lastModified: payload.last_modified,
