@@ -84,8 +84,7 @@ pub fn discard_recording(temp_path: String) -> Result<(), String> {
 pub fn prompt_save_recording(default_name: String, default_dir: Option<String>) -> Result<Option<String>, String> {
     let mut dialog = rfd::FileDialog::new()
         .set_file_name(&default_name)
-        .add_filter("WebM Video", &["webm"])
-        .add_filter("MP4 Video", &["mp4"]);
+        .add_filter("WebM Video", &["webm"]);
 
     if let Some(dir) = default_dir {
         let p = PathBuf::from(dir);

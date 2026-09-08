@@ -63,10 +63,10 @@ Take instant, crisp screenshots without needing external tools:
 
 ### 🎥 4. Desktop Screen Recording
 Record quick gameplay clips, software demos, or tutorials with ease:
-- **Stroke-Free Frosted Dock**: A floating recording bar with live timer, pause/resume, audio switches, and stop controls.
-- **Audio Control**: Toggle your microphone and system audio independently with a single click.
+- **Stroke-Free Frosted Dock**: A floating recording bar with live timer, pause/resume, and stop/discard controls.
+- **Audio Support**: Captures system audio alongside video via the display media stream.
 - **Region Recording**: Record your whole desktop or select a custom rectangle with a clean glowing border guide.
-- **Export Ready**: Exports directly to WebM or MP4 with an automatic folder pop-up upon completion.
+- **Low-RAM Streaming**: Streams recorded chunks directly to disk in 1-second intervals, exporting lightweight **WebM** (VP9/Opus) video files.
 
 ---
 

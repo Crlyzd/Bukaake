@@ -135,9 +135,9 @@ src-tauri/src/
   - Capture modes: Full Screen, Active Monitor, Custom Region.
   - Auto-Save & Clipboard: Automatically copies captured snips to clipboard (`CF_DIB`) and writes timestamped PNGs to the user's Pictures/Screenshots directory via `screenshot-saver.js`.
 - **Screen Recording (`recording-dock.js`, `screen-recorder-service.js`, `recording_border.rs`, `recording_pill.rs`)**:
-  - Stroke-free frosted recording dock with timer, audio toggles (mic + system audio), pause/resume, and stop buttons.
+  - Stroke-free frosted recording dock with live timer, pause/resume, and stop/discard buttons.
   - Native overlay border around recorded region (`recording_border.rs`) with zero window chrome.
-  - Export to WebM/MP4 with automatic folder opening and notification toast.
+  - Low-RAM stream-to-disk chunking exporting directly to WebM (VP9/Opus) with automatic toast notification and optional external editor launch.
 - **Alitken Tandem Workflow (`alitken-service.js`)**:
   - Deep-link bridge allowing one-click transfer of active images to Alitken for advanced editing and seamless auto-reload in Bukaake upon save.
 - **Unified Hotkeys (`hotkey-service.js`)**:
