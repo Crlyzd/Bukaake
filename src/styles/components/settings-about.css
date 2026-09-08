@@ -1,0 +1,149 @@
+/* ==========================================================================
+   Bukaake Settings About & Updates Styles
+   Author attribution, donation chips, and update progress (< 120 lines)
+   ========================================================================== */
+
+.about-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding-top: 4px;
+  padding-bottom: 12px;
+  gap: 6px;
+}
+
+.about-logo {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.25), rgba(168, 85, 247, 0.25));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--galactic-glow-shadow);
+  margin-bottom: 2px;
+}
+
+.about-app-name {
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: -0.2px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  line-height: 1.2;
+}
+
+.about-tagline {
+  font-size: 11px;
+  color: var(--text-muted);
+  max-width: 340px;
+  line-height: 1.4;
+}
+
+.about-love-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 4px;
+  line-height: 1.2;
+}
+
+.heart-pulse {
+  color: #ef4444;
+  font-size: 14px;
+  display: inline-block;
+  transition: transform 0.14s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer !important;
+  user-select: none;
+}
+
+.about-love-row:hover .heart-pulse {
+  transform: scale(1.35);
+}
+
+.heart-pulse.sprout-pop {
+  animation: heartBounce 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.heart-pulse:active {
+  transform: scale(0.82) !important;
+}
+
+@keyframes heartBounce {
+  0% { transform: scale(1); }
+  30% { transform: scale(0.72); }
+  65% { transform: scale(1.4); }
+  100% { transform: scale(1); }
+}
+
+/* TikTok-style Sprouted Floating Hearts */
+.sprouted-heart {
+  position: fixed;
+  pointer-events: none;
+  z-index: 10000;
+  color: var(--heart-color, #ef4444);
+  font-size: var(--heart-size, 16px);
+  will-change: transform, opacity;
+  animation: sproutHeart var(--dur, 0.85s) cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  filter: drop-shadow(0 2px 8px rgba(239, 68, 68, 0.45));
+}
+
+@keyframes sproutHeart {
+  0% {
+    transform: translate(-50%, 0) scale(0.6) rotate(0deg);
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.95;
+  }
+  100% {
+    transform: translate(calc(-50% + var(--tx, 0px)), -80px) scale(1.35) rotate(var(--rot, 0deg));
+    opacity: 0;
+  }
+}
+
+.author-link {
+  color: var(--text-main);
+  font-weight: 600;
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+.author-link:hover { color: var(--accent-indigo, #818cf8); }
+
+.coffee-btn-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Update Progress Track */
+.update-progress-track {
+  width: 100%;
+  height: 4px;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.12);
+  overflow: hidden;
+  margin-top: 4px;
+  margin-bottom: 8px;
+}
+
+html[data-theme="light"] .update-progress-track {
+  background: rgba(26, 32, 44, 0.08);
+}
+
+.update-progress-fill {
+  height: 100%;
+  border-radius: 9999px;
+  background: linear-gradient(90deg, #6366f1, #a855f7, #06b6d4);
+  box-shadow: 0 0 10px rgba(168, 85, 247, 0.7);
+  transition: width 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.update-progress-track.hidden {
+  display: none !important;
+}

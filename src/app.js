@@ -29,6 +29,7 @@ import { toast } from './components/toast.js';
 import { loadingIndicator } from './components/loading-indicator.js';
 import { standbyService } from './services/standby-service.js';
 import { CaptureManager } from './services/capture-manager.js';
+import { themeManager } from './services/theme-manager.js';
 
 const RAW_EXTS = new Set([
   'arw','srf','sr2','cr2','cr3','nef','nrw','dng','raf','rw2','orf','pef','3fr',
@@ -50,8 +51,6 @@ class BukaakeApp {
 
     this.fileLoader = new FileLoader();
     this.confirmModal = new ConfirmModal(); this.deleteModal = new DeleteModal();
-    this.bgModes = ['bg-transparent', 'bg-checkerboard'];
-    this.currentBgIndex = 0;
     this.initComponents(); this.initServices(); this.init();
   }
 
@@ -202,7 +201,6 @@ class BukaakeApp {
     const shield = document.getElementById('modalShield');
     tauriBridge.onSettingsModalState((open) => shield?.classList.toggle('hidden', !open));
     shield?.addEventListener('mousedown', (e) => { e.preventDefault(); e.stopPropagation(); tauriBridge.playWindowsDing(); tauriBridge.openSettingsWindow(); });
-    document.body.classList.add('bg-transparent');
     this.titlebar.syncMaximizedState(await tauriBridge.isFullscreen());
     await standbyService.init({
       onOpenPath: async (p) => {
@@ -241,10 +239,9 @@ class BukaakeApp {
 
   cycleBgMode() {
     if (document.body.classList.contains('mode-viewer')) return toast.show('Background theme is disabled in fullscreen');
-    document.body.classList.remove(...this.bgModes);
-    this.currentBgIndex = (this.currentBgIndex + 1) % this.bgModes.length;
-    document.body.classList.add(this.bgModes[this.currentBgIndex]);
-    toast.show(`Background: ${['Pure Crystal Transparency', 'Checkerboard Grid'][this.currentBgIndex]}`);
+    if (!document.body.classList.contains('image-loaded')) return toast.show('Load an image first to toggle canvas background');
+    themeManager.toggleCheckerboard();
+    toast.show(`Background: ${themeManager.checkerboardEnabled ? 'Checkerboard Grid' : 'Pure Crystal Transparency'}`);
   }
 
   copyImage() { copyProcessedImage(this.viewer, this.filters); }

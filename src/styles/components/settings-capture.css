@@ -1,52 +1,59 @@
 /* ==========================================================================
    Bukaake Settings Capture & Tandem Styles
-   Stroke-free frosted glass cards for Hotkeys, Storage, and Alitken (< 140 lines)
+   Stroke-free frosted glass styling for Hotkeys, Paths, & Dropdown (< 200 lines)
    ========================================================================== */
 
-.settings-card-header-col {
+/* Standardized Path Row & Input */
+.path-row {
   display: flex;
-  flex-direction: column;
-  gap: 2px;
-  width: 100%;
-}
-
-.settings-hotkeys-grid {
-  display: flex;
-  flex-direction: column;
+  align-items: center;
   gap: 8px;
   width: 100%;
-  margin-top: 4px;
 }
 
-.hotkey-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-}
-
-.hotkey-label {
-  font-size: 11.5px;
-  color: var(--text-muted);
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.hotkey-chip {
-  padding: 4px 10px;
-  background: var(--glass-btn-bg);
-  border: none;
+.settings-path-input,
+.path-field {
+  flex: 1;
+  height: 32px;
+  padding: 0 12px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--text-main);
+  background: rgba(0, 0, 0, 0.30);
+  border: none !important;
   outline: none !important;
-  border-radius: var(--radius-pill);
+  border-radius: var(--radius-sm);
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+  box-sizing: border-box;
+}
+
+html[data-theme="light"] .settings-path-input,
+html[data-theme="light"] .path-field {
+  background: rgba(26, 32, 44, 0.05);
+}
+
+/* Standardized Hotkey Recorder Button */
+.hotkey-chip,
+.hotkey-btn {
+  height: 32px;
+  padding: 0 10px;
+  background: var(--glass-btn-bg);
+  border: none !important;
+  outline: none !important;
+  border-radius: var(--radius-sm);
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   gap: 4px;
   transition: all var(--transition-fast);
+  color: var(--text-main);
+  box-sizing: border-box;
 }
 
-.hotkey-chip:hover {
+.hotkey-chip:hover,
+.hotkey-btn:hover {
   background: var(--glass-btn-hover);
   transform: translateY(-1px);
 }
@@ -64,10 +71,10 @@
   align-items: center;
   justify-content: center;
   padding: 2px 7px;
-  font-size: 10.5px;
-  font-weight: 500;
+  font-size: 11px;
+  font-weight: 600;
   color: var(--text-main);
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.10);
   border-radius: 4px;
   line-height: 1.2;
 }
@@ -84,126 +91,77 @@ html[data-theme="light"] .key-token {
   user-select: none;
 }
 
-.hotkey-chip.listening {
-  background: rgba(99, 102, 241, 0.22);
-  box-shadow: 0 2px 10px rgba(99, 102, 241, 0.35);
-}
-
-.hotkey-chip.listening .hotkey-key-label {
-  color: #c7d2fe;
+.hotkey-chip.listening,
+.hotkey-btn.listening {
+  background: var(--galactic-glow-bg) !important;
+  box-shadow: var(--galactic-glow-shadow) !important;
 }
 
 .hotkey-chip.listening .key-token {
-  background: rgba(99, 102, 241, 0.40);
+  background: rgba(168, 85, 247, 0.40);
   color: #ffffff;
 }
 
-html[data-theme="light"] .hotkey-chip.listening {
-  background: rgba(99, 102, 241, 0.16);
-  box-shadow: 0 2px 10px rgba(99, 102, 241, 0.25);
-}
-
-html[data-theme="light"] .hotkey-chip.listening .hotkey-key-label {
-  color: #4f46e5;
-}
-
-html[data-theme="light"] .hotkey-chip.listening .key-token {
-  background: rgba(99, 102, 241, 0.25);
-  color: #3730a3;
-}
-
-.settings-section-gap {
-  width: 100%;
-  height: 8px;
-  background: transparent;
-}
-
-.settings-path-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  width: 100%;
-  margin-top: 4px;
-}
-
-.settings-path-input {
-  flex: 1;
-  padding: 6px 10px;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 10.5px;
-  color: var(--text-main);
-  background: rgba(255, 255, 255, 0.05);
-  border: none;
-  outline: none !important;
-  border-radius: var(--radius-sm);
-  text-overflow: ellipsis;
-}
-
-html[data-theme="light"] .settings-path-input {
-  background: rgba(26, 32, 44, 0.06);
-}
-
-.settings-option-subrow {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  width: 100%;
-  margin-top: 4px;
-  font-size: 11.5px;
-}
-
-.settings-sub-label {
-  color: var(--text-muted);
-}
-
-/* Custom Frosted Glass Dropdown (Context Menu Style - Pillar 1 & 2) */
-.glass-dropdown-wrap {
+/* ==========================================================================
+   ELEVATED FROSTED GLASS DROPDOWN (Zero Clipping Bug Fix)
+   ========================================================================== */
+.glass-dropdown-wrap,
+.dropdown {
   position: relative;
   display: inline-block;
 }
 
-.glass-dropdown-trigger {
+.glass-dropdown-trigger,
+.dropdown-btn {
+  height: 32px;
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 5px 10px;
-  font-size: 11px;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 0 12px;
+  font-size: 12px;
   font-weight: 500;
   color: var(--text-main);
   background: var(--glass-btn-bg);
-  border: none;
+  border: none !important;
   outline: none !important;
   border-radius: var(--radius-sm);
   cursor: pointer;
+  min-width: 185px;
   transition: all var(--transition-fast);
+  box-sizing: border-box;
 }
 
-.glass-dropdown-trigger:hover {
+.glass-dropdown-trigger:hover,
+.dropdown-btn:hover {
   background: var(--glass-btn-hover);
   transform: translateY(-1px);
 }
 
-.glass-dropdown-trigger i.trigger-chevron {
-  font-size: 12px;
+.glass-dropdown-trigger i.trigger-chevron,
+.dropdown-btn i {
+  font-size: 14px;
   color: var(--text-muted);
   transition: transform var(--transition-fast);
 }
 
-.glass-dropdown-wrap.open .glass-dropdown-trigger i.trigger-chevron {
+.glass-dropdown-wrap.open .glass-dropdown-trigger i.trigger-chevron,
+.dropdown.open .dropdown-btn i {
   transform: rotate(180deg);
 }
 
-.glass-dropdown-menu {
+.glass-dropdown-menu,
+.dropdown-menu {
   position: absolute;
   top: calc(100% + 6px);
-  left: 0;
-  z-index: 1000;
-  min-width: 195px;
+  right: 0;
+  z-index: 9999;
+  min-width: 210px;
   padding: 5px;
   border-radius: var(--radius-md);
-  background: rgba(16, 19, 28, 0.96);
-  backdrop-filter: blur(28px) saturate(190%);
-  -webkit-backdrop-filter: blur(28px) saturate(190%);
+  background: rgba(16, 20, 30, 0.98);
+  backdrop-filter: blur(32px) saturate(190%);
+  -webkit-backdrop-filter: blur(32px) saturate(190%);
   border: none !important;
   box-shadow: 0 16px 40px rgba(0, 0, 0, 0.65), 0 4px 14px rgba(0, 0, 0, 0.45);
   display: flex;
@@ -212,8 +170,9 @@ html[data-theme="light"] .settings-path-input {
 }
 
 body.light-theme .glass-dropdown-menu,
-html[data-theme="light"] .glass-dropdown-menu {
-  background: rgba(255, 255, 255, 0.96);
+html[data-theme="light"] .glass-dropdown-menu,
+html[data-theme="light"] .dropdown-menu {
+  background: rgba(255, 255, 255, 0.98);
   box-shadow: 0 16px 40px rgba(26, 32, 44, 0.18), 0 4px 14px rgba(26, 32, 44, 0.10);
 }
 
@@ -221,15 +180,17 @@ html[data-theme="light"] .glass-dropdown-menu {
   display: none !important;
 }
 
-.glass-dropdown-item {
+.glass-dropdown-item,
+.dropdown-item {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 6px 10px;
+  padding: 7px 10px;
   border-radius: var(--radius-sm);
   color: var(--text-main);
-  font-size: 11.5px;
+  font-size: 12px;
   font-weight: 500;
+  line-height: 1.3;
   cursor: pointer;
   border: none !important;
   outline: none !important;
@@ -240,38 +201,30 @@ html[data-theme="light"] .glass-dropdown-menu {
   box-sizing: border-box;
 }
 
-.glass-dropdown-item:hover {
+.glass-dropdown-item:hover,
+.dropdown-item:hover {
   background: var(--glass-btn-hover);
   color: var(--text-main);
 }
 
-.glass-dropdown-item.active {
-  color: #818cf8;
+.glass-dropdown-item.active,
+.dropdown-item.active {
+  color: var(--accent-indigo, #818cf8);
+  font-weight: 600;
 }
 
-html[data-theme="light"] .glass-dropdown-item.active {
+html[data-theme="light"] .glass-dropdown-item.active,
+html[data-theme="light"] .dropdown-item.active {
   color: #4f46e5;
 }
 
-.glass-dropdown-item .item-check {
-  font-size: 13px;
+.glass-dropdown-item .item-check,
+.dropdown-item i.check {
+  font-size: 14px;
   opacity: 0;
 }
 
-.glass-dropdown-item.active .item-check {
+.glass-dropdown-item.active .item-check,
+.dropdown-item.active i.check {
   opacity: 1;
-}
-
-.settings-checkbox-wrap {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  cursor: pointer;
-  color: var(--text-muted);
-  font-size: 11px;
-}
-
-.settings-checkbox-wrap input {
-  accent-color: #6366f1;
-  cursor: pointer;
 }

@@ -7,14 +7,15 @@
   <link rel="icon" type="image/png" href="/favicon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet">
   <link rel="stylesheet" href="/src/styles/main.css">
 </head>
 <body class="settings-window dark">
   <div class="settings-window-shell">
     <div class="toast-container" id="toastContainer"></div>
-    <!-- Draggable Transparent Ghost Titlebar -->
+
+    <!-- Draggable Transparent Titlebar -->
     <div class="settings-titlebar-drag" data-tauri-drag-region>
       <div class="settings-title-left" data-tauri-drag-region>
         <div class="app-logo">
@@ -30,187 +31,276 @@
       </div>
     </div>
 
-    <div class="settings-content-scroll">
-      <!-- Bio / About Hero Card -->
-      <div class="settings-bio-card">
-        <div class="settings-hero-header">
-          <div class="settings-hero-icon">
-            <img src="/icon-frameless.png" alt="Bukaake" />
-          </div>
-          <h2 class="settings-hero-title">Bukaake</h2>
-          <span class="settings-hero-subtitle">v0.1.2 • Portable Edition</span>
-        </div>
-        <p class="settings-desc">
-          Ultra-fast, distraction-free image viewer crafted in native Windows frosted glass.
-        </p>
-        <div class="settings-author-row">
-          <span>Made with</span>
-          <i class="ri-heart-3-line icon-author-heart"></i>
-          <span>by</span>
-          <a href="https://kaleksananbagus.com" target="_blank" class="settings-author-link">Kaleksanan Bagus</a>
-        </div>
-        <div class="settings-coffee-row">
-          <span class="coffee-label"><i class="ri-cup-line"></i> Buy me a coffee:</span>
-          <a href="https://saweria.co/curlyzed" target="_blank" class="coffee-chip"><span>Saweria</span> <i class="ri-arrow-right-up-line"></i></a>
-          <a href="https://paypal.me/BagusMassani" target="_blank" class="coffee-chip"><span>PayPal</span> <i class="ri-arrow-right-up-line"></i></a>
-        </div>
-      <!-- Default Image Viewer Banner -->
-      <div class="settings-assoc-banner" id="cardFileAssoc">
-        <div class="settings-assoc-main">
-          <div class="settings-assoc-status-wrap" id="assocStatusWrap">
-            <i class="ri-shield-check-line settings-assoc-icon" id="assocStatusIcon"></i>
-            <div class="settings-assoc-text-col">
-              <div class="settings-assoc-headline">
-                <span class="settings-assoc-title">Default Image Viewer</span>
-                <span class="settings-assoc-chip" id="assocStatusBadge">37 Formats</span>
+    <!-- Segmented Navigation (3 Tabs) -->
+    <div class="segmented-nav-wrap">
+      <nav class="segmented-nav">
+        <button type="button" class="nav-item active" data-tab="general"><i class="ri-settings-4-line"></i><span>General</span></button>
+        <button type="button" class="nav-item" data-tab="capture"><i class="ri-camera-line"></i><span>Capture</span></button>
+        <button type="button" class="nav-item" data-tab="about"><i class="ri-heart-3-line"></i><span>About</span></button>
+      </nav>
+    </div>
+
+    <!-- Single Unified Inset Panel -->
+    <div class="win-body">
+      <div class="inset-panel" id="mainPanel">
+
+        <!-- ==================== TAB 1: GENERAL (MERGED WITH APPEARANCE) ==================== -->
+        <div class="tab-content" id="tabGeneral">
+          <span class="sub-section-title">Theme & Appearance</span>
+
+          <!-- Giant Dark & Light Selection Cards with Galactic Glow -->
+          <div class="theme-cards-grid">
+            <button class="theme-card-btn active-theme" id="btnCardDark" type="button">
+              <div class="theme-card-icon-box">
+                <i class="ri-moon-line"></i>
               </div>
-              <span class="settings-assoc-sub" id="assocSubText">Set as default for photos, RAW & VFX</span>
-              <span class="settings-assoc-location" id="assocPathText">Locating...</span>
-            </div>
+              <div class="theme-card-text">
+                <span class="theme-card-title">Dark Mode</span>
+                <span class="theme-card-subtitle">Deep Obsidian</span>
+              </div>
+            </button>
+
+            <button class="theme-card-btn" id="btnCardLight" type="button">
+              <div class="theme-card-icon-box">
+                <i class="ri-sun-line"></i>
+              </div>
+              <div class="theme-card-text">
+                <span class="theme-card-title">Light Mode</span>
+                <span class="theme-card-subtitle">Luminous Slate</span>
+              </div>
+            </button>
           </div>
-          <div class="settings-assoc-btn-group">
-            <button class="btn-assoc-action" id="btnSetDefaultApp" title="Register Bukaake in Windows">
+
+          <!-- Canvas Checkerboard Row -->
+          <div class="row-item">
+            <div class="row-meta">
+              <span class="row-title">Canvas Checkerboard</span>
+              <span class="row-desc">Show slate grid pattern for transparent PNG/WebP files</span>
+            </div>
+            <label class="settings-toggle-switch toggle" title="Toggle canvas checkerboard pattern">
+              <input type="checkbox" id="toggleCheckerboard" />
+              <span class="settings-toggle-slider toggle-slider"></span>
+            </label>
+          </div>
+
+          <span class="sub-section-title">Default Application</span>
+          
+          <div class="row-item" id="cardFileAssoc">
+            <div class="row-meta">
+              <div class="row-title">
+                Default Image Viewer
+                <span class="badge badge-success settings-assoc-chip" id="assocStatusBadge">37 Formats</span>
+              </div>
+              <span class="row-desc" id="assocSubText">Set as default for photos, RAW & VFX</span>
+            </div>
+            <button class="btn btn-primary btn-assoc-action" id="btnSetDefaultApp" title="Register Bukaake in Windows">
               <i class="ri-check-line"></i> Register
             </button>
           </div>
-        </div>
-      </div>
 
-      <!-- Run in Background Banner -->
-      <div class="settings-assoc-banner settings-standby-banner" id="cardStandby">
-        <div class="settings-assoc-main">
-          <div class="settings-assoc-status-wrap">
-            <i class="ri-flashlight-line settings-assoc-icon" id="standbyStatusIcon"></i>
-            <div class="settings-assoc-text-col">
-              <div class="settings-assoc-headline">
-                <span class="settings-assoc-title">Run in Background</span>
-              </div>
-              <span class="settings-assoc-sub">Keep running in tray when closed to keep hotkeys active</span>
+          <div class="row-item assoc-target-row">
+            <div class="row-meta">
+              <span class="row-title">Executable Target</span>
             </div>
+            <span class="settings-assoc-location" id="assocPathText">Locating...</span>
           </div>
-          <div class="settings-assoc-btn-group">
-            <label class="settings-toggle-switch" title="Toggle Run in Background">
+
+          <span class="sub-section-title">System Tray</span>
+
+          <div class="row-item" id="cardStandby">
+            <div class="row-meta">
+              <span class="row-title">Run in Background</span>
+              <span class="row-desc">Keep running in tray when closed for sub-10ms launch & global snip</span>
+            </div>
+            <label class="settings-toggle-switch toggle" title="Toggle Run in Background">
               <input type="checkbox" id="toggleStandby" checked />
-              <span class="settings-toggle-slider"></span>
+              <span class="settings-toggle-slider toggle-slider"></span>
             </label>
           </div>
         </div>
-      </div>
 
-      <!-- Unified Capture & Recording Settings Card -->
-      <div class="settings-assoc-banner settings-hotkeys-banner" id="cardCaptureSettings">
-        <div class="settings-card-header-col">
-          <div class="settings-assoc-headline">
-            <i class="ri-camera-line settings-assoc-icon"></i>
-            <span class="settings-assoc-title">Capture & Recording</span>
-          </div>
-          <span class="settings-assoc-sub">Configure global shortcut, save location, and recording quality</span>
-        </div>
-        <div class="settings-hotkeys-grid">
-          <div class="hotkey-row">
-            <span class="hotkey-label"><i class="ri-screenshot-fill"></i> Capture / Record:</span>
-            <button class="hotkey-chip glass-btn" id="btnKeyCapture" title="Click to bind shortcut">
+        <!-- ==================== TAB 2: CAPTURE ==================== -->
+        <div class="tab-content" id="tabCapture" style="display: none;">
+          <span class="sub-section-title">Screen Capture</span>
+
+          <!-- Hotkey Row -->
+          <div class="row-item">
+            <div class="row-meta">
+              <span class="row-title">Global Shortcut</span>
+              <span class="row-desc">Desktop crosshair region snip</span>
+            </div>
+            <button class="hotkey-btn hotkey-chip" id="btnKeyCapture" title="Click to bind shortcut">
               <span class="hotkey-key-label" id="lblKeyCapture"></span>
             </button>
           </div>
-        </div>
 
-        <div class="settings-section-gap"></div>
-
-        <div class="settings-card-header-col">
-          <div class="settings-assoc-headline">
-            <i class="ri-folder-image-line settings-assoc-icon"></i>
-            <span class="settings-assoc-title">Save Location</span>
-          </div>
-          <span class="settings-assoc-sub">Folder where screenshots and recordings are auto-saved</span>
-        </div>
-        <div class="settings-path-row">
-          <input type="text" class="settings-path-input glass-input" id="inputVideoSaveDir" placeholder="Default Captures Folder" readonly />
-          <button class="btn-assoc-action" id="btnBrowseVideoDir" title="Browse Save Folder">
-            <i class="ri-folder-open-line"></i> Browse
-          </button>
-        </div>
-        <div class="settings-option-subrow">
-          <span class="settings-sub-label">Quality:</span>
-          <div class="glass-dropdown-wrap" id="wrapVideoQuality">
-            <button type="button" class="glass-dropdown-trigger" id="btnVideoQualityTrigger" title="Select recording quality">
-              <span id="lblVideoQuality">60 FPS • High (6 Mbps)</span>
-              <i class="ri-arrow-down-s-line trigger-chevron"></i>
-            </button>
-            <div class="glass-dropdown-menu hidden" id="menuVideoQuality">
-              <button type="button" class="glass-dropdown-item active" data-value="high">
-                <span>60 FPS • High (6 Mbps)</span>
-                <i class="ri-check-line item-check"></i>
-              </button>
-              <button type="button" class="glass-dropdown-item" data-value="balanced">
-                <span>30 FPS • Balanced (3 Mbps)</span>
-                <i class="ri-check-line item-check"></i>
-              </button>
-              <button type="button" class="glass-dropdown-item" data-value="ultra">
-                <span>60 FPS • Ultra (12 Mbps)</span>
-                <i class="ri-check-line item-check"></i>
+          <!-- Save Path Row -->
+          <div class="row-item col-layout">
+            <div class="row-meta">
+              <span class="row-title">Auto-Save Directory</span>
+              <span class="row-desc">Folder where screenshots & recordings are stored</span>
+            </div>
+            <div class="path-row">
+              <input type="text" class="path-field settings-path-input" id="inputVideoSaveDir" placeholder="Default Captures Folder" readonly />
+              <button class="btn btn-glass" id="btnBrowseVideoDir" title="Browse Save Folder">
+                <i class="ri-folder-open-line"></i> Browse
               </button>
             </div>
           </div>
-          <label class="settings-checkbox-wrap" title="Prompt where to save each time you stop recording">
-            <input type="checkbox" id="togglePromptSave" />
-            <span>Ask where to save video</span>
-          </label>
-        </div>
-      </div>
 
-      <!-- Alitken Media Converter Tandem Card -->
-      <div class="settings-assoc-banner" id="cardAlitken">
-        <div class="settings-card-header-col">
-          <div class="settings-assoc-headline">
-            <i class="ri-film-line settings-assoc-icon"></i>
-            <span class="settings-assoc-title">Alitken Media Converter</span>
+          <span class="sub-section-title">Video Recording</span>
+
+          <!-- Video Quality Dropdown Row (Unclipped Fix) -->
+          <div class="row-item">
+            <div class="row-meta">
+              <span class="row-title">Encoding Quality</span>
+              <span class="row-desc">Target framerate & bitrate</span>
+            </div>
+
+            <div class="dropdown glass-dropdown-wrap" id="wrapVideoQuality">
+              <button class="dropdown-btn glass-dropdown-trigger" id="btnVideoQualityTrigger" type="button" title="Select recording quality">
+                <span id="lblVideoQuality">60 FPS • High (6 Mbps)</span>
+                <i class="ri-arrow-down-s-line trigger-chevron"></i>
+              </button>
+              <div class="dropdown-menu glass-dropdown-menu hidden" id="menuVideoQuality">
+                <button type="button" class="dropdown-item glass-dropdown-item" data-value="balanced">
+                  <span>30 FPS • Balanced (3 Mbps)</span>
+                  <i class="ri-check-line check item-check"></i>
+                </button>
+                <button type="button" class="dropdown-item glass-dropdown-item active" data-value="high">
+                  <span>60 FPS • High (6 Mbps)</span>
+                  <i class="ri-check-line check item-check"></i>
+                </button>
+                <button type="button" class="dropdown-item glass-dropdown-item" data-value="ultra">
+                  <span>60 FPS • Ultra (12 Mbps)</span>
+                  <i class="ri-check-line check item-check"></i>
+                </button>
+              </div>
+            </div>
           </div>
-          <span class="settings-assoc-sub">Send recordings directly to Alitken for splitting & compression</span>
-        </div>
-        <div class="settings-path-row">
-          <input type="text" class="settings-path-input glass-input" id="inputAlitkenPath" placeholder="Auto-Detect (./AlitConverter.exe)" readonly />
-          <button class="btn-assoc-action" id="btnBrowseAlitken" title="Locate AlitConverter.exe">
-            <i class="ri-folder-open-line"></i> Browse
-          </button>
-        </div>
-        <div class="settings-option-subrow">
-          <label class="settings-checkbox-wrap" title="Automatically open recordings in Alitken after stopping">
-            <input type="checkbox" id="toggleAlitkenAuto" />
-            <span>Auto-open recordings in Alitken</span>
-          </label>
-        </div>
-      </div>
 
-      <!-- Update Banner -->
-      <div class="settings-update-banner">
-        <div class="settings-update-header">
-          <div class="update-status-wrap">
-            <i class="ri-checkbox-circle-line" id="updateStatusIcon"></i>
-            <span id="updateStatusText">Bukaake v0.1.2 (Latest Version)</span>
+          <!-- Prompt Save Toggle -->
+          <div class="row-item">
+            <div class="row-meta">
+              <span class="row-title">Always Prompt Save Location</span>
+              <span class="row-desc">Ask where to save file each time recording finishes</span>
+            </div>
+            <label class="settings-toggle-switch toggle" title="Prompt where to save each time you stop recording">
+              <input type="checkbox" id="togglePromptSave" />
+              <span class="settings-toggle-slider toggle-slider"></span>
+            </label>
           </div>
-          <button class="btn-check-update" id="btnCheckUpdate"><i class="ri-refresh-line"></i> Check</button>
-        </div>
-        <div class="update-progress-track hidden" id="updateProgressTrack">
-          <div class="update-progress-fill" id="updateProgressFill" style="width: 0%;"></div>
-        </div>
-      </div>
 
-      <!-- Report Bug Action -->
-      <div class="settings-actions-grid">
-        <a href="https://docs.google.com/forms/d/e/1FAIpQLSciTFA6rWYPq98UwqOvJgLnqGh5P71Vcz5d2GPVdne9Tz34WA/viewform" target="_blank" class="settings-action-btn" id="btnReportBug">
-          <i class="ri-bug-line"></i> Report Bug / Feature <i class="ri-arrow-right-up-line"></i>
-        </a>
+          <span class="sub-section-title">Tandem Editor</span>
+
+          <!-- Alitken Tandem Row -->
+          <div class="row-item col-layout" id="cardAlitken">
+            <div class="row-meta">
+              <span class="row-title">Alitken Media Converter</span>
+              <span class="row-desc">Seamless tandem workflow for splitting & compression</span>
+            </div>
+            <div class="path-row">
+              <input type="text" class="path-field settings-path-input" id="inputAlitkenPath" placeholder="Auto-Detect (./AlitConverter.exe)" readonly />
+              <button class="btn btn-glass" id="btnBrowseAlitken" title="Locate AlitConverter.exe">
+                <i class="ri-folder-open-line"></i> Browse
+              </button>
+            </div>
+          </div>
+
+          <div class="row-item">
+            <div class="row-meta">
+              <span class="row-title">Auto-open in Alitken</span>
+              <span class="row-desc">Open recordings directly after stopping</span>
+            </div>
+            <label class="settings-toggle-switch toggle" title="Automatically open recordings in Alitken after stopping">
+              <input type="checkbox" id="toggleAlitkenAuto" />
+              <span class="settings-toggle-slider toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+
+        <!-- ==================== TAB 3: ABOUT ==================== -->
+        <div class="tab-content" id="tabAbout" style="display: none;">
+          
+          <!-- Compact Hero Header with "Made with love" -->
+          <div class="about-header">
+            <div class="about-logo">
+              <img src="/icon-frameless.png" alt="Bukaake" style="width: 28px; height: 28px; object-fit: contain;" />
+            </div>
+            <h2 class="about-app-name">
+              Bukaake <span class="version-tag">v0.1.2 Portable</span>
+            </h2>
+            <p class="about-tagline">
+              Ultra-fast, distraction-free image viewer crafted in native Windows frosted glass.
+            </p>
+            <div class="about-love-row">
+              <span>Made with</span>
+              <i class="ri-heart-3-fill heart-pulse" id="authorHeart"></i>
+              <span>by</span>
+              <a href="https://kaleksananbagus.com" target="_blank" class="author-link">Kaleksanan Bagus</a>
+            </div>
+          </div>
+
+          <span class="sub-section-title">Updates & Support</span>
+
+          <!-- Update Row -->
+          <div class="row-item settings-update-banner">
+            <div class="row-meta">
+              <span class="row-title">Software Update</span>
+              <span class="row-desc" id="updateStatusText">Bukaake v0.1.2 (Latest Version)</span>
+            </div>
+            <button class="btn btn-primary btn-check-update" id="btnCheckUpdate">
+              <i class="ri-checkbox-circle-line" id="updateStatusIcon"></i> Check
+            </button>
+          </div>
+
+          <div class="update-progress-track hidden" id="updateProgressTrack">
+            <div class="update-progress-fill" id="updateProgressFill" style="width: 0%;"></div>
+          </div>
+
+          <!-- Coffee Donation Row -->
+          <div class="row-item">
+            <div class="row-meta">
+              <span class="row-title">Buy me a coffee</span>
+              <span class="row-desc">Support independent portable software</span>
+            </div>
+            <div class="coffee-btn-group">
+              <a href="https://saweria.co/curlyzed" target="_blank" class="btn btn-glass" style="height: 30px; font-size: 11px;">
+                <i class="ri-cup-line"></i> Saweria <i class="ri-arrow-right-up-line" style="font-size: 10px;"></i>
+              </a>
+              <a href="https://paypal.me/BagusMassani" target="_blank" class="btn btn-glass" style="height: 30px; font-size: 11px;">
+                <i class="ri-paypal-line"></i> PayPal <i class="ri-arrow-right-up-line" style="font-size: 10px;"></i>
+              </a>
+            </div>
+          </div>
+
+          <!-- Feedback Row -->
+          <div class="row-item">
+            <div class="row-meta">
+              <span class="row-title">Feedback & Issues</span>
+              <span class="row-desc">Report bugs or request new features</span>
+            </div>
+            <a href="https://docs.google.com/forms/d/e/1FAIpQLSciTFA6rWYPq98UwqOvJgLnqGh5P71Vcz5d2GPVdne9Tz34WA/viewform" target="_blank" class="btn btn-glass" id="btnReportBug" style="height: 30px; font-size: 11px;">
+              <i class="ri-bug-line"></i> Open Form <i class="ri-arrow-right-up-line" style="font-size: 10px;"></i>
+            </a>
+          </div>
+
+        </div>
+
       </div>
     </div>
 
-    <div class="settings-window-footer">
-      <span>Engine: Tauri v2 • Rust Tokio</span>
-      <span>Webview2 & Vanilla JS</span>
-    </div>
+    <!-- Window Footer -->
+    <footer class="win-footer">
+      <div class="footer-tech-stack">
+        <span class="tech-chip"><i class="ri-cpu-line"></i> Rust Tokio • Tauri v2 • LibRaw</span>
+      </div>
+      <div class="footer-design-spec">
+        <span class="tech-chip"><i class="ri-drop-line"></i> Windows Acrylic</span>
+      </div>
+    </footer>
   </div>
 
-  <div class="toast-container" id="toastContainer"></div>
   <script type="module" src="/src/settings-app.js"></script>
 </body>
 </html>

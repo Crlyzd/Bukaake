@@ -14,6 +14,7 @@
 @import './components/toast.css';
 @import './components/modes.css';
 @import './components/settings.css';
+@import './components/settings-nav.css';
 @import './components/vibrancy.css';
 @import './components/context-menu.css';
 @import './components/draw.css';
@@ -24,4 +25,6 @@
 @import './components/snipper.css';
 @import './components/recording.css';
 @import './components/settings-capture.css';
+@import './components/settings-theme.css';
+@import './components/settings-about.css';
 

@@ -1,0 +1,90 @@
+/* ==========================================================================
+   Bukaake Settings Theme Cards Styles
+   Giant Dark & Light Selection Cards with Galactic Glow (< 100 lines)
+   ========================================================================== */
+
+.theme-cards-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.theme-card-btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border-radius: var(--radius-md);
+  background: var(--glass-btn-bg);
+  border: none !important;
+  outline: none !important;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  text-align: left;
+  user-select: none;
+}
+
+.theme-card-btn:hover {
+  background: var(--glass-btn-hover);
+  transform: translateY(-1px);
+}
+
+.theme-card-icon-box {
+  width: 38px;
+  height: 38px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-muted);
+  transition: all var(--transition-fast);
+}
+
+html[data-theme="light"] .theme-card-icon-box {
+  background: rgba(26, 32, 44, 0.06);
+}
+
+.theme-card-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.theme-card-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-main);
+  line-height: 1.2;
+}
+
+.theme-card-subtitle {
+  font-size: 11px;
+  color: var(--text-muted);
+  line-height: 1.2;
+}
+
+/* Active State: Bukaake Galactic Glow */
+.theme-card-btn.active-theme {
+  background: var(--galactic-glow-bg) !important;
+  box-shadow: var(--galactic-glow-shadow) !important;
+}
+
+.theme-card-btn.active-theme .theme-card-icon-box {
+  background: linear-gradient(135deg, #6366f1, #a855f7, #06b6d4) !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 14px rgba(168, 85, 247, 0.45);
+}
+
+html[data-theme="light"] .theme-card-btn.active-theme .theme-card-icon-box {
+  background: linear-gradient(135deg, #4f46e5, #9333ea, #0284c7) !important;
+}
+
+.theme-card-btn.active-theme .theme-card-title {
+  color: var(--text-main);
+  text-shadow: 0 0 10px rgba(168, 85, 247, 0.35);
+}

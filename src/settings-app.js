@@ -1,6 +1,6 @@
 /**
- * Bukaake Settings Standalone Window Controller
- * Coordinates live settings, live sync with main window, and window controls (< 150 lines)
+ * Bukaake Settings Standalone Window Controller — Option B Architecture
+ * Coordinates tabs, theme engine, live sync with main window, and system bindings (< 280 lines)
  */
 
 import './styles/main.css';
@@ -9,12 +9,11 @@ import { toast } from './components/toast.js';
 import { updaterService, APP_VERSION, hydrateAppVersions } from './services/updater-service.js';
 import { fileAssocService } from './services/file-assoc-service.js';
 import { bindCaptureSettings } from './components/settings-capture-section.js';
+import { initHeartSprouter } from './components/heart-sprouter.js';
 
 class SettingsApp {
   constructor() {
     this.btnClose = document.getElementById('btnCloseWindow');
-    this.sliderWindowOpacity = document.getElementById('sliderWindowOpacity');
-    this.valWindowOpacity = document.getElementById('valWindowOpacity');
     this.btnCheckUpdate = document.getElementById('btnCheckUpdate');
     this.updateStatusText = document.getElementById('updateStatusText');
     this.updateStatusIcon = document.getElementById('updateStatusIcon');
@@ -22,11 +21,11 @@ class SettingsApp {
     this.updateProgressTrack = document.getElementById('updateProgressTrack');
     this.updateProgressFill = document.getElementById('updateProgressFill');
     this.btnSetDefault = document.getElementById('btnSetDefaultApp');
-    this.btnUnregisterAssoc = document.getElementById('btnUnregisterAssoc');
     this.assocBadge = document.getElementById('assocStatusBadge');
-    this.assocPathChip = document.getElementById('assocPathChip');
     this.toggleStandby = document.getElementById('toggleStandby');
-    this.standbyBadge = document.getElementById('standbyStatusBadge');
+    this.btnCardDark = document.getElementById('btnCardDark');
+    this.btnCardLight = document.getElementById('btnCardLight');
+    this.toggleCheckerboard = document.getElementById('toggleCheckerboard');
 
     this.init();
   }
@@ -35,29 +34,66 @@ class SettingsApp {
     hydrateAppVersions(document);
     this.syncThemeFromStorage();
     this.bindWindowControls();
-    this.bindAppearanceControls();
+    this.bindNavigation();
+    this.bindThemeCards();
+    this.bindCheckerboard();
     this.bindUpdater();
     this.bindFileAssociations();
     this.bindStandbySettings();
     this.bindCaptureSettings();
+    initHeartSprouter(document.getElementById('authorHeart'));
     tauriBridge.initExternalLinks();
 
     window.addEventListener('contextmenu', (e) => {
       if (!Boolean(import.meta.env?.DEV) || !e.shiftKey) e.preventDefault();
     });
 
-    // Listen to theme or setting changes across windows
     window.addEventListener('storage', (e) => {
-      if (e.key === 'bukaake_theme') {
-        this.syncThemeFromStorage();
+      if (e.key === 'bukaake_theme' && (e.newValue === 'light' || e.newValue === 'dark')) {
+        this.applyTheme(e.newValue);
+      } else if (e.key === 'bukaake_checkerboard' && this.toggleCheckerboard && e.newValue !== null) {
+        this.toggleCheckerboard.checked = e.newValue === 'true';
       }
     });
 
     if (window.__TAURI__?.event?.listen) {
       window.__TAURI__.event.listen('theme-changed', (e) => {
-        this.applyTheme(e.payload?.theme || 'dark');
+        if (e.payload?.theme) {
+          this.applyTheme(e.payload.theme);
+        }
+      });
+      window.__TAURI__.event.listen('settings-changed', (e) => {
+        if (e.payload?.theme) {
+          this.applyTheme(e.payload.theme);
+        }
+        if (typeof e.payload?.checkerboard === 'boolean' && this.toggleCheckerboard) {
+          this.toggleCheckerboard.checked = e.payload.checkerboard;
+        }
       });
     }
+  }
+
+  bindNavigation() {
+    const navItems = document.querySelectorAll('.nav-item');
+    const tabContents = {
+      general: document.getElementById('tabGeneral'),
+      capture: document.getElementById('tabCapture'),
+      about: document.getElementById('tabAbout')
+    };
+
+    navItems.forEach(item => {
+      item.addEventListener('click', () => {
+        navItems.forEach(i => i.classList.remove('active'));
+        item.classList.add('active');
+
+        const tabKey = item.dataset.tab;
+        Object.keys(tabContents).forEach(key => {
+          if (tabContents[key]) {
+            tabContents[key].style.display = (key === tabKey) ? 'block' : 'none';
+          }
+        });
+      });
+    });
   }
 
   syncThemeFromStorage() {
@@ -66,9 +102,46 @@ class SettingsApp {
   }
 
   applyTheme(theme) {
+    if (this.currentTheme === theme && document.documentElement.getAttribute('data-theme') === theme) {
+      return;
+    }
+    this.currentTheme = theme;
     document.documentElement.setAttribute('data-theme', theme);
     document.body.classList.toggle('light-theme', theme === 'light');
     document.body.classList.toggle('dark', theme === 'dark');
+
+    const isLight = theme === 'light';
+    this.btnCardLight?.classList.toggle('active-theme', isLight);
+    this.btnCardDark?.classList.toggle('active-theme', !isLight);
+  }
+
+  bindThemeCards() {
+    const setTheme = (theme) => {
+      if (this.currentTheme === theme) return;
+      localStorage.setItem('bukaake_theme', theme);
+      this.applyTheme(theme);
+      tauriBridge.setWindowVibrancy(theme === 'dark');
+      if (window.__TAURI__?.event?.emit) {
+        window.__TAURI__.event.emit('theme-changed', { theme });
+      }
+    };
+
+    this.btnCardDark?.addEventListener('click', () => setTheme('dark'));
+    this.btnCardLight?.addEventListener('click', () => setTheme('light'));
+  }
+
+  bindCheckerboard() {
+    if (!this.toggleCheckerboard) return;
+    const isEnabled = localStorage.getItem('bukaake_checkerboard') === 'true';
+    this.toggleCheckerboard.checked = isEnabled;
+
+    this.toggleCheckerboard.addEventListener('change', () => {
+      const checked = this.toggleCheckerboard.checked;
+      localStorage.setItem('bukaake_checkerboard', checked ? 'true' : 'false');
+      if (window.__TAURI__?.event?.emit) {
+        window.__TAURI__.event.emit('settings-changed', { checkerboard: checked });
+      }
+    });
   }
 
   bindWindowControls() {
@@ -81,35 +154,6 @@ class SettingsApp {
         tauriBridge.hideSettingsWindow();
       }
     });
-  }
-
-  bindAppearanceControls() {
-    const savedOpacity = localStorage.getItem('bukaake_window_opacity') || '28';
-    this.applyWindowOpacity(savedOpacity);
-
-    if (this.sliderWindowOpacity && this.valWindowOpacity) {
-      this.sliderWindowOpacity.value = savedOpacity;
-      this.valWindowOpacity.textContent = `${savedOpacity}%`;
-
-      this.sliderWindowOpacity.addEventListener('input', (e) => {
-        const val = e.target.value;
-        this.valWindowOpacity.textContent = `${val}%`;
-        this.applyWindowOpacity(val);
-        localStorage.setItem('bukaake_window_opacity', val);
-        this.broadcastChange({ opacity: val });
-      });
-    }
-  }
-
-  applyWindowOpacity(percentage) {
-    const alpha = (parseInt(percentage, 10) / 100).toFixed(2);
-    document.documentElement.style.setProperty('--window-opacity', alpha);
-  }
-
-  broadcastChange(data) {
-    if (window.__TAURI__?.event?.emit) {
-      window.__TAURI__.event.emit('settings-changed', data);
-    }
   }
 
   bindUpdater() {
@@ -232,11 +276,9 @@ class SettingsApp {
     const isEnabled = localStorage.getItem('bukaake_standby_enabled') !== 'false';
     if (this.toggleStandby) {
       this.toggleStandby.checked = isEnabled;
-      this.updateStandbyUI(isEnabled);
       this.toggleStandby.addEventListener('change', () => {
         const checked = this.toggleStandby.checked;
         localStorage.setItem('bukaake_standby_enabled', checked ? 'true' : 'false');
-        this.updateStandbyUI(checked);
         tauriBridge.invoke('set_standby_enabled', { enabled: checked });
         window.__TAURI__?.event?.emit('bukaake-standby-setting-changed', checked);
       });
@@ -244,18 +286,9 @@ class SettingsApp {
 
     window.addEventListener('storage', (e) => {
       if (e.key === 'bukaake_standby_enabled' && this.toggleStandby) {
-        const checked = e.newValue !== 'false';
-        this.toggleStandby.checked = checked;
-        this.updateStandbyUI(checked);
+        this.toggleStandby.checked = e.newValue !== 'false';
       }
     });
-  }
-
-  updateStandbyUI(enabled) {
-    if (this.standbyBadge) {
-      this.standbyBadge.textContent = enabled ? 'Enabled' : 'Disabled';
-      this.standbyBadge.classList.toggle('matched', enabled);
-    }
   }
 
   bindCaptureSettings() {

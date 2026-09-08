@@ -198,13 +198,11 @@ html[data-theme="light"] .snipper-dock-divider {
 .snipper-pill-btn:hover {
   background: var(--glass-btn-hover-bg);
   color: var(--text-main);
-  transform: translateY(-1px);
 }
 
 .snipper-pill-btn.active {
   background: var(--action-bg);
   color: var(--action-text);
-  font-weight: 600;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
