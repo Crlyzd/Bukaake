@@ -34,9 +34,10 @@ pub fn open_url(url: String) -> Result<(), String> {
 pub fn show_in_folder(path: String) -> Result<(), String> {
     #[cfg(target_os = "windows")]
     {
-        let mut cmd = std::process::Command::new("explorer");
-        cmd.args(["/select,", &path]);
-        cmd.creation_flags(CREATE_NO_WINDOW);
+        let normalized = path.replace('/', "\\");
+        let arg = format!("/select,{}", normalized);
+        let mut cmd = std::process::Command::new("explorer.exe");
+        cmd.arg(&arg);
         cmd.spawn().map_err(|e| e.to_string())?;
     }
     #[cfg(not(target_os = "windows"))]

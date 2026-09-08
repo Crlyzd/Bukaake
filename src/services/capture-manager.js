@@ -86,8 +86,12 @@ export class CaptureManager {
     };
 
     options.windows = payload.windows || [];
-    options.screenWidth = payload.width;
-    options.screenHeight = payload.height;
+    options.screenWidth = payload.width;    // GDI physical width (pixels)
+    options.screenHeight = payload.height;  // GDI physical height (pixels)
+    // Capture physical dimensions at overlay-open time, before any window resize
+    const capturePhysW = payload.width;
+    const capturePhysH = payload.height;
+
     this.snipper.startSnip(
       payload.data_url,
       async ({ rect, dataUrl, copyOnly, isRecord }) => {
@@ -95,7 +99,14 @@ export class CaptureManager {
 
         if (isRecord) {
           const isFull = (rect.mode === 'fullscreen' || (rect.isFullscreen && !rect.isWindow));
-          await this.startRecording(isFull ? null : rect);
+          // Attach GDI physical dimensions so screen-recorder-service can compute scale
+          // without relying on the live window.innerWidth (which changes to 320px during pill mode)
+          const cropRect = isFull ? null : {
+            ...rect,
+            screenWidth: capturePhysW,
+            screenHeight: capturePhysH,
+          };
+          await this.startRecording(cropRect);
           return;
         }
 
@@ -170,12 +181,13 @@ export class CaptureManager {
 
     if (tauriBridge.isTauri()) {
       await invoke('enter_recording_pill_mode').catch(() => {});
+      // cropRegion.x/y/width/height are already physical screen pixels
       if (cropRegion && cropRegion.width > 20 && cropRegion.height > 20) {
         await invoke('show_recording_border', {
-          x: Math.round(cropRegion.x),
-          y: Math.round(cropRegion.y),
-          width: Math.round(cropRegion.width),
-          height: Math.round(cropRegion.height),
+          x: cropRegion.x,
+          y: cropRegion.y,
+          width: cropRegion.width,
+          height: cropRegion.height,
         }).catch(() => {});
       }
     }

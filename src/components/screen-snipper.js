@@ -6,25 +6,13 @@
 export class ScreenSnipper {
   constructor(containerEl = null) {
     this.container = containerEl || document.body;
-    this.overlay = null;
-    this.bgImg = null;
-    this.box = null;
-    this.dimTag = null;
-    this.actionDock = null;
-    this.modeDock = null;
-
-    this.isDragging = false;
-    this.startX = 0;
-    this.startY = 0;
-    this.currentRect = null;
-    this.currentDataUrl = null;
-    this.currentMode = 'region';
-    this.currentType = 'screenshot';
-    this.detectedWindows = [];
-
-    this.onComplete = null;
-    this.onCancel = null;
-
+    this.overlay = null; this.bgImg = null; this.box = null;
+    this.dimTag = null; this.actionDock = null; this.modeDock = null;
+    this.isDragging = false; this.startX = 0; this.startY = 0;
+    this.currentRect = null; this.currentDataUrl = null;
+    this.currentMode = 'region'; this.currentType = 'screenshot';
+    this.detectedWindows = []; this.screenDpr = 1;
+    this.onComplete = null; this.onCancel = null;
     this.createDom();
   }
 
@@ -128,18 +116,16 @@ export class ScreenSnipper {
     });
 
     this.actionDock.classList.add('hidden');
-
     if (mode === 'fullscreen') {
       this.modeDock.querySelector('#btnModeFullscreen')?.classList.add('active');
-      this.updateBox(0, 0, window.innerWidth, window.innerHeight);
+      const physW = Math.round(window.innerWidth * this.screenDpr);
+      const physH = Math.round(window.innerHeight * this.screenDpr);
+      this.currentRect = { x: 0, y: 0, width: physW, height: physH, cssX: 0, cssY: 0, cssWidth: window.innerWidth, cssHeight: window.innerHeight };
+      Object.assign(this.box.style, { left: '0px', top: '0px', width: `${window.innerWidth}px`, height: `${window.innerHeight}px` });
       this.dimTag.textContent = `${window.innerWidth} × ${window.innerHeight} • Click anywhere to capture`;
       this.box.classList.remove('hidden');
-    } else if (mode === 'window') {
-      this.modeDock.querySelector('#btnModeWindow')?.classList.add('active');
-      this.box.classList.add('hidden');
-      this.currentRect = null;
     } else {
-      this.modeDock.querySelector('#btnModeRegion')?.classList.add('active');
+      this.modeDock.querySelector(mode === 'window' ? '#btnModeWindow' : '#btnModeRegion')?.classList.add('active');
       this.box.classList.add('hidden');
       this.currentRect = null;
     }
@@ -152,16 +138,18 @@ export class ScreenSnipper {
     this.onCancel = onCancel;
     this.currentRect = null;
 
-    const dpr = (options.screenWidth && window.innerWidth)
+    // Physical-to-CSS scale: GDI width (physical px) / WebView CSS width
+    this.screenDpr = (options.screenWidth && window.innerWidth)
       ? (options.screenWidth / window.innerWidth)
       : (window.devicePixelRatio || 1);
 
+    // Pre-compute CSS-space window rects for hit-testing on the overlay
     this.detectedWindows = (options.windows || []).map((w) => ({
       ...w,
-      cssX: w.x / dpr,
-      cssY: w.y / dpr,
-      cssWidth: w.width / dpr,
-      cssHeight: w.height / dpr,
+      cssX: w.x / this.screenDpr,
+      cssY: w.y / this.screenDpr,
+      cssWidth: w.width / this.screenDpr,
+      cssHeight: w.height / this.screenDpr,
     }));
 
     this.bgImg.src = captureDataUrl;
@@ -185,9 +173,7 @@ export class ScreenSnipper {
     }
 
     if (this.currentMode === 'window') {
-      if (this.currentRect && this.currentRect.width > 20) {
-        this.confirmSnip(false);
-      }
+      if (this.currentRect && this.currentRect.width > 20) this.confirmSnip(false);
       return;
     }
 
@@ -237,17 +223,31 @@ export class ScreenSnipper {
       this.actionDock.classList.add('hidden');
       this.currentRect = null;
     } else if (this.currentMode === 'region' && this.currentRect) {
+      this.positionActionDock();
       this.actionDock.classList.remove('hidden');
     }
   }
 
-  updateBox(x, y, w, h) {
-    this.currentRect = { x, y, width: w, height: h };
-    this.box.style.left = `${x}px`;
-    this.box.style.top = `${y}px`;
-    this.box.style.width = `${w}px`;
-    this.box.style.height = `${h}px`;
-    this.dimTag.textContent = `${Math.round(w)} × ${Math.round(h)}`;
+  positionActionDock() {
+    if (!this.currentRect) return;
+    const rect = this.currentRect;
+    const dockH = 44;
+    const spaceBelow = window.innerHeight - (rect.cssY + rect.cssHeight);
+    const top = spaceBelow > dockH + 12 ? (rect.cssY + rect.cssHeight + 8) : Math.max(12, rect.cssY - dockH - 8);
+    const left = Math.min(Math.max(12, rect.cssX + rect.cssWidth - 220), window.innerWidth - 232);
+    Object.assign(this.actionDock.style, { left: `${left}px`, top: `${top}px` });
+  }
+
+  updateBox(cssX, cssY, cssW, cssH) {
+    this.currentRect = {
+      x: Math.round(cssX * this.screenDpr),
+      y: Math.round(cssY * this.screenDpr),
+      width: Math.round(cssW * this.screenDpr),
+      height: Math.round(cssH * this.screenDpr),
+      cssX, cssY, cssWidth: cssW, cssHeight: cssH,
+    };
+    Object.assign(this.box.style, { left: `${cssX}px`, top: `${cssY}px`, width: `${cssW}px`, height: `${cssH}px` });
+    this.dimTag.textContent = `${Math.round(cssW)} × ${Math.round(cssH)}`;
     if (this.currentMode !== 'region' || this.isDragging) {
       this.actionDock.classList.add('hidden');
     }
@@ -263,10 +263,11 @@ export class ScreenSnipper {
       mode: this.currentMode,
       isWindow: this.currentMode === 'window',
       isFullscreen: this.currentMode === 'fullscreen',
+      screenDpr: this.screenDpr,
     };
     const dataUrl = this.currentDataUrl;
     const isRecord = this.currentType === 'record';
-    localStorage.setItem('bukaake-last-region', JSON.stringify(rect));
+    localStorage.setItem('bukaake-last-region', JSON.stringify({ x: rect.x, y: rect.y, width: rect.width, height: rect.height }));
     this.hide();
     this.onComplete?.({ rect, dataUrl, copyOnly, isRecord, mode: this.currentMode });
   }

@@ -63,11 +63,11 @@
 .recording-btn.cancel { padding: 5px 8px; color: rgba(255, 255, 255, 0.6); }
 .recording-btn.cancel:hover { color: #fff; }
 
-/* In-Window Pill Mode (Main Window Resized to 320x56) */
+/* In-Window Pill Mode (Main Window Resized to 240x38 compact square widget) */
 body.mode-recording-pill {
   width: 100vw !important; height: 100vh !important;
   background: transparent !important; overflow: hidden !important;
-  display: flex !important; align-items: center !important; justify-content: center !important;
+  display: flex !important; align-items: stretch !important; justify-content: stretch !important;
   margin: 0 !important; padding: 0 !important;
 }
 
@@ -99,8 +99,50 @@ body.mode-recording-pill .screen-snipper-overlay {
 
 body.mode-recording-pill .recording-dock {
   position: static !important; top: auto !important; right: auto !important;
-  margin: 0 auto !important; height: 44px;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.65), 0 0 16px rgba(239, 68, 68, 0.3) !important;
+  margin: 0 !important; width: 100% !important; height: 100% !important;
+  box-sizing: border-box !important;
+  border-radius: 10px !important;
+  padding: 4px 8px !important;
+  gap: 6px !important;
+  box-shadow: none !important;
+}
+
+body.mode-recording-pill .recording-indicator {
+  gap: 6px !important;
+}
+
+body.mode-recording-pill .recording-pulse-dot {
+  width: 8px !important; height: 8px !important;
+}
+
+body.mode-recording-pill .recording-timer {
+  font-size: 12px !important; min-width: 38px !important;
+}
+
+body.mode-recording-pill .recording-dock-divider {
+  height: 14px !important;
+}
+
+body.mode-recording-pill .recording-controls {
+  gap: 4px !important;
+}
+
+body.mode-recording-pill .recording-btn {
+  padding: 4px 7px !important;
+  font-size: 11.5px !important;
+  border-radius: 6px !important;
+  gap: 4px !important;
+}
+
+body.mode-recording-pill .recording-btn.stop {
+  padding: 4px 9px !important;
+  font-size: 11.5px !important;
+  border-radius: 6px !important;
+}
+
+body.mode-recording-pill .recording-btn.cancel {
+  padding: 4px 5px !important;
+  border-radius: 6px !important;
 }
 
 /* Post-Recording Compact Glass Pill Banner (42px Height) */

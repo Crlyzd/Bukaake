@@ -41,19 +41,35 @@ pub fn enter_recording_pill_mode(app: tauri::AppHandle) -> Result<(), String> {
     // Clear acrylic blur to allow 100% crystal-clear transparency around the floating pill
     #[cfg(target_os = "windows")]
     let _ = window_vibrancy::clear_acrylic(&win);
+    let _ = win.set_shadow(false);
+
+    #[cfg(target_os = "windows")]
+    if let Ok(hwnd) = win.hwnd() {
+        use windows::Win32::Graphics::Dwm::{DwmSetWindowAttribute, DWMWA_WINDOW_CORNER_PREFERENCE, DWMWCP_DONOTROUND};
+        let preference = DWMWCP_DONOTROUND.0;
+        let _ = unsafe {
+            DwmSetWindowAttribute(
+                windows::Win32::Foundation::HWND(hwnd.0),
+                DWMWA_WINDOW_CORNER_PREFERENCE,
+                &preference as *const _ as *const _,
+                std::mem::size_of::<u32>() as u32,
+            )
+        };
+    }
 
     if let Ok(Some(monitor)) = win.current_monitor() {
+        let monitor_pos = monitor.position();
         let screen_size = monitor.size();
         let scale = monitor.scale_factor();
-        let w = (320.0 * scale) as u32;
-        let h = (56.0 * scale) as u32;
-        let x = screen_size.width as i32 - w as i32 - (24.0 * scale) as i32;
-        let y = (50.0 * scale) as i32;
+        let w = (240.0 * scale) as u32;
+        let h = (38.0 * scale) as u32;
+        let x = monitor_pos.x + screen_size.width as i32 - w as i32 - (24.0 * scale) as i32;
+        let y = monitor_pos.y + (50.0 * scale) as i32;
 
         let _ = win.set_size(Size::Physical(PhysicalSize { width: w, height: h }));
         let _ = win.set_position(Position::Physical(PhysicalPosition { x, y }));
     } else {
-        let _ = win.set_size(Size::Logical(tauri::LogicalSize { width: 320.0, height: 56.0 }));
+        let _ = win.set_size(Size::Logical(tauri::LogicalSize { width: 240.0, height: 38.0 }));
     }
 
     let _ = win.set_always_on_top(true);
@@ -68,6 +84,21 @@ pub fn exit_recording_pill_mode(app: tauri::AppHandle) -> Result<(), String> {
     let win = app.get_webview_window("main").ok_or("Main window not found")?;
 
     let _ = win.set_always_on_top(false);
+    let _ = win.set_shadow(true);
+
+    #[cfg(target_os = "windows")]
+    if let Ok(hwnd) = win.hwnd() {
+        use windows::Win32::Graphics::Dwm::{DwmSetWindowAttribute, DWMWA_WINDOW_CORNER_PREFERENCE, DWMWCP_DEFAULT};
+        let preference = DWMWCP_DEFAULT.0;
+        let _ = unsafe {
+            DwmSetWindowAttribute(
+                windows::Win32::Foundation::HWND(hwnd.0),
+                DWMWA_WINDOW_CORNER_PREFERENCE,
+                &preference as *const _ as *const _,
+                std::mem::size_of::<u32>() as u32,
+            )
+        };
+    }
 
     let mut saved_state = None;
     if let Ok(mut lock) = SAVED_GEOMETRY.lock() {

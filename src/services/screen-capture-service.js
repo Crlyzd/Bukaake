@@ -39,12 +39,12 @@ export class ScreenCaptureService {
     return new Promise((resolve, reject) => {
       const img = new Image();
       img.onload = () => {
-        const scaleX = (img.naturalWidth && window.innerWidth) ? (img.naturalWidth / window.innerWidth) : 1;
-        const scaleY = (img.naturalHeight && window.innerHeight) ? (img.naturalHeight / window.innerHeight) : 1;
-        const sX = Math.round(rect.x * scaleX);
-        const sY = Math.round(rect.y * scaleY);
-        const sW = Math.max(1, Math.round(rect.width * scaleX));
-        const sH = Math.max(1, Math.round(rect.height * scaleY));
+        // rect.x/y/width/height are already in physical screen pixels (set by screen-snipper.js).
+        // The GDI screenshot image natural size also matches physical pixels, so we draw directly.
+        const sX = Math.round(rect.x);
+        const sY = Math.round(rect.y);
+        const sW = Math.max(1, Math.round(rect.width));
+        const sH = Math.max(1, Math.round(rect.height));
 
         const canvas = document.createElement('canvas');
         canvas.width = sW;
@@ -52,17 +52,7 @@ export class ScreenCaptureService {
         const ctx = canvas.getContext('2d');
         if (!ctx) return reject(new Error('Canvas 2D context unavailable'));
 
-        ctx.drawImage(
-          img,
-          sX,
-          sY,
-          sW,
-          sH,
-          0,
-          0,
-          sW,
-          sH
-        );
+        ctx.drawImage(img, sX, sY, sW, sH, 0, 0, sW, sH);
         resolve(canvas.toDataURL('image/png'));
       };
       img.onerror = () => reject(new Error('Failed to load capture for cropping'));

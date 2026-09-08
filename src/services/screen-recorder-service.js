@@ -62,14 +62,19 @@ export class ScreenRecorderService {
         if (!video.videoWidth) {
           await new Promise((resolve) => {
             video.onloadedmetadata = () => resolve();
-            setTimeout(resolve, 100);
+            setTimeout(resolve, 200);
           });
         }
 
-        const vW = video.videoWidth || window.innerWidth;
-        const vH = video.videoHeight || window.innerHeight;
-        const scaleX = vW / window.innerWidth;
-        const scaleY = vH / window.innerHeight;
+        // cropRegion.x/y/width/height are in physical screen pixels (from screen-snipper.js).
+        // video.videoWidth matches the physical screen capture resolution.
+        // cropRegion.screenWidth is the GDI physical resolution at capture time.
+        // Apply a correction only if the browser captured at a different resolution.
+        const refW = cropRegion.screenWidth || video.videoWidth || 1;
+        const vW = video.videoWidth || refW;
+        const vH = video.videoHeight || (cropRegion.screenHeight || 1);
+        const scaleX = vW / refW;
+        const scaleY = vH / (cropRegion.screenHeight || refW);
 
         const sX = Math.round(cropRegion.x * scaleX);
         const sY = Math.round(cropRegion.y * scaleY);
