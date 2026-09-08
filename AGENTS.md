@@ -137,7 +137,7 @@ src-tauri/src/
 - **Screen Recording (`recording-dock.js`, `screen-recorder-service.js`, `recording_border.rs`, `recording_pill.rs`)**:
   - Stroke-free frosted recording dock with live timer, pause/resume, and stop/discard buttons.
   - Native overlay border around recorded region (`recording_border.rs`) with zero window chrome.
-  - Low-RAM stream-to-disk chunking exporting directly to WebM (VP9/Opus) with automatic toast notification and optional external editor launch.
+  - Low-RAM stream-to-disk chunking exporting directly to WebM (VP9) with automatic toast notification and optional external editor launch.
 - **Alitken Tandem Workflow (`alitken-service.js`)**:
   - Deep-link bridge allowing one-click transfer of active images to Alitken for advanced editing and seamless auto-reload in Bukaake upon save.
 - **Unified Hotkeys (`hotkey-service.js`)**:

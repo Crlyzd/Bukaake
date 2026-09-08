@@ -59,14 +59,23 @@ Take instant, crisp screenshots without needing external tools:
 - **Instant Clipboard (`Ctrl+V`)**: Captured snips are copied directly to your Windows clipboard so you can paste them straight into Discord, WhatsApp, Slack, or Word.
 - **Automatic Auto-Save**: Clean, timestamped PNG files are automatically saved to your `Pictures/Screenshots` folder—with a handy 1-click button in Settings to open the folder right away.
 
+<div align="center">
+  <!-- SCREEN SNIPPING SCREENSHOT PLACEHOLDER -->
+  <img src="YOUR_SCREEN_SNIPPING_IMAGE_URL_HERE" alt="Built-in Screen Snipping & Region Capture" />
+</div>
+
 ---
 
 ### 🎥 4. Desktop Screen Recording
 Record quick gameplay clips, software demos, or tutorials with ease:
 - **Stroke-Free Frosted Dock**: A floating recording bar with live timer, pause/resume, and stop/discard controls.
-- **Audio Support**: Captures system audio alongside video via the display media stream.
 - **Region Recording**: Record your whole desktop or select a custom rectangle with a clean glowing border guide.
-- **Low-RAM Streaming**: Streams recorded chunks directly to disk in 1-second intervals, exporting lightweight **WebM** (VP9/Opus) video files.
+- **Low-RAM Streaming**: Streams recorded chunks directly to disk in 1-second intervals, exporting lightweight **WebM** (VP9) video files.
+
+<div align="center">
+  <!-- SCREEN RECORDING SCREENSHOT PLACEHOLDER -->
+  <img src="YOUR_SCREEN_RECORDING_IMAGE_URL_HERE" alt="Desktop Screen Recording Dock" />
+</div>
 
 ---
 

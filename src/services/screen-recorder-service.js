@@ -43,10 +43,7 @@ export class ScreenRecorderService {
           displaySurface: 'monitor',
           frameRate: { ideal: quality.fps, max: quality.fps },
         },
-        audio: {
-          echoCancellation: true,
-          noiseSuppression: true,
-        },
+        audio: false,
       });
 
       this.mediaStream = stream;
@@ -102,8 +99,8 @@ export class ScreenRecorderService {
         recordStream = canvasStream;
       }
 
-      const mimeType = MediaRecorder.isTypeSupported('video/webm;codecs=vp9,opus')
-        ? 'video/webm;codecs=vp9,opus'
+      const mimeType = MediaRecorder.isTypeSupported('video/webm;codecs=vp9')
+        ? 'video/webm;codecs=vp9'
         : 'video/webm';
 
       const tempFilename = `rec_${Date.now()}.part`;
