@@ -3,13 +3,31 @@
  * Manages customizable capture shortcuts, key combination recording, and event dispatch (< 120 lines)
  */
 
+import { invoke } from '@tauri-apps/api/core';
+import { emit } from '@tauri-apps/api/event';
+
 export class HotkeyService {
   constructor() {
     this.DEFAULT_SCREENSHOT = 'Alt+Shift+S';
-    this.DEFAULT_RECORD = 'Alt+Shift+R';
+    this.DEFAULT_RECORD = 'Alt+Shift+S';
 
     this.STORAGE_KEY_SCREENSHOT = 'bukaake-hotkey-screenshot';
     this.STORAGE_KEY_RECORD = 'bukaake-hotkey-record';
+  }
+
+  getSharedHotkey() {
+    return this.getScreenshotHotkey();
+  }
+
+  setSharedHotkey(combo) {
+    if (combo) {
+      localStorage.setItem(this.STORAGE_KEY_SCREENSHOT, combo);
+      localStorage.setItem(this.STORAGE_KEY_RECORD, combo);
+    } else {
+      localStorage.removeItem(this.STORAGE_KEY_SCREENSHOT);
+      localStorage.removeItem(this.STORAGE_KEY_RECORD);
+    }
+    this.notifyChange();
   }
 
   getScreenshotHotkey() {
@@ -44,15 +62,11 @@ export class HotkeyService {
       record: this.getRecordHotkey(),
     };
     window.dispatchEvent(new CustomEvent('bukaake-hotkeys-changed', { detail }));
-    if (window.__TAURI__?.core?.invoke) {
-      window.__TAURI__.core.invoke('update_global_shortcuts', {
-        snipCombo: detail.screenshot,
-        recordCombo: detail.record,
-      }).catch(() => {});
-    }
-    if (window.__TAURI__?.event?.emit) {
-      window.__TAURI__.event.emit('bukaake-hotkeys-changed', detail).catch(() => {});
-    }
+    invoke('update_global_shortcuts', {
+      snipCombo: detail.screenshot,
+      recordCombo: detail.record,
+    }).catch(() => {});
+    emit('bukaake-hotkeys-changed', detail).catch(() => {});
   }
 
   /**

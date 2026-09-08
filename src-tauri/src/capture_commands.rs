@@ -210,9 +210,35 @@ pub fn update_global_shortcuts(
     if let Ok(sc) = snip_combo.parse::<Shortcut>() {
         let _ = app.global_shortcut().register(sc);
     }
-    if let Ok(sc) = record_combo.parse::<Shortcut>() {
-        let _ = app.global_shortcut().register(sc);
+    if !record_combo.is_empty() && record_combo != snip_combo {
+        if let Ok(sc) = record_combo.parse::<Shortcut>() {
+            let _ = app.global_shortcut().register(sc);
+        }
     }
     Ok(())
+}
+
+#[tauri::command]
+pub fn save_screenshot_to_dir(
+    base64_png: String,
+    dest_dir: String,
+    filename: String,
+) -> Result<String, String> {
+    use base64::Engine;
+    let clean_b64 = if let Some(idx) = base64_png.find(',') {
+        &base64_png[idx + 1..]
+    } else {
+        &base64_png
+    };
+    let bytes = base64::engine::general_purpose::STANDARD
+        .decode(clean_b64)
+        .map_err(|e| format!("Base64 decode error: {}", e))?;
+
+    let dest = Path::new(&dest_dir);
+    fs::create_dir_all(dest).map_err(|e| format!("Failed to create folder: {}", e))?;
+    let target = dest.join(&filename);
+    fs::write(&target, bytes).map_err(|e| format!("Failed to write screenshot file: {}", e))?;
+
+    Ok(target.to_string_lossy().to_string())
 }
 

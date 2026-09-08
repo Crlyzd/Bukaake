@@ -37,11 +37,11 @@ export class ScreenSnipper {
       </div>
       <div class="snipper-selection-box hidden">
         <div class="snipper-dim-tag">0 × 0</div>
-        <div class="snipper-action-dock glass-panel hidden">
-          <button class="snipper-btn confirm" id="btnSnipConfirm" title="Open in Bukaake (Enter)"><i class="ri-check-line"></i> <span id="snipConfirmLabel">Open</span></button>
-          <button class="snipper-btn" id="btnSnipCopy" title="Copy to Clipboard (Ctrl+C)"><i class="ri-clipboard-line"></i> Copy</button>
-          <button class="snipper-btn cancel" id="btnSnipCancel" title="Cancel (Esc)"><i class="ri-close-line"></i></button>
-        </div>
+      </div>
+      <div class="snipper-action-dock glass-panel hidden">
+        <button class="snipper-btn confirm" id="btnSnipConfirm" title="Open in Bukaake (Enter)"><i class="ri-check-line"></i> <span id="snipConfirmLabel">Open</span></button>
+        <button class="snipper-btn" id="btnSnipCopy" title="Copy to Clipboard (Ctrl+C)"><i class="ri-clipboard-line"></i> Copy</button>
+        <button class="snipper-btn cancel" id="btnSnipCancel" title="Cancel (Esc)"><i class="ri-close-line"></i></button>
       </div>
     `;
 
@@ -223,8 +223,8 @@ export class ScreenSnipper {
       this.actionDock.classList.add('hidden');
       this.currentRect = null;
     } else if (this.currentMode === 'region' && this.currentRect) {
-      this.positionActionDock();
       this.actionDock.classList.remove('hidden');
+      this.positionActionDock();
     }
   }
 
@@ -232,9 +232,12 @@ export class ScreenSnipper {
     if (!this.currentRect) return;
     const rect = this.currentRect;
     const dockH = 44;
+    const dockW = this.actionDock.offsetWidth || 150;
+    const halfW = dockW / 2;
     const spaceBelow = window.innerHeight - (rect.cssY + rect.cssHeight);
     const top = spaceBelow > dockH + 12 ? (rect.cssY + rect.cssHeight + 8) : Math.max(12, rect.cssY - dockH - 8);
-    const left = Math.min(Math.max(12, rect.cssX + rect.cssWidth - 220), window.innerWidth - 232);
+    const centerX = rect.cssX + (rect.cssWidth / 2);
+    const left = Math.min(Math.max(halfW + 12, centerX), window.innerWidth - halfW - 12);
     Object.assign(this.actionDock.style, { left: `${left}px`, top: `${top}px` });
   }
 

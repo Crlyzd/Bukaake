@@ -97,64 +97,64 @@
         </div>
       </div>
 
-      <!-- Global Capture Hotkeys Card -->
-      <div class="settings-assoc-banner settings-hotkeys-banner" id="cardHotkeys">
+      <!-- Unified Capture & Recording Settings Card -->
+      <div class="settings-assoc-banner settings-hotkeys-banner" id="cardCaptureSettings">
         <div class="settings-card-header-col">
           <div class="settings-assoc-headline">
-            <i class="ri-keyboard-line settings-assoc-icon"></i>
-            <span class="settings-assoc-title">Global Capture Hotkeys</span>
+            <i class="ri-camera-line settings-assoc-icon"></i>
+            <span class="settings-assoc-title">Capture & Recording</span>
           </div>
-          <span class="settings-assoc-sub">Press anywhere across Windows to capture or record</span>
+          <span class="settings-assoc-sub">Configure global shortcut, save location, and recording quality</span>
         </div>
         <div class="settings-hotkeys-grid">
           <div class="hotkey-row">
-            <span class="hotkey-label"><i class="ri-screenshot-fill"></i> Screenshot / Snip:</span>
-            <button class="hotkey-chip glass-btn" id="btnKeyScreenshot" title="Click to bind shortcut">
-              <kbd id="lblKeyScreenshot">Alt+Shift+S</kbd>
+            <span class="hotkey-label"><i class="ri-screenshot-fill"></i> Capture / Record:</span>
+            <button class="hotkey-chip glass-btn" id="btnKeyCapture" title="Click to bind shortcut">
+              <span class="hotkey-key-label" id="lblKeyCapture"></span>
             </button>
-          </div>
-          <div class="hotkey-row">
-            <span class="hotkey-label"><i class="ri-video-on-line"></i> Screen Record:</span>
-            <button class="hotkey-chip glass-btn" id="btnKeyRecord" title="Click to bind shortcut">
-              <kbd id="lblKeyRecord">Alt+Shift+R</kbd>
-            </button>
-          </div>
-          <div class="settings-option-subrow" style="margin-top: 6px;">
-            <span class="settings-sub-label">Default Target:</span>
-            <select class="settings-select glass-input" id="selectDefaultCaptureMode">
-              <option value="region">Selected Region</option>
-              <option value="window">Active Window</option>
-              <option value="fullscreen">Full Screen</option>
-            </select>
           </div>
         </div>
-      </div>
 
-      <!-- Video Save Location & Quality Card -->
-      <div class="settings-assoc-banner" id="cardRecordingStorage">
+        <div class="settings-section-gap"></div>
+
         <div class="settings-card-header-col">
           <div class="settings-assoc-headline">
-            <i class="ri-folder-video-line settings-assoc-icon"></i>
-            <span class="settings-assoc-title">Video Save Location</span>
+            <i class="ri-folder-image-line settings-assoc-icon"></i>
+            <span class="settings-assoc-title">Save Location</span>
           </div>
-          <span class="settings-assoc-sub">Folder where completed screen recordings are saved</span>
+          <span class="settings-assoc-sub">Folder where screenshots and recordings are auto-saved</span>
         </div>
         <div class="settings-path-row">
-          <input type="text" class="settings-path-input glass-input" id="inputVideoSaveDir" placeholder="Default Videos Folder" readonly />
+          <input type="text" class="settings-path-input glass-input" id="inputVideoSaveDir" placeholder="Default Captures Folder" readonly />
           <button class="btn-assoc-action" id="btnBrowseVideoDir" title="Browse Save Folder">
             <i class="ri-folder-open-line"></i> Browse
           </button>
         </div>
         <div class="settings-option-subrow">
           <span class="settings-sub-label">Quality:</span>
-          <select class="settings-select glass-input" id="selectVideoQuality">
-            <option value="high">60 FPS • High (6 Mbps)</option>
-            <option value="balanced">30 FPS • Balanced (3 Mbps)</option>
-            <option value="ultra">60 FPS • Ultra (12 Mbps)</option>
-          </select>
+          <div class="glass-dropdown-wrap" id="wrapVideoQuality">
+            <button type="button" class="glass-dropdown-trigger" id="btnVideoQualityTrigger" title="Select recording quality">
+              <span id="lblVideoQuality">60 FPS • High (6 Mbps)</span>
+              <i class="ri-arrow-down-s-line trigger-chevron"></i>
+            </button>
+            <div class="glass-dropdown-menu hidden" id="menuVideoQuality">
+              <button type="button" class="glass-dropdown-item active" data-value="high">
+                <span>60 FPS • High (6 Mbps)</span>
+                <i class="ri-check-line item-check"></i>
+              </button>
+              <button type="button" class="glass-dropdown-item" data-value="balanced">
+                <span>30 FPS • Balanced (3 Mbps)</span>
+                <i class="ri-check-line item-check"></i>
+              </button>
+              <button type="button" class="glass-dropdown-item" data-value="ultra">
+                <span>60 FPS • Ultra (12 Mbps)</span>
+                <i class="ri-check-line item-check"></i>
+              </button>
+            </div>
+          </div>
           <label class="settings-checkbox-wrap" title="Prompt where to save each time you stop recording">
             <input type="checkbox" id="togglePromptSave" />
-            <span>Ask where to save</span>
+            <span>Ask where to save video</span>
           </label>
         </div>
       </div>

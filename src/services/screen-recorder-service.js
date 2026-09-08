@@ -85,6 +85,7 @@ export class ScreenRecorderService {
         canvas.width = sW;
         canvas.height = sH;
         const ctx = canvas.getContext('2d', { alpha: false });
+        ctx.imageSmoothingEnabled = false;
 
         this.cropCanvas = canvas;
         this.cropVideo = video;

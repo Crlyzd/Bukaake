@@ -9,6 +9,9 @@ mod win_border {
     use std::sync::Mutex;
     use windows::core::w;
     use windows::Win32::Foundation::{COLORREF, HWND, LPARAM, LRESULT, RECT, WPARAM};
+    use windows::Win32::Graphics::Dwm::{
+        DwmSetWindowAttribute, DWMNCRP_DISABLED, DWMWA_NCRENDERING_POLICY,
+    };
     use windows::Win32::Graphics::Gdi::{
         BeginPaint, CreateSolidBrush, DeleteObject, EndPaint, FillRect, InvalidateRect,
         PAINTSTRUCT,
@@ -55,15 +58,15 @@ mod win_border {
                 FillRect(hdc, &rc, black_brush);
                 let _ = DeleteObject(black_brush);
 
-                // Border color: Red (0x002626ef BGR) or Amber (0x000b9ef5 BGR)
+                // Border color: Soft Ruby Red (0x003333cc BGR) or Amber (0x000b9ef5 BGR)
                 let border_bgr = if IS_PAUSED.load(Ordering::Relaxed) {
                     COLORREF(0x000b9ef5)
                 } else {
-                    COLORREF(0x002626ef)
+                    COLORREF(0x003333cc)
                 };
                 let border_brush = CreateSolidBrush(border_bgr);
 
-                let bw = 3;
+                let bw = 2;
                 let w = rc.right - rc.left;
                 let h = rc.bottom - rc.top;
 
@@ -147,6 +150,13 @@ mod win_border {
 
             if let Ok(valid_hwnd) = hwnd {
                 let _ = SetLayeredWindowAttributes(valid_hwnd, COLORREF(0x00000000), 0, LWA_COLORKEY);
+                let policy = DWMNCRP_DISABLED.0 as u32;
+                let _ = DwmSetWindowAttribute(
+                    valid_hwnd,
+                    DWMWA_NCRENDERING_POLICY,
+                    &policy as *const _ as _,
+                    std::mem::size_of::<u32>() as u32,
+                );
                 BORDER_HWND.store(valid_hwnd.0 as isize, Ordering::SeqCst);
 
                 let mut msg = MSG::default();

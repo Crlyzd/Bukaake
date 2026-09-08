@@ -14,6 +14,7 @@ import { RecordingDock } from '../components/recording-dock.js';
 import { toast } from '../components/toast.js';
 import { changeTracker } from './change-tracker.js';
 import { tauriBridge } from './tauri-bridge.js';
+import { screenshotSaver } from './screenshot-saver.js';
 
 export class CaptureManager {
   constructor(options = {}) {
@@ -112,14 +113,15 @@ export class CaptureManager {
 
         try {
           const croppedUrl = await screenCaptureService.cropCapturedRegion(dataUrl, rect);
+          const filename = screenshotSaver.generateFilename();
+          const savedPath = await screenshotSaver.saveToDisk(croppedUrl, filename);
           await screenCaptureService.copyToClipboard(croppedUrl);
 
           if (!copyOnly) {
-            const filename = screenCaptureService.generateScreenshotName();
             this.loadCapturedImage(croppedUrl, filename);
-            toast.show('Snippet captured & loaded into Bukaake', 'info');
+            toast.show(savedPath ? 'Snippet saved & loaded into Bukaake' : 'Snippet loaded', 'info');
           } else {
-            toast.show('Snippet copied to clipboard', 'info');
+            toast.show(savedPath ? 'Snippet saved & copied to clipboard' : 'Snippet copied to clipboard', 'info');
           }
         } catch (err) {
           console.error('[CaptureManager] Snip processing failed:', err);
@@ -183,11 +185,12 @@ export class CaptureManager {
       await invoke('enter_recording_pill_mode').catch(() => {});
       // cropRegion.x/y/width/height are already physical screen pixels
       if (cropRegion && cropRegion.width > 20 && cropRegion.height > 20) {
+        const BW = 5;
         await invoke('show_recording_border', {
-          x: cropRegion.x,
-          y: cropRegion.y,
-          width: cropRegion.width,
-          height: cropRegion.height,
+          x: Math.max(0, cropRegion.x - BW),
+          y: Math.max(0, cropRegion.y - BW),
+          width: cropRegion.width + (BW * 2),
+          height: cropRegion.height + (BW * 2),
         }).catch(() => {});
       }
     }
@@ -284,14 +287,8 @@ export class CaptureManager {
     `;
 
     document.body.appendChild(banner);
-    banner.querySelector('#btnPostAlitken')?.addEventListener('click', () => {
-      alitkenService.launch(savedPath);
-      banner.remove();
-    });
-    banner.querySelector('#btnPostFolder')?.addEventListener('click', () => {
-      invoke('show_in_folder', { path: savedPath });
-      banner.remove();
-    });
+    banner.querySelector('#btnPostAlitken')?.addEventListener('click', () => { alitkenService.launch(savedPath); banner.remove(); });
+    banner.querySelector('#btnPostFolder')?.addEventListener('click', () => { invoke('show_in_folder', { path: savedPath }); banner.remove(); });
     banner.querySelector('#btnPostClose')?.addEventListener('click', () => banner.remove());
     setTimeout(() => { if (document.body.contains(banner)) banner.remove(); }, 12000);
   }

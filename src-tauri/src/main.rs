@@ -23,6 +23,7 @@ use capture_commands::{
     get_default_videos_dir, init_recording_stream, launch_alitken,
     prompt_select_executable, prompt_select_folder, prompt_save_recording,
     prepare_screen_snip, finish_screen_snip, update_global_shortcuts,
+    save_screenshot_to_dir,
 };
 use recording_pill::{enter_recording_pill_mode, exit_recording_pill_mode};
 use recording_border::{show_recording_border, hide_recording_border, set_recording_border_paused};
@@ -66,10 +67,10 @@ fn main() {
                 .with_handler(|app, shortcut, event| {
                     if event.state() == ShortcutState::Pressed {
                         let text = shortcut.to_string().to_lowercase();
-                        if text.contains('s') {
-                            let _ = app.emit("bukaake://trigger-snip", ());
-                        } else if text.contains('r') {
+                        if text.contains('r') && !text.contains('s') {
                             let _ = app.emit("bukaake://trigger-record", ());
+                        } else {
+                            let _ = app.emit("bukaake://trigger-snip", ());
                         }
                     }
                 })
@@ -133,9 +134,6 @@ fn main() {
             if let Ok(snip_sc) = "Alt+Shift+S".parse::<tauri_plugin_global_shortcut::Shortcut>() {
                 let _ = app.global_shortcut().register(snip_sc);
             }
-            if let Ok(rec_sc) = "Alt+Shift+R".parse::<tauri_plugin_global_shortcut::Shortcut>() {
-                let _ = app.global_shortcut().register(rec_sc);
-            }
             Ok(())
         })
         .on_window_event(|window, event| {
@@ -173,7 +171,8 @@ fn main() {
             prompt_save_recording, prompt_select_folder, prompt_select_executable,
             launch_alitken, prepare_screen_snip, finish_screen_snip, update_global_shortcuts,
             enter_recording_pill_mode, exit_recording_pill_mode,
-            show_recording_border, hide_recording_border, set_recording_border_paused
+            show_recording_border, hide_recording_border, set_recording_border_paused,
+            save_screenshot_to_dir
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

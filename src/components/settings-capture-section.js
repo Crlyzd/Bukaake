@@ -7,56 +7,181 @@ import { invoke } from '@tauri-apps/api/core';
 import { hotkeyService } from '../services/hotkey-service.js';
 import { alitkenService } from '../services/alitken-service.js';
 
+export function renderHotkeyBadge(container, combo) {
+  if (!container) return;
+  if (!combo || combo === 'Press keys...') {
+    container.textContent = combo || '';
+    return;
+  }
+  const parts = combo.split('+');
+  container.innerHTML = parts
+    .map((p) => `<span class="key-token">${p.trim()}</span>`)
+    .join('<span class="key-sep">+</span>');
+}
+
 export function bindCaptureSettings() {
-  // 1. Hotkeys Binding
-  const btnSS = document.getElementById('btnKeyScreenshot');
-  const lblSS = document.getElementById('lblKeyScreenshot');
-  const btnRec = document.getElementById('btnKeyRecord');
-  const lblRec = document.getElementById('lblKeyRecord');
+  // 1. Unified Hotkey Binding
+  const btnCapture = document.getElementById('btnKeyCapture');
+  const lblCapture = document.getElementById('lblKeyCapture');
 
-  if (lblSS) lblSS.textContent = hotkeyService.getScreenshotHotkey();
-  if (lblRec) lblRec.textContent = hotkeyService.getRecordHotkey();
+  if (lblCapture) {
+    renderHotkeyBadge(lblCapture, hotkeyService.getSharedHotkey());
+  }
 
-  const setupRecorder = (btn, lbl, setter) => {
-    if (!btn || !lbl) return;
-    btn.addEventListener('click', () => {
-      btn.classList.add('listening');
-      lbl.textContent = 'Press keys...';
+  let isListening = false;
 
-      const onKeyDown = (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        const combo = hotkeyService.parseEventToCombo(e);
-        if (combo) {
-          setter(combo);
-          lbl.textContent = combo;
-          btn.classList.remove('listening');
-          window.removeEventListener('keydown', onKeyDown, true);
-        } else if (e.key === 'Escape') {
-          btn.classList.remove('listening');
-          lbl.textContent = btn === btnSS ? hotkeyService.getScreenshotHotkey() : hotkeyService.getRecordHotkey();
-          window.removeEventListener('keydown', onKeyDown, true);
-        }
-      };
-      window.addEventListener('keydown', onKeyDown, true);
-    });
+  const cancelRecording = () => {
+    if (!isListening) return;
+    isListening = false;
+    btnCapture?.classList.remove('listening');
+    renderHotkeyBadge(lblCapture, hotkeyService.getSharedHotkey());
+    window.removeEventListener('keydown', onKeyDown, true);
+    window.removeEventListener('keyup', onKeyUp, true);
+    window.removeEventListener('blur', onBlur);
+    document.removeEventListener('click', onClickOutside, true);
   };
 
-  setupRecorder(btnSS, lblSS, (combo) => hotkeyService.setScreenshotHotkey(combo));
-  setupRecorder(btnRec, lblRec, (combo) => hotkeyService.setRecordHotkey(combo));
+  const onKeyDown = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
 
-  const selCaptureMode = document.getElementById('selectDefaultCaptureMode');
-  if (selCaptureMode) {
-    selCaptureMode.value = localStorage.getItem('bukaake-capture-mode') || 'region';
-    selCaptureMode.addEventListener('change', () => {
-      localStorage.setItem('bukaake-capture-mode', selCaptureMode.value);
+    if (e.key === 'Escape') {
+      cancelRecording();
+      return;
+    }
+
+    const mods = [];
+    if (e.ctrlKey || e.metaKey) mods.push('Ctrl');
+    if (e.altKey) mods.push('Alt');
+    if (e.shiftKey) mods.push('Shift');
+
+    if (['Control', 'Alt', 'Shift', 'Meta'].includes(e.key)) {
+      if (lblCapture) {
+        lblCapture.textContent = mods.length > 0 ? `${mods.join('+')}+...` : 'Press keys...';
+      }
+      return;
+    }
+
+    let keyName = e.key;
+    if (keyName === ' ') keyName = 'Space';
+    else if (keyName === 'PrintScreen') keyName = 'PrtScn';
+    else if (keyName.length === 1) keyName = keyName.toUpperCase();
+
+    mods.push(keyName);
+    const combo = mods.join('+');
+
+    hotkeyService.setSharedHotkey(combo);
+    renderHotkeyBadge(lblCapture, combo);
+
+    isListening = false;
+    btnCapture?.classList.remove('listening');
+    window.removeEventListener('keydown', onKeyDown, true);
+    window.removeEventListener('keyup', onKeyUp, true);
+    window.removeEventListener('blur', onBlur);
+    document.removeEventListener('click', onClickOutside, true);
+  };
+
+  const onKeyUp = (e) => {
+    if (!isListening) return;
+    e.preventDefault();
+    e.stopPropagation();
+    const mods = [];
+    if (e.ctrlKey || e.metaKey) mods.push('Ctrl');
+    if (e.altKey) mods.push('Alt');
+    if (e.shiftKey) mods.push('Shift');
+    if (lblCapture) {
+      lblCapture.textContent = mods.length > 0 ? `${mods.join('+')}+...` : 'Press keys...';
+    }
+  };
+
+  const onClickOutside = (e) => {
+    if (!btnCapture?.contains(e.target)) {
+      cancelRecording();
+    }
+  };
+
+  const onBlur = () => {
+    cancelRecording();
+  };
+
+  if (btnCapture && lblCapture) {
+    btnCapture.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (isListening) {
+        cancelRecording();
+        return;
+      }
+      btnCapture.blur();
+      isListening = true;
+      btnCapture.classList.add('listening');
+      lblCapture.textContent = 'Press keys...';
+
+      window.addEventListener('keydown', onKeyDown, true);
+      window.addEventListener('keyup', onKeyUp, true);
+      window.addEventListener('blur', onBlur);
+      setTimeout(() => document.addEventListener('click', onClickOutside, true), 10);
     });
   }
 
-  // 2. Storage Directory & Prompt
+  // 2. Custom Frosted Glass Video Quality Dropdown
+  const wrapQuality = document.getElementById('wrapVideoQuality');
+  const btnTrigger = document.getElementById('btnVideoQualityTrigger');
+  const lblQuality = document.getElementById('lblVideoQuality');
+  const menuQuality = document.getElementById('menuVideoQuality');
+
+  const QUALITY_LABELS = {
+    high: '60 FPS • High (6 Mbps)',
+    balanced: '30 FPS • Balanced (3 Mbps)',
+    ultra: '60 FPS • Ultra (12 Mbps)',
+  };
+
+  const setQuality = (val) => {
+    const key = QUALITY_LABELS[val] ? val : 'high';
+    localStorage.setItem('bukaake-video-quality', key);
+    if (lblQuality) lblQuality.textContent = QUALITY_LABELS[key];
+    menuQuality?.querySelectorAll('.glass-dropdown-item').forEach((item) => {
+      item.classList.toggle('active', item.dataset.value === key);
+    });
+  };
+
+  const savedQuality = localStorage.getItem('bukaake-video-quality') || 'high';
+  setQuality(savedQuality);
+
+  if (btnTrigger && menuQuality && wrapQuality) {
+    const closeDropdown = () => {
+      menuQuality.classList.add('hidden');
+      wrapQuality.classList.remove('open');
+      document.removeEventListener('click', onDocClick);
+    };
+
+    const onDocClick = (e) => {
+      if (!wrapQuality.contains(e.target)) closeDropdown();
+    };
+
+    btnTrigger.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const isOpen = !menuQuality.classList.contains('hidden');
+      if (isOpen) {
+        closeDropdown();
+      } else {
+        menuQuality.classList.remove('hidden');
+        wrapQuality.classList.add('open');
+        setTimeout(() => document.addEventListener('click', onDocClick), 10);
+      }
+    });
+
+    menuQuality.querySelectorAll('.glass-dropdown-item').forEach((item) => {
+      item.addEventListener('click', (e) => {
+        e.stopPropagation();
+        setQuality(item.dataset.value);
+        closeDropdown();
+      });
+    });
+  }
+
+  // 3. Storage Directory & Prompt
   const inputDir = document.getElementById('inputVideoSaveDir');
   const btnBrowseDir = document.getElementById('btnBrowseVideoDir');
-  const selQuality = document.getElementById('selectVideoQuality');
   const togglePrompt = document.getElementById('togglePromptSave');
 
   const updateDirDisplay = async () => {
@@ -72,13 +197,6 @@ export function bindCaptureSettings() {
       if (inputDir) inputDir.value = folder;
     }
   });
-
-  if (selQuality) {
-    selQuality.value = localStorage.getItem('bukaake-video-quality') || 'high';
-    selQuality.addEventListener('change', () => {
-      localStorage.setItem('bukaake-video-quality', selQuality.value);
-    });
-  }
 
   if (togglePrompt) {
     togglePrompt.checked = localStorage.getItem('bukaake-video-prompt-save') === 'true';
