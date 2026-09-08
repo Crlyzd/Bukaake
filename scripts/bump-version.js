@@ -27,7 +27,7 @@ function writeJson(file, obj) {
 }
 
 const pkg = readJson(pkgPath);
-const currentVer = pkg.version || '0.1.2';
+const currentVer = pkg.version || '0.4.2';
 const arg = (process.argv[2] || 'patch').toLowerCase().trim();
 
 function getSupportedFormatCount() {
@@ -108,11 +108,39 @@ if (fs.existsSync(cargoPath)) {
   fs.writeFileSync(cargoPath, content, 'utf8');
 }
 
+// 4. Update static templates & updater service fallbacks
+const settingsHtmlPath = path.join(rootDir, 'settings.html');
+if (fs.existsSync(settingsHtmlPath)) {
+  let html = fs.readFileSync(settingsHtmlPath, 'utf8');
+  html = html.replace(/(<span class="version-tag">)v[\d.]+ Portable(<\/span>)/g, `$1v${newVer} Portable$2`);
+  html = html.replace(/(<span class="row-desc" id="updateStatusText">Bukaake )v[\d.]+( \([^)]+\)<\/span>)/g, `$1v${newVer}$2`);
+  fs.writeFileSync(settingsHtmlPath, html, 'utf8');
+}
+
+const indexHtmlPath = path.join(rootDir, 'index.html');
+if (fs.existsSync(indexHtmlPath)) {
+  let html = fs.readFileSync(indexHtmlPath, 'utf8');
+  html = html.replace(/(<span class="app-version"[^>]*>)v[\d.]+(<\/span>)/g, `$1v${newVer}$2`);
+  html = html.replace(/(<span class="settings-subtitle">)v[\d.]+( \(x64\) • Glass Image Viewer<\/span>)/g, `$1v${newVer}$2`);
+  html = html.replace(/(<span class="settings-hero-subtitle">)v[\d.]+( • Portable Edition<\/span>)/g, `$1v${newVer}$2`);
+  html = html.replace(/(<span id="updateStatusText">Bukaake )v[\d.]+( \([^)]+\)<\/span>)/g, `$1v${newVer}$2`);
+  fs.writeFileSync(indexHtmlPath, html, 'utf8');
+}
+
+const updaterServicePath = path.join(rootDir, 'src', 'services', 'updater-service.js');
+if (fs.existsSync(updaterServicePath)) {
+  let code = fs.readFileSync(updaterServicePath, 'utf8');
+  code = code.replace(/export const APP_VERSION = typeof __APP_VERSION__ !== 'undefined' \? __APP_VERSION__ : '[^']+';/, `export const APP_VERSION = typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : '${newVer}';`);
+  fs.writeFileSync(updaterServicePath, code, 'utf8');
+}
+
 console.log(`\n  ========================================================`);
 console.log(`    [+] Bukaake SSOT Version Bumped: v${currentVer} -> v${newVer}`);
 console.log(`  ========================================================`);
 console.log(`    Updated: package.json (Single Source of Truth)`);
 console.log(`    Updated: package-lock.json`);
 console.log(`    Updated: src-tauri/Cargo.toml`);
+console.log(`    Updated: settings.html & index.html (Static fallbacks)`);
+console.log(`    Updated: src/services/updater-service.js (Fallback constant)`);
 console.log(`    Synchronized: Format count (${formatCount}) across documentation`);
 console.log(`    Note: All HTML, JS, and Tauri configs inherit dynamically!\n`);

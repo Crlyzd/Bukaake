@@ -54,8 +54,8 @@ body.settings-window {
 }
 
 .settings-title-left .app-logo {
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -74,6 +74,9 @@ body.settings-window {
   font-weight: 600;
   letter-spacing: -0.2px;
   color: var(--text-main);
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
 }
 
 .settings-win-version {
@@ -83,6 +86,9 @@ body.settings-window {
   background: var(--glass-btn-bg);
   padding: 1px 6px;
   border-radius: var(--radius-pill);
+  line-height: 1.2;
+  display: inline-flex;
+  align-items: center;
 }
 
 .settings-win-controls {
@@ -219,6 +225,7 @@ html[data-theme="light"] .inset-panel {
 }
 
 .btn:active { transform: translateY(1px); }
+.btn i { font-size: 14px; line-height: 1; }
 
 .btn-primary {
   background: var(--action-bg);

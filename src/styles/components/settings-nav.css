@@ -50,6 +50,7 @@ html[data-theme="light"] .segmented-nav {
   justify-content: center;
   color: inherit;
   flex-shrink: 0;
+  transform: translateY(-1px);
 }
 
 .nav-item span {

@@ -6,7 +6,7 @@
 
 import { toast } from '../components/toast.js';
 
-export const APP_VERSION = typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : '0.1.2';
+export const APP_VERSION = typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : '0.4.2';
 
 function compareVersions(v1, v2) {
   const c1 = (v1 || '').replace(/^v/i, '').split('.').map((n) => parseInt(n, 10) || 0);
@@ -247,6 +247,9 @@ class UpdaterService {
 export function hydrateAppVersions(root = document) {
   root.querySelectorAll('.app-version, .settings-win-version').forEach((el) => {
     el.textContent = `v${APP_VERSION}`;
+  });
+  root.querySelectorAll('.version-tag').forEach((el) => {
+    el.textContent = `v${APP_VERSION} Portable`;
   });
   root.querySelectorAll('.settings-hero-subtitle').forEach((el) => {
     el.textContent = `v${APP_VERSION} • Portable Edition`;

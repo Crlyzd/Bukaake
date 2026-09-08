@@ -71,6 +71,7 @@ body.image-loaded .app-titlebar:hover {
   font-weight: 600;
   letter-spacing: 0.3px;
   color: var(--text-main);
+  line-height: 1;
   flex-shrink: 0;
 }
 
@@ -80,9 +81,11 @@ body.image-loaded .app-titlebar:hover {
   font-weight: 500;
   color: var(--text-dim);
   opacity: 0.75;
+  line-height: 1;
   margin-left: 2px;
   margin-right: 4px;
   flex-shrink: 0;
+  transform: translateY(1.5px);
 }
 
 .titlebar-sep {

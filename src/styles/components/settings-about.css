@@ -14,15 +14,34 @@
 }
 
 .about-logo {
+  position: relative;
   width: 44px;
   height: 44px;
-  border-radius: 12px;
-  background: linear-gradient(135deg, rgba(99, 102, 241, 0.25), rgba(168, 85, 247, 0.25));
+  background: transparent;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: var(--galactic-glow-shadow);
   margin-bottom: 2px;
+}
+
+.about-logo::before {
+  content: '';
+  position: absolute;
+  inset: -8px;
+  border-radius: var(--radius-pill);
+  background: radial-gradient(circle, rgba(168, 85, 247, 0.35) 0%, rgba(56, 189, 248, 0.20) 50%, transparent 75%);
+  filter: blur(10px);
+  pointer-events: none;
+}
+
+.about-logo img {
+  position: relative;
+  z-index: 1;
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+  pointer-events: none;
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.35));
 }
 
 .about-app-name {
@@ -33,6 +52,21 @@
   align-items: center;
   gap: 8px;
   line-height: 1.2;
+}
+
+.version-tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--text-dim);
+  background: var(--glass-btn-bg);
+  padding: 2px 7px;
+  border-radius: var(--radius-pill);
+  letter-spacing: 0;
+  line-height: 1.2;
+  display: inline-flex;
+  align-items: center;
+  user-select: none;
 }
 
 .about-tagline {

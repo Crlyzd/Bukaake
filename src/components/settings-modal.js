@@ -63,7 +63,7 @@ export class SettingsModal {
         this.btnCheckUpdate.disabled = isChecking || isUpdating;
         if (isUpdating) {
           if (state.updateStatus === 'installing') {
-            this.btnCheckUpdate.innerHTML = '<i class="ri-refresh-line ri-spin"></i> Restarting...';
+            this.btnCheckUpdate.innerHTML = '<i class="ri-restart-line ri-spin"></i> Restarting...';
           } else {
             this.btnCheckUpdate.innerHTML = `<i class="ri-loader-4-line ri-spin"></i> Downloading (${state.updatePercent || 0}%)...`;
           }
@@ -72,7 +72,7 @@ export class SettingsModal {
         } else if (state.hasUpdate) {
           this.btnCheckUpdate.innerHTML = `<i class="ri-download-cloud-line"></i> Install v${state.version || APP_VERSION}`;
         } else {
-          this.btnCheckUpdate.innerHTML = '<i class="ri-refresh-line"></i> Check';
+          this.btnCheckUpdate.innerHTML = '<i class="ri-restart-line"></i> Check';
         }
       }
 
