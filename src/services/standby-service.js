@@ -60,24 +60,23 @@ class StandbyService {
     }
   }
 
-  async enterStandby({ viewer, fileLoader }) {
+  async enterStandby({ viewer, fileLoader, onHidden } = {}) {
     if (!this.enabled) {
       return await tauriBridge.exitApp();
     }
 
-    // Purge memory buffers before hiding
+    // 1. Hide window immediately — prevents any visible clearing or layout jumping
+    await tauriBridge.invoke('enter_standby');
+
+    // 2. Window is now completely invisible: clean up buffers and reset DOM offscreen
     try {
-      fileLoader?.prefetchCache?.clear();
+      onHidden?.();
+      fileLoader?.clearItems?.();
       viewer?.setImage(null);
-      if (fileLoader) {
-        fileLoader.currentMeta = null;
-      }
+      if (fileLoader) fileLoader.currentMeta = null;
     } catch (err) {
       console.warn('[StandbyService] Error clearing buffers:', err);
     }
-
-    // Hide window, trim memory working-set, and start 5-minute countdown in Rust
-    await tauriBridge.invoke('enter_standby');
   }
 }
 

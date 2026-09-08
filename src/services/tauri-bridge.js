@@ -149,18 +149,22 @@ export class TauriBridge {
   }
 
   async setMaximizable(maximizable) {
+    try { if (this.isTauri()) await this.invoke('set_window_maximizable', { maximizable }); } catch (e) {}
+  }
+
+  async setResizable(resizable) {
     try {
       if (this.isTauri()) {
-        await this.invoke('set_window_maximizable', { maximizable });
+        const win = window.__TAURI__.window?.getCurrentWindow?.();
+        if (win?.setResizable) await win.setResizable(resizable);
+        else await this.invoke('set_window_resizable', { resizable });
       }
     } catch (e) {}
   }
 
   async resizeAndCenter(width, height) {
     try {
-      if (this.isTauri()) {
-        await this.invoke('resize_and_center_window', { width: Math.round(width), height: Math.round(height) });
-      }
+      if (this.isTauri()) await this.invoke('resize_and_center_window', { width: Math.round(width), height: Math.round(height) });
     } catch (e) {
       console.warn('[TauriBridge] resize_and_center_window failed:', e);
     }
@@ -225,16 +229,12 @@ export class TauriBridge {
   }
 
   async promptOpenFile() {
-    if (this.isTauri()) {
-      try { return await this.invoke('prompt_open_file'); } catch (e) { console.warn(e); }
-    }
+    if (this.isTauri()) { try { return await this.invoke('prompt_open_file'); } catch (e) { console.warn(e); } }
     return null;
   }
 
   async showInFolder(path) {
-    if (this.isTauri() && path) {
-      try { await this.invoke('show_in_folder', { path }); return true; } catch (e) { console.warn(e); }
-    }
+    if (this.isTauri() && path) { try { await this.invoke('show_in_folder', { path }); return true; } catch (e) { console.warn(e); } }
     return false;
   }
 
@@ -259,9 +259,7 @@ export class TauriBridge {
   }
 
   async playWindowsDing() {
-    if (this.isTauri()) {
-      try { await this.invoke('play_windows_ding'); } catch (e) {}
-    }
+    if (this.isTauri()) { try { await this.invoke('play_windows_ding'); } catch (e) {} }
   }
 
   async deleteFile(path, toTrash = true) {

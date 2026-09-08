@@ -60,14 +60,16 @@ pub fn activate_main_window(app: &tauri::AppHandle) {
 
         let is_visible = win.is_visible().unwrap_or(false);
 
+        if !is_visible {
+            let _ = win.set_fullscreen(false);
+            let _ = win.set_resizable(false);
+            let _ = win.set_size(tauri::Size::Logical(tauri::LogicalSize { width: 680.0, height: 480.0 }));
+            let _ = win.emit("bukaake://wake-from-standby", ());
+        }
+
         let _ = win.unminimize();
         let _ = win.show();
         let _ = win.set_focus();
-
-        if !is_visible {
-            let _ = win.set_fullscreen(false);
-            let _ = win.emit("bukaake://wake-from-standby", ());
-        }
     }
 }
 

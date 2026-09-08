@@ -122,7 +122,8 @@ export class WindowModeManager {
       this.updateModeClasses(MODE_REGULAR);
       await tauriBridge.setFullscreen(false);
       await tauriBridge.unmaximize();
-      if (this.lastAspectSize) {
+      await tauriBridge.setResizable(Boolean(this.viewer?.img));
+      if (this.viewer?.img && this.lastAspectSize) {
         await tauriBridge.resizeAndCenter(this.lastAspectSize.width, this.lastAspectSize.height);
       }
     }

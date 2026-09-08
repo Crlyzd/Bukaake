@@ -85,7 +85,7 @@ export class ScreenCaptureService {
   async copyToClipboard(dataUrl) {
     try {
       const base64Clean = dataUrl.replace(/^data:image\/[a-z]+;base64,/, '');
-      await invoke('write_clipboard_image', { base64: base64Clean });
+      await invoke('write_clipboard_image', { base64Data: base64Clean, base64: base64Clean });
       toast.show('Screenshot copied to clipboard', 'info');
     } catch (err) {
       console.warn('[ScreenCapture] Clipboard copy failed:', err);

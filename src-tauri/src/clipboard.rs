@@ -143,11 +143,17 @@ pub fn read_clipboard() -> Result<Option<ClipboardPayload>, String> {
 }
 
 #[tauri::command]
-pub fn write_clipboard_image(base64_data: String) -> Result<(), String> {
-    let cleaned = if let Some(idx) = base64_data.find(',') {
-        &base64_data[idx + 1..]
+pub fn write_clipboard_image(
+    base64_data: Option<String>,
+    base64: Option<String>,
+) -> Result<(), String> {
+    let raw = base64_data
+        .or(base64)
+        .ok_or_else(|| "Missing base64 image data".to_string())?;
+    let cleaned = if let Some(idx) = raw.find(',') {
+        &raw[idx + 1..]
     } else {
-        &base64_data
+        &raw
     };
     let data = BASE64_STANDARD.decode(cleaned).map_err(|e| e.to_string())?;
     let img = image::load_from_memory(&data).map_err(|e| e.to_string())?;

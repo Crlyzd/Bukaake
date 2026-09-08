@@ -116,6 +116,11 @@ pub fn set_window_maximizable(window: tauri::Window, maximizable: bool) -> Resul
 }
 
 #[tauri::command]
+pub fn set_window_resizable(window: tauri::Window, resizable: bool) -> Result<(), String> {
+    window.set_resizable(resizable).map_err(|e| e.to_string())
+}
+
+#[tauri::command]
 pub fn resize_and_center_window(window: tauri::Window, width: u32, height: u32) -> Result<(), String> {
     let _ = window.unmaximize();
     window.set_size(tauri::Size::Logical(tauri::LogicalSize { width: width as f64, height: height as f64 })).map_err(|e| e.to_string())?;

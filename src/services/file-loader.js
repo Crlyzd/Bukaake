@@ -22,6 +22,15 @@ export class FileLoader {
 
   get totalFiles() { return this.items.length; }
 
+  clearItems() {
+    this.items = [];
+    this.currentIndex = -1;
+    this.currentImage = null;
+    this.currentMeta = null;
+    this.prefetchCache?.clear();
+    this.emitListChanged();
+  }
+
   bindDropAndPaste(viewportEl, fileInputEl) {
     fileInputEl?.addEventListener('change', (e) => this.loadWebFiles(e.target.files));
     document.getElementById('dropOpenBtn')?.addEventListener('click', () => {
