@@ -24,7 +24,7 @@
   align-items: center;
   gap: 12px;
   width: 100%;
-  max-width: 535px;
+  max-width: 620px;
   border: none;
   background: var(--glass-card-bg);
   backdrop-filter: blur(24px) saturate(180%);
@@ -86,21 +86,25 @@
 
 .drop-actions {
   display: flex;
-  gap: 10px;
+  align-items: center;
+  gap: 8px;
   margin-top: 2px;
   flex-wrap: wrap;
   justify-content: center;
 }
 
 .drop-actions .btn-primary {
-  padding: 9px 20px;
+  padding: 8px 16px;
   font-size: 13px;
   font-weight: 600;
   border-radius: var(--radius-pill);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .drop-actions .btn-secondary {
-  padding: 9px 18px;
+  padding: 8px 14px;
   font-size: 13px;
   font-weight: 500;
   border-radius: var(--radius-pill);

@@ -4,15 +4,16 @@
  */
 
 import { invoke } from '@tauri-apps/api/core';
+import { listen } from '@tauri-apps/api/event';
 import { screenCaptureService } from './screen-capture-service.js';
 import { screenRecorderService } from './screen-recorder-service.js';
 import { alitkenService } from './alitken-service.js';
 import { hotkeyService } from './hotkey-service.js';
 import { ScreenSnipper } from '../components/screen-snipper.js';
 import { RecordingDock } from '../components/recording-dock.js';
-import { CaptureMenu } from '../components/capture-menu.js';
 import { toast } from '../components/toast.js';
 import { changeTracker } from './change-tracker.js';
+import { tauriBridge } from './tauri-bridge.js';
 
 export class CaptureManager {
   constructor(options = {}) {
@@ -22,24 +23,19 @@ export class CaptureManager {
 
     this.snipper = new ScreenSnipper();
     this.recordingDock = new RecordingDock();
-    this.captureMenu = null;
 
     this.init();
   }
 
   init() {
-    const btnTitlebarCapture = document.getElementById('btnTitlebarCapture');
-    if (btnTitlebarCapture) {
-      this.captureMenu = new CaptureMenu({
-        anchorBtn: btnTitlebarCapture,
-        onCaptureFullscreen: () => this.captureFullscreen(),
-        onCaptureSnip: () => this.captureSnip(),
-        onToggleRecord: () => this.toggleRecord(),
-      });
-    }
-
+    document.getElementById('btnTitlebarCapture')?.addEventListener('click', () => this.captureSnip());
     document.getElementById('dropSnipBtn')?.addEventListener('click', () => this.captureSnip());
     document.getElementById('dropRecordBtn')?.addEventListener('click', () => this.toggleRecord());
+
+    if (tauriBridge.isTauri()) {
+      listen('bukaake://trigger-snip', () => this.captureSnip());
+      listen('bukaake://trigger-record', () => this.toggleRecord());
+    }
 
     screenRecorderService.onTimerTick = (timeStr) => {
       this.recordingDock.updateTimer(timeStr);
@@ -58,21 +54,51 @@ export class CaptureManager {
   }
 
   async captureFullscreen() {
-    const payload = await screenCaptureService.captureDesktop();
-    if (!payload) return;
-
-    await screenCaptureService.copyToClipboard(payload.data_url);
-    this.loadCapturedImage(payload.data_url, 'Fullscreen_Capture.png');
-    toast.show('Full screen captured & copied to clipboard', 'info');
+    this.captureSnip({ type: 'screenshot', mode: 'fullscreen' });
   }
 
-  async captureSnip() {
-    const payload = await screenCaptureService.captureDesktop();
+  async captureSnip(options = {}) {
+    if (this.snipper.isActive) return;
+    const isFs = await tauriBridge.isFullscreen();
+    const isMax = await tauriBridge.isMaximized();
+
+    let payload = null;
+    if (tauriBridge.isTauri()) {
+      payload = await invoke('prepare_screen_snip').catch((err) => {
+        console.warn('[CaptureManager] prepare_screen_snip fallback:', err);
+        return null;
+      });
+    }
+
+    if (!payload) {
+      payload = await screenCaptureService.captureDesktop();
+    }
     if (!payload) return;
 
+    const cleanupSnip = async () => {
+      if (tauriBridge.isTauri()) {
+        await invoke('finish_screen_snip', {
+          wasFullscreen: isFs || isMax,
+          wasMinimized: false,
+          wasHidden: false,
+        }).catch(() => {});
+      }
+    };
+
+    options.windows = payload.windows || [];
+    options.screenWidth = payload.width;
+    options.screenHeight = payload.height;
     this.snipper.startSnip(
       payload.data_url,
-      async ({ rect, dataUrl, copyOnly }) => {
+      async ({ rect, dataUrl, copyOnly, isRecord }) => {
+        await cleanupSnip();
+
+        if (isRecord) {
+          const isFull = (rect.mode === 'fullscreen' || (rect.isFullscreen && !rect.isWindow));
+          await this.startRecording(isFull ? null : rect);
+          return;
+        }
+
         try {
           const croppedUrl = await screenCaptureService.cropCapturedRegion(dataUrl, rect);
           await screenCaptureService.copyToClipboard(croppedUrl);
@@ -81,13 +107,18 @@ export class CaptureManager {
             const filename = screenCaptureService.generateScreenshotName();
             this.loadCapturedImage(croppedUrl, filename);
             toast.show('Snippet captured & loaded into Bukaake', 'info');
+          } else {
+            toast.show('Snippet copied to clipboard', 'info');
           }
         } catch (err) {
           console.error('[CaptureManager] Snip processing failed:', err);
           toast.show('Snip failed: ' + err.message, 'error');
         }
       },
-      () => {}
+      async () => {
+        await cleanupSnip();
+      },
+      options
     );
   }
 
@@ -107,26 +138,69 @@ export class CaptureManager {
   }
 
   async toggleRecord() {
-    if (screenRecorderService.state === 'idle') {
-      await this.startRecording();
-    } else {
+    if (screenRecorderService.state === 'recording' || screenRecorderService.state === 'paused') {
       await this.stopRecording();
+    } else {
+      const defaultMode = localStorage.getItem('bukaake-capture-mode') || 'region';
+      this.captureSnip({ type: 'record', mode: defaultMode });
     }
   }
 
-  async startRecording() {
-    const started = await screenRecorderService.startRecording();
+  async startRecording(cropRegion = null) {
+    const started = await screenRecorderService.startRecording(null, cropRegion);
     if (!started) return;
 
+    document.body.classList.add('mode-recording-pill');
     this.recordingDock.show({
-      onPause: () => screenRecorderService.pauseRecording(),
-      onResume: () => screenRecorderService.resumeRecording(),
+      onPause: () => {
+        screenRecorderService.pauseRecording();
+        if (tauriBridge.isTauri()) {
+          invoke('set_recording_border_paused', { paused: true }).catch(() => {});
+        }
+      },
+      onResume: () => {
+        screenRecorderService.resumeRecording();
+        if (tauriBridge.isTauri()) {
+          invoke('set_recording_border_paused', { paused: false }).catch(() => {});
+        }
+      },
       onStop: () => this.stopRecording(),
-      onCancel: () => screenRecorderService.cancelRecording(),
+      onCancel: () => this.cancelRecording(),
     });
+
+    if (tauriBridge.isTauri()) {
+      await invoke('enter_recording_pill_mode').catch(() => {});
+      if (cropRegion && cropRegion.width > 20 && cropRegion.height > 20) {
+        await invoke('show_recording_border', {
+          x: Math.round(cropRegion.x),
+          y: Math.round(cropRegion.y),
+          width: Math.round(cropRegion.width),
+          height: Math.round(cropRegion.height),
+        }).catch(() => {});
+      }
+    }
+    toast.show(cropRegion ? 'Recording selected region...' : 'Recording full screen...', 'info');
+  }
+
+  async cancelRecording() {
+    this.recordingDock.hide();
+    document.body.classList.remove('mode-recording-pill');
+    if (tauriBridge.isTauri()) {
+      invoke('hide_recording_border').catch(() => {});
+      await invoke('exit_recording_pill_mode').catch(() => {});
+    }
+    await screenRecorderService.cancelRecording();
+    toast.show('Recording discarded', 'info');
   }
 
   async stopRecording() {
+    this.recordingDock.hide();
+    document.body.classList.remove('mode-recording-pill');
+    if (tauriBridge.isTauri()) {
+      invoke('hide_recording_border').catch(() => {});
+      await invoke('exit_recording_pill_mode').catch(() => {});
+    }
+
     const result = await screenRecorderService.stopRecording();
     if (!result || !result.tempPath) return;
 
@@ -171,24 +245,27 @@ export class CaptureManager {
   showRecordingSavedToast(savedPath, durationSecs) {
     const filename = savedPath.split(/[/\\]/).pop();
     const timeStr = screenRecorderService.formatTime(durationSecs);
-    toast.show(`Recording saved: ${filename} (${timeStr})`, 'info');
 
-    // Create a rich interactive post-recording pill notification
+    // Single-toast lifecycle: dismiss any active banner before rendering
+    document.querySelectorAll('.recording-complete-banner').forEach((b) => b.remove());
+
     const banner = document.createElement('div');
     banner.className = 'recording-complete-banner glass-panel';
     banner.innerHTML = `
-      <div class="complete-text">
-        <i class="ri-video-check-line"></i>
-        <span>${filename}</span>
+      <div class="complete-badge"><i class="ri-checkbox-circle-fill"></i></div>
+      <div class="complete-meta">
+        <span class="complete-filename" title="${filename}">${filename}</span>
+        <span class="complete-duration">(${timeStr})</span>
       </div>
+      <div class="complete-divider"></div>
       <div class="complete-actions">
         <button class="complete-btn alitken" id="btnPostAlitken" title="Open with Alitken Media Converter">
-          <i class="ri-film-line"></i> Open in Alitken
+          <i class="ri-film-line"></i> <span>Open in Alitken</span>
         </button>
-        <button class="complete-btn" id="btnPostFolder" title="Show in Windows Explorer">
-          <i class="ri-folder-open-line"></i> Show in Folder
+        <button class="complete-btn folder" id="btnPostFolder" title="Show in Windows Explorer">
+          <i class="ri-folder-open-line"></i> <span>Folder</span>
         </button>
-        <button class="complete-btn close" id="btnPostClose">
+        <button class="complete-btn close" id="btnPostClose" title="Dismiss">
           <i class="ri-close-line"></i>
         </button>
       </div>

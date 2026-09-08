@@ -5,8 +5,8 @@
 
 export class HotkeyService {
   constructor() {
-    this.DEFAULT_SCREENSHOT = 'Ctrl+Alt+S';
-    this.DEFAULT_RECORD = 'Ctrl+Alt+R';
+    this.DEFAULT_SCREENSHOT = 'Alt+Shift+S';
+    this.DEFAULT_RECORD = 'Alt+Shift+R';
 
     this.STORAGE_KEY_SCREENSHOT = 'bukaake-hotkey-screenshot';
     this.STORAGE_KEY_RECORD = 'bukaake-hotkey-record';
@@ -19,6 +19,7 @@ export class HotkeyService {
   setScreenshotHotkey(combo) {
     if (combo) localStorage.setItem(this.STORAGE_KEY_SCREENSHOT, combo);
     else localStorage.removeItem(this.STORAGE_KEY_SCREENSHOT);
+    this.notifyChange();
   }
 
   getRecordHotkey() {
@@ -28,15 +29,34 @@ export class HotkeyService {
   setRecordHotkey(combo) {
     if (combo) localStorage.setItem(this.STORAGE_KEY_RECORD, combo);
     else localStorage.removeItem(this.STORAGE_KEY_RECORD);
+    this.notifyChange();
   }
 
   resetDefaults() {
     localStorage.removeItem(this.STORAGE_KEY_SCREENSHOT);
     localStorage.removeItem(this.STORAGE_KEY_RECORD);
+    this.notifyChange();
+  }
+
+  notifyChange() {
+    const detail = {
+      screenshot: this.getScreenshotHotkey(),
+      record: this.getRecordHotkey(),
+    };
+    window.dispatchEvent(new CustomEvent('bukaake-hotkeys-changed', { detail }));
+    if (window.__TAURI__?.core?.invoke) {
+      window.__TAURI__.core.invoke('update_global_shortcuts', {
+        snipCombo: detail.screenshot,
+        recordCombo: detail.record,
+      }).catch(() => {});
+    }
+    if (window.__TAURI__?.event?.emit) {
+      window.__TAURI__.event.emit('bukaake-hotkeys-changed', detail).catch(() => {});
+    }
   }
 
   /**
-   * Normalizes a KeyboardEvent into a standard combo string (e.g. "Ctrl+Alt+S")
+   * Normalizes a KeyboardEvent into a standard combo string (e.g. "Alt+Shift+S")
    * @param {KeyboardEvent} e 
    * @returns {string|null}
    */

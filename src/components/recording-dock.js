@@ -26,9 +26,9 @@ export class RecordingDock {
     this.dock = document.createElement('div');
     this.dock.className = 'recording-dock glass-panel hidden';
     this.dock.innerHTML = `
-      <div class="recording-indicator">
-        <span class="recording-pulse-dot"></span>
-        <span class="recording-timer" id="recordingTimer">00:00</span>
+      <div class="recording-indicator" data-tauri-drag-region>
+        <span class="recording-pulse-dot" data-tauri-drag-region></span>
+        <span class="recording-timer" id="recordingTimer" data-tauri-drag-region>00:00</span>
       </div>
       <div class="recording-dock-divider"></div>
       <div class="recording-controls">
@@ -56,6 +56,9 @@ export class RecordingDock {
   }
 
   bindEvents() {
+    [this.btnPause, this.btnStop, this.btnCancel].forEach((btn) => {
+      btn?.addEventListener('mousedown', (e) => e.stopPropagation());
+    });
     this.btnPause?.addEventListener('click', (e) => {
       e.stopPropagation();
       if (this.isPaused) {

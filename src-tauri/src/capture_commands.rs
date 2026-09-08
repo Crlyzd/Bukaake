@@ -125,8 +125,7 @@ pub fn launch_alitken(video_path: String, custom_exe: Option<String>) -> Result<
         if let Ok(current_exe) = std::env::current_exe() {
             if let Some(dir) = current_exe.parent() {
                 let candidates = [
-                    dir.join("AlitConverter.exe"),
-                    dir.join("alitken.exe"),
+                    dir.join("AlitConverter.exe"), dir.join("alitken.exe"),
                     dir.join("Alitken").join("AlitConverter.exe"),
                     dir.join("..").join("Alitken").join("AlitConverter.exe"),
                     dir.join("..").join("AlitConverter.exe"),
@@ -155,3 +154,65 @@ pub fn launch_alitken(video_path: String, custom_exe: Option<String>) -> Result<
 
     Ok(())
 }
+
+#[tauri::command]
+pub fn prepare_screen_snip(app: tauri::AppHandle) -> Result<ScreenCapturePayload, String> {
+    use tauri::Manager;
+    if let Some(win) = app.get_webview_window("main") {
+        if win.is_visible().unwrap_or(false) {
+            let _ = win.hide();
+            std::thread::sleep(std::time::Duration::from_millis(280));
+        }
+    }
+
+    let payload = screen_capture::capture_desktop()?;
+
+    if let Some(win) = app.get_webview_window("main") {
+        let _ = win.set_always_on_top(true);
+        let _ = win.set_fullscreen(true);
+        let _ = win.show();
+        let _ = win.set_focus();
+    }
+    Ok(payload)
+}
+
+#[tauri::command]
+pub fn finish_screen_snip(
+    app: tauri::AppHandle,
+    was_fullscreen: bool,
+    was_minimized: bool,
+    was_hidden: bool,
+) -> Result<(), String> {
+    use tauri::Manager;
+    if let Some(win) = app.get_webview_window("main") {
+        let _ = win.set_always_on_top(false);
+        if was_hidden {
+            let _ = win.set_fullscreen(false);
+            let _ = win.hide();
+        } else if was_minimized {
+            let _ = win.set_fullscreen(false);
+            let _ = win.minimize();
+        } else if !was_fullscreen {
+            let _ = win.set_fullscreen(false);
+        }
+    }
+    Ok(())
+}
+
+#[tauri::command]
+pub fn update_global_shortcuts(
+    app: tauri::AppHandle,
+    snip_combo: String,
+    record_combo: String,
+) -> Result<(), String> {
+    use tauri_plugin_global_shortcut::{GlobalShortcutExt, Shortcut};
+    let _ = app.global_shortcut().unregister_all();
+    if let Ok(sc) = snip_combo.parse::<Shortcut>() {
+        let _ = app.global_shortcut().register(sc);
+    }
+    if let Ok(sc) = record_combo.parse::<Shortcut>() {
+        let _ = app.global_shortcut().register(sc);
+    }
+    Ok(())
+}
+

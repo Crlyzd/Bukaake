@@ -9,6 +9,8 @@ pub mod heif_reader;
 pub mod pro_decoder;
 pub mod raw_reader;
 pub mod capture_commands;
+pub mod recording_pill;
+pub mod recording_border;
 pub mod screen_capture;
 pub mod standby;
 pub mod window_commands;
@@ -20,7 +22,10 @@ use capture_commands::{
     append_recording_chunk, capture_screen, discard_recording, finalize_recording,
     get_default_videos_dir, init_recording_stream, launch_alitken,
     prompt_select_executable, prompt_select_folder, prompt_save_recording,
+    prepare_screen_snip, finish_screen_snip, update_global_shortcuts,
 };
+use recording_pill::{enter_recording_pill_mode, exit_recording_pill_mode};
+use recording_border::{show_recording_border, hide_recording_border, set_recording_border_paused};
 use clipboard::{read_clipboard, write_clipboard_image};
 use file_assoc::{
     auto_heal_or_sync_path, check_association_status, launch_default_apps_settings,
@@ -30,6 +35,7 @@ use file_ops::delete_file;
 use image_loader::{get_initial_image, read_image_context, read_image_file, read_raw_full_sensor};
 use standby::{enter_standby, is_standby_enabled, set_standby_enabled, show_main_window, StandbyManager};
 use tauri::{Emitter, Manager};
+use tauri_plugin_global_shortcut::{GlobalShortcutExt, ShortcutState};
 use updater::{cleanup_old_update_artifacts, download_and_install_update, get_system_arch};
 use window_commands::{
     get_cli_args, open_url, show_in_folder, close_window, exit_app,
@@ -40,8 +46,35 @@ use window_commands::{
 };
 
 fn main() {
+    #[cfg(target_os = "windows")]
+    {
+        let current_args = std::env::var("WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS").unwrap_or_default();
+        let capture_flags = "--auto-select-desktop-capture-source=\"Entire screen\" --enable-usermedia-screen-capturing --use-fake-ui-for-media-stream --disable-background-timer-throttling --disable-renderer-backgrounding --disable-backgrounding-occluded-windows";
+        if !current_args.contains("--auto-select-desktop-capture-source") {
+            let combined = if current_args.is_empty() {
+                capture_flags.to_string()
+            } else {
+                format!("{} {}", current_args, capture_flags)
+            };
+            std::env::set_var("WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS", combined);
+        }
+    }
     cleanup_old_update_artifacts();
     tauri::Builder::default()
+        .plugin(
+            tauri_plugin_global_shortcut::Builder::new()
+                .with_handler(|app, shortcut, event| {
+                    if event.state() == ShortcutState::Pressed {
+                        let text = shortcut.to_string().to_lowercase();
+                        if text.contains('s') {
+                            let _ = app.emit("bukaake://trigger-snip", ());
+                        } else if text.contains('r') {
+                            let _ = app.emit("bukaake://trigger-record", ());
+                        }
+                    }
+                })
+                .build(),
+        )
         .plugin(tauri_plugin_single_instance::init(|app, argv, _cwd| {
             if let Some(win) = app.get_webview_window("main") {
                 let standby = app.state::<StandbyManager>();
@@ -97,6 +130,12 @@ fn main() {
                     let _ = window_vibrancy::apply_acrylic(&w, tint);
                 }
             }
+            if let Ok(snip_sc) = "Alt+Shift+S".parse::<tauri_plugin_global_shortcut::Shortcut>() {
+                let _ = app.global_shortcut().register(snip_sc);
+            }
+            if let Ok(rec_sc) = "Alt+Shift+R".parse::<tauri_plugin_global_shortcut::Shortcut>() {
+                let _ = app.global_shortcut().register(rec_sc);
+            }
             Ok(())
         })
         .on_window_event(|window, event| {
@@ -132,7 +171,9 @@ fn main() {
             capture_screen, get_default_videos_dir, init_recording_stream,
             append_recording_chunk, finalize_recording, discard_recording,
             prompt_save_recording, prompt_select_folder, prompt_select_executable,
-            launch_alitken
+            launch_alitken, prepare_screen_snip, finish_screen_snip, update_global_shortcuts,
+            enter_recording_pill_mode, exit_recording_pill_mode,
+            show_recording_border, hide_recording_border, set_recording_border_paused
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

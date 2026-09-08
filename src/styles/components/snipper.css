@@ -29,8 +29,9 @@
 
 .snipper-selection-box {
   position: absolute;
-  box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.50), 0 0 24px rgba(99, 102, 241, 0.45);
-  border: none;
+  box-sizing: border-box;
+  box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.55), 0 0 14px rgba(0, 162, 255, 0.85);
+  border: 3px solid #00a2ff;
   outline: none !important;
   pointer-events: auto;
   border-radius: 4px;
@@ -117,3 +118,103 @@
 .snipper-btn.cancel:hover {
   color: var(--text-main);
 }
+
+/* Light Theme Optical Definition (Pillar 2) */
+body.light-theme .snipper-action-dock,
+html[data-theme="light"] .snipper-action-dock {
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 12px 32px rgba(26, 32, 44, 0.18);
+}
+
+body.light-theme .snipper-dim-tag,
+html[data-theme="light"] .snipper-dim-tag {
+  background: rgba(255, 255, 255, 0.95);
+  color: var(--text-main);
+  box-shadow: 0 4px 12px rgba(26, 32, 44, 0.12);
+}
+
+/* Top Floating Mode Switcher Dock (Windows 11 Snipping Tool style) */
+.snipper-mode-dock {
+  position: absolute;
+  top: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 10px;
+  background: rgba(14, 18, 27, 0.94);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border-radius: var(--radius-pill);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.65), 0 0 20px rgba(99, 102, 241, 0.25);
+  border: none;
+  user-select: none;
+}
+
+body.light-theme .snipper-mode-dock,
+html[data-theme="light"] .snipper-mode-dock {
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 16px 40px rgba(26, 32, 44, 0.18), 0 0 20px rgba(99, 102, 241, 0.15);
+}
+
+.snipper-type-toggle,
+.snipper-region-modes {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.snipper-dock-divider {
+  width: 2px;
+  height: 14px;
+  background: rgba(255, 255, 255, 0.16);
+  border-radius: 2px;
+  margin: 0 6px;
+}
+
+body.light-theme .snipper-dock-divider,
+html[data-theme="light"] .snipper-dock-divider {
+  background: rgba(26, 32, 44, 0.14);
+}
+
+.snipper-pill-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 10px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-muted);
+  background: transparent;
+  border: none;
+  outline: none !important;
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.snipper-pill-btn:hover {
+  background: var(--glass-btn-hover-bg);
+  color: var(--text-main);
+  transform: translateY(-1px);
+}
+
+.snipper-pill-btn.active {
+  background: var(--action-bg);
+  color: var(--action-text);
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.snipper-pill-btn.cancel {
+  padding: 5px 8px;
+  color: var(--text-dim);
+}
+
+.snipper-pill-btn.cancel:hover {
+  color: #ef4444;
+}
+
+

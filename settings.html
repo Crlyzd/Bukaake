@@ -108,16 +108,24 @@
         </div>
         <div class="settings-hotkeys-grid">
           <div class="hotkey-row">
-            <span class="hotkey-label"><i class="ri-screenshot-2-line"></i> Screenshot / Snip:</span>
+            <span class="hotkey-label"><i class="ri-screenshot-fill"></i> Screenshot / Snip:</span>
             <button class="hotkey-chip glass-btn" id="btnKeyScreenshot" title="Click to bind shortcut">
-              <kbd id="lblKeyScreenshot">Ctrl+Alt+S</kbd>
+              <kbd id="lblKeyScreenshot">Alt+Shift+S</kbd>
             </button>
           </div>
           <div class="hotkey-row">
-            <span class="hotkey-label"><i class="ri-video-record-line"></i> Screen Record:</span>
+            <span class="hotkey-label"><i class="ri-video-on-line"></i> Screen Record:</span>
             <button class="hotkey-chip glass-btn" id="btnKeyRecord" title="Click to bind shortcut">
-              <kbd id="lblKeyRecord">Ctrl+Alt+R</kbd>
+              <kbd id="lblKeyRecord">Alt+Shift+R</kbd>
             </button>
+          </div>
+          <div class="settings-option-subrow" style="margin-top: 6px;">
+            <span class="settings-sub-label">Default Target:</span>
+            <select class="settings-select glass-input" id="selectDefaultCaptureMode">
+              <option value="region">Selected Region</option>
+              <option value="window">Active Window</option>
+              <option value="fullscreen">Full Screen</option>
+            </select>
           </div>
         </div>
       </div>

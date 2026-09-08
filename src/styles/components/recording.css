@@ -63,62 +63,58 @@
 .recording-btn.cancel { padding: 5px 8px; color: rgba(255, 255, 255, 0.6); }
 .recording-btn.cancel:hover { color: #fff; }
 
-/* Capture Popover Menu in Titlebar */
-.capture-popover-menu {
-  position: fixed; z-index: 99999;
-  display: flex; flex-direction: column; gap: 4px; padding: 6px; min-width: 190px;
-  background: rgba(14, 18, 27, 0.95);
-  backdrop-filter: blur(24px) saturate(180%);
-  -webkit-backdrop-filter: blur(24px) saturate(180%);
-  border-radius: var(--radius-md);
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6);
-  border: none; animation: popoverFadeIn 0.18s ease-out;
+/* In-Window Pill Mode (Main Window Resized to 320x56) */
+body.mode-recording-pill {
+  width: 100vw !important; height: 100vh !important;
+  background: transparent !important; overflow: hidden !important;
+  display: flex !important; align-items: center !important; justify-content: center !important;
+  margin: 0 !important; padding: 0 !important;
 }
 
-.capture-popover-menu.hidden { display: none !important; }
-
-@keyframes popoverFadeIn {
-  from { opacity: 0; transform: translateY(-6px); }
-  to { opacity: 1; transform: translateY(0); }
+html.mode-recording-pill,
+body.mode-recording-pill {
+  background: transparent !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
 }
 
-.capture-menu-item {
-  display: flex; align-items: center; gap: 10px; padding: 8px 10px;
-  border-radius: var(--radius-sm); background: transparent;
-  border: none; outline: none !important; color: var(--text-main);
-  cursor: pointer; font-size: 13px; transition: all var(--transition-fast);
-  text-align: left; width: 100%;
+body.mode-recording-pill #appTitlebar,
+body.mode-recording-pill #viewportContainer,
+body.mode-recording-pill #dropZone,
+body.mode-recording-pill #resizeHandleContainer,
+body.mode-recording-pill #toolbarDock,
+body.mode-recording-pill #titlebar,
+body.mode-recording-pill #toolbar,
+body.mode-recording-pill #viewerCanvas,
+body.mode-recording-pill #emptyState,
+body.mode-recording-pill .modal-overlay,
+body.mode-recording-pill .modal-shield,
+body.mode-recording-pill .toast-container,
+body.mode-recording-pill .drawer,
+body.mode-recording-pill #metadataDrawer,
+body.mode-recording-pill #adjustmentsPanel,
+body.mode-recording-pill .screen-snipper-overlay {
+  display: none !important;
 }
 
-.capture-menu-item:hover { background: rgba(255, 255, 255, 0.08); }
-.capture-menu-item i { font-size: 16px; color: var(--text-muted); }
-.capture-menu-item:hover i { color: var(--text-main); }
-.capture-menu-item.record:hover i { color: #ef4444; }
-
-.menu-item-text {
-  display: flex; align-items: center; justify-content: space-between; flex: 1;
+body.mode-recording-pill .recording-dock {
+  position: static !important; top: auto !important; right: auto !important;
+  margin: 0 auto !important; height: 44px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.65), 0 0 16px rgba(239, 68, 68, 0.3) !important;
 }
 
-.menu-item-text kbd {
-  font-family: 'JetBrains Mono', monospace; font-size: 10px;
-  color: var(--text-dim); background: rgba(255, 255, 255, 0.06);
-  padding: 2px 5px; border-radius: 4px;
-}
-
-.capture-menu-divider {
-  height: 1px; background: rgba(255, 255, 255, 0.08); margin: 3px 6px;
-}
-
-/* Post-Recording Tandem Banner */
+/* Post-Recording Compact Glass Pill Banner (42px Height) */
 .recording-complete-banner {
   position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
-  z-index: 99999; display: flex; align-items: center; gap: 14px; padding: 8px 16px;
-  background: rgba(14, 18, 27, 0.96);
+  z-index: 99999; display: flex; align-items: center; gap: 10px; padding: 4px 12px;
+  height: 42px; box-sizing: border-box;
+  background: rgba(14, 18, 27, 0.94);
   backdrop-filter: blur(24px) saturate(180%);
   -webkit-backdrop-filter: blur(24px) saturate(180%);
   border-radius: var(--radius-pill);
   box-shadow: 0 16px 48px rgba(0, 0, 0, 0.65), 0 0 24px rgba(99, 102, 241, 0.3);
   border: none; animation: bannerSlideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  user-select: none;
 }
 
 @keyframes bannerSlideUp {
@@ -126,31 +122,123 @@
   to { opacity: 1; transform: translate(-50%, 0); }
 }
 
-.complete-text {
-  display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 500;
-  color: #fff; max-width: 280px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+.complete-badge {
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 16px; color: #10b981; line-height: 1;
 }
 
-.complete-text i { font-size: 17px; color: #10b981; }
-.complete-actions { display: flex; align-items: center; gap: 6px; }
+.complete-meta {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 12px; font-weight: 500; color: #fff;
+  line-height: 1;
+}
+
+.complete-filename {
+  max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+
+.complete-duration {
+  font-family: 'JetBrains Mono', monospace; font-size: 11px;
+  color: rgba(255, 255, 255, 0.6); letter-spacing: 0.3px;
+  white-space: nowrap;
+}
+
+.complete-divider {
+  width: 1px; height: 16px; background: rgba(255, 255, 255, 0.12);
+  margin: 0 2px;
+}
+
+.complete-actions {
+  display: flex; align-items: center; gap: 6px;
+}
 
 .complete-btn {
-  display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px;
-  font-size: 12px; font-weight: 500; color: #fff;
-  background: rgba(255, 255, 255, 0.08); border: none; outline: none !important;
-  border-radius: var(--radius-pill); cursor: pointer; transition: all var(--transition-fast);
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 5px 12px; font-size: 12px; font-weight: 500;
+  line-height: 1; white-space: nowrap !important;
+  color: #fff; background: rgba(255, 255, 255, 0.08);
+  border: none; outline: none !important; border-radius: var(--radius-pill);
+  cursor: pointer; transition: all var(--transition-fast);
 }
 
-.complete-btn:hover { background: rgba(255, 255, 255, 0.16); transform: translateY(-1px); }
+.complete-btn:hover {
+  background: rgba(255, 255, 255, 0.16); transform: translateY(-1px);
+}
 
 .complete-btn.alitken {
-  background: linear-gradient(135deg, #6366f1, #8b5cf6); color: #fff; font-weight: 600;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  color: #fff; font-weight: 600;
   box-shadow: 0 4px 14px rgba(99, 102, 241, 0.4);
 }
 
 .complete-btn.alitken:hover {
-  filter: brightness(1.1); box-shadow: 0 6px 18px rgba(99, 102, 241, 0.55);
+  filter: brightness(1.1);
+  box-shadow: 0 6px 18px rgba(99, 102, 241, 0.55);
 }
 
-.complete-btn.close { padding: 6px 8px; color: rgba(255, 255, 255, 0.5); }
-.complete-btn.close:hover { color: #fff; }
+.complete-btn.close {
+  padding: 5px 8px; color: rgba(255, 255, 255, 0.5);
+}
+.complete-btn.close:hover {
+  color: #fff;
+}
+
+/* Light Theme Optical Fills (Pillar 2) */
+body.light-theme .recording-dock,
+html[data-theme="light"] .recording-dock {
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 16px 40px rgba(26, 32, 44, 0.16), 0 0 20px rgba(239, 68, 68, 0.20);
+}
+
+body.light-theme .recording-timer,
+html[data-theme="light"] .recording-timer {
+  color: var(--text-main);
+}
+
+body.light-theme .recording-dock-divider,
+html[data-theme="light"] .recording-dock-divider {
+  background: rgba(26, 32, 44, 0.12);
+}
+
+body.light-theme .recording-btn:not(.stop),
+html[data-theme="light"] .recording-btn:not(.stop) {
+  color: var(--text-main);
+  background: rgba(26, 32, 44, 0.06);
+}
+
+body.light-theme .recording-btn:not(.stop):hover,
+html[data-theme="light"] .recording-btn:not(.stop):hover {
+  background: rgba(26, 32, 44, 0.12);
+}
+
+body.light-theme .recording-complete-banner,
+html[data-theme="light"] .recording-complete-banner {
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 16px 48px rgba(26, 32, 44, 0.18), 0 0 24px rgba(99, 102, 241, 0.25);
+}
+
+body.light-theme .complete-meta,
+html[data-theme="light"] .complete-meta {
+  color: var(--text-main);
+}
+
+body.light-theme .complete-duration,
+html[data-theme="light"] .complete-duration {
+  color: var(--text-muted);
+}
+
+body.light-theme .complete-divider,
+html[data-theme="light"] .complete-divider {
+  background: rgba(26, 32, 44, 0.12);
+}
+
+body.light-theme .complete-btn:not(.alitken),
+html[data-theme="light"] .complete-btn:not(.alitken) {
+  color: var(--text-main);
+  background: rgba(26, 32, 44, 0.06);
+}
+
+body.light-theme .complete-btn:not(.alitken):hover,
+html[data-theme="light"] .complete-btn:not(.alitken):hover {
+  background: rgba(26, 32, 44, 0.12);
+}

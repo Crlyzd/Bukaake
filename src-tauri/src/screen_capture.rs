@@ -8,6 +8,15 @@ use image::{ImageFormat, RgbaImage};
 use serde::Serialize;
 use std::io::Cursor;
 
+#[derive(Serialize, Clone)]
+pub struct DetectedWindow {
+    pub title: String,
+    pub x: i32,
+    pub y: i32,
+    pub width: i32,
+    pub height: i32,
+}
+
 #[derive(Serialize)]
 pub struct ScreenCapturePayload {
     pub data_url: String,
@@ -15,6 +24,7 @@ pub struct ScreenCapturePayload {
     pub height: u32,
     pub x: i32,
     pub y: i32,
+    pub windows: Vec<DetectedWindow>,
 }
 
 #[cfg(target_os = "windows")]
@@ -124,6 +134,7 @@ pub fn capture_desktop() -> Result<ScreenCapturePayload, String> {
 
         let encoded = base64::engine::general_purpose::STANDARD.encode(png_bytes.into_inner());
         let data_url = format!("data:image/png;base64,{}", encoded);
+        let windows = enumerate_visible_windows();
 
         Ok(ScreenCapturePayload {
             data_url,
@@ -131,8 +142,61 @@ pub fn capture_desktop() -> Result<ScreenCapturePayload, String> {
             height: height as u32,
             x,
             y,
+            windows,
         })
     }
+}
+
+#[cfg(target_os = "windows")]
+pub fn enumerate_visible_windows() -> Vec<DetectedWindow> {
+    use windows::Win32::Foundation::{BOOL, HWND, LPARAM, RECT};
+    use windows::Win32::UI::WindowsAndMessaging::{
+        EnumWindows, GetWindowLongW, GetWindowRect, GetWindowTextW,
+        IsIconic, IsWindowVisible, GWL_EXSTYLE, WS_EX_TOOLWINDOW,
+    };
+
+    struct EnumData {
+        windows: Vec<DetectedWindow>,
+    }
+
+    unsafe extern "system" fn enum_proc(hwnd: HWND, lparam: LPARAM) -> BOOL {
+        let data = &mut *(lparam.0 as *mut EnumData);
+        if IsWindowVisible(hwnd).as_bool() && !IsIconic(hwnd).as_bool() {
+            let ex_style = GetWindowLongW(hwnd, GWL_EXSTYLE) as u32;
+            if (ex_style & WS_EX_TOOLWINDOW.0) == 0 {
+                let mut rect = RECT::default();
+                if GetWindowRect(hwnd, &mut rect).is_ok() {
+                    let w = rect.right - rect.left;
+                    let h = rect.bottom - rect.top;
+                    if w > 120 && h > 80 {
+                        let mut text_buf = [0u16; 256];
+                        let len = GetWindowTextW(hwnd, &mut text_buf);
+                        let title = if len > 0 {
+                            String::from_utf16_lossy(&text_buf[..len as usize])
+                        } else {
+                            String::new()
+                        };
+                        if title != "Program Manager" && !title.is_empty() {
+                            data.windows.push(DetectedWindow {
+                                title,
+                                x: rect.left,
+                                y: rect.top,
+                                width: w,
+                                height: h,
+                            });
+                        }
+                    }
+                }
+            }
+        }
+        BOOL(1)
+    }
+
+    let mut data = EnumData { windows: Vec::new() };
+    unsafe {
+        let _ = EnumWindows(Some(enum_proc), LPARAM(&mut data as *mut _ as isize));
+    }
+    data.windows
 }
 
 #[cfg(not(target_os = "windows"))]

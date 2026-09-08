@@ -39,22 +39,29 @@ export class ScreenCaptureService {
     return new Promise((resolve, reject) => {
       const img = new Image();
       img.onload = () => {
+        const scaleX = (img.naturalWidth && window.innerWidth) ? (img.naturalWidth / window.innerWidth) : 1;
+        const scaleY = (img.naturalHeight && window.innerHeight) ? (img.naturalHeight / window.innerHeight) : 1;
+        const sX = Math.round(rect.x * scaleX);
+        const sY = Math.round(rect.y * scaleY);
+        const sW = Math.max(1, Math.round(rect.width * scaleX));
+        const sH = Math.max(1, Math.round(rect.height * scaleY));
+
         const canvas = document.createElement('canvas');
-        canvas.width = Math.max(1, Math.round(rect.width));
-        canvas.height = Math.max(1, Math.round(rect.height));
+        canvas.width = sW;
+        canvas.height = sH;
         const ctx = canvas.getContext('2d');
         if (!ctx) return reject(new Error('Canvas 2D context unavailable'));
 
         ctx.drawImage(
           img,
-          Math.round(rect.x),
-          Math.round(rect.y),
-          canvas.width,
-          canvas.height,
+          sX,
+          sY,
+          sW,
+          sH,
           0,
           0,
-          canvas.width,
-          canvas.height
+          sW,
+          sH
         );
         resolve(canvas.toDataURL('image/png'));
       };

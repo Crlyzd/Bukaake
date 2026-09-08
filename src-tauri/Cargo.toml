@@ -24,6 +24,7 @@ winreg = "0.52"
 heif-oxide = "0.1.0"
 
 tauri-plugin-single-instance = "2"
+tauri-plugin-global-shortcut = "2"
 
 [features]
 default = ["custom-protocol"]

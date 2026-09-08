@@ -45,6 +45,14 @@ export function bindCaptureSettings() {
   setupRecorder(btnSS, lblSS, (combo) => hotkeyService.setScreenshotHotkey(combo));
   setupRecorder(btnRec, lblRec, (combo) => hotkeyService.setRecordHotkey(combo));
 
+  const selCaptureMode = document.getElementById('selectDefaultCaptureMode');
+  if (selCaptureMode) {
+    selCaptureMode.value = localStorage.getItem('bukaake-capture-mode') || 'region';
+    selCaptureMode.addEventListener('change', () => {
+      localStorage.setItem('bukaake-capture-mode', selCaptureMode.value);
+    });
+  }
+
   // 2. Storage Directory & Prompt
   const inputDir = document.getElementById('inputVideoSaveDir');
   const btnBrowseDir = document.getElementById('btnBrowseVideoDir');

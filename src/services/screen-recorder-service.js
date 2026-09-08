@@ -33,7 +33,7 @@ export class ScreenRecorderService {
     return QUALITY_PRESETS[saved] ? saved : 'high';
   }
 
-  async startRecording(presetKey = null) {
+  async startRecording(presetKey = null, cropRegion = null) {
     if (this.state !== 'idle') return false;
     const quality = QUALITY_PRESETS[presetKey || this.getQualitySetting()] || QUALITY_PRESETS.high;
 
@@ -50,6 +50,52 @@ export class ScreenRecorderService {
       });
 
       this.mediaStream = stream;
+      let recordStream = stream;
+
+      if (cropRegion && cropRegion.width > 20 && cropRegion.height > 20) {
+        const video = document.createElement('video');
+        video.srcObject = stream;
+        video.muted = true;
+        video.playsInline = true;
+        await video.play().catch(() => {});
+
+        if (!video.videoWidth) {
+          await new Promise((resolve) => {
+            video.onloadedmetadata = () => resolve();
+            setTimeout(resolve, 100);
+          });
+        }
+
+        const vW = video.videoWidth || window.innerWidth;
+        const vH = video.videoHeight || window.innerHeight;
+        const scaleX = vW / window.innerWidth;
+        const scaleY = vH / window.innerHeight;
+
+        const sX = Math.round(cropRegion.x * scaleX);
+        const sY = Math.round(cropRegion.y * scaleY);
+        const sW = Math.max(1, Math.round(cropRegion.width * scaleX));
+        const sH = Math.max(1, Math.round(cropRegion.height * scaleY));
+
+        const canvas = document.createElement('canvas');
+        canvas.width = sW;
+        canvas.height = sH;
+        const ctx = canvas.getContext('2d', { alpha: false });
+
+        this.cropCanvas = canvas;
+        this.cropVideo = video;
+
+        const frameInterval = Math.max(16, Math.floor(1000 / quality.fps));
+        this.cropInterval = setInterval(() => {
+          if (this.state === 'recording' || this.state === 'paused') {
+            ctx.drawImage(video, sX, sY, sW, sH, 0, 0, sW, sH);
+          }
+        }, frameInterval);
+
+        const canvasStream = canvas.captureStream(quality.fps);
+        stream.getAudioTracks().forEach((track) => canvasStream.addTrack(track));
+        recordStream = canvasStream;
+      }
+
       const mimeType = MediaRecorder.isTypeSupported('video/webm;codecs=vp9,opus')
         ? 'video/webm;codecs=vp9,opus'
         : 'video/webm';
@@ -57,7 +103,7 @@ export class ScreenRecorderService {
       const tempFilename = `rec_${Date.now()}.part`;
       this.tempFilePath = await invoke('init_recording_stream', { tempFilename });
 
-      this.mediaRecorder = new MediaRecorder(stream, {
+      this.mediaRecorder = new MediaRecorder(recordStream, {
         mimeType,
         videoBitsPerSecond: quality.bitrate,
       });
@@ -180,6 +226,21 @@ export class ScreenRecorderService {
 
   cleanup() {
     this.stopTimer();
+    if (this.cropInterval) {
+      clearInterval(this.cropInterval);
+      this.cropInterval = null;
+    }
+    if (this.cropAnimFrame) {
+      cancelAnimationFrame(this.cropAnimFrame);
+      this.cropAnimFrame = null;
+    }
+    if (this.cropVideo) {
+      this.cropVideo.pause();
+      this.cropVideo.srcObject = null;
+      this.cropVideo = null;
+    }
+    this.cropCanvas = null;
+
     if (this.mediaStream) {
       this.mediaStream.getTracks().forEach((track) => track.stop());
       this.mediaStream = null;
