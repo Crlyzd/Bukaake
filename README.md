@@ -10,122 +10,136 @@
 
 ---
 
-<!-- HERO SCREENSHOT PLACEHOLDER -->
 <div align="center">
-  <img width="2559" height="1440" alt="image" src="https://github.com/user-attachments/assets/6626a09e-23c3-41d3-8796-6fe82474fb0d" />
-  <p><em>Desktop-immersive viewing: Dimmed wallpaper background, centered floating titlebar, and zero window borders.</em></p>
+  <img width="2559" height="1440" alt="Bukaake Photo Viewer Screenshot" src="https://github.com/user-attachments/assets/6626a09e-23c3-41d3-8796-6fe82474fb0d" />
+  <p><em>Desktop-immersive viewing: Softly dimmed wallpaper background, centered floating controls, and zero bulky window borders.</em></p>
 </div>
 
 ---
 
 ## 💡 Why Bukaake?
 
-Most photo viewers on Windows today are either bloated, slow to launch, or trap your photos inside heavy window frames with thick borders and distracting toolbars. Some even ask you to buy extra plugins just to open photos from your phone!
+Most photo viewers on Windows today are slow to launch, cluttered with heavy toolbars, or trap your pictures inside thick, ugly window borders. Some even force you to pay for extra codecs just to open photos from your iPhone!
 
-**Bukaake** revives the beloved, magical experience of the classic **Google Picasa Photo Viewer**:
-- **Zero Distractions**: Borderless and translucent. Your desktop wallpaper stays visible softly dimmed in the background.
-- **Auto-Hiding Controls**: Look at your photos in complete peace. The moment your mouse stops moving, all toolbar buttons and titles fade smoothly into transparency.
-- **Instant Launch**: Opens in a blink and uses almost no RAM. A single ~5 MB portable file—no installation needed.
-- **Smooth Navigation**: Zoom like butter with your mouse wheel right into the details, drag to pan, and press `Left`/`Right` arrow keys to flip effortlessly through your albums.
-- **Safe & Friendly**: Send bad shots directly to the Windows Recycle Bin with `Delete`, jot quick notes with a built-in pen, or crop in seconds.
+**Bukaake** revives what made **Google Picasa Photo Viewer** so beloved, supercharged with modern Windows 10 & 11 design:
+
+- **Zero Distractions**: Truly borderless and translucent. Your desktop wallpaper stays softly dimmed in the background while your photo takes center stage.
+- **Auto-Hiding Controls**: Relax and enjoy your photos in peace. The second your mouse stops moving, all buttons and titles gently fade away.
+- **Instant Launch**: Opens in the blink of an eye and uses almost no RAM. A single ~5 MB portable file—no installation needed.
+- **Smooth Navigation**: Zoom like butter with your mouse wheel right into the fine details, click-and-drag to pan, and flip effortlessly through folders with your arrow keys.
+- **Stress-Free & Safe**: Send bad photos straight to your **Windows Recycle Bin** with `Delete`—easily restore them if you ever change your mind!
+- **Built-in Snip & Record**: Take instant screenshots of any monitor or region, or record video clips right from the app with zero extra tools.
 
 ---
 
 ## ✨ Features You'll Love
 
 ### 🪟 1. Picasa-Style Transparent Immersion
-When you double-click a photo, Bukaake lets your desktop wallpaper shine through with gentle dimming and zero blur. The photo floats elegantly at a comfortable 75% screen scale so it never overpowers your workspace.
+When you open an image, Bukaake lets your desktop wallpaper softly show through with gentle dimming and zero blur. Photos comfortably fill up to 75% of your screen so they never overpower your workspace, while all control bars stay elevated safely above your Windows taskbar.
 
-<img width="2560" height="1440" alt="image" src="https://github.com/user-attachments/assets/c29df440-32b0-49dd-b3d6-a25a9567b370">
+<img width="2560" height="1440" alt="Transparent Immersion" src="https://github.com/user-attachments/assets/c29df440-32b0-49dd-b3d6-a25a9567b370">
 
 ---
 
 ### 📷 2. Opens 49+ Formats, iPhone Photos & Pro Camera RAW
-Opens virtually every photo format in existence without needing to install extra software:
+Opens virtually every image format in existence without needing to download anything extra:
 - **Everyday Photos**: PNG, JPG, WebP, GIF, SVG, BMP, TIFF, AVIF.
-- **iPhone & iPad Photos (HEIC/HEIF)**: Opens Apple `.heic` photos out of the box—**100% free**, no paid Windows Store extensions required!
-- **Pro Camera RAW Photos**: Blazing-fast previews for Sony (`.arw`), Canon (`.cr2`, `.cr3`), Nikon (`.nef`), Fujifilm (`.raf`), Panasonic Lumix (`.rw2`), Olympus (`.orf`), Pentax (`.pef`), Leica, GoPro, DJI, and Adobe DNG.
-- **NEW: Full Sensor RAW Develop (`Q`)**: When viewing any RAW camera photo, just tap **`Q`** or click the sensor icon on the floating toolbar to instantly develop and unpack the full uncompressed sensor data!
-- **3D & Game Art**: Built-in support for HDR, OpenEXR, DDS, and TGA texture formats.
-- **Zero-Lag Album Flipping**: Next and previous photos load ahead of time in the background so flipping through a folder feels completely instant.
-- **Camera Info (`I`)**: Press **`I`** anytime to view camera telemetry: lens, aperture ($f$-stop), shutter speed, ISO, and GPS map coordinates.
+- **iPhone & iPad Photos (HEIC/HEIF)**: Opens Apple `.heic` photos out of the box—**100% free**, no paid Microsoft Store extensions needed!
+- **Pro Camera RAW**: Blazing-fast instant previews for Sony (`.arw`), Canon (`.cr2`, `.cr3`), Nikon (`.nef`), Fujifilm (`.raf`), Panasonic Lumix (`.rw2`), Olympus (`.orf`), Pentax, Leica, GoPro, DJI, and Adobe DNG.
+- **Full Sensor RAW Develop (`Q`)**: When viewing camera RAW photos, press **`Q`** or click the sensor icon to develop the full uncompressed sensor data with rich dynamic range.
+- **3D & Game Art**: Native support for HDR, OpenEXR, DDS, and TGA textures.
+- **Instant Folder Flipping**: Next and previous photos pre-load silently in the background so flipping through a folder feels instant.
+- **Camera Info Drawer (`I`)**: Press **`I`** anytime to view your camera telemetry: lens, aperture ($f$-stop), shutter speed, ISO, and GPS map coordinates.
 
 ---
 
-### 🗑️ 3. Safe Windows Recycle Bin Deletion
-Cleaning up blurry or unwanted photos is completely safe and stress-free:
+### 📸 3. Built-In Screen Snipping & Region Capture
+Take instant, crisp screenshots without needing external tools:
+- **Capture Modes**: Snip your Full Screen, Active Monitor, or drag any Custom Region with live dimension badges and crosshairs.
+- **Instant Clipboard (`Ctrl+V`)**: Captured snips are copied directly to your Windows clipboard so you can paste them straight into Discord, WhatsApp, Slack, or Word.
+- **Automatic Auto-Save**: Clean, timestamped PNG files are automatically saved to your `Pictures/Screenshots` folder—with a handy 1-click button in Settings to open the folder right away.
+
+---
+
+### 🎥 4. Desktop Screen Recording
+Record quick gameplay clips, software demos, or tutorials with ease:
+- **Stroke-Free Frosted Dock**: A floating recording bar with live timer, pause/resume, audio switches, and stop controls.
+- **Audio Control**: Toggle your microphone and system audio independently with a single click.
+- **Region Recording**: Record your whole desktop or select a custom rectangle with a clean glowing border guide.
+- **Export Ready**: Exports directly to WebM or MP4 with an automatic folder pop-up upon completion.
+
+---
+
+### 🗑️ 5. Safe Windows Recycle Bin Deletion
+Cleaning up blurry or duplicate photos is stress-free:
 - Press **`Delete`** on any photo to bring up the quick confirmation card.
-- Files are safely moved into the **Windows Recycle Bin**, meaning you can easily restore them at any time if you change your mind!
+- Files are safely sent to your **Windows Recycle Bin**, meaning you can restore them anytime!
 - Automatically flips smoothly to the next photo in your folder once deleted.
 - Want to permanently shred a file? Press **`Shift + Delete`**.
 
 ---
 
-### ✍️ 4. Freehand Pen & Highlighter
-Need to circle a detail, highlight a line on a receipt, or jot a quick note?
-- Tap **`D`** to open the floating drawing toolbar.
-- Choose between a crisp **Pen** or a soft translucent **Highlighter**.
-- Pick curated vibrant colors and stroke thicknesses with an interactive cursor preview ring.
-- Full **Undo (`Ctrl+Z`)** and **Redo (`Ctrl+Y`)** support.
+### ✍️ 6. Freehand Pen, Highlighter & Precision Crop
+- **Doodle & Annotate (`D`)**: Jot notes or circle important details with a sharp **Pen** or translucent **Highlighter**. Features vibrant curated colors, adjustable stroke thickness, and full **Undo (`Ctrl+Z`)** / **Redo (`Ctrl+Y`)**.
+- **Quick Crop (`C`)**: Frame your shot with common presets (1:1 Square, 16:9 Widescreen, 9:16 Story, 4:3, or Freeform) guided by magnetic alignment lasers.
+- **Instant Color Adjustments (`E`)**: Fine-tune Brightness, Contrast, Saturation, Exposure, and Warmth with real-time sliders or one-click preset styles.
+- **Change Protection**: Unsaved edits are automatically guarded so you never lose work by accident.
 
-<img width="787" height="442" alt="Cropped Image_edited" src="https://github.com/user-attachments/assets/846ec474-a1e3-440e-9c35-ac00fe7116cb" />
-
----
-
-### ✂️ 5. Quick Crop & Instant Color Adjustments
-- **Crop (`C`)**: Quickly frame your shot with popular aspect ratios (1:1 Square, 16:9 Widescreen, 9:16 Story, 4:3, or Freeform) with smooth corner handles and magnetic snapping guides.
-- **Enhance (`E`)**: Fine-tune Brightness, Contrast, Saturation, Exposure, and Warmth with real-time sliders or one-click preset styles.
-- **Safe Editing**: Unsaved changes are automatically guarded so you never lose your work when switching photos.
-
-<img width="1892" height="1065" alt="image" src="https://github.com/user-attachments/assets/ff3deac8-318a-43b0-8b37-29205394a73b" />
-<img width="1681" height="948" alt="image" src="https://github.com/user-attachments/assets/b5e28977-d018-4b7c-aaa5-c1f35bce8315" />
+<div align="center">
+  <img width="787" height="442" alt="Drawing Tool" src="https://github.com/user-attachments/assets/846ec474-a1e3-440e-9c35-ac00fe7116cb" />
+</div>
 
 ---
 
-### 🎨 6. Stroke-Free Frosted Glass (Dark & Light)
-Designed specifically to feel right at home on Windows 10 and 11:
+### 🎨 7. Stroke-Free Frosted Glass (Dark & Light)
+Crafted to look and feel right at home on Windows 10 and 11:
 - Ultra-modern frosted acrylic with soft ambient drop shadows and zero harsh 1px lines.
-- **Deep Obsidian Dark Mode** for comfortable night viewing and **Clean Frosted Slate Light Mode** for daylight.
+- **Deep Obsidian Dark Mode** for night-time comfort and **Clean Frosted Slate Light Mode** for bright rooms.
 - Seamless one-click theme toggle or matches your Windows system theme automatically.
 
-<img width="2559" height="1440" alt="image" src="https://github.com/user-attachments/assets/5ec39b3a-28b5-468b-86e9-73beeb451728" />
+<div align="center">
+  <img width="2559" height="1440" alt="Theme Support" src="https://github.com/user-attachments/assets/5ec39b3a-28b5-468b-86e9-73beeb451728" />
+</div>
 
 ---
 
-### 🛡️ 7. 1-Click Windows Default App & Move-Anywhere Portability
-Set Bukaake as your main photo viewer with a single click:
-- **Default Viewer in 1 Click**: Make Bukaake your primary app for all your photos directly from Settings (`Ctrl+,`).
-- **Right-Click Shortcut**: Automatically adds a handy *"Open with Bukaake"* option to your Windows right-click menu.
-- **Move It Anywhere Without Breaking**: Bukaake is 100% portable. If you move `bukaake.exe` to a new folder, external drive, or USB thumbdrive, your file shortcuts automatically stay connected.
-- **Easy Toggle**: Turn associations on or off anytime with a single toggle in Settings (`Ctrl+,`).
+### 🤝 8. Alitken Tandem Workflow
+Love doing deep edits? Bukaake integrates seamlessly with **Alitken**:
+- Click the Alitken icon on the titlebar or press the shortcut to jump straight into advanced photo editing.
+- Once you save your edits in Alitken, Bukaake automatically detects the change and refreshes the image on your screen instantly.
 
 ---
 
-### ⚡ 8. Instant Opening & Battery-Friendly Standby
+### ⚡ 9. Sub-10ms Launch & Battery-Friendly Standby
 - **Sub-10ms Launch**: Keeps Bukaake ready in your system notification tray so double-clicking photos opens instantly with zero waiting.
-- **1-Click Wake**: Simply click the tray icon anytime to bring Bukaake straight to your screen.
-- **Uses Almost Zero Memory**: Quietly frees up memory while resting in the background (~8-15 MB RAM), keeping your PC fast and responsive.
-- **Auto-Closes When Idle**: If you haven't opened any photos for 5 minutes, Bukaake quietly exits completely to save battery.
-- **Totally Optional**: Turn background standby on or off anytime with a simple switch in Settings (`Ctrl+,`).
+- **Click-to-Wake**: Simply click the tray icon anytime to bring Bukaake straight back to your screen.
+- **Preserves Your Window Placement**: Remembers your preferred monitor and window position without annoying screen-centering jumps.
+- **Uses Almost Zero Memory**: Quietly trims down to ~8-15 MB RAM while resting in the tray, keeping your PC fast and responsive.
+- **Totally Optional**: Turn background standby on or off anytime in Settings (`Ctrl+,`).
 
 ---
 
-### 🔄 9. Effortless In-App Updates
-Never worry about missing out on new features or improvements:
+### 🛡️ 10. 1-Click Default App & Move-Anywhere Portability
+- **Default Viewer in 1 Click**: Make Bukaake your primary app for all your photos directly from Settings (`Ctrl+,`).
+- **Right-Click Shortcut**: Adds a handy *"Open with Bukaake"* option to your Windows context menu.
+- **Move It Anywhere**: Bukaake is 100% portable. Move `bukaake.exe` to an external SSD or USB drive, and your file shortcuts automatically stay connected.
+
+---
+
+### 🔄 11. Effortless In-App Updates
 - **Quiet Update Notifications**: Gently lets you know when a new version is available without interrupting your viewing.
-- **1-Click Update**: Click **Install** in Settings to update directly inside the app with a smooth progress bar.
-- **Restarts Seamlessly**: Updates directly in place without breaking your taskbar pins or desktop shortcuts.
+- **1-Click In-Place Update**: Click **Install** in Settings to update directly inside the app with a live progress bar.
 
 ---
 
 ## ⚡ Quick Start (No Installation Needed!)
 
 1. Go to the **[Latest Release](https://github.com/Crlyzd/Bukaake/releases/latest)** page.
-2. Download the executable matching your PC:
-   - Most Windows laptops and PCs: **`bukaake-vX.Y.Z-x64.exe`**
-   - ARM laptops (like Surface Pro or Snapdragon PCs): **`bukaake-vX.Y.Z-arm64.exe`**
-3. **Double-click to run!** That's it—no setup wizard, no extra downloads, and no administrator rights needed.
-4. Press **`Ctrl + ,`** to open Settings and click **Register** to make Bukaake your default photo viewer across all 49 formats in seconds!
+2. Download the version for your PC:
+   - **Most Windows laptops & desktops**: `bukaake-vX.Y.Z-x64.exe`
+   - **ARM laptops (Surface Pro / Snapdragon)**: `bukaake-vX.Y.Z-arm64.exe`
+3. **Double-click to run!** No setup wizard, no installers, and no administrator permissions required.
+4. Press **`Ctrl + ,`** to open Settings and click **Register** to make Bukaake your default photo viewer for 49 formats in seconds!
 
 ---
 
@@ -134,11 +148,11 @@ Never worry about missing out on new features or improvements:
 | Shortcut | What It Does |
 | :---: | :--- |
 | **`Left` / `Right`** | Previous / Next photo in current folder |
-| **`Mouse Wheel`** | Smooth zoom in / out (centered on your mouse cursor) |
-| **`F`** | Fit image to window / screen |
+| **`Mouse Wheel`** | Smooth zoom in / out (anchored to cursor) |
+| **`F`** | Fit photo to window / screen |
 | **`1`** | View at 100% (1:1 actual pixels) |
 | **`,` / `.`** | Rotate photo 90° Left / Right |
-| **`Q`** | **Load Full Sensor Decode** (develops raw sensor data for camera RAW photos) |
+| **`Q`** | **Full Sensor Decode** (develops raw sensor data for camera RAW photos) |
 | **`Delete`** | **Move photo to Windows Recycle Bin** (safe & undoable) |
 | **`Shift` + `Delete`** | Permanently delete file |
 | **`D`** | Toggle Freehand Drawing & Highlighting |
@@ -146,13 +160,14 @@ Never worry about missing out on new features or improvements:
 | **`E`** | Toggle Color Adjustments & Filters |
 | **`I`** | Toggle Image Details & Camera EXIF Drawer |
 | **`B`** | Toggle Background pattern (Transparent vs Obsidian Checkerboard) |
-| **`P`** | Toggle Pixel Smoothing (great for pixel art & retro graphics) |
+| **`P`** | Toggle Pixel Smoothing (crisp mode for pixel art) |
 | **`Ctrl` + `V`** | Paste image directly from clipboard |
 | **`Ctrl` + `C`** | Copy current photo to clipboard |
 | **`Ctrl` + `S`** | Save edited image |
 | **`Ctrl` + `Shift` + `S`** | Save As a new image file |
 | **`Ctrl` + `Z` / `Ctrl` + `Y`** | Undo / Redo drawing strokes |
-| **`Esc`** | Exit fullscreen mode, close editing tool, or close window |
+| **`Ctrl` + `,`** | Open Settings & File Associations |
+| **`Esc`** | Exit fullscreen mode, close active tool, or close window |
 
 ---
 
@@ -170,11 +185,11 @@ cd Bukaake
 # or double-click run.bat
 ```
 
-The built-in Control Center provides an interactive 10-option manager:
+The built-in Control Center provides an interactive manager:
 - **Live Development**: Native desktop window (`npm run tauri:dev`) or instant web dev server (`npm run dev`).
-- **Fast Multi-Core Builds**: Option `[3]` compiles an incremental `bukaake-vX.Y.Z-x64-fast.exe` with uncapped CPU threads and zero LTO bottleneck.
-- **Production Builds**: Options `[4]` and `[5]` produce maximum-compression, symbol-stripped binaries for x64 and ARM64.
-- **One-Key Version Bumping**: Syncs versions atomically across `package.json`, `Cargo.toml`, and `tauri.conf.json`.
+- **Fast Multi-Core Builds**: Compile incremental `bukaake-vX.Y.Z-x64-fast.exe` with uncapped CPU threads.
+- **Production Builds**: Maximum-compression, symbol-stripped binaries for x64 and ARM64.
+- **Single-Source Version Bumping**: Syncs versions atomically across `package.json`, `Cargo.toml`, and `tauri.conf.json`.
 
 ---
 

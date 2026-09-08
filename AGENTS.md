@@ -163,10 +163,13 @@ src-tauri/src/
 
 ### Platform Integration, Standby & File Associations
 - **Native Recycle Bin (`file_ops.rs`, `delete-modal.js`)**: Win32 `SHFileOperationW` (`FO_DELETE` + `FOF_ALLOWUNDO`) for safe Recycle Bin deletion with automatic navigation to neighbor images.
-- **Native OS Clipboard (`clipboard.rs`)**: Uses Windows APIs (`CF_HDROP` / `CF_DIB`) eliminating WebView2 permission popups.
+- **Native OS Clipboard (`clipboard.rs`)**: Uses Windows APIs (`CF_HDROP` / `CF_DIB`) eliminating WebView2 permission popups. Supports dual `base64Data`/`base64` parameters for snipped region clipboard delivery.
 - **Tray Standby & Memory Trim (`standby.rs`, `standby-service.js`)**:
-  - Sits in notification tray for sub-10ms subsequent launches; trims working set memory via `K32EmptyWorkingSet` down to ~8-15 MB RAM.
-  - Automatically terminates after 5 minutes of inactivity; left-click on tray immediately restores window into Mode 1.
+  - Persistent background tray daemon; trims working set memory via `K32EmptyWorkingSet` down to ~8-15 MB RAM. Left-click on tray immediately restores window cleanly into Mode 1.
+  - **Zero Hardcoded Centering Invariant**: Never invoke `win.center()` on window close, hide, or tray wake. Always preserve user window position and multi-monitor coordinates.
+  - **Clean Standby Hide Invariant**: In `enter_standby`, only invoke `win.hide()`. Never apply `set_size` or repositioning during hide, as Win32/Tauri renders moves before completing the hide, causing an unsightly screen jump/flash glitch.
+  - **Startup Window Size Lock**: Startup window dimensions locked to 680×480 with native `set_resizable(false)` and `set_maximizable(false)`. Edge resize handles and cursors are suppressed in `startpage.css` when `body:not(.image-loaded)`. Resizing is dynamically enabled only when an image is loaded.
+  - **Empty State Aspect Isolation**: In `window-mode-manager.js`, `resizeAndCenter` is strictly guarded by `if (this.viewer?.img && this.lastAspectSize)`. `handleEmptyState()` must always clear `this.windowModeManager.lastAspectSize = null`.
 - **Shell File Association (`file_assoc.rs`, `file-assoc-service.js`)**:
   - Registers ProgID and capabilities for 49 formats under `HKCU` (zero UAC prompts).
   - Silent auto-healing on startup checks binary location and updates registry commands in-place if executable is moved.
