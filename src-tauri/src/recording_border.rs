@@ -18,10 +18,11 @@ mod win_border {
     };
     use windows::Win32::UI::WindowsAndMessaging::{
         CreateWindowExW, DefWindowProcW, DispatchMessageW, GetClientRect, GetMessageW,
-        PostMessageW, RegisterClassExW, SetLayeredWindowAttributes, SetWindowPos, ShowWindow,
-        HWND_TOPMOST, LWA_COLORKEY, MSG, SWP_NOACTIVATE, SWP_SHOWWINDOW, SW_HIDE,
-        WNDCLASSEXW, WS_EX_LAYERED, WS_EX_NOACTIVATE, WS_EX_TOOLWINDOW, WS_EX_TOPMOST,
-        WS_EX_TRANSPARENT, WS_POPUP, WM_ERASEBKGND, WM_PAINT, WM_USER,
+        PostMessageW, RegisterClassExW, SetLayeredWindowAttributes, SetWindowDisplayAffinity,
+        SetWindowPos, ShowWindow, HWND_TOPMOST, LWA_COLORKEY, MSG, SWP_NOACTIVATE,
+        SWP_SHOWWINDOW, SW_HIDE, WDA_EXCLUDEFROMCAPTURE, WNDCLASSEXW, WS_EX_LAYERED,
+        WS_EX_NOACTIVATE, WS_EX_TOOLWINDOW, WS_EX_TOPMOST, WS_EX_TRANSPARENT, WS_POPUP,
+        WM_ERASEBKGND, WM_PAINT, WM_USER,
     };
 
     const WM_UPDATE_RECT: u32 = WM_USER + 1;
@@ -150,6 +151,7 @@ mod win_border {
 
             if let Ok(valid_hwnd) = hwnd {
                 let _ = SetLayeredWindowAttributes(valid_hwnd, COLORREF(0x00000000), 0, LWA_COLORKEY);
+                let _ = SetWindowDisplayAffinity(valid_hwnd, WDA_EXCLUDEFROMCAPTURE);
                 let policy = DWMNCRP_DISABLED.0 as u32;
                 let _ = DwmSetWindowAttribute(
                     valid_hwnd,

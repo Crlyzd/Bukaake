@@ -180,7 +180,7 @@ class BukaakeApp {
         const isPix = !this.viewer.togglePixelSmoothing();
         document.getElementById('btnPixelated')?.classList.toggle('active', isPix);
       },
-      onToggleMaximize: () => this.windowModeManager?.toggleMode(), onToggleHelp: () => this.shortcutsModal.toggle(),
+      onToggleMaximize: () => { if (this.viewer.img) this.windowModeManager?.toggleMode(); else toast.info('Load an image first'); }, onToggleHelp: () => this.shortcutsModal.toggle(),
       onDeleteFile: (perm) => this.deleteCurrentFile(perm),
       onLoadFullRaw: () => this.handleLoadFullRaw(),
       onEscape: () => {

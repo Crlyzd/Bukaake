@@ -168,6 +168,7 @@ pub fn prepare_screen_snip(app: tauri::AppHandle) -> Result<ScreenCapturePayload
     let payload = screen_capture::capture_desktop()?;
 
     if let Some(win) = app.get_webview_window("main") {
+        let _ = win.set_maximizable(true);
         let _ = win.set_always_on_top(true);
         let _ = win.set_fullscreen(true);
         let _ = win.show();
@@ -195,6 +196,7 @@ pub fn finish_screen_snip(
         } else if !was_fullscreen {
             let _ = win.set_fullscreen(false);
         }
+        let _ = win.set_maximizable(was_fullscreen);
     }
     Ok(())
 }

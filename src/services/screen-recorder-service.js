@@ -76,10 +76,10 @@ export class ScreenRecorderService {
         const scaleX = vW / refW;
         const scaleY = vH / (cropRegion.screenHeight || refW);
 
-        const sX = Math.round(cropRegion.x * scaleX);
-        const sY = Math.round(cropRegion.y * scaleY);
-        const sW = Math.max(1, Math.round(cropRegion.width * scaleX));
-        const sH = Math.max(1, Math.round(cropRegion.height * scaleY));
+        const sX = Math.max(0, Math.min(vW - 1, Math.round(cropRegion.x * scaleX)));
+        const sY = Math.max(0, Math.min(vH - 1, Math.round(cropRegion.y * scaleY)));
+        const sW = Math.max(1, Math.min(vW - sX, Math.round(cropRegion.width * scaleX)));
+        const sH = Math.max(1, Math.min(vH - sY, Math.round(cropRegion.height * scaleY)));
 
         const canvas = document.createElement('canvas');
         canvas.width = sW;

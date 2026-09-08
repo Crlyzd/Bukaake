@@ -27,8 +27,22 @@ export class WindowModeManager {
 
   bindWindowEvents() {
     const checkState = async () => {
+      if (document.body.classList.contains('mode-capturing') ||
+          document.body.classList.contains('mode-recording-pill') ||
+          document.querySelector('.screen-snipper-overlay:not(.hidden)')) {
+        return;
+      }
       const isFs = await tauriBridge.isFullscreen();
       const isMax = await tauriBridge.isMaximized();
+      const hasImage = Boolean(this.viewer?.img);
+      if (!hasImage && (isFs || isMax)) {
+        await tauriBridge.setFullscreen(false);
+        await tauriBridge.unmaximize();
+        if (this.currentMode !== MODE_REGULAR) {
+          this.updateModeClasses(MODE_REGULAR);
+        }
+        return;
+      }
       const nextMode = (isFs || isMax) ? MODE_VIEWER : MODE_REGULAR;
       if (nextMode !== this.currentMode) {
         this.updateModeClasses(nextMode);
@@ -101,6 +115,7 @@ export class WindowModeManager {
 
   async setMode(newMode) {
     if (newMode === MODE_VIEWER) {
+      if (!this.viewer?.img) return;
       this.updateModeClasses(MODE_VIEWER);
       await tauriBridge.setFullscreen(true);
     } else {
@@ -122,6 +137,7 @@ export class WindowModeManager {
     if (isFs || isMax || this.currentMode === MODE_VIEWER) {
       await this.setMode(MODE_REGULAR);
     } else {
+      if (!this.viewer?.img) return;
       await this.setMode(MODE_VIEWER);
     }
   }

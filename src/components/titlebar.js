@@ -27,6 +27,7 @@ export class Titlebar {
     this.onToggleHelp = options.onToggleHelp || null;
     this.onToggleMode = options.onToggleMode || null;
     this.onClose = options.onClose || null;
+    this.hasImage = false;
 
     this.init();
   }
@@ -50,6 +51,7 @@ export class Titlebar {
     });
 
     this.btnMax?.addEventListener('click', async () => {
+      if (!this.hasImage) return;
       await this.handleToggleMaximize();
     });
 
@@ -66,6 +68,7 @@ export class Titlebar {
         if (e.target.closest('.titlebar-right') || e.target.closest('button')) {
           return;
         }
+        if (!this.hasImage) return;
         this.handleToggleMaximize();
       });
     }
@@ -99,6 +102,7 @@ export class Titlebar {
   }
 
   async handleToggleMaximize() {
+    if (!this.hasImage) return;
     if (this.onToggleMode) {
       await this.onToggleMode();
     } else {
@@ -121,7 +125,9 @@ export class Titlebar {
       if (icon) {
         icon.className = isExpanded ? 'ri-checkbox-multiple-blank-line' : 'ri-checkbox-blank-line';
       }
-      this.btnMax.title = isExpanded ? 'Restore Window' : 'Fullscreen Viewer (F11)';
+      this.btnMax.title = !this.hasImage
+        ? 'Fullscreen Viewer (Load an image first)'
+        : (isExpanded ? 'Restore Window' : 'Fullscreen Viewer (F11)');
     }
   }
 
@@ -152,10 +158,19 @@ export class Titlebar {
   }
 
   setHasImage(hasImage) {
+    this.hasImage = Boolean(hasImage);
     if (this.btnInfo) {
-      this.btnInfo.disabled = !hasImage;
-      this.btnInfo.title = hasImage ? 'Toggle Image Properties (I)' : 'Image Properties (Load an image first)';
+      this.btnInfo.disabled = !this.hasImage;
+      this.btnInfo.title = this.hasImage ? 'Toggle Image Properties (I)' : 'Image Properties (Load an image first)';
     }
+    if (this.btnMax) {
+      this.btnMax.disabled = !this.hasImage;
+      this.btnMax.classList.toggle('disabled', !this.hasImage);
+      this.btnMax.title = this.hasImage
+        ? (document.body.classList.contains('window-maximized') ? 'Restore Window' : 'Fullscreen Viewer (F11)')
+        : 'Fullscreen Viewer (Load an image first)';
+    }
+    tauriBridge.setMaximizable(this.hasImage);
   }
 
   initUpdateListeners() {

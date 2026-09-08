@@ -150,9 +150,13 @@ pub fn capture_desktop() -> Result<ScreenCapturePayload, String> {
 #[cfg(target_os = "windows")]
 pub fn enumerate_visible_windows() -> Vec<DetectedWindow> {
     use windows::Win32::Foundation::{BOOL, HWND, LPARAM, RECT};
+    use windows::Win32::Graphics::Dwm::{DwmGetWindowAttribute, DWMWA_EXTENDED_FRAME_BOUNDS};
+    use windows::Win32::Graphics::Gdi::{
+        GetMonitorInfoW, MonitorFromWindow, MONITORINFO, MONITOR_DEFAULTTONEAREST,
+    };
     use windows::Win32::UI::WindowsAndMessaging::{
         EnumWindows, GetWindowLongW, GetWindowRect, GetWindowTextW,
-        IsIconic, IsWindowVisible, GWL_EXSTYLE, WS_EX_TOOLWINDOW,
+        IsIconic, IsWindowVisible, IsZoomed, GWL_EXSTYLE, WS_EX_TOOLWINDOW,
     };
 
     struct EnumData {
@@ -165,26 +169,50 @@ pub fn enumerate_visible_windows() -> Vec<DetectedWindow> {
             let ex_style = GetWindowLongW(hwnd, GWL_EXSTYLE) as u32;
             if (ex_style & WS_EX_TOOLWINDOW.0) == 0 {
                 let mut rect = RECT::default();
-                if GetWindowRect(hwnd, &mut rect).is_ok() {
-                    let w = rect.right - rect.left;
-                    let h = rect.bottom - rect.top;
-                    if w > 120 && h > 80 {
-                        let mut text_buf = [0u16; 256];
-                        let len = GetWindowTextW(hwnd, &mut text_buf);
-                        let title = if len > 0 {
-                            String::from_utf16_lossy(&text_buf[..len as usize])
-                        } else {
-                            String::new()
-                        };
-                        if title != "Program Manager" && !title.is_empty() {
-                            data.windows.push(DetectedWindow {
-                                title,
-                                x: rect.left,
-                                y: rect.top,
-                                width: w,
-                                height: h,
-                            });
-                        }
+                let mut acquired = false;
+
+                if IsZoomed(hwnd).as_bool() {
+                    let mut mi = MONITORINFO {
+                        cbSize: std::mem::size_of::<MONITORINFO>() as u32,
+                        ..Default::default()
+                    };
+                    let hmon = MonitorFromWindow(hwnd, MONITOR_DEFAULTTONEAREST);
+                    if !hmon.is_invalid() && GetMonitorInfoW(hmon, &mut mi).as_bool() {
+                        rect = mi.rcWork;
+                        acquired = true;
+                    }
+                }
+
+                if !acquired {
+                    let dwm_res = DwmGetWindowAttribute(
+                        hwnd,
+                        DWMWA_EXTENDED_FRAME_BOUNDS,
+                        &mut rect as *mut _ as _,
+                        std::mem::size_of::<RECT>() as u32,
+                    );
+                    if dwm_res.is_err() {
+                        let _ = GetWindowRect(hwnd, &mut rect);
+                    }
+                }
+
+                let w = rect.right - rect.left;
+                let h = rect.bottom - rect.top;
+                if w > 120 && h > 80 {
+                    let mut text_buf = [0u16; 256];
+                    let len = GetWindowTextW(hwnd, &mut text_buf);
+                    let title = if len > 0 {
+                        String::from_utf16_lossy(&text_buf[..len as usize])
+                    } else {
+                        String::new()
+                    };
+                    if title != "Program Manager" && !title.is_empty() {
+                        data.windows.push(DetectedWindow {
+                            title,
+                            x: rect.left,
+                            y: rect.top,
+                            width: w,
+                            height: h,
+                        });
                     }
                 }
             }

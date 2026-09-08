@@ -194,9 +194,16 @@ body.image-loaded .app-titlebar:hover {
   pointer-events: none;
 }
 
-.win-btn:hover {
+.win-btn:hover:not(:disabled) {
   background: var(--glass-bg-hover);
   color: var(--text-main);
+}
+
+.win-btn:disabled,
+.win-btn.disabled {
+  opacity: 0.28 !important;
+  cursor: not-allowed !important;
+  pointer-events: none !important;
 }
 
 .win-close:hover {

@@ -46,8 +46,10 @@ pub fn enter_recording_pill_mode(app: tauri::AppHandle) -> Result<(), String> {
     #[cfg(target_os = "windows")]
     if let Ok(hwnd) = win.hwnd() {
         use windows::Win32::Graphics::Dwm::{DwmSetWindowAttribute, DWMWA_WINDOW_CORNER_PREFERENCE, DWMWCP_ROUND};
+        use windows::Win32::UI::WindowsAndMessaging::{SetWindowDisplayAffinity, WDA_EXCLUDEFROMCAPTURE};
         let preference = DWMWCP_ROUND.0;
         let _ = unsafe {
+            let _ = SetWindowDisplayAffinity(windows::Win32::Foundation::HWND(hwnd.0), WDA_EXCLUDEFROMCAPTURE);
             DwmSetWindowAttribute(
                 windows::Win32::Foundation::HWND(hwnd.0),
                 DWMWA_WINDOW_CORNER_PREFERENCE,
@@ -89,8 +91,10 @@ pub fn exit_recording_pill_mode(app: tauri::AppHandle) -> Result<(), String> {
     #[cfg(target_os = "windows")]
     if let Ok(hwnd) = win.hwnd() {
         use windows::Win32::Graphics::Dwm::{DwmSetWindowAttribute, DWMWA_WINDOW_CORNER_PREFERENCE, DWMWCP_DEFAULT};
+        use windows::Win32::UI::WindowsAndMessaging::{SetWindowDisplayAffinity, WDA_NONE};
         let preference = DWMWCP_DEFAULT.0;
         let _ = unsafe {
+            let _ = SetWindowDisplayAffinity(windows::Win32::Foundation::HWND(hwnd.0), WDA_NONE);
             DwmSetWindowAttribute(
                 windows::Win32::Foundation::HWND(hwnd.0),
                 DWMWA_WINDOW_CORNER_PREFERENCE,

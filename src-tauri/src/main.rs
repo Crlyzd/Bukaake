@@ -42,8 +42,9 @@ use window_commands::{
     get_cli_args, open_url, show_in_folder, close_window, exit_app,
     prompt_save_file, prompt_open_file, save_image_bytes,
     minimize_window, toggle_maximize_window, is_window_maximized, unmaximize_window,
-    resize_and_center_window, start_window_resize, set_fullscreen_window, is_window_fullscreen,
-    play_windows_ding, open_settings_window, hide_settings_window, set_window_vibrancy,
+    set_window_maximizable, resize_and_center_window, start_window_resize, set_fullscreen_window,
+    is_window_fullscreen, play_windows_ding, open_settings_window, hide_settings_window,
+    set_window_vibrancy,
 };
 
 fn main() {
@@ -158,7 +159,7 @@ fn main() {
             play_windows_ding, open_url, show_in_folder, close_window, exit_app,
             prompt_save_file, prompt_open_file, save_image_bytes, read_clipboard,
             write_clipboard_image, minimize_window, toggle_maximize_window,
-            is_window_maximized, unmaximize_window, resize_and_center_window,
+            is_window_maximized, unmaximize_window, set_window_maximizable, resize_and_center_window,
             start_window_resize, set_fullscreen_window, is_window_fullscreen,
             set_window_vibrancy, open_settings_window, hide_settings_window,
             download_and_install_update, get_system_arch, delete_file,

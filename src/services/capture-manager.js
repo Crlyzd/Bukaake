@@ -57,7 +57,8 @@ export class CaptureManager {
   }
 
   async captureSnip(options = {}) {
-    if (this.snipper.isActive) return;
+    if (this.snipper.isActive || document.body.classList.contains('mode-capturing')) return;
+    document.body.classList.add('mode-capturing');
     const isFs = await tauriBridge.isFullscreen();
     const isMax = await tauriBridge.isMaximized();
 
@@ -69,12 +70,14 @@ export class CaptureManager {
       });
     }
 
+    if (!payload) payload = await screenCaptureService.captureDesktop();
     if (!payload) {
-      payload = await screenCaptureService.captureDesktop();
+      document.body.classList.remove('mode-capturing');
+      return;
     }
-    if (!payload) return;
 
     const cleanupSnip = async () => {
+      document.body.classList.remove('mode-capturing');
       if (tauriBridge.isTauri()) {
         await invoke('finish_screen_snip', {
           wasFullscreen: isFs || isMax,
@@ -185,8 +188,8 @@ export class CaptureManager {
       if (cropRegion && cropRegion.width > 20 && cropRegion.height > 20) {
         const BW = 5;
         await invoke('show_recording_border', {
-          x: Math.max(0, cropRegion.x - BW),
-          y: Math.max(0, cropRegion.y - BW),
+          x: cropRegion.x - BW,
+          y: cropRegion.y - BW,
           width: cropRegion.width + (BW * 2),
           height: cropRegion.height + (BW * 2),
         }).catch(() => {});
@@ -225,10 +228,7 @@ export class CaptureManager {
 
       let finalPath = null;
       if (askPrompt) {
-        finalPath = await invoke('prompt_save_recording', {
-          defaultName,
-          defaultDir,
-        });
+        finalPath = await invoke('prompt_save_recording', { defaultName, defaultDir });
         if (!finalPath) {
           await invoke('discard_recording', { tempPath: result.tempPath });
           toast.show('Recording discarded', 'info');
@@ -239,16 +239,9 @@ export class CaptureManager {
         finalPath = `${dest}/${defaultName}`;
       }
 
-      const savedPath = await invoke('finalize_recording', {
-        tempPath: result.tempPath,
-        destPath: finalPath,
-      });
-
+      const savedPath = await invoke('finalize_recording', { tempPath: result.tempPath, destPath: finalPath });
       this.showRecordingSavedToast(savedPath, result.durationSecs);
-
-      if (alitkenService.isAutoOpenEnabled()) {
-        alitkenService.launch(savedPath);
-      }
+      if (alitkenService.isAutoOpenEnabled()) alitkenService.launch(savedPath);
     } catch (err) {
       console.error('[CaptureManager] Save recording failed:', err);
       toast.show('Failed to save recording: ' + err, 'error');
