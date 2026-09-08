@@ -2,7 +2,7 @@ use std::sync::{
     atomic::{AtomicBool, Ordering},
     Arc, Mutex,
 };
-use std::time::{Duration, Instant};
+use std::time::Instant;
 use tauri::{
     menu::{Menu, MenuItem, PredefinedMenuItem},
     tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent},
@@ -10,7 +10,7 @@ use tauri::{
 };
 
 static STANDBY_ENABLED: AtomicBool = AtomicBool::new(true);
-static STANDBY_TIMEOUT_SECS: u64 = 300; // 5 minutes
+
 #[derive(Clone, Default)]
 pub struct StandbyManager {
     timer_active: Arc<AtomicBool>,
@@ -30,35 +30,9 @@ impl StandbyManager {
             app_handle.exit(0);
             return;
         }
-
         self.timer_active.store(true, Ordering::Relaxed);
         *self.last_hide.lock().unwrap() = Some(Instant::now());
-
-        let timer_active = Arc::clone(&self.timer_active);
-        let last_hide = Arc::clone(&self.last_hide);
-
-        std::thread::spawn(move || {
-            loop {
-                std::thread::sleep(Duration::from_secs(2));
-                if !timer_active.load(Ordering::Relaxed) {
-                    break;
-                }
-
-                let should_exit = {
-                    let lock = last_hide.lock().unwrap();
-                    if let Some(time) = *lock {
-                        time.elapsed() >= Duration::from_secs(STANDBY_TIMEOUT_SECS)
-                    } else {
-                        false
-                    }
-                };
-
-                if should_exit && timer_active.load(Ordering::Relaxed) {
-                    app_handle.exit(0);
-                    break;
-                }
-            }
-        });
+        // Persistent standby daemon: memory is trimmed, no 5m kill timer
     }
 
     pub fn cancel_countdown(&self) {

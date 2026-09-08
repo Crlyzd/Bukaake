@@ -1,0 +1,156 @@
+/* ==========================================================================
+   Bukaake Floating Recording Dock & Capture Popover Styles
+   Stroke-free frosted glass widgets adhering to Pillars 1 & 2 (< 200 lines)
+   ========================================================================== */
+
+.recording-dock {
+  position: fixed; top: 20px; right: 24px; z-index: 99999;
+  display: flex; align-items: center; gap: 10px; padding: 6px 14px;
+  background: rgba(14, 18, 27, 0.94);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border-radius: var(--radius-pill);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.55), 0 0 20px rgba(239, 68, 68, 0.25);
+  border: none; user-select: none;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease;
+}
+
+.recording-dock.hidden { display: none !important; }
+.recording-dock.dock-enter { transform: translateY(-20px); opacity: 0; }
+
+.recording-indicator { display: flex; align-items: center; gap: 8px; }
+
+.recording-pulse-dot {
+  width: 9px; height: 9px; border-radius: 50%;
+  background: #ef4444; box-shadow: 0 0 10px #ef4444;
+  animation: recPulse 1.4s ease-in-out infinite alternate;
+}
+
+.recording-pulse-dot.paused {
+  background: #f59e0b; box-shadow: 0 0 8px #f59e0b; animation: none;
+}
+
+@keyframes recPulse {
+  0% { transform: scale(0.85); opacity: 0.6; }
+  100% { transform: scale(1.2); opacity: 1; }
+}
+
+.recording-timer {
+  font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 600;
+  color: #fff; letter-spacing: 0.5px; min-width: 44px;
+}
+
+.recording-dock-divider {
+  width: 1px; height: 16px; background: rgba(255, 255, 255, 0.12);
+}
+
+.recording-controls { display: flex; align-items: center; gap: 6px; }
+
+.recording-btn {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 5px 10px; font-size: 12px; font-weight: 500;
+  color: #fff; background: rgba(255, 255, 255, 0.08);
+  border: none; outline: none !important; border-radius: var(--radius-pill);
+  cursor: pointer; transition: all var(--transition-fast);
+}
+
+.recording-btn:hover { background: rgba(255, 255, 255, 0.15); transform: translateY(-1px); }
+.recording-btn:active { transform: scale(0.97); }
+
+.recording-btn.stop { background: #ef4444; color: #fff; font-weight: 600; }
+.recording-btn.stop:hover { background: #dc2626; box-shadow: 0 0 14px rgba(239, 68, 68, 0.5); }
+
+.recording-btn.cancel { padding: 5px 8px; color: rgba(255, 255, 255, 0.6); }
+.recording-btn.cancel:hover { color: #fff; }
+
+/* Capture Popover Menu in Titlebar */
+.capture-popover-menu {
+  position: fixed; z-index: 99999;
+  display: flex; flex-direction: column; gap: 4px; padding: 6px; min-width: 190px;
+  background: rgba(14, 18, 27, 0.95);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border-radius: var(--radius-md);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6);
+  border: none; animation: popoverFadeIn 0.18s ease-out;
+}
+
+.capture-popover-menu.hidden { display: none !important; }
+
+@keyframes popoverFadeIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.capture-menu-item {
+  display: flex; align-items: center; gap: 10px; padding: 8px 10px;
+  border-radius: var(--radius-sm); background: transparent;
+  border: none; outline: none !important; color: var(--text-main);
+  cursor: pointer; font-size: 13px; transition: all var(--transition-fast);
+  text-align: left; width: 100%;
+}
+
+.capture-menu-item:hover { background: rgba(255, 255, 255, 0.08); }
+.capture-menu-item i { font-size: 16px; color: var(--text-muted); }
+.capture-menu-item:hover i { color: var(--text-main); }
+.capture-menu-item.record:hover i { color: #ef4444; }
+
+.menu-item-text {
+  display: flex; align-items: center; justify-content: space-between; flex: 1;
+}
+
+.menu-item-text kbd {
+  font-family: 'JetBrains Mono', monospace; font-size: 10px;
+  color: var(--text-dim); background: rgba(255, 255, 255, 0.06);
+  padding: 2px 5px; border-radius: 4px;
+}
+
+.capture-menu-divider {
+  height: 1px; background: rgba(255, 255, 255, 0.08); margin: 3px 6px;
+}
+
+/* Post-Recording Tandem Banner */
+.recording-complete-banner {
+  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+  z-index: 99999; display: flex; align-items: center; gap: 14px; padding: 8px 16px;
+  background: rgba(14, 18, 27, 0.96);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border-radius: var(--radius-pill);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.65), 0 0 24px rgba(99, 102, 241, 0.3);
+  border: none; animation: bannerSlideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes bannerSlideUp {
+  from { opacity: 0; transform: translate(-50%, 20px); }
+  to { opacity: 1; transform: translate(-50%, 0); }
+}
+
+.complete-text {
+  display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 500;
+  color: #fff; max-width: 280px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+
+.complete-text i { font-size: 17px; color: #10b981; }
+.complete-actions { display: flex; align-items: center; gap: 6px; }
+
+.complete-btn {
+  display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px;
+  font-size: 12px; font-weight: 500; color: #fff;
+  background: rgba(255, 255, 255, 0.08); border: none; outline: none !important;
+  border-radius: var(--radius-pill); cursor: pointer; transition: all var(--transition-fast);
+}
+
+.complete-btn:hover { background: rgba(255, 255, 255, 0.16); transform: translateY(-1px); }
+
+.complete-btn.alitken {
+  background: linear-gradient(135deg, #6366f1, #8b5cf6); color: #fff; font-weight: 600;
+  box-shadow: 0 4px 14px rgba(99, 102, 241, 0.4);
+}
+
+.complete-btn.alitken:hover {
+  filter: brightness(1.1); box-shadow: 0 6px 18px rgba(99, 102, 241, 0.55);
+}
+
+.complete-btn.close { padding: 6px 8px; color: rgba(255, 255, 255, 0.5); }
+.complete-btn.close:hover { color: #fff; }

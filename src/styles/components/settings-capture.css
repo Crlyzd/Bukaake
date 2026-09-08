@@ -1,0 +1,135 @@
+/* ==========================================================================
+   Bukaake Settings Capture & Tandem Styles
+   Stroke-free frosted glass cards for Hotkeys, Storage, and Alitken (< 140 lines)
+   ========================================================================== */
+
+.settings-card-header-col {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 100%;
+}
+
+.settings-hotkeys-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  margin-top: 4px;
+}
+
+.hotkey-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.hotkey-label {
+  font-size: 11.5px;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.hotkey-chip {
+  padding: 4px 10px;
+  background: var(--glass-btn-bg);
+  border: none;
+  outline: none !important;
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.hotkey-chip kbd {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-main);
+  pointer-events: none;
+}
+
+.hotkey-chip:hover {
+  background: var(--glass-btn-hover);
+  transform: translateY(-1px);
+}
+
+.hotkey-chip.listening {
+  background: rgba(99, 102, 241, 0.25);
+  box-shadow: 0 0 12px rgba(99, 102, 241, 0.6);
+  animation: recPulse 1.2s infinite alternate;
+}
+
+.hotkey-chip.listening kbd {
+  color: #818cf8;
+}
+
+.settings-path-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  margin-top: 4px;
+}
+
+.settings-path-input {
+  flex: 1;
+  padding: 6px 10px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10.5px;
+  color: var(--text-main);
+  background: rgba(255, 255, 255, 0.05);
+  border: none;
+  outline: none !important;
+  border-radius: var(--radius-sm);
+  text-overflow: ellipsis;
+}
+
+html[data-theme="light"] .settings-path-input {
+  background: rgba(26, 32, 44, 0.06);
+}
+
+.settings-option-subrow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  margin-top: 4px;
+  font-size: 11.5px;
+}
+
+.settings-sub-label {
+  color: var(--text-muted);
+}
+
+.settings-select {
+  padding: 4px 8px;
+  font-size: 11px;
+  color: var(--text-main);
+  background: rgba(255, 255, 255, 0.06);
+  border: none;
+  outline: none !important;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+.settings-select option {
+  background: #1e2330;
+  color: #fff;
+}
+
+.settings-checkbox-wrap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  color: var(--text-muted);
+  font-size: 11px;
+}
+
+.settings-checkbox-wrap input {
+  accent-color: #6366f1;
+  cursor: pointer;
+}

@@ -1,0 +1,119 @@
+/* ==========================================================================
+   Bukaake Screen Snipper Styles
+   Stroke-free frosted glass snipping overlay with ambient cutout mask (< 150 lines)
+   ========================================================================== */
+
+.screen-snipper-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 99998;
+  user-select: none;
+  cursor: crosshair;
+  background: rgba(0, 0, 0, 0.45);
+  overflow: hidden;
+}
+
+.screen-snipper-overlay.hidden {
+  display: none !important;
+}
+
+.snipper-bg-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: fill;
+  pointer-events: none;
+  filter: brightness(0.85);
+}
+
+.snipper-selection-box {
+  position: absolute;
+  box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.50), 0 0 24px rgba(99, 102, 241, 0.45);
+  border: none;
+  outline: none !important;
+  pointer-events: auto;
+  border-radius: 4px;
+}
+
+.snipper-selection-box.hidden {
+  display: none !important;
+}
+
+.snipper-dim-tag {
+  position: absolute;
+  top: -28px;
+  left: 0;
+  padding: 3px 10px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 500;
+  color: #fff;
+  background: rgba(14, 18, 27, 0.92);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-radius: var(--radius-pill);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.snipper-action-dock {
+  position: absolute;
+  bottom: -46px;
+  right: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  background: rgba(14, 18, 27, 0.94);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-radius: var(--radius-pill);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.55);
+  border: none;
+}
+
+.snipper-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-main);
+  background: var(--glass-btn-bg);
+  border: none;
+  outline: none !important;
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.snipper-btn:hover {
+  background: var(--glass-btn-hover);
+  transform: translateY(-1px);
+}
+
+.snipper-btn:active {
+  transform: scale(0.97);
+}
+
+.snipper-btn.confirm {
+  background: var(--action-bg);
+  color: var(--action-text);
+  font-weight: 600;
+}
+
+.snipper-btn.confirm:hover {
+  filter: brightness(1.1);
+}
+
+.snipper-btn.cancel {
+  padding: 6px 9px;
+  color: var(--text-dim);
+}
+
+.snipper-btn.cancel:hover {
+  color: var(--text-main);
+}

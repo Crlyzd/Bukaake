@@ -76,25 +76,101 @@
         </div>
       </div>
 
-      <!-- Instant Launch Standby Banner -->
+      <!-- Run in Background Banner -->
       <div class="settings-assoc-banner settings-standby-banner" id="cardStandby">
         <div class="settings-assoc-main">
           <div class="settings-assoc-status-wrap">
             <i class="ri-flashlight-line settings-assoc-icon" id="standbyStatusIcon"></i>
             <div class="settings-assoc-text-col">
               <div class="settings-assoc-headline">
-                <span class="settings-assoc-title">Instant Launch Standby</span>
-                <span class="settings-assoc-chip" id="standbyStatusBadge">5m Warm</span>
+                <span class="settings-assoc-title">Run in Background</span>
               </div>
-              <span class="settings-assoc-sub">Keep warm in tray for instant opening (auto-quits after 5m)</span>
+              <span class="settings-assoc-sub">Keep running in tray when closed to keep hotkeys active</span>
             </div>
           </div>
           <div class="settings-assoc-btn-group">
-            <label class="settings-toggle-switch" title="Toggle Instant Launch Standby">
+            <label class="settings-toggle-switch" title="Toggle Run in Background">
               <input type="checkbox" id="toggleStandby" checked />
               <span class="settings-toggle-slider"></span>
             </label>
           </div>
+        </div>
+      </div>
+
+      <!-- Global Capture Hotkeys Card -->
+      <div class="settings-assoc-banner settings-hotkeys-banner" id="cardHotkeys">
+        <div class="settings-card-header-col">
+          <div class="settings-assoc-headline">
+            <i class="ri-keyboard-line settings-assoc-icon"></i>
+            <span class="settings-assoc-title">Global Capture Hotkeys</span>
+          </div>
+          <span class="settings-assoc-sub">Press anywhere across Windows to capture or record</span>
+        </div>
+        <div class="settings-hotkeys-grid">
+          <div class="hotkey-row">
+            <span class="hotkey-label"><i class="ri-screenshot-2-line"></i> Screenshot / Snip:</span>
+            <button class="hotkey-chip glass-btn" id="btnKeyScreenshot" title="Click to bind shortcut">
+              <kbd id="lblKeyScreenshot">Ctrl+Alt+S</kbd>
+            </button>
+          </div>
+          <div class="hotkey-row">
+            <span class="hotkey-label"><i class="ri-video-record-line"></i> Screen Record:</span>
+            <button class="hotkey-chip glass-btn" id="btnKeyRecord" title="Click to bind shortcut">
+              <kbd id="lblKeyRecord">Ctrl+Alt+R</kbd>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Video Save Location & Quality Card -->
+      <div class="settings-assoc-banner" id="cardRecordingStorage">
+        <div class="settings-card-header-col">
+          <div class="settings-assoc-headline">
+            <i class="ri-folder-video-line settings-assoc-icon"></i>
+            <span class="settings-assoc-title">Video Save Location</span>
+          </div>
+          <span class="settings-assoc-sub">Folder where completed screen recordings are saved</span>
+        </div>
+        <div class="settings-path-row">
+          <input type="text" class="settings-path-input glass-input" id="inputVideoSaveDir" placeholder="Default Videos Folder" readonly />
+          <button class="btn-assoc-action" id="btnBrowseVideoDir" title="Browse Save Folder">
+            <i class="ri-folder-open-line"></i> Browse
+          </button>
+        </div>
+        <div class="settings-option-subrow">
+          <span class="settings-sub-label">Quality:</span>
+          <select class="settings-select glass-input" id="selectVideoQuality">
+            <option value="high">60 FPS • High (6 Mbps)</option>
+            <option value="balanced">30 FPS • Balanced (3 Mbps)</option>
+            <option value="ultra">60 FPS • Ultra (12 Mbps)</option>
+          </select>
+          <label class="settings-checkbox-wrap" title="Prompt where to save each time you stop recording">
+            <input type="checkbox" id="togglePromptSave" />
+            <span>Ask where to save</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Alitken Media Converter Tandem Card -->
+      <div class="settings-assoc-banner" id="cardAlitken">
+        <div class="settings-card-header-col">
+          <div class="settings-assoc-headline">
+            <i class="ri-film-line settings-assoc-icon"></i>
+            <span class="settings-assoc-title">Alitken Media Converter</span>
+          </div>
+          <span class="settings-assoc-sub">Send recordings directly to Alitken for splitting & compression</span>
+        </div>
+        <div class="settings-path-row">
+          <input type="text" class="settings-path-input glass-input" id="inputAlitkenPath" placeholder="Auto-Detect (./AlitConverter.exe)" readonly />
+          <button class="btn-assoc-action" id="btnBrowseAlitken" title="Locate AlitConverter.exe">
+            <i class="ri-folder-open-line"></i> Browse
+          </button>
+        </div>
+        <div class="settings-option-subrow">
+          <label class="settings-checkbox-wrap" title="Automatically open recordings in Alitken after stopping">
+            <input type="checkbox" id="toggleAlitkenAuto" />
+            <span>Auto-open recordings in Alitken</span>
+          </label>
         </div>
       </div>
 

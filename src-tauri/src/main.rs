@@ -8,12 +8,19 @@ pub mod exif_reader;
 pub mod heif_reader;
 pub mod pro_decoder;
 pub mod raw_reader;
+pub mod capture_commands;
+pub mod screen_capture;
 pub mod standby;
 pub mod window_commands;
 #[cfg(target_os = "windows")]
 pub mod wic_decoder;
 mod image_loader;
 mod updater;
+use capture_commands::{
+    append_recording_chunk, capture_screen, discard_recording, finalize_recording,
+    get_default_videos_dir, init_recording_stream, launch_alitken,
+    prompt_select_executable, prompt_select_folder, prompt_save_recording,
+};
 use clipboard::{read_clipboard, write_clipboard_image};
 use file_assoc::{
     auto_heal_or_sync_path, check_association_status, launch_default_apps_settings,
@@ -121,7 +128,11 @@ fn main() {
             check_association_status, register_file_associations,
             unregister_file_associations, launch_default_apps_settings,
             enter_standby, show_main_window,
-            set_standby_enabled, is_standby_enabled
+            set_standby_enabled, is_standby_enabled,
+            capture_screen, get_default_videos_dir, init_recording_stream,
+            append_recording_chunk, finalize_recording, discard_recording,
+            prompt_save_recording, prompt_select_folder, prompt_select_executable,
+            launch_alitken
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

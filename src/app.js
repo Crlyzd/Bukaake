@@ -28,6 +28,7 @@ import { exportImage, copyProcessedImage } from './services/image-saver.js';
 import { toast } from './components/toast.js';
 import { loadingIndicator } from './components/loading-indicator.js';
 import { standbyService } from './services/standby-service.js';
+import { CaptureManager } from './services/capture-manager.js';
 
 const RAW_EXTS = new Set([
   'arw','srf','sr2','cr2','cr3','nef','nrw','dng','raf','rw2','orf','pef','3fr',
@@ -57,6 +58,7 @@ class BukaakeApp {
   initComponents() {
     this.settingsModal = new SettingsModal();
     this.shortcutsModal = new ShortcutsModal();
+    this.captureManager = new CaptureManager({ viewer: this.viewer, fileLoader: this.fileLoader, toolbar: this.toolbar });
     this.metadataDrawer = new MetadataDrawer({ metadataInspector: this.metadataInspector });
     this.adjustmentsPanel = new AdjustmentsPanel({ filters: this.filters, onClose: () => this.toolbar.setAdjustmentsActive(false) });
     this.titlebar = new Titlebar({

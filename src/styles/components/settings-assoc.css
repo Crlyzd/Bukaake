@@ -207,3 +207,5 @@ html[data-theme="light"] .settings-toggle-slider {
 html[data-theme="light"] .settings-toggle-switch input:checked + .settings-toggle-slider {
   background: #10b981;
 }
+
+

@@ -56,6 +56,9 @@
       <button class="titlebar-ghost-btn" id="btnThemeToggle" title="Toggle Dark / Light Theme">
         <i class="ri-sun-line"></i>
       </button>
+      <button class="titlebar-ghost-btn" id="btnTitlebarCapture" title="Capture & Screen Recording">
+        <i class="ri-camera-lens-line"></i>
+      </button>
       <button class="titlebar-ghost-btn" id="btnToggleInfo" title="Toggle Image Properties (I)">
         <i class="ri-information-line"></i>
       </button>
@@ -100,6 +103,12 @@
           <button class="btn-secondary glass-btn" id="dropPasteBtn" title="Paste Image from Clipboard (Ctrl+V)">
             <i class="ri-clipboard-line"></i> Paste Image
           </button>
+          <button class="btn-secondary glass-btn" id="dropSnipBtn" title="Take Screenshot / Snip Region (Ctrl+Alt+S / PrtScn)">
+            <i class="ri-screenshot-2-line"></i> Screenshot
+          </button>
+          <button class="btn-secondary glass-btn" id="dropRecordBtn" title="Record Screen (Ctrl+Alt+R)">
+            <i class="ri-video-record-line"></i> Record
+          </button>
         </div>
 
         <div class="pro-capabilities-strip">
@@ -111,6 +120,12 @@
           </span>
           <span class="pro-cap-pill" title="Color & Filter Adjustments (E)">
             <i class="ri-equalizer-line"></i> Adjust <kbd>E</kbd>
+          </span>
+          <span class="pro-cap-pill" title="Take Screenshot / Snip Region (S)">
+            <i class="ri-screenshot-2-line"></i> Snip <kbd>S</kbd>
+          </span>
+          <span class="pro-cap-pill" title="Screen Recording (Ctrl+R)">
+            <i class="ri-video-record-line"></i> Record <kbd>Ctrl+R</kbd>
           </span>
           <span class="pro-cap-pill" title="Camera EXIF Telemetry (I)">
             <i class="ri-information-line"></i> EXIF <kbd>I</kbd>
@@ -486,14 +501,13 @@
                 <i class="ri-flashlight-line settings-assoc-icon" id="standbyStatusIconModal"></i>
                 <div class="settings-assoc-text-col">
                   <div class="settings-assoc-headline">
-                    <span class="settings-assoc-title">Instant Launch Standby</span>
-                    <span class="settings-assoc-chip" id="standbyStatusBadgeModal">5m Warm</span>
+                    <span class="settings-assoc-title">Run in Background</span>
                   </div>
-                  <span class="settings-assoc-sub">Keep warm in tray for instant opening (auto-quits after 5m)</span>
+                  <span class="settings-assoc-sub">Keep running in tray when closed to keep hotkeys active</span>
                 </div>
               </div>
               <div class="settings-assoc-btn-group">
-                <label class="settings-toggle-switch" title="Toggle Instant Launch Standby">
+                <label class="settings-toggle-switch" title="Toggle Run in Background">
                   <input type="checkbox" id="toggleStandbyModal" checked />
                   <span class="settings-toggle-slider"></span>
                 </label>
@@ -545,7 +559,10 @@
           <div class="shortcut-item"><kbd>,</kbd> / <kbd>.</kbd> <span>Rotate Left / Right</span></div>
           <div class="shortcut-item"><kbd>H</kbd> / <kbd>V</kbd> <span>Flip Horizontal / Vertical</span></div>
           <div class="shortcut-item"><kbd>C</kbd> <span>Toggle Crop Mode</span></div>
+          <div class="shortcut-item"><kbd>D</kbd> <span>Draw & Highlight</span></div>
           <div class="shortcut-item"><kbd>E</kbd> <span>Toggle Color & Filters</span></div>
+          <div class="shortcut-item"><kbd>PrtScn</kbd> / <kbd>Ctrl+Alt+S</kbd> <span>Screenshot / Snip Area</span></div>
+          <div class="shortcut-item"><kbd>Ctrl+Alt+R</kbd> <span>Record Screen</span></div>
           <div class="shortcut-item"><kbd>I</kbd> <span>Image Properties / EXIF</span></div>
           <div class="shortcut-item"><kbd>B</kbd> <span>Toggle Background Theme</span></div>
           <div class="shortcut-item"><kbd>P</kbd> <span>Toggle Pixel Smoothing</span></div>

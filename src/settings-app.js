@@ -8,6 +8,7 @@ import { tauriBridge } from './services/tauri-bridge.js';
 import { toast } from './components/toast.js';
 import { updaterService, APP_VERSION, hydrateAppVersions } from './services/updater-service.js';
 import { fileAssocService } from './services/file-assoc-service.js';
+import { bindCaptureSettings } from './components/settings-capture-section.js';
 
 class SettingsApp {
   constructor() {
@@ -38,6 +39,7 @@ class SettingsApp {
     this.bindUpdater();
     this.bindFileAssociations();
     this.bindStandbySettings();
+    this.bindCaptureSettings();
     tauriBridge.initExternalLinks();
 
     window.addEventListener('contextmenu', (e) => {
@@ -251,9 +253,13 @@ class SettingsApp {
 
   updateStandbyUI(enabled) {
     if (this.standbyBadge) {
-      this.standbyBadge.textContent = enabled ? '5m Warm' : 'Disabled';
+      this.standbyBadge.textContent = enabled ? 'Enabled' : 'Disabled';
       this.standbyBadge.classList.toggle('matched', enabled);
     }
+  }
+
+  bindCaptureSettings() {
+    bindCaptureSettings();
   }
 }
 
