@@ -145,7 +145,8 @@ body.mode-viewer .titlebar-divider,
 body.mode-viewer #btnOpenFile,
 body.mode-viewer #btnClipboard,
 body.mode-viewer #btnThemeToggle,
-body.mode-viewer #btnSettings {
+body.mode-viewer #btnSettings,
+body.mode-viewer #btnTitlebarCapture {
   display: none !important;
 }
 

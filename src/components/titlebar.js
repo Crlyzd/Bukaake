@@ -64,10 +64,32 @@ export class Titlebar {
     });
 
     if (this.container) {
-      this.container.addEventListener('dblclick', (e) => {
-        if (e.target.closest('.titlebar-right') || e.target.closest('button')) {
-          return;
+      let pendingDrag = false;
+      let startX = 0;
+      let startY = 0;
+
+      this.container.addEventListener('mousedown', (e) => {
+        if (e.button !== 0) return;
+        if (e.target.closest('.titlebar-right') || e.target.closest('button')) return;
+        startX = e.screenX;
+        startY = e.screenY;
+        pendingDrag = true;
+      });
+
+      window.addEventListener('mousemove', (e) => {
+        if (!pendingDrag || e.buttons !== 1) { pendingDrag = false; return; }
+        if (Math.hypot(e.screenX - startX, e.screenY - startY) >= 4) {
+          pendingDrag = false;
+          if (tauriBridge.isTauri()) {
+            window.__TAURI__.window?.getCurrentWindow?.()?.startDragging?.().catch(() => {});
+          }
         }
+      });
+
+      window.addEventListener('mouseup', () => { pendingDrag = false; });
+
+      this.container.addEventListener('dblclick', (e) => {
+        if (e.target.closest('.titlebar-right') || e.target.closest('button')) return;
         if (!this.hasImage) return;
         this.handleToggleMaximize();
       });

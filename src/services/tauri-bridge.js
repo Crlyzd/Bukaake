@@ -151,9 +151,7 @@ export class TauriBridge {
   async setMaximizable(maximizable) {
     try {
       if (this.isTauri()) {
-        const win = window.__TAURI__.window?.getCurrentWindow?.();
-        if (win?.setMaximizable) await win.setMaximizable(maximizable);
-        else await this.invoke('set_window_maximizable', { maximizable });
+        await this.invoke('set_window_maximizable', { maximizable });
       }
     } catch (e) {}
   }

@@ -35,9 +35,14 @@ pub fn show_in_folder(path: String) -> Result<(), String> {
     #[cfg(target_os = "windows")]
     {
         let normalized = path.replace('/', "\\");
-        let arg = format!("/select,{}", normalized);
+        let p = std::path::Path::new(&normalized);
         let mut cmd = std::process::Command::new("explorer.exe");
-        cmd.arg(&arg);
+        if p.is_dir() {
+            cmd.arg(&normalized);
+        } else {
+            let arg = format!("/select,{}", normalized);
+            cmd.arg(&arg);
+        }
         cmd.spawn().map_err(|e| e.to_string())?;
     }
     #[cfg(not(target_os = "windows"))]

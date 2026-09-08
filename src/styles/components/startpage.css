@@ -206,4 +206,10 @@ body.light-theme .pro-cap-pill kbd {
   box-shadow: none;
 }
 
+/* Startup Mode Window Size Lock: Suppress edge resize cursors */
+body:not(.image-loaded) .resize-handle {
+  pointer-events: none !important;
+  cursor: default !important;
+}
+
 

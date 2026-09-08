@@ -221,12 +221,14 @@ class BukaakeApp {
       if (initial?.target_path) {
         await this.windowModeManager.setMode(MODE_VIEWER);
         loadingIndicator.show(`Loading ${initial.file_name}...`);
-        // Eagerly suppress startpage before window reveal to eliminate the ~5-frame
-        // dropzone flash caused by img.onload decoding async after show_main_window.
+        // Suppress startpage before reveal to eliminate dropzone flash
         document.body.classList.add('image-loaded');
         this.dropZoneEl.style.display = 'none';
         this.fileLoader.loadFromTauriContext(initial);
-      } else if (initial?.error) toast.warn(initial.error);
+      } else {
+        if (initial?.error) toast.warn(initial.error);
+        await tauriBridge.resizeAndCenter(680, 480);
+      }
     } catch (err) { console.warn('[Bukaake] Startup check failed:', err); }
     await tauriBridge.invoke('show_main_window');
   }
@@ -333,10 +335,8 @@ class BukaakeApp {
   }
 
   async wakeFromStandby() {
-    // Restore Mode 1: resets body.mode-regular CSS, re-applies acrylic via setWindowVibrancy
     await this.windowModeManager.setMode(MODE_REGULAR);
-    // Restore start page drop zone if no image is currently loaded
-    if (!this.viewer.img) this.handleEmptyState();
+    if (!this.viewer.img) { this.handleEmptyState(); await tauriBridge.resizeAndCenter(680, 480); }
   }
 }
 

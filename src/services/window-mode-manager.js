@@ -146,7 +146,7 @@ export class WindowModeManager {
     const resizers = container.querySelectorAll('.resize-handle');
     resizers.forEach((handle) => {
       handle.addEventListener('mousedown', async (e) => {
-        if (this.currentMode === MODE_VIEWER) return;
+        if (this.currentMode === MODE_VIEWER || !this.viewer?.img) return;
         e.preventDefault();
         const dir = handle.dataset.direction;
         if (dir) {

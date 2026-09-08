@@ -4,6 +4,7 @@
  */
 
 import { invoke } from '@tauri-apps/api/core';
+import { tauriBridge } from '../services/tauri-bridge.js';
 import { hotkeyService } from '../services/hotkey-service.js';
 import { alitkenService } from '../services/alitken-service.js';
 
@@ -182,6 +183,7 @@ export function bindCaptureSettings() {
   // 3. Storage Directory & Prompt
   const inputDir = document.getElementById('inputVideoSaveDir');
   const btnBrowseDir = document.getElementById('btnBrowseVideoDir');
+  const btnOpenDir = document.getElementById('btnOpenVideoDir');
   const togglePrompt = document.getElementById('togglePromptSave');
 
   const updateDirDisplay = async () => {
@@ -195,6 +197,13 @@ export function bindCaptureSettings() {
     if (folder) {
       localStorage.setItem('bukaake-video-save-dir', folder);
       if (inputDir) inputDir.value = folder;
+    }
+  });
+
+  btnOpenDir?.addEventListener('click', async () => {
+    const dir = inputDir?.value || localStorage.getItem('bukaake-video-save-dir') || (await invoke('get_default_videos_dir'));
+    if (dir) {
+      await tauriBridge.showInFolder(dir);
     }
   });
 

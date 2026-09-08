@@ -34,6 +34,22 @@ html[data-theme="light"] .path-field {
   background: rgba(26, 32, 44, 0.05);
 }
 
+/* Standardized Icon-Only Glass Action Button */
+.path-row .btn-icon-only,
+.btn-icon-only {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 14px;
+  text-decoration: none;
+  border: none !important;
+  outline: none !important;
+}
+
 /* Standardized Hotkey Recorder Button */
 .hotkey-chip,
 .hotkey-btn {
