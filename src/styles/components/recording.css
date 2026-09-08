@@ -101,14 +101,14 @@ body.mode-recording-pill .recording-dock {
   position: static !important; top: auto !important; right: auto !important;
   margin: 0 !important; width: 100% !important; height: 100% !important;
   box-sizing: border-box !important;
-  border-radius: 10px !important;
-  padding: 4px 8px !important;
-  gap: 6px !important;
+  border-radius: 8px !important;
+  padding: 3px 6px !important;
+  gap: 5px !important;
   box-shadow: none !important;
 }
 
 body.mode-recording-pill .recording-indicator {
-  gap: 6px !important;
+  gap: 5px !important;
 }
 
 body.mode-recording-pill .recording-pulse-dot {
@@ -116,7 +116,7 @@ body.mode-recording-pill .recording-pulse-dot {
 }
 
 body.mode-recording-pill .recording-timer {
-  font-size: 12px !important; min-width: 38px !important;
+  font-size: 12px !important; min-width: 36px !important;
 }
 
 body.mode-recording-pill .recording-dock-divider {
@@ -128,14 +128,14 @@ body.mode-recording-pill .recording-controls {
 }
 
 body.mode-recording-pill .recording-btn {
-  padding: 4px 7px !important;
+  padding: 4px 6px !important;
   font-size: 11.5px !important;
   border-radius: 6px !important;
   gap: 4px !important;
 }
 
 body.mode-recording-pill .recording-btn.stop {
-  padding: 4px 9px !important;
+  padding: 4px 8px !important;
   font-size: 11.5px !important;
   border-radius: 6px !important;
 }
@@ -143,6 +143,14 @@ body.mode-recording-pill .recording-btn.stop {
 body.mode-recording-pill .recording-btn.cancel {
   padding: 4px 5px !important;
   border-radius: 6px !important;
+}
+
+/* Hide floating tool dock when post-recording banner is active */
+body.has-recording-banner .floating-toolbar {
+  opacity: 0 !important;
+  pointer-events: none !important;
+  transform: translate(-50%, 20px) !important;
+  transition: opacity 0.2s ease, transform 0.2s ease !important;
 }
 
 /* Post-Recording Compact Glass Pill Banner (42px Height) */
@@ -171,23 +179,20 @@ body.mode-recording-pill .recording-btn.cancel {
 
 .complete-meta {
   display: flex; align-items: center; gap: 6px;
-  font-size: 12px; font-weight: 500; color: #fff;
-  line-height: 1;
+  font-size: 12px; font-weight: 500; color: #fff; line-height: 1;
 }
 
 .complete-filename {
-  max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
 
 .complete-duration {
   font-family: 'JetBrains Mono', monospace; font-size: 11px;
-  color: rgba(255, 255, 255, 0.6); letter-spacing: 0.3px;
-  white-space: nowrap;
+  color: rgba(255, 255, 255, 0.6); letter-spacing: 0.3px; white-space: nowrap;
 }
 
 .complete-divider {
-  width: 1px; height: 16px; background: rgba(255, 255, 255, 0.12);
-  margin: 0 2px;
+  width: 1px; height: 16px; background: rgba(255, 255, 255, 0.12); margin: 0 2px;
 }
 
 .complete-actions {
@@ -195,9 +200,10 @@ body.mode-recording-pill .recording-btn.cancel {
 }
 
 .complete-btn {
-  display: inline-flex; align-items: center; gap: 5px;
-  padding: 5px 12px; font-size: 12px; font-weight: 500;
-  line-height: 1; white-space: nowrap !important;
+  display: inline-flex; align-items: center; justify-content: center; gap: 5px;
+  height: 28px; box-sizing: border-box;
+  padding: 0 11px; font-size: 12px; font-weight: 500;
+  line-height: normal; white-space: nowrap !important;
   color: #fff; background: rgba(255, 255, 255, 0.08);
   border: none; outline: none !important; border-radius: var(--radius-pill);
   cursor: pointer; transition: all var(--transition-fast);
@@ -207,23 +213,22 @@ body.mode-recording-pill .recording-btn.cancel {
   background: rgba(255, 255, 255, 0.16); transform: translateY(-1px);
 }
 
+.complete-btn.play {
+  background: rgba(99, 102, 241, 0.18); color: #a5b4fc;
+}
+.complete-btn.play:hover {
+  background: rgba(99, 102, 241, 0.28); color: #fff;
+}
+
 .complete-btn.alitken {
-  background: linear-gradient(135deg, #6366f1, #8b5cf6);
-  color: #fff; font-weight: 600;
-  box-shadow: 0 4px 14px rgba(99, 102, 241, 0.4);
+  background: rgba(139, 92, 246, 0.18); color: #c4b5fd;
 }
-
 .complete-btn.alitken:hover {
-  filter: brightness(1.1);
-  box-shadow: 0 6px 18px rgba(99, 102, 241, 0.55);
+  background: rgba(139, 92, 246, 0.28); color: #fff;
 }
 
-.complete-btn.close {
-  padding: 5px 8px; color: rgba(255, 255, 255, 0.5);
-}
-.complete-btn.close:hover {
-  color: #fff;
-}
+.complete-btn.close { width: 28px; padding: 0; color: rgba(255, 255, 255, 0.5); }
+.complete-btn.close:hover { color: #fff; background: rgba(255, 255, 255, 0.12); }
 
 /* Light Theme Optical Fills (Pillar 2) */
 body.light-theme .recording-dock,
@@ -233,25 +238,17 @@ html[data-theme="light"] .recording-dock {
 }
 
 body.light-theme .recording-timer,
-html[data-theme="light"] .recording-timer {
-  color: var(--text-main);
-}
+html[data-theme="light"] .recording-timer { color: var(--text-main); }
 
 body.light-theme .recording-dock-divider,
-html[data-theme="light"] .recording-dock-divider {
-  background: rgba(26, 32, 44, 0.12);
-}
+html[data-theme="light"] .recording-dock-divider { background: rgba(26, 32, 44, 0.12); }
 
 body.light-theme .recording-btn:not(.stop),
 html[data-theme="light"] .recording-btn:not(.stop) {
-  color: var(--text-main);
-  background: rgba(26, 32, 44, 0.06);
+  color: var(--text-main); background: rgba(26, 32, 44, 0.06);
 }
-
 body.light-theme .recording-btn:not(.stop):hover,
-html[data-theme="light"] .recording-btn:not(.stop):hover {
-  background: rgba(26, 32, 44, 0.12);
-}
+html[data-theme="light"] .recording-btn:not(.stop):hover { background: rgba(26, 32, 44, 0.12); }
 
 body.light-theme .recording-complete-banner,
 html[data-theme="light"] .recording-complete-banner {
@@ -260,27 +257,32 @@ html[data-theme="light"] .recording-complete-banner {
 }
 
 body.light-theme .complete-meta,
-html[data-theme="light"] .complete-meta {
-  color: var(--text-main);
-}
-
+html[data-theme="light"] .complete-meta { color: var(--text-main); }
 body.light-theme .complete-duration,
-html[data-theme="light"] .complete-duration {
-  color: var(--text-muted);
-}
-
+html[data-theme="light"] .complete-duration { color: var(--text-muted); }
 body.light-theme .complete-divider,
-html[data-theme="light"] .complete-divider {
-  background: rgba(26, 32, 44, 0.12);
-}
+html[data-theme="light"] .complete-divider { background: rgba(26, 32, 44, 0.12); }
 
-body.light-theme .complete-btn:not(.alitken),
-html[data-theme="light"] .complete-btn:not(.alitken) {
-  color: var(--text-main);
-  background: rgba(26, 32, 44, 0.06);
+body.light-theme .complete-btn,
+html[data-theme="light"] .complete-btn {
+  color: var(--text-main); background: rgba(26, 32, 44, 0.06);
 }
+body.light-theme .complete-btn:hover,
+html[data-theme="light"] .complete-btn:hover { background: rgba(26, 32, 44, 0.12); }
 
-body.light-theme .complete-btn:not(.alitken):hover,
-html[data-theme="light"] .complete-btn:not(.alitken):hover {
-  background: rgba(26, 32, 44, 0.12);
-}
+body.light-theme .complete-btn.play,
+html[data-theme="light"] .complete-btn.play { background: rgba(99, 102, 241, 0.10); color: #4f46e5; }
+body.light-theme .complete-btn.play:hover,
+html[data-theme="light"] .complete-btn.play:hover { background: rgba(99, 102, 241, 0.18); }
+
+body.light-theme .complete-btn.alitken,
+html[data-theme="light"] .complete-btn.alitken { background: rgba(139, 92, 246, 0.10); color: #7c3aed; }
+body.light-theme .complete-btn.alitken:hover,
+html[data-theme="light"] .complete-btn.alitken:hover { background: rgba(139, 92, 246, 0.18); }
+
+body.light-theme .complete-btn.close,
+html[data-theme="light"] .complete-btn.close { color: #64748b; background: transparent; }
+body.light-theme .complete-btn.close:hover,
+html[data-theme="light"] .complete-btn.close:hover { background: rgba(26, 32, 44, 0.08); color: #1f2937; }
+
+

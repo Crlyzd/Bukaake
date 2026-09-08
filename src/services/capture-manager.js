@@ -30,8 +30,6 @@ export class CaptureManager {
 
   init() {
     document.getElementById('btnTitlebarCapture')?.addEventListener('click', () => this.captureSnip());
-    document.getElementById('dropSnipBtn')?.addEventListener('click', () => this.captureSnip());
-    document.getElementById('dropRecordBtn')?.addEventListener('click', () => this.toggleRecord());
 
     if (tauriBridge.isTauri()) {
       listen('bukaake://trigger-snip', () => this.captureSnip());
@@ -260,9 +258,8 @@ export class CaptureManager {
   showRecordingSavedToast(savedPath, durationSecs) {
     const filename = savedPath.split(/[/\\]/).pop();
     const timeStr = screenRecorderService.formatTime(durationSecs);
-
-    // Single-toast lifecycle: dismiss any active banner before rendering
     document.querySelectorAll('.recording-complete-banner').forEach((b) => b.remove());
+    document.body.classList.add('has-recording-banner');
 
     const banner = document.createElement('div');
     banner.className = 'recording-complete-banner glass-panel';
@@ -274,11 +271,14 @@ export class CaptureManager {
       </div>
       <div class="complete-divider"></div>
       <div class="complete-actions">
-        <button class="complete-btn alitken" id="btnPostAlitken" title="Open with Alitken Media Converter">
-          <i class="ri-film-line"></i> <span>Open in Alitken</span>
+        <button class="complete-btn play" id="btnPostPlay" title="Play Video Directly">
+          <i class="ri-play-fill"></i> <span>Play</span>
         </button>
         <button class="complete-btn folder" id="btnPostFolder" title="Show in Windows Explorer">
           <i class="ri-folder-open-line"></i> <span>Folder</span>
+        </button>
+        <button class="complete-btn alitken" id="btnPostAlitken" title="Open with Alitken Media Converter">
+          <i class="ri-magic-line"></i> <span>Open in Alitken</span>
         </button>
         <button class="complete-btn close" id="btnPostClose" title="Dismiss">
           <i class="ri-close-line"></i>
@@ -287,9 +287,11 @@ export class CaptureManager {
     `;
 
     document.body.appendChild(banner);
-    banner.querySelector('#btnPostAlitken')?.addEventListener('click', () => { alitkenService.launch(savedPath); banner.remove(); });
-    banner.querySelector('#btnPostFolder')?.addEventListener('click', () => { invoke('show_in_folder', { path: savedPath }); banner.remove(); });
-    banner.querySelector('#btnPostClose')?.addEventListener('click', () => banner.remove());
-    setTimeout(() => { if (document.body.contains(banner)) banner.remove(); }, 12000);
+    const dismiss = () => { document.body.classList.remove('has-recording-banner'); banner.remove(); };
+    banner.querySelector('#btnPostPlay')?.addEventListener('click', () => { invoke('open_url', { url: savedPath }); dismiss(); });
+    banner.querySelector('#btnPostFolder')?.addEventListener('click', () => { invoke('show_in_folder', { path: savedPath }); dismiss(); });
+    banner.querySelector('#btnPostAlitken')?.addEventListener('click', () => { alitkenService.launch(savedPath); dismiss(); });
+    banner.querySelector('#btnPostClose')?.addEventListener('click', () => dismiss());
+    setTimeout(() => { if (document.body.contains(banner)) dismiss(); }, 12000);
   }
 }

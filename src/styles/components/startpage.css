@@ -77,55 +77,51 @@
   letter-spacing: -0.2px;
 }
 
-.drop-card p {
-  font-size: 13px;
-  color: var(--text-muted);
-  line-height: 1.4;
-  max-width: 380px;
-}
-
 .drop-actions {
   display: flex;
   align-items: center;
   gap: 8px;
   margin-top: 2px;
-  flex-wrap: wrap;
   justify-content: center;
 }
 
 .drop-actions .btn-primary {
-  padding: 8px 16px;
-  font-size: 13px;
-  font-weight: 600;
-  border-radius: var(--radius-pill);
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.drop-actions .btn-secondary {
-  padding: 8px 14px;
+  padding: 8px 18px;
   font-size: 13px;
   font-weight: 500;
   border-radius: var(--radius-pill);
-  background: var(--glass-btn-bg);
-  color: var(--text-main);
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  border: none;
-  outline: none !important;
+  gap: 7px;
   cursor: pointer;
   transition: all var(--transition-fast);
 }
 
-.drop-actions .btn-secondary:hover {
-  background: var(--glass-btn-hover);
-  transform: translateY(-1px);
+.drop-subtext-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 9px;
+  margin-top: 2px;
 }
 
-.drop-actions .btn-secondary:active {
-  transform: scale(0.97);
+.drop-hint {
+  font-size: 12.5px;
+  font-weight: 400;
+  color: var(--text-muted);
+  line-height: 1.4;
+  margin: 0;
+  letter-spacing: -0.1px;
+}
+
+.subtle-kbd {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 400;
+  color: var(--text-dim);
+  background: rgba(255, 255, 255, 0.06);
+  padding: 1px 5px;
+  border-radius: 4px;
 }
 
 .pro-capabilities-strip {
@@ -135,7 +131,6 @@
   justify-content: center;
   gap: 6px;
   width: 100%;
-  margin-top: 2px;
 }
 
 .pro-cap-pill {
@@ -143,7 +138,7 @@
   align-items: center;
   gap: 5px;
   font-size: 11px;
-  font-weight: 500;
+  font-weight: 400;
   color: var(--text-muted);
   background: var(--bg-secondary);
   padding: 3px 9px;
@@ -152,12 +147,16 @@
   transition: all var(--transition-fast);
 }
 
-.pro-cap-pill i { font-size: 12px; color: var(--accent); }
+.pro-cap-pill i {
+  font-size: 12px;
+  color: var(--accent);
+  opacity: 0.85;
+}
 
 .pro-cap-pill kbd {
   font-family: 'JetBrains Mono', monospace;
-  font-size: 9px;
-  font-weight: 600;
+  font-size: 9.5px;
+  font-weight: 400;
   color: var(--text-dim);
   background: var(--glass-card-bg);
   padding: 1px 4px;
@@ -183,16 +182,28 @@
 }
 
 /* Light Theme Optical Definition (Pillar 2) */
+html[data-theme="light"] .drop-hint,
+body.light-theme .drop-hint {
+  color: #64748b;
+}
+
+html[data-theme="light"] .subtle-kbd,
+body.light-theme .subtle-kbd {
+  background: rgba(26, 32, 44, 0.05);
+  color: #475569;
+}
+
 html[data-theme="light"] .pro-cap-pill,
 body.light-theme .pro-cap-pill {
-  background: rgba(26, 32, 44, 0.05);
-  color: #374151;
+  background: rgba(26, 32, 44, 0.04);
+  color: #64748b;
 }
 
 html[data-theme="light"] .pro-cap-pill kbd,
 body.light-theme .pro-cap-pill kbd {
-  background: #ffffff;
-  color: #1f2937;
-  box-shadow: 0 1px 2px rgba(26, 32, 44, 0.06);
+  background: rgba(26, 32, 44, 0.05);
+  color: #475569;
+  box-shadow: none;
 }
+
 

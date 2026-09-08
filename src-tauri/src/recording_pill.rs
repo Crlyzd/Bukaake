@@ -45,8 +45,8 @@ pub fn enter_recording_pill_mode(app: tauri::AppHandle) -> Result<(), String> {
 
     #[cfg(target_os = "windows")]
     if let Ok(hwnd) = win.hwnd() {
-        use windows::Win32::Graphics::Dwm::{DwmSetWindowAttribute, DWMWA_WINDOW_CORNER_PREFERENCE, DWMWCP_DONOTROUND};
-        let preference = DWMWCP_DONOTROUND.0;
+        use windows::Win32::Graphics::Dwm::{DwmSetWindowAttribute, DWMWA_WINDOW_CORNER_PREFERENCE, DWMWCP_ROUND};
+        let preference = DWMWCP_ROUND.0;
         let _ = unsafe {
             DwmSetWindowAttribute(
                 windows::Win32::Foundation::HWND(hwnd.0),
@@ -61,15 +61,15 @@ pub fn enter_recording_pill_mode(app: tauri::AppHandle) -> Result<(), String> {
         let monitor_pos = monitor.position();
         let screen_size = monitor.size();
         let scale = monitor.scale_factor();
-        let w = (240.0 * scale) as u32;
-        let h = (38.0 * scale) as u32;
+        let w = (196.0 * scale) as u32;
+        let h = (36.0 * scale) as u32;
         let x = monitor_pos.x + screen_size.width as i32 - w as i32 - (24.0 * scale) as i32;
         let y = monitor_pos.y + (50.0 * scale) as i32;
 
         let _ = win.set_size(Size::Physical(PhysicalSize { width: w, height: h }));
         let _ = win.set_position(Position::Physical(PhysicalPosition { x, y }));
     } else {
-        let _ = win.set_size(Size::Logical(tauri::LogicalSize { width: 240.0, height: 38.0 }));
+        let _ = win.set_size(Size::Logical(tauri::LogicalSize { width: 196.0, height: 36.0 }));
     }
 
     let _ = win.set_always_on_top(true);
