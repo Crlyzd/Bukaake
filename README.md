@@ -61,7 +61,7 @@ Take instant, crisp screenshots without needing external tools:
 
 <div align="center">
   <!-- SCREEN SNIPPING SCREENSHOT PLACEHOLDER -->
-  <img src="YOUR_SCREEN_SNIPPING_IMAGE_URL_HERE" alt="Built-in Screen Snipping & Region Capture" />
+  <img width="2560" height="1440" alt="image" src="https://github.com/user-attachments/assets/500290d7-a62d-4d9c-a766-b937177567aa" />
 </div>
 
 ---
@@ -74,7 +74,7 @@ Record quick gameplay clips, software demos, or tutorials with ease:
 
 <div align="center">
   <!-- SCREEN RECORDING SCREENSHOT PLACEHOLDER -->
-  <img src="YOUR_SCREEN_RECORDING_IMAGE_URL_HERE" alt="Desktop Screen Recording Dock" />
+  <img width="1494" height="841" alt="image" src="https://github.com/user-attachments/assets/e4821226-86e9-4300-b231-969b4eb377da" />
 </div>
 
 ---
