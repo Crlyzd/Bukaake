@@ -1,6 +1,6 @@
 /**
  * Bukaake Custom Hotkey Service
- * Manages customizable capture shortcuts, key combination recording, and event dispatch (< 120 lines)
+ * Manages customizable unified capture shortcut, key combination recording, and event dispatch (< 120 lines)
  */
 
 import { invoke } from '@tauri-apps/api/core';
@@ -8,72 +8,79 @@ import { emit } from '@tauri-apps/api/event';
 
 export class HotkeyService {
   constructor() {
-    this.DEFAULT_SCREENSHOT = 'Alt+Shift+S';
-    this.DEFAULT_RECORD = 'Alt+Shift+S';
+    this.DEFAULT_HOTKEY = 'Alt+Shift+S';
+    this.STORAGE_KEY = 'bukaake-hotkey-capture';
+    this.LEGACY_STORAGE_KEY = 'bukaake-hotkey-screenshot';
 
-    this.STORAGE_KEY_SCREENSHOT = 'bukaake-hotkey-screenshot';
-    this.STORAGE_KEY_RECORD = 'bukaake-hotkey-record';
+    this.init();
   }
 
-  getSharedHotkey() {
-    return this.getScreenshotHotkey();
+  init() {
+    window.addEventListener('storage', (e) => {
+      if (e.key === this.STORAGE_KEY || e.key === this.LEGACY_STORAGE_KEY) {
+        this.applyToBackend();
+      }
+    });
+
+    if (window.__TAURI__?.event?.listen) {
+      window.__TAURI__.event.listen('bukaake-hotkeys-changed', (e) => {
+        const val = e.payload?.combo || e.payload?.screenshot;
+        if (val) {
+          localStorage.setItem(this.STORAGE_KEY, val);
+          localStorage.setItem(this.LEGACY_STORAGE_KEY, val);
+        }
+      }).catch(() => {});
+    }
+
+    this.applyToBackend();
   }
 
-  setSharedHotkey(combo) {
+  async applyToBackend() {
+    try {
+      await invoke('update_global_shortcuts', {
+        combo: this.getHotkey(),
+      });
+    } catch (_) {}
+  }
+
+  getHotkey() {
+    return localStorage.getItem(this.STORAGE_KEY)
+      || localStorage.getItem(this.LEGACY_STORAGE_KEY)
+      || this.DEFAULT_HOTKEY;
+  }
+
+  setHotkey(combo) {
     if (combo) {
-      localStorage.setItem(this.STORAGE_KEY_SCREENSHOT, combo);
-      localStorage.setItem(this.STORAGE_KEY_RECORD, combo);
+      localStorage.setItem(this.STORAGE_KEY, combo);
+      localStorage.setItem(this.LEGACY_STORAGE_KEY, combo);
     } else {
-      localStorage.removeItem(this.STORAGE_KEY_SCREENSHOT);
-      localStorage.removeItem(this.STORAGE_KEY_RECORD);
+      localStorage.removeItem(this.STORAGE_KEY);
+      localStorage.removeItem(this.LEGACY_STORAGE_KEY);
     }
     this.notifyChange();
   }
 
-  getScreenshotHotkey() {
-    return localStorage.getItem(this.STORAGE_KEY_SCREENSHOT) || this.DEFAULT_SCREENSHOT;
-  }
-
-  setScreenshotHotkey(combo) {
-    if (combo) localStorage.setItem(this.STORAGE_KEY_SCREENSHOT, combo);
-    else localStorage.removeItem(this.STORAGE_KEY_SCREENSHOT);
-    this.notifyChange();
-  }
-
-  getRecordHotkey() {
-    return localStorage.getItem(this.STORAGE_KEY_RECORD) || this.DEFAULT_RECORD;
-  }
-
-  setRecordHotkey(combo) {
-    if (combo) localStorage.setItem(this.STORAGE_KEY_RECORD, combo);
-    else localStorage.removeItem(this.STORAGE_KEY_RECORD);
-    this.notifyChange();
-  }
+  // Aliases for compatibility
+  getSharedHotkey() { return this.getHotkey(); }
+  setSharedHotkey(combo) { this.setHotkey(combo); }
+  getScreenshotHotkey() { return this.getHotkey(); }
+  setScreenshotHotkey(combo) { this.setHotkey(combo); }
 
   resetDefaults() {
-    localStorage.removeItem(this.STORAGE_KEY_SCREENSHOT);
-    localStorage.removeItem(this.STORAGE_KEY_RECORD);
+    localStorage.removeItem(this.STORAGE_KEY);
+    localStorage.removeItem(this.LEGACY_STORAGE_KEY);
+    localStorage.removeItem('bukaake-hotkey-record');
     this.notifyChange();
   }
 
   notifyChange() {
-    const detail = {
-      screenshot: this.getScreenshotHotkey(),
-      record: this.getRecordHotkey(),
-    };
+    const hotkey = this.getHotkey();
+    const detail = { combo: hotkey, screenshot: hotkey };
     window.dispatchEvent(new CustomEvent('bukaake-hotkeys-changed', { detail }));
-    invoke('update_global_shortcuts', {
-      snipCombo: detail.screenshot,
-      recordCombo: detail.record,
-    }).catch(() => {});
+    this.applyToBackend();
     emit('bukaake-hotkeys-changed', detail).catch(() => {});
   }
 
-  /**
-   * Normalizes a KeyboardEvent into a standard combo string (e.g. "Alt+Shift+S")
-   * @param {KeyboardEvent} e 
-   * @returns {string|null}
-   */
   parseEventToCombo(e) {
     if (['Control', 'Alt', 'Shift', 'Meta'].includes(e.key)) return null;
 
@@ -91,26 +98,21 @@ export class HotkeyService {
     return parts.join('+');
   }
 
-  /**
-   * Checks if a KeyboardEvent matches a specified combo string
-   * @param {KeyboardEvent} e 
-   * @param {string} comboStr 
-   * @returns {boolean}
-   */
   matches(e, comboStr) {
     if (!comboStr) return false;
     const parsed = this.parseEventToCombo(e);
     if (!parsed) return false;
-    return parsed.toLowerCase() === comboStr.toLowerCase();
+    const norm = (s) => s.toLowerCase().replace(/printscreen/g, 'prtscn');
+    return norm(parsed) === norm(comboStr);
+  }
+
+  isCaptureTrigger(e) {
+    if (e.key === 'PrintScreen') return true;
+    return this.matches(e, this.getHotkey());
   }
 
   isScreenshotTrigger(e) {
-    if (e.key === 'PrintScreen') return true;
-    return this.matches(e, this.getScreenshotHotkey());
-  }
-
-  isRecordTrigger(e) {
-    return this.matches(e, this.getRecordHotkey());
+    return this.isCaptureTrigger(e);
   }
 }
 

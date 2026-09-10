@@ -226,25 +226,6 @@ pub fn finish_screen_snip(
 }
 
 #[tauri::command]
-pub fn update_global_shortcuts(
-    app: tauri::AppHandle,
-    snip_combo: String,
-    record_combo: String,
-) -> Result<(), String> {
-    use tauri_plugin_global_shortcut::{GlobalShortcutExt, Shortcut};
-    let _ = app.global_shortcut().unregister_all();
-    if let Ok(sc) = snip_combo.parse::<Shortcut>() {
-        let _ = app.global_shortcut().register(sc);
-    }
-    if !record_combo.is_empty() && record_combo != snip_combo {
-        if let Ok(sc) = record_combo.parse::<Shortcut>() {
-            let _ = app.global_shortcut().register(sc);
-        }
-    }
-    Ok(())
-}
-
-#[tauri::command]
 pub fn save_screenshot_to_dir(
     base64_png: String,
     dest_dir: String,

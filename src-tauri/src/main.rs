@@ -10,6 +10,7 @@ pub mod heif_reader;
 pub mod pro_decoder;
 pub mod raw_reader;
 pub mod capture_commands;
+pub mod hotkeys;
 pub mod recording_pill;
 pub mod recording_border;
 pub mod screen_capture;
@@ -23,9 +24,10 @@ use capture_commands::{
     append_recording_chunk, capture_screen, discard_recording, finalize_recording,
     get_default_videos_dir, init_recording_stream, launch_alitken,
     prompt_select_executable, prompt_select_folder, prompt_save_recording,
-    prepare_screen_snip, show_screen_snip, finish_screen_snip, update_global_shortcuts,
+    prepare_screen_snip, show_screen_snip, finish_screen_snip,
     save_screenshot_to_dir,
 };
+use hotkeys::{handle_global_shortcut, setup_hotkeys, update_global_shortcuts};
 use recording_pill::{enter_recording_pill_mode, exit_recording_pill_mode};
 use recording_border::{show_recording_border, hide_recording_border, set_recording_border_paused};
 use autostart::{auto_heal_autostart_path, get_autostart_status, set_autostart_enabled};
@@ -38,7 +40,7 @@ use file_ops::delete_file;
 use image_loader::{get_initial_image, read_image_context, read_image_file, read_raw_full_sensor};
 use standby::{enter_standby, is_standby_enabled, set_standby_enabled, show_main_window, StandbyManager};
 use tauri::{Emitter, Manager};
-use tauri_plugin_global_shortcut::{GlobalShortcutExt, ShortcutState};
+use tauri_plugin_global_shortcut::ShortcutState;
 use updater::{cleanup_old_update_artifacts, download_and_install_update, get_system_arch};
 use window_commands::{
     get_cli_args, open_url, show_in_folder, close_window, exit_app,
@@ -69,12 +71,7 @@ fn main() {
             tauri_plugin_global_shortcut::Builder::new()
                 .with_handler(|app, shortcut, event| {
                     if event.state() == ShortcutState::Pressed {
-                        let text = shortcut.to_string().to_lowercase();
-                        if text.contains('r') && !text.contains('s') {
-                            let _ = app.emit("bukaake://trigger-record", ());
-                        } else {
-                            let _ = app.emit("bukaake://trigger-snip", ());
-                        }
+                        handle_global_shortcut(app, shortcut);
                     }
                 })
                 .build(),
@@ -139,9 +136,7 @@ fn main() {
                     let _ = window_vibrancy::apply_acrylic(&w, tint);
                 }
             }
-            if let Ok(snip_sc) = "Alt+Shift+S".parse::<tauri_plugin_global_shortcut::Shortcut>() {
-                let _ = app.global_shortcut().register(snip_sc);
-            }
+            setup_hotkeys(app);
             Ok(())
         })
         .on_window_event(|window, event| {

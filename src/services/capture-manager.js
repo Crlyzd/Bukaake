@@ -34,6 +34,7 @@ export class CaptureManager {
     if (tauriBridge.isTauri()) {
       listen('bukaake://trigger-snip', () => this.captureSnip());
       listen('bukaake://trigger-record', () => this.toggleRecord());
+      hotkeyService.applyToBackend();
     }
 
     screenRecorderService.onTimerTick = (timeStr) => {
@@ -42,12 +43,9 @@ export class CaptureManager {
 
     window.addEventListener('keydown', (e) => {
       if (['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName)) return;
-      if (hotkeyService.isScreenshotTrigger(e)) {
+      if (hotkeyService.isCaptureTrigger(e)) {
         e.preventDefault();
         this.captureSnip();
-      } else if (hotkeyService.isRecordTrigger(e)) {
-        e.preventDefault();
-        this.toggleRecord();
       }
     });
   }

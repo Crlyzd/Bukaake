@@ -27,6 +27,9 @@ export function bindCaptureSettings() {
 
   if (lblCapture) {
     renderHotkeyBadge(lblCapture, hotkeyService.getSharedHotkey());
+    window.addEventListener('bukaake-hotkeys-changed', (e) => {
+      if (e.detail?.screenshot) renderHotkeyBadge(lblCapture, e.detail.screenshot);
+    });
   }
 
   let isListening = false;
