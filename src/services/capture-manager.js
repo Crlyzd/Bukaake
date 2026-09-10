@@ -89,6 +89,10 @@ export class CaptureManager {
           wasMinimized: shouldHide ? false : wasMinimized,
           wasHidden: shouldHide,
         }).catch(() => {});
+        if (!shouldHide && !restoreFs) {
+          const isDark = !document.body.classList.contains('light-theme');
+          await tauriBridge.setWindowVibrancy(isDark, false).catch(() => {});
+        }
       }
     };
 
@@ -98,7 +102,7 @@ export class CaptureManager {
     const capturePhysW = payload.width;
     const capturePhysH = payload.height;
 
-    this.snipper.startSnip(
+    await this.snipper.startSnip(
       payload.data_url,
       async ({ rect, dataUrl, copyOnly, isRecord }) => {
         if (isRecord) {
@@ -138,6 +142,10 @@ export class CaptureManager {
       },
       options
     );
+
+    if (tauriBridge.isTauri()) {
+      await invoke('show_screen_snip').catch(() => {});
+    }
   }
 
   loadCapturedImage(dataUrl, filename) {

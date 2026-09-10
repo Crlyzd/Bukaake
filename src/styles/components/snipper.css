@@ -11,6 +11,12 @@
   cursor: crosshair;
   background: rgba(0, 0, 0, 0.45);
   overflow: hidden;
+  animation: snipperFadeIn 0.16s ease-out;
+}
+
+@keyframes snipperFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 .screen-snipper-overlay.hidden {

@@ -157,6 +157,9 @@ pub fn launch_alitken(video_path: String, custom_exe: Option<String>) -> Result<
 #[tauri::command]
 pub fn prepare_screen_snip(app: tauri::AppHandle) -> Result<ScreenCapturePayload, String> {
     use tauri::Manager;
+    #[cfg(target_os = "windows")]
+    use window_vibrancy::clear_acrylic;
+
     let mut was_visible = false;
     let mut was_minimized = false;
     let mut was_fullscreen = false;
@@ -170,6 +173,8 @@ pub fn prepare_screen_snip(app: tauri::AppHandle) -> Result<ScreenCapturePayload
             let _ = win.hide();
             std::thread::sleep(std::time::Duration::from_millis(280));
         }
+        #[cfg(target_os = "windows")]
+        let _ = clear_acrylic(&win);
     }
 
     let mut payload = screen_capture::capture_desktop()?;
@@ -181,10 +186,18 @@ pub fn prepare_screen_snip(app: tauri::AppHandle) -> Result<ScreenCapturePayload
         let _ = win.set_maximizable(true);
         let _ = win.set_always_on_top(true);
         let _ = win.set_fullscreen(true);
+    }
+    Ok(payload)
+}
+
+#[tauri::command]
+pub fn show_screen_snip(app: tauri::AppHandle) -> Result<(), String> {
+    use tauri::Manager;
+    if let Some(win) = app.get_webview_window("main") {
         let _ = win.show();
         let _ = win.set_focus();
     }
-    Ok(payload)
+    Ok(())
 }
 
 #[tauri::command]
@@ -198,9 +211,9 @@ pub fn finish_screen_snip(
     if let Some(win) = app.get_webview_window("main") {
         let _ = win.set_always_on_top(false);
         if was_hidden {
+            let _ = win.hide();
             let _ = win.set_fullscreen(false);
             let _ = win.set_maximizable(false);
-            let _ = win.hide();
         } else if was_minimized {
             let _ = win.set_fullscreen(false);
             let _ = win.minimize();

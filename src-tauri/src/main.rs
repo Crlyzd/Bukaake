@@ -23,7 +23,7 @@ use capture_commands::{
     append_recording_chunk, capture_screen, discard_recording, finalize_recording,
     get_default_videos_dir, init_recording_stream, launch_alitken,
     prompt_select_executable, prompt_select_folder, prompt_save_recording,
-    prepare_screen_snip, finish_screen_snip, update_global_shortcuts,
+    prepare_screen_snip, show_screen_snip, finish_screen_snip, update_global_shortcuts,
     save_screenshot_to_dir,
 };
 use recording_pill::{enter_recording_pill_mode, exit_recording_pill_mode};
@@ -178,7 +178,7 @@ fn main() {
             capture_screen, get_default_videos_dir, init_recording_stream,
             append_recording_chunk, finalize_recording, discard_recording,
             prompt_save_recording, prompt_select_folder, prompt_select_executable,
-            launch_alitken, prepare_screen_snip, finish_screen_snip, update_global_shortcuts,
+            launch_alitken, prepare_screen_snip, show_screen_snip, finish_screen_snip, update_global_shortcuts,
             enter_recording_pill_mode, exit_recording_pill_mode,
             show_recording_border, hide_recording_border, set_recording_border_paused,
             save_screenshot_to_dir

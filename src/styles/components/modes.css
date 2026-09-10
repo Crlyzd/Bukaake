@@ -260,3 +260,23 @@ body.mode-viewer .resize-handle-container {
 .resize-handle[data-direction="NorthEast"] { top: 0; right: 0; width: 10px; height: 10px; cursor: ne-resize; }
 .resize-handle[data-direction="SouthWest"] { bottom: 0; left: 0; width: 10px; height: 10px; cursor: sw-resize; }
 .resize-handle[data-direction="SouthEast"] { bottom: 0; right: 0; width: 10px; height: 10px; cursor: se-resize; }
+
+/* --------------------------------------------------------------------------
+   Capture Mode: Optical Isolation (Zero-Flash & Transparent Background)
+   -------------------------------------------------------------------------- */
+body.mode-capturing {
+  background: transparent !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+body.mode-capturing .app-titlebar,
+body.mode-capturing .viewport-container,
+body.mode-capturing .resize-handle-container,
+body.mode-capturing .floating-toolbar {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}

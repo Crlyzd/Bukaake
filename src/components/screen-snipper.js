@@ -132,7 +132,7 @@ export class ScreenSnipper {
     localStorage.setItem('bukaake-capture-mode', mode);
   }
 
-  startSnip(captureDataUrl, onComplete, onCancel, options = {}) {
+  async startSnip(captureDataUrl, onComplete, onCancel, options = {}) {
     this.currentDataUrl = captureDataUrl;
     this.onComplete = onComplete;
     this.onCancel = onCancel;
@@ -153,6 +153,10 @@ export class ScreenSnipper {
     }));
 
     this.bgImg.src = captureDataUrl;
+    if (this.bgImg.decode) {
+      await this.bgImg.decode().catch(() => {});
+    }
+
     this.box.classList.add('hidden');
     this.actionDock.classList.add('hidden');
     this.overlay.classList.remove('hidden');
