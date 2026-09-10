@@ -25,6 +25,9 @@ pub struct ScreenCapturePayload {
     pub x: i32,
     pub y: i32,
     pub windows: Vec<DetectedWindow>,
+    pub was_visible: bool,
+    pub was_fullscreen: bool,
+    pub was_minimized: bool,
 }
 
 #[cfg(target_os = "windows")]
@@ -143,6 +146,9 @@ pub fn capture_desktop() -> Result<ScreenCapturePayload, String> {
             x,
             y,
             windows,
+            was_visible: true,
+            was_fullscreen: false,
+            was_minimized: false,
         })
     }
 }

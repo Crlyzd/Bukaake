@@ -132,6 +132,8 @@ pub fn enter_standby(
 
     if let Some(win) = app_handle.get_webview_window("main") {
         let _ = win.hide();
+        let _ = win.set_fullscreen(false);
+        let _ = win.set_maximizable(false);
     }
     trim_memory();
     state.start_countdown(app_handle);

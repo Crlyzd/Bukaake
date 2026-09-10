@@ -286,7 +286,7 @@ class BukaakeApp {
   }
 
   handleEmptyState() {
-    if (this.windowModeManager) this.windowModeManager.lastAspectSize = null;
+    if (this.windowModeManager) { this.windowModeManager.lastAspectSize = null; this.windowModeManager.updateModeClasses(MODE_REGULAR); }
     this.fileLoader?.clearItems();
     document.body.classList.remove('image-loaded');
     this.dropZoneEl.style.display = 'flex';

@@ -76,38 +76,35 @@ export class CaptureManager {
       return;
     }
 
-    const cleanupSnip = async () => {
+    const hasImage = Boolean(this.viewer?.img);
+    const wasVisible = payload.was_visible ?? true;
+    const wasMinimized = payload.was_minimized ?? false;
+    const wasFullscreen = payload.was_fullscreen ?? (isFs || isMax);
+
+    const finishSnip = async ({ shouldHide = false, restoreFs = wasFullscreen } = {}) => {
       document.body.classList.remove('mode-capturing');
       if (tauriBridge.isTauri()) {
         await invoke('finish_screen_snip', {
-          wasFullscreen: isFs || isMax,
-          wasMinimized: false,
-          wasHidden: false,
+          wasFullscreen: restoreFs,
+          wasMinimized: shouldHide ? false : wasMinimized,
+          wasHidden: shouldHide,
         }).catch(() => {});
       }
     };
 
     options.windows = payload.windows || [];
-    options.screenWidth = payload.width;    // GDI physical width (pixels)
-    options.screenHeight = payload.height;  // GDI physical height (pixels)
-    // Capture physical dimensions at overlay-open time, before any window resize
+    options.screenWidth = payload.width;
+    options.screenHeight = payload.height;
     const capturePhysW = payload.width;
     const capturePhysH = payload.height;
 
     this.snipper.startSnip(
       payload.data_url,
       async ({ rect, dataUrl, copyOnly, isRecord }) => {
-        await cleanupSnip();
-
         if (isRecord) {
+          document.body.classList.remove('mode-capturing');
           const isFull = (rect.mode === 'fullscreen' || (rect.isFullscreen && !rect.isWindow));
-          // Attach GDI physical dimensions so screen-recorder-service can compute scale
-          // without relying on the live window.innerWidth (which changes to 320px during pill mode)
-          const cropRect = isFull ? null : {
-            ...rect,
-            screenWidth: capturePhysW,
-            screenHeight: capturePhysH,
-          };
+          const cropRect = isFull ? null : { ...rect, screenWidth: capturePhysW, screenHeight: capturePhysH };
           await this.startRecording(cropRect);
           return;
         }
@@ -119,18 +116,25 @@ export class CaptureManager {
           await screenCaptureService.copyToClipboard(croppedUrl);
 
           if (!copyOnly) {
+            await finishSnip({ shouldHide: false, restoreFs: wasFullscreen });
             this.loadCapturedImage(croppedUrl, filename);
             toast.show(savedPath ? 'Snippet saved & loaded into Bukaake' : 'Snippet loaded', 'info');
           } else {
-            toast.show(savedPath ? 'Snippet saved & copied to clipboard' : 'Snippet copied to clipboard', 'info');
+            const shouldHide = !wasVisible || !hasImage;
+            await finishSnip({ shouldHide, restoreFs: wasFullscreen });
+            if (!shouldHide) {
+              toast.show(savedPath ? 'Snippet saved & copied to clipboard' : 'Snippet copied to clipboard', 'info');
+            }
           }
         } catch (err) {
           console.error('[CaptureManager] Snip processing failed:', err);
+          await finishSnip({ shouldHide: !wasVisible || !hasImage });
           toast.show('Snip failed: ' + err.message, 'error');
         }
       },
       async () => {
-        await cleanupSnip();
+        const shouldHide = !wasVisible || !hasImage;
+        await finishSnip({ shouldHide, restoreFs: wasFullscreen });
       },
       options
     );
@@ -258,26 +262,14 @@ export class CaptureManager {
     banner.className = 'recording-complete-banner glass-panel';
     banner.innerHTML = `
       <div class="complete-badge"><i class="ri-checkbox-circle-fill"></i></div>
-      <div class="complete-meta">
-        <span class="complete-filename" title="${filename}">${filename}</span>
-        <span class="complete-duration">(${timeStr})</span>
-      </div>
+      <div class="complete-meta"><span class="complete-filename" title="${filename}">${filename}</span><span class="complete-duration">(${timeStr})</span></div>
       <div class="complete-divider"></div>
       <div class="complete-actions">
-        <button class="complete-btn play" id="btnPostPlay" title="Play Video Directly">
-          <i class="ri-play-fill"></i> <span>Play</span>
-        </button>
-        <button class="complete-btn folder" id="btnPostFolder" title="Show in Windows Explorer">
-          <i class="ri-folder-open-line"></i> <span>Folder</span>
-        </button>
-        <button class="complete-btn alitken" id="btnPostAlitken" title="Open with Alitken Media Converter">
-          <i class="ri-magic-line"></i> <span>Open in Alitken</span>
-        </button>
-        <button class="complete-btn close" id="btnPostClose" title="Dismiss">
-          <i class="ri-close-line"></i>
-        </button>
-      </div>
-    `;
+        <button class="complete-btn play" id="btnPostPlay" title="Play Video Directly"><i class="ri-play-fill"></i> <span>Play</span></button>
+        <button class="complete-btn folder" id="btnPostFolder" title="Show in Windows Explorer"><i class="ri-folder-open-line"></i> <span>Folder</span></button>
+        <button class="complete-btn alitken" id="btnPostAlitken" title="Open with Alitken Media Converter"><i class="ri-magic-line"></i> <span>Open in Alitken</span></button>
+        <button class="complete-btn close" id="btnPostClose" title="Dismiss"><i class="ri-close-line"></i></button>
+      </div>`;
 
     document.body.appendChild(banner);
     const dismiss = () => { document.body.classList.remove('has-recording-banner'); banner.remove(); };
