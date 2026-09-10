@@ -8,6 +8,7 @@ import { toast } from './toast.js';
 import { themeManager } from '../services/theme-manager.js';
 import { updaterService, APP_VERSION, hydrateAppVersions } from '../services/updater-service.js';
 import { fileAssocService } from '../services/file-assoc-service.js';
+import { autostartService } from '../services/autostart-service.js';
 import { tauriBridge } from '../services/tauri-bridge.js';
 
 export class SettingsModal {
@@ -26,6 +27,7 @@ export class SettingsModal {
     this.btnUnregisterAssoc = this.modalEl?.querySelector('#btnUnregisterAssoc');
     this.assocBadge = this.modalEl?.querySelector('#assocStatusBadge');
     this.assocPathChip = this.modalEl?.querySelector('#assocPathChip');
+    this.toggleAutostart = this.modalEl?.querySelector('#toggleAutostartModal');
     this.toggleStandby = this.modalEl?.querySelector('#toggleStandbyModal');
     this.standbyBadge = this.modalEl?.querySelector('#standbyStatusBadgeModal');
 
@@ -35,6 +37,7 @@ export class SettingsModal {
     this.init();
     this.initAppearanceSettings();
     this.bindFileAssociations();
+    this.bindAutostartSettings();
     this.bindStandbySettings();
   }
 
@@ -241,5 +244,19 @@ export class SettingsModal {
       this.standbyBadge.textContent = enabled ? '5m Warm' : 'Disabled';
       this.standbyBadge.classList.toggle('matched', enabled);
     }
+  }
+
+  bindAutostartSettings() {
+    if (!this.toggleAutostart) return;
+
+    autostartService.subscribe((status) => {
+      this.toggleAutostart.checked = Boolean(status.is_enabled);
+    });
+
+    autostartService.checkStatus();
+
+    this.toggleAutostart.addEventListener('change', () => {
+      autostartService.setEnabled(this.toggleAutostart.checked);
+    });
   }
 }

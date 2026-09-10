@@ -141,6 +141,16 @@ pub fn enter_standby(
 
 #[tauri::command]
 pub fn show_main_window(app_handle: tauri::AppHandle) -> Result<(), String> {
+    let is_startup = std::env::args().any(|a| a == "--startup" || a == "--minimized" || a == "--background");
+    let has_img = std::env::args().skip(1).any(|a| {
+        let p = std::path::Path::new(&a);
+        p.is_file() && crate::image_loader::is_image_file(p)
+    });
+    if is_startup && !has_img {
+        trim_memory();
+        return Ok(());
+    }
+
     if let Some(win) = app_handle.get_webview_window("main") {
         let _ = win.unminimize();
         let _ = win.show();

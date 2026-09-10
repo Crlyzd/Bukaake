@@ -8,6 +8,7 @@ import { tauriBridge } from './services/tauri-bridge.js';
 import { toast } from './components/toast.js';
 import { updaterService, APP_VERSION, hydrateAppVersions } from './services/updater-service.js';
 import { fileAssocService } from './services/file-assoc-service.js';
+import { autostartService } from './services/autostart-service.js';
 import { bindCaptureSettings } from './components/settings-capture-section.js';
 import { initHeartSprouter } from './components/heart-sprouter.js';
 
@@ -22,6 +23,8 @@ class SettingsApp {
     this.updateProgressFill = document.getElementById('updateProgressFill');
     this.btnSetDefault = document.getElementById('btnSetDefaultApp');
     this.assocBadge = document.getElementById('assocStatusBadge');
+    this.toggleAutostart = document.getElementById('toggleAutostart');
+    this.autostartBadge = document.getElementById('autostartStatusBadge');
     this.toggleStandby = document.getElementById('toggleStandby');
     this.btnCardDark = document.getElementById('btnCardDark');
     this.btnCardLight = document.getElementById('btnCardLight');
@@ -39,6 +42,7 @@ class SettingsApp {
     this.bindCheckerboard();
     this.bindUpdater();
     this.bindFileAssociations();
+    this.bindAutostartSettings();
     this.bindStandbySettings();
     this.bindCaptureSettings();
     initHeartSprouter(document.getElementById('authorHeart'));
@@ -269,6 +273,29 @@ class SettingsApp {
       } else {
         fileAssocService.registerAndOpenDefaultApps();
       }
+    });
+  }
+
+  bindAutostartSettings() {
+    if (!this.toggleAutostart) return;
+
+    autostartService.subscribe((status) => {
+      this.toggleAutostart.checked = Boolean(status.is_enabled);
+      if (this.autostartBadge) {
+        if (status.is_enabled) {
+          this.autostartBadge.textContent = status.is_path_matched ? 'Active' : 'Relocated';
+          this.autostartBadge.classList.add('matched');
+        } else {
+          this.autostartBadge.textContent = 'Disabled';
+          this.autostartBadge.classList.remove('matched');
+        }
+      }
+    });
+
+    autostartService.checkStatus();
+
+    this.toggleAutostart.addEventListener('change', () => {
+      autostartService.setEnabled(this.toggleAutostart.checked);
     });
   }
 

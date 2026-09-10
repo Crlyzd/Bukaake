@@ -1,6 +1,7 @@
 // Prevents additional console window on Windows in release
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+mod autostart;
 mod clipboard;
 mod file_assoc;
 mod file_ops;
@@ -27,6 +28,7 @@ use capture_commands::{
 };
 use recording_pill::{enter_recording_pill_mode, exit_recording_pill_mode};
 use recording_border::{show_recording_border, hide_recording_border, set_recording_border_paused};
+use autostart::{auto_heal_autostart_path, get_autostart_status, set_autostart_enabled};
 use clipboard::{read_clipboard, write_clipboard_image};
 use file_assoc::{
     auto_heal_or_sync_path, check_association_status, launch_default_apps_settings,
@@ -110,6 +112,7 @@ fn main() {
             #[cfg(target_os = "windows")]
             {
                 let _ = auto_heal_or_sync_path();
+                let _ = auto_heal_autostart_path();
                 let tint = Some((16, 19, 28, 248));
                 if let Some(icon) = app.default_window_icon() {
                     for name in ["main", "settings"] {
@@ -169,6 +172,7 @@ fn main() {
             download_and_install_update, get_system_arch, delete_file,
             check_association_status, register_file_associations,
             unregister_file_associations, launch_default_apps_settings,
+            get_autostart_status, set_autostart_enabled,
             enter_standby, show_main_window,
             set_standby_enabled, is_standby_enabled,
             capture_screen, get_default_videos_dir, init_recording_stream,
