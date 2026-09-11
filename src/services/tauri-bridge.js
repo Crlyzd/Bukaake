@@ -262,15 +262,16 @@ export class TauriBridge {
     if (this.isTauri()) { try { await this.invoke('play_windows_ding'); } catch (e) {} }
   }
 
+  async trimMemoryWorkingSet() {
+    if (this.isTauri()) {
+      try { await this.invoke('trim_memory_working_set'); } catch (_) {}
+    }
+  }
+
   async deleteFile(path, toTrash = true) {
     if (!this.isTauri() || !path) return false;
-    try {
-      await this.invoke('delete_file', { path, toTrash });
-      return true;
-    } catch (err) {
-      console.warn(`[TauriBridge] delete_file failed for '${path}':`, err);
-      throw err;
-    }
+    try { await this.invoke('delete_file', { path, toTrash }); return true; }
+    catch (err) { console.warn(`[TauriBridge] delete_file failed for '${path}':`, err); throw err; }
   }
 
   onSettingsModalState(callback) {
@@ -282,10 +283,7 @@ export class TauriBridge {
   initExternalLinks() {
     document.addEventListener('click', (e) => {
       const anchor = e.target.closest('a[href^="http"]');
-      if (anchor) {
-        e.preventDefault();
-        this.openUrl(anchor.href);
-      }
+      if (anchor) { e.preventDefault(); this.openUrl(anchor.href); }
     });
   }
 }

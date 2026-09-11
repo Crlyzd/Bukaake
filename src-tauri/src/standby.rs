@@ -41,17 +41,9 @@ impl StandbyManager {
     }
 }
 
-#[cfg(target_os = "windows")]
 pub fn trim_memory() {
-    unsafe {
-        use windows::Win32::System::ProcessStatus::K32EmptyWorkingSet;
-        use windows::Win32::System::Threading::GetCurrentProcess;
-        let _ = K32EmptyWorkingSet(GetCurrentProcess());
-    }
+    crate::process_memory::trim_process_tree();
 }
-
-#[cfg(not(target_os = "windows"))]
-pub fn trim_memory() {}
 
 pub fn activate_main_window(app: &tauri::AppHandle) {
     if let Some(win) = app.get_webview_window("main") {

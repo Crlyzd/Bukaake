@@ -74,6 +74,10 @@ class StandbyService {
       fileLoader?.clearItems?.();
       viewer?.setImage(null);
       if (fileLoader) fileLoader.currentMeta = null;
+      if (typeof window !== 'undefined' && window.gc) {
+        try { window.gc(); } catch (_) {}
+      }
+      await tauriBridge.trimMemoryWorkingSet();
     } catch (err) {
       console.warn('[StandbyService] Error clearing buffers:', err);
     }

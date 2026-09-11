@@ -15,6 +15,7 @@ pub mod recording_pill;
 pub mod recording_border;
 pub mod screen_capture;
 pub mod standby;
+pub mod process_memory;
 pub mod window_commands;
 #[cfg(target_os = "windows")]
 pub mod wic_decoder;
@@ -52,19 +53,7 @@ use window_commands::{
 };
 
 fn main() {
-    #[cfg(target_os = "windows")]
-    {
-        let current_args = std::env::var("WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS").unwrap_or_default();
-        let capture_flags = "--auto-select-desktop-capture-source=\"Entire screen\" --enable-usermedia-screen-capturing --use-fake-ui-for-media-stream --disable-background-timer-throttling --disable-renderer-backgrounding --disable-backgrounding-occluded-windows";
-        if !current_args.contains("--auto-select-desktop-capture-source") {
-            let combined = if current_args.is_empty() {
-                capture_flags.to_string()
-            } else {
-                format!("{} {}", current_args, capture_flags)
-            };
-            std::env::set_var("WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS", combined);
-        }
-    }
+    process_memory::configure_low_memory_webview_env();
     cleanup_old_update_artifacts();
     tauri::Builder::default()
         .plugin(
@@ -176,7 +165,8 @@ fn main() {
             launch_alitken, prepare_screen_snip, show_screen_snip, finish_screen_snip, update_global_shortcuts,
             enter_recording_pill_mode, exit_recording_pill_mode,
             show_recording_border, hide_recording_border, set_recording_border_paused,
-            save_screenshot_to_dir
+            save_screenshot_to_dir,
+            process_memory::trim_memory_working_set
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

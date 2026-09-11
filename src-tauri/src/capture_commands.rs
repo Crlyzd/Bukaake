@@ -32,6 +32,7 @@ pub fn get_default_videos_dir() -> Result<String, String> {
 
 #[tauri::command]
 pub fn init_recording_stream(temp_filename: String) -> Result<String, String> {
+    crate::process_memory::set_recording_memory_lockout(true);
     let temp_dir = std::env::temp_dir().join("Bukaake").join("captures");
     fs::create_dir_all(&temp_dir).map_err(|e| e.to_string())?;
 
@@ -56,6 +57,7 @@ pub fn append_recording_chunk(temp_path: String, chunk: Vec<u8>) -> Result<(), S
 
 #[tauri::command]
 pub fn finalize_recording(temp_path: String, dest_path: String) -> Result<String, String> {
+    crate::process_memory::set_recording_memory_lockout(false);
     let temp = Path::new(&temp_path);
     let dest = Path::new(&dest_path);
 
@@ -68,15 +70,18 @@ pub fn finalize_recording(temp_path: String, dest_path: String) -> Result<String
         let _ = fs::remove_file(temp);
     }
 
+    crate::process_memory::trim_process_tree();
     Ok(dest.to_string_lossy().to_string())
 }
 
 #[tauri::command]
 pub fn discard_recording(temp_path: String) -> Result<(), String> {
+    crate::process_memory::set_recording_memory_lockout(false);
     let path = Path::new(&temp_path);
     if path.exists() {
         let _ = fs::remove_file(path);
     }
+    crate::process_memory::trim_process_tree();
     Ok(())
 }
 
