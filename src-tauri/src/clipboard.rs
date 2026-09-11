@@ -157,8 +157,14 @@ pub fn write_clipboard_image(
     };
     let data = BASE64_STANDARD.decode(cleaned).map_err(|e| e.to_string())?;
     let img = image::load_from_memory(&data).map_err(|e| e.to_string())?;
-    let rgba = img.to_rgba8();
+    let mut rgba = img.to_rgba8();
     let (width, height) = rgba.dimensions();
+
+    // Ensure all pixels are fully opaque for universal Win32 CF_DIB compatibility,
+    // preventing Windows Clipboard History (Win + V) from displaying transparent pixels as black
+    for pixel in rgba.chunks_exact_mut(4) {
+        pixel[3] = 255;
+    }
 
     let mut clipboard = arboard::Clipboard::new().map_err(|e| e.to_string())?;
     let img_data = arboard::ImageData {

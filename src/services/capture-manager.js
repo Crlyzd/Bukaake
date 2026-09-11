@@ -102,7 +102,7 @@ export class CaptureManager {
 
     await this.snipper.startSnip(
       payload.data_url,
-      async ({ rect, dataUrl, copyOnly, isRecord }) => {
+      async ({ rect, dataUrl, sourceImg, copyOnly, isRecord }) => {
         if (isRecord) {
           document.body.classList.remove('mode-capturing');
           const isFull = (rect.mode === 'fullscreen' || (rect.isFullscreen && !rect.isWindow));
@@ -112,7 +112,7 @@ export class CaptureManager {
         }
 
         try {
-          const croppedUrl = await screenCaptureService.cropCapturedRegion(dataUrl, rect);
+          const croppedUrl = await screenCaptureService.cropCapturedRegion(dataUrl, rect, sourceImg);
           const filename = screenshotSaver.generateFilename();
           const savedPath = await screenshotSaver.saveToDisk(croppedUrl, filename);
           await screenCaptureService.copyToClipboard(croppedUrl);

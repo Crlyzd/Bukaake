@@ -1,4 +1,7 @@
-import { tauriBridge } from './tauri-bridge.js';
+/**
+ * Bukaake Picasa-Style Immersion Controller
+ * Manages hover-activated titlebar and floating toolbar
+ */
 
 export class IdleController {
   constructor(options = {}) {
@@ -17,17 +20,12 @@ export class IdleController {
 
     this.titlebarTimer = null;
     this.toolbarTimer = null;
-    this.deepIdleTimer = null;
 
     this.init();
   }
 
   init() {
     window.addEventListener('mousemove', (e) => this.handleMouseMove(e));
-    window.addEventListener('blur', () => {
-      setTimeout(() => tauriBridge.trimMemoryWorkingSet(), 3000);
-    });
-    this.resetDeepIdleTimer();
 
     this.titlebarEl?.addEventListener('mouseenter', () => {
       this.isOverTitlebar = true;
@@ -50,7 +48,6 @@ export class IdleController {
 
   handleMouseMove(e) {
     this.mouseY = e.clientY;
-    this.resetDeepIdleTimer();
 
     if (!this.hasImage()) {
       this.showTitlebar(true);
@@ -123,12 +120,5 @@ export class IdleController {
       this.scheduleTitlebarHide();
       this.scheduleToolbarHide();
     }
-  }
-
-  resetDeepIdleTimer() {
-    clearTimeout(this.deepIdleTimer);
-    this.deepIdleTimer = setTimeout(() => {
-      tauriBridge.trimMemoryWorkingSet();
-    }, 30000);
   }
 }

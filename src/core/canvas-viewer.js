@@ -106,7 +106,7 @@ export class CanvasViewer {
     this.flipV = false;
     this.currentFilterCss = '';
     if (img) this.fitToScreen(true);
-    else { this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height); this.render(); }
+    else this.render();
   }
 
   calculateFitScale(bottomInset = this.bottomInset) {

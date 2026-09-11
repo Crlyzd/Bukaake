@@ -13,13 +13,14 @@ pub fn configure_low_memory_webview_env() {
     {
         let current = std::env::var("WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS").unwrap_or_default();
         let flags = [
-            "--in-process-gpu",
             "--renderer-process-limit=1",
             "--disable-gpu-shader-disk-cache",
             "--disk-cache-size=1",
             "--media-cache-size=1",
-            "--enable-low-end-device-mode",
-            "--js-flags=\"--max-old-space-size=64 --expose-gc\"",
+            "--js-flags=\"--max-old-space-size=256 --expose-gc\"",
+            "--disable-background-timer-throttling",
+            "--disable-renderer-backgrounding",
+            "--disable-backgrounding-occluded-windows",
             "--auto-select-desktop-capture-source=\"Entire screen\"",
             "--enable-usermedia-screen-capturing",
             "--use-fake-ui-for-media-stream",

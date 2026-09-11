@@ -260,10 +260,9 @@ export class ScreenSnipper {
     }
   }
 
-  confirmSnip(copyOnly = false) {
+  async confirmSnip(copyOnly = false) {
     if (!this.currentRect || this.currentRect.width <= 5 || this.currentRect.height <= 5) {
-      this.cancelSnip();
-      return;
+      return this.cancelSnip();
     }
     const rect = {
       ...this.currentRect,
@@ -273,23 +272,27 @@ export class ScreenSnipper {
       screenDpr: this.screenDpr,
     };
     const dataUrl = this.currentDataUrl;
+    const sourceImg = this.bgImg;
     const isRecord = this.currentType === 'record';
     localStorage.setItem('bukaake-last-region', JSON.stringify({ x: rect.x, y: rect.y, width: rect.width, height: rect.height }));
-    this.hide();
-    this.onComplete?.({ rect, dataUrl, copyOnly, isRecord, mode: this.currentMode });
+    this.hideVisuals();
+    try {
+      await this.onComplete?.({ rect, dataUrl, sourceImg, copyOnly, isRecord, mode: this.currentMode });
+    } finally {
+      this.cleanup();
+    }
   }
 
-  cancelSnip() {
-    this.hide();
-    this.onCancel?.();
-  }
-
-  hide() {
+  cancelSnip() { this.hide(); this.onCancel?.(); }
+  hideVisuals() {
     this.overlay.classList.add('hidden');
     this.box.classList.add('hidden');
     this.actionDock.classList.add('hidden');
+  }
+  cleanup() {
     this.bgImg.src = '';
     this.currentDataUrl = null;
     this.currentRect = null;
   }
+  hide() { this.hideVisuals(); this.cleanup(); }
 }

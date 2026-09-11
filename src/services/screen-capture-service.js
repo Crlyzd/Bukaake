@@ -30,30 +30,47 @@ export class ScreenCaptureService {
   }
 
   /**
-   * Clips a region from a full-desktop capture data URL
+   * Clips a region from a full-desktop capture data URL or preloaded Image
    * @param {string} dataUrl 
    * @param {{ x: number, y: number, width: number, height: number }} rect 
+   * @param {HTMLImageElement|null} sourceImg Optional preloaded image for instant zero-allocation crop
    * @returns {Promise<string>} Cropped data URL
    */
-  async cropCapturedRegion(dataUrl, rect) {
+  async cropCapturedRegion(dataUrl, rect, sourceImg = null) {
+    const doCrop = (img) => {
+      const naturalW = img.naturalWidth || img.width || 1;
+      const naturalH = img.naturalHeight || img.height || 1;
+      const sX = Math.max(0, Math.min(naturalW - 1, Math.round(rect.x)));
+      const sY = Math.max(0, Math.min(naturalH - 1, Math.round(rect.y)));
+      const sW = Math.max(1, Math.min(naturalW - sX, Math.round(rect.width)));
+      const sH = Math.max(1, Math.min(naturalH - sY, Math.round(rect.height)));
+
+      const canvas = document.createElement('canvas');
+      canvas.width = sW;
+      canvas.height = sH;
+      const ctx = canvas.getContext('2d', { willReadFrequently: true });
+      if (!ctx) throw new Error('Canvas 2D context unavailable');
+
+      ctx.drawImage(img, sX, sY, sW, sH, 0, 0, sW, sH);
+      return canvas.toDataURL('image/png');
+    };
+
+    if (sourceImg && sourceImg.complete && (sourceImg.naturalWidth || sourceImg.width)) {
+      try {
+        return doCrop(sourceImg);
+      } catch (err) {
+        console.warn('[ScreenCapture] Fast sourceImg crop failed, using dataUrl fallback:', err);
+      }
+    }
+
     return new Promise((resolve, reject) => {
       const img = new Image();
       img.onload = () => {
-        // rect.x/y/width/height are already in physical screen pixels (set by screen-snipper.js).
-        // The GDI screenshot image natural size also matches physical pixels, so we draw directly.
-        const sX = Math.round(rect.x);
-        const sY = Math.round(rect.y);
-        const sW = Math.max(1, Math.round(rect.width));
-        const sH = Math.max(1, Math.round(rect.height));
-
-        const canvas = document.createElement('canvas');
-        canvas.width = sW;
-        canvas.height = sH;
-        const ctx = canvas.getContext('2d');
-        if (!ctx) return reject(new Error('Canvas 2D context unavailable'));
-
-        ctx.drawImage(img, sX, sY, sW, sH, 0, 0, sW, sH);
-        resolve(canvas.toDataURL('image/png'));
+        try {
+          resolve(doCrop(img));
+        } catch (err) {
+          reject(err);
+        }
       };
       img.onerror = () => reject(new Error('Failed to load capture for cropping'));
       img.src = dataUrl;
