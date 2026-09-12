@@ -1,30 +1,34 @@
 <div align="center">
 
-  <img src="public/app-icon.png" width="96" height="96" alt="Bukaake Logo" style="border-radius: 22px;" />
+  <h1>
+    <img src="public/app-icon.png" width="40" height="40" alt="Bukaake Logo" style="vertical-align: middle; border-radius: 10px; margin-right: 8px;" />
+    Bukaake
+  </h1>
 
-  # Bukaake
+  <p>
+    <strong>The ultra-fast, transparent, and distraction-free photo viewer for Windows.</strong><br />
+    <em>Reviving the desktop-immersive magic of the classic Google Picasa Photo Viewer with modern stroke-free frosted glass.</em>
+  </p>
 
-  **The ultra-fast, transparent, and distraction-free photo viewer for Windows.**  
-  *Reviving the desktop-immersive magic of the classic Google Picasa Photo Viewer with modern stroke-free frosted glass.*
+  <p>
+    <a href="https://github.com/Crlyzd/Bukaake/releases/latest"><img src="https://img.shields.io/github/v/release/Crlyzd/Bukaake?color=00e5ff&label=Release&style=flat-square" alt="Latest Release" /></a>
+    <a href="https://github.com/Crlyzd/Bukaake/releases"><img src="https://img.shields.io/badge/Platform-Windows%2010%20%2F%2011-0078d4?style=flat-square&logo=windows&logoColor=white" alt="Platform" /></a>
+    <a href="https://github.com/Crlyzd/Bukaake/releases"><img src="https://img.shields.io/badge/Architecture-x64%20%7C%20ARM64-6c5ce7?style=flat-square" alt="Architecture" /></a>
+    <a href="https://github.com/Crlyzd/Bukaake/releases"><img src="https://img.shields.io/badge/Edition-Single%20Portable%20Exe%20(~5MB)-00b894?style=flat-square" alt="Edition" /></a>
+    <a href="LICENSE"><img src="https://img.shields.io/badge/License-GPL--3.0-0984e3?style=flat-square" alt="License" /></a>
+  </p>
+
+  <p>
+    <a href="https://github.com/Crlyzd/Bukaake/releases/latest">
+      <img src="https://img.shields.io/badge/%E2%AC%87%EF%B8%8F_Download_Latest-Windows_x64-00e5ff?style=for-the-badge&logoColor=black" alt="Download Latest x64" />
+    </a>
+    &nbsp;
+    <a href="https://github.com/Crlyzd/Bukaake/releases/latest">
+      <img src="https://img.shields.io/badge/%E2%AC%87%EF%B8%8F_Download_ARM64-Surface_%2F_Snapdragon-2d3436?style=for-the-badge&logoColor=white" alt="Download Latest ARM64" />
+    </a>
+  </p>
 
   <br />
-
-  [![Latest Release](https://img.shields.io/github/v/release/Crlyzd/Bukaake?color=00e5ff&label=Release&style=flat-square)](https://github.com/Crlyzd/Bukaake/releases/latest)
-  [![Platform](https://img.shields.io/badge/Platform-Windows%2010%20%2F%2011-0078d4?style=flat-square&logo=windows&logoColor=white)](https://github.com/Crlyzd/Bukaake/releases)
-  [![Architecture](https://img.shields.io/badge/Architecture-x64%20%7C%20ARM64-6c5ce7?style=flat-square)](https://github.com/Crlyzd/Bukaake/releases)
-  [![Edition](https://img.shields.io/badge/Edition-Single%20Portable%20Exe%20(~5MB)-00b894?style=flat-square)](https://github.com/Crlyzd/Bukaake/releases)
-  [![License](https://img.shields.io/badge/License-GPL--3.0-0984e3?style=flat-square)](LICENSE)
-
-  <br />
-
-  <a href="https://github.com/Crlyzd/Bukaake/releases/latest">
-    <img src="https://img.shields.io/badge/%E2%AC%87%EF%B8%8F_Download_Latest-Windows_x64-00e5ff?style=for-the-badge&logoColor=black" alt="Download Latest x64" />
-  </a>
-  <a href="https://github.com/Crlyzd/Bukaake/releases/latest">
-    <img src="https://img.shields.io/badge/%E2%AC%87%EF%B8%8F_Download_ARM64-Surface_%2F_Snapdragon-2d3436?style=for-the-badge&logoColor=white" alt="Download Latest ARM64" />
-  </a>
-
-  <br /><br />
 
   <img width="1280" alt="Bukaake Photo Viewer Showcase" src="https://github.com/user-attachments/assets/6626a09e-23c3-41d3-8796-6fe82474fb0d" style="border-radius: 12px; box-shadow: 0 20px 50px rgba(0,0,0,0.4);" />
 
@@ -33,6 +37,23 @@
   </p>
 
 </div>
+
+<br />
+
+---
+
+## 💡 Why Bukaake?
+
+Most photo viewers on Windows today are slow to launch, cluttered with heavy toolbars, or trap your pictures inside thick, distracting window frames. Some even force you to pay for extra codecs just to open photos from your iPhone!
+
+**Bukaake** revives what made **Google Picasa Photo Viewer** so beloved, supercharged with modern Windows 10 & 11 design:
+
+- 🪟 **Zero Distractions**: Truly borderless and translucent. Your desktop wallpaper stays softly dimmed in the background while your photo takes center stage.
+- ⚡ **Auto-Hiding Controls**: Relax and enjoy your photos in peace. The second your mouse stops moving, all buttons and titles gently fade away.
+- 🚀 **Instant Launch**: Opens in the blink of an eye and uses almost no RAM. A single ~5 MB portable file—no installation needed.
+- 🖱️ **Smooth Navigation**: Zoom like butter with your mouse wheel right into the fine details, click-and-drag to pan, and flip effortlessly through folders with your arrow keys.
+- 🗑️ **Stress-Free & Safe**: Send bad photos straight to your **Windows Recycle Bin** with `Delete`—easily restore them if you ever change your mind!
+- 📸 **Built-in Snip & Record**: Take instant screenshots of any monitor or region, or record video clips right from the app with zero extra tools.
 
 <br />
 
@@ -260,7 +281,30 @@ npm run tauri:dev
 
 ---
 
+## 💖 About the Creator & Support
+
+Bukaake is designed and developed with ❤️ by **[Kaleksanan Bagus](https://kaleksananbagus.com)**.
+
+If you love using Bukaake and want to support independent, high-performance desktop software:
+
+<p>
+  <a href="https://saweria.co/curlyzed" target="_blank">
+    <img src="https://img.shields.io/badge/%E2%98%95_Saweria-Support_on_Saweria-fa8231?style=for-the-badge&logoColor=white" alt="Support on Saweria" />
+  </a>
+  &nbsp;
+  <a href="https://paypal.me/BagusMassani" target="_blank">
+    <img src="https://img.shields.io/badge/%F0%9F%92%B3_PayPal-Donate_via_PayPal-003087?style=for-the-badge&logo=paypal&logoColor=white" alt="Donate with PayPal" />
+  </a>
+</p>
+
+- 🌐 **Personal Website**: [kaleksananbagus.com](https://kaleksananbagus.com)
+- 🐛 **Report a Bug or Suggest a Feature**: [Feedback Form](https://docs.google.com/forms/d/e/1FAIpQLSciTFA6rWYPq98UwqOvJgLnqGh5P71Vcz5d2GPVdne9Tz34WA/viewform) or open an [Issue](https://github.com/Crlyzd/Bukaake/issues).
+
+<br />
+
+---
+
 ## 📄 License
 
-Bukaake is open-source software licensed under the **[GPL-3.0 License](LICENSE)**.
+Bukaake is open-source software licensed under the **[GPL-3.0 License](LICENSE)**.  
 Distributed without warranty in the hope of bringing back fluid, beautiful, and distraction-free viewing to the Windows desktop.
