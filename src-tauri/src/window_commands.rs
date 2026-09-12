@@ -128,7 +128,11 @@ pub fn resize_and_center_window(window: tauri::Window, width: u32, height: u32) 
 }
 
 #[tauri::command]
-pub fn start_window_resize(window: tauri::Window, direction: String) -> Result<(), String> { let _ = (window, direction); Ok(()) }
+pub fn start_window_resize(window: tauri::Window, direction: String) -> Result<(), String> {
+    let dir = serde_json::from_value(serde_json::Value::String(direction))
+        .map_err(|e| e.to_string())?;
+    window.start_resize_dragging(dir).map_err(|e| e.to_string())
+}
 
 #[tauri::command]
 pub fn set_fullscreen_window(window: tauri::Window, fullscreen: bool) -> Result<(), String> { window.set_fullscreen(fullscreen).map_err(|e| e.to_string()) }

@@ -18,6 +18,7 @@
     "core:window:allow-start-dragging",
     "core:window:allow-start-resize-dragging",
     "core:window:allow-set-maximizable",
+    "core:window:allow-set-resizable",
     "core:window:allow-is-maximizable",
     "core:window:allow-unmaximize",
     "core:window:allow-set-size",

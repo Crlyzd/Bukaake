@@ -153,13 +153,15 @@ export class TauriBridge {
   }
 
   async setResizable(resizable) {
+    if (!this.isTauri()) return;
     try {
-      if (this.isTauri()) {
-        const win = window.__TAURI__.window?.getCurrentWindow?.();
-        if (win?.setResizable) await win.setResizable(resizable);
-        else await this.invoke('set_window_resizable', { resizable });
+      const win = window.__TAURI__.window?.getCurrentWindow?.();
+      if (win?.setResizable) {
+        try { await win.setResizable(resizable); return; }
+        catch (e) { console.warn('[TauriBridge] win.setResizable fallback to IPC:', e); }
       }
-    } catch (e) {}
+      await this.invoke('set_window_resizable', { resizable });
+    } catch (e) { console.warn('[TauriBridge] setResizable failed:', e); }
   }
 
   async resizeAndCenter(width, height) {
@@ -171,11 +173,15 @@ export class TauriBridge {
   }
 
   async startResizeDragging(direction) {
+    if (!this.isTauri()) return;
     try {
-      if (this.isTauri() && window.__TAURI__.window?.getCurrentWindow) {
-        await window.__TAURI__.window.getCurrentWindow().startResizeDragging(direction);
+      const win = window.__TAURI__.window?.getCurrentWindow?.();
+      if (win?.startResizeDragging) {
+        try { await win.startResizeDragging(direction); return; }
+        catch (e) { console.warn('[TauriBridge] win.startResizeDragging fallback to IPC:', e); }
       }
-    } catch (e) {}
+      await this.invoke('start_window_resize', { direction });
+    } catch (e) { console.warn('[TauriBridge] startResizeDragging failed:', e); }
   }
 
   async getInitialImage() {
