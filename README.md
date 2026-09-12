@@ -1,8 +1,6 @@
 <div align="center">
 
-  <h1>
-    <img src="public/app-icon.png" width="36" height="36" align="absmiddle" alt="Bukaake Logo" /> Bukaake
-  </h1>
+  <h1>Bukaake</h1>
 
   <p>
     <strong>The ultra-fast, transparent, and distraction-free photo viewer for Windows.</strong><br />
