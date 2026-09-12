@@ -1,8 +1,7 @@
 <div align="center">
 
   <h1>
-    <img src="public/app-icon.png" width="40" height="40" alt="Bukaake Logo" style="vertical-align: middle; border-radius: 10px; margin-right: 8px;" />
-    Bukaake
+    <img src="public/app-icon.png" width="36" height="36" align="absmiddle" alt="Bukaake Logo" /> Bukaake
   </h1>
 
   <p>
@@ -144,7 +143,7 @@ Capture and share anything on your screen without launching heavy third-party so
 
 ### ✍️ 4. Creative Annotation & Precision Crop
 Quickly mark up screenshots or adjust composition with built-in creative tools:
-- **Freehand Pen & Highlighter (`D`)**: Draw sharp annotations or mark lines with translucent ink. Features curated palettes, stroke thickness sliders, and multi-step **Undo (`Ctrl+Z`)** / **Redo (`Ctrl+Y`)**.
+- **Freehand Pen & Highlighter (`D`)**: Draw sharp annotations or mark lines with translucent ink. Features curated palettes, stroke thickness sliders, and multi-step **Undo (`Ctrl+Z`)** to quickly revert strokes.
 - **Laser-Guided Crop (`C`)**: Standard aspect presets (1:1, 16:9, 9:16, 4:3, Freeform) featuring dynamic magnetic guides that snap directly to image centers and edges.
 - **Real-Time Color Filters (`E`)**: Adjust Brightness, Contrast, Saturation, Exposure, and Temperature on-the-fly with 60 FPS GPU-accelerated rendering.
 - **Alitken Tandem Integration**: One-click bridge to send images to external editors and automatically reload your edits on save.
@@ -211,7 +210,6 @@ Designed from the ground up for modern Windows aesthetics:
 | `Q` | Full Sensor RAW Develop |
 | `I` | Toggle EXIF Info Drawer |
 | `Ctrl + Z` | Undo drawing stroke |
-| `Ctrl + Y` | Redo drawing stroke |
 
 </td>
 <td valign="top">

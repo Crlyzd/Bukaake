@@ -155,7 +155,7 @@ src-tauri/src/
   - Dual-stroke sandwich contrast layering (1px core flanked by dark casing shadows) guarantees visibility on pure white or pure black photos.
   - Magnetic laser guides detect image edges and centers with dynamic snapping.
 - **Drawing Tool (`drawing-tool.js`, `draw.css`)**:
-  - Screen-to-image coordinate mapping (`screenToImageCoords`), strokes clipped strictly to image bounds (`ctx.clip()`), discrete undo/redo stacks (`Ctrl+Z` / `Ctrl+Y`).
+  - Screen-to-image coordinate mapping (`screenToImageCoords`), strokes clipped strictly to image bounds (`ctx.clip()`), discrete undo stack (`Ctrl+Z`).
 - **Tool Exclusivity (`canvas-tools-manager.js`)**:
   - Crop, Draw, and Color Adjustments are mutually exclusive; activating any tool locks out context menus, directory navigation, and file deletion.
 - **Change Safety (`change-tracker.js`, `confirm-modal.js`)**:
