@@ -1,0 +1,83 @@
+/* ==========================================================================
+   Bukaake Text Tool — Canva-Style Handles & Snap Guides (< 85 lines)
+   ========================================================================== */
+
+/* Ensure the box is a relative container so absolute handles work */
+.canvas-text-box {
+  position: absolute;
+  overflow: visible;
+}
+
+/* Canva-style handles: crisp white with violet/purple border */
+.text-handle {
+  position: absolute;
+  box-sizing: border-box;
+  background: #ffffff;
+  border: 1.5px solid #8b5cf6;
+  z-index: 5;
+  pointer-events: auto;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+  transition: transform 0.08s ease;
+}
+
+/* 4 Corner Circular Handles & 2 Top/Bottom Circular Handles */
+.text-handle-nw, .text-handle-ne, .text-handle-sw, .text-handle-se,
+.text-handle-tc, .text-handle-bc {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+}
+
+.text-handle-nw { top: -1px; left: -1px; transform: translate(-50%, -50%); cursor: nw-resize; }
+.text-handle-ne { top: -1px; right: -1px; transform: translate(50%, -50%); cursor: ne-resize; }
+.text-handle-sw { bottom: -1px; left: -1px; transform: translate(-50%, 50%); cursor: sw-resize; }
+.text-handle-se { bottom: -1px; right: -1px; transform: translate(50%, 50%); cursor: se-resize; }
+.text-handle-tc { top: -1px; left: 50%; transform: translate(-50%, -50%); cursor: ns-resize; }
+.text-handle-bc { bottom: -1px; left: 50%; transform: translate(-50%, 50%); cursor: ns-resize; }
+
+/* 2 Side Vertical Pill Handles */
+.text-handle-ml, .text-handle-mr {
+  width: 5px;
+  height: 14px;
+  border-radius: 3px;
+  top: 50%;
+}
+
+.text-handle-ml { left: -1px; transform: translate(-50%, -50%); cursor: ew-resize; }
+.text-handle-mr { right: -1px; transform: translate(50%, -50%); cursor: ew-resize; }
+
+.text-handle:hover {
+  background: #ffffff;
+  transform: translate(-50%, -50%) scale(1.25);
+  box-shadow: 0 0 6px rgba(139, 92, 246, 0.6);
+}
+.text-handle-ne:hover { transform: translate(50%, -50%) scale(1.25); }
+.text-handle-sw:hover, .text-handle-bc:hover { transform: translate(-50%, 50%) scale(1.25); }
+.text-handle-se:hover { transform: translate(50%, 50%) scale(1.25); }
+.text-handle-mr:hover { transform: translate(50%, -50%) scale(1.25); }
+
+/* Canva-style purple magnetic snap guide lines */
+.text-snap-guide {
+  position: absolute;
+  pointer-events: none;
+  z-index: 42;
+  opacity: 0;
+  transition: opacity 0.08s ease;
+}
+
+.text-snap-guide.visible {
+  opacity: 1;
+}
+
+.text-snap-h {
+  height: 1.5px;
+  background: #8b5cf6;
+  box-shadow: 0 0 6px rgba(139, 92, 246, 0.7);
+}
+
+.text-snap-v {
+  width: 1.5px;
+  background: #8b5cf6;
+  box-shadow: 0 0 6px rgba(139, 92, 246, 0.7);
+}
+

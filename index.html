@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,19 +9,22 @@
   <!-- Google Fonts: Inter & JetBrains Mono -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+    rel="stylesheet">
   <!-- Remix Icons for crisp Glass UI icons -->
   <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet">
   <link rel="stylesheet" href="/src/styles/main.css">
 </head>
+
 <body class="glass-theme dark">
-  
+
   <!-- Main Window Modal Shield (Active when Settings window is open) -->
   <div class="modal-shield hidden" id="modalShield"></div>
 
   <!-- Floating Toast Notification Container -->
   <div class="toast-container" id="toastContainer"></div>
-  
+
   <!-- Borderless Window Edge Resizers (Active in Mode 1) -->
   <div class="resize-handle-container" id="resizeHandleContainer">
     <div class="resize-handle" data-direction="North"></div>
@@ -70,7 +74,8 @@
 
       <div class="window-controls">
         <button class="win-btn win-min" id="winMin" title="Minimize"><i class="ri-subtract-line"></i></button>
-        <button class="win-btn win-max" id="winMax" title="Maximize / Restore"><i class="ri-checkbox-blank-line"></i></button>
+        <button class="win-btn win-max" id="winMax" title="Maximize / Restore"><i
+            class="ri-checkbox-blank-line"></i></button>
         <button class="win-btn win-close" id="winClose" title="Close"><i class="ri-close-line"></i></button>
       </div>
     </div>
@@ -78,7 +83,7 @@
 
   <!-- Main Viewing Container -->
   <main class="viewport-container" id="viewportContainer">
-    
+
     <!-- Frosted Glass Animated Loading Pill -->
     <div class="glass-loading-pill hidden" id="loadingPill">
       <svg class="loading-spinner" viewBox="0 0 24 24">
@@ -128,6 +133,8 @@
     <canvas id="imageCanvas"></canvas>
     <canvas id="drawCanvas" class="hidden"></canvas>
     <div id="drawCursorRing" class="hidden"></div>
+    <canvas id="textCanvas" class="hidden"></canvas>
+    <div class="text-overlay-container hidden" id="textOverlayContainer"></div>
 
     <!-- Interactive Crop Box Overlay (Hidden by default) -->
     <div class="crop-overlay-container hidden" id="cropOverlayContainer">
@@ -210,6 +217,9 @@
         <button class="toolbar-btn" id="btnDrawMode" title="Draw & Highlight (D)">
           <i class="ri-mark-pen-line"></i>
         </button>
+        <button class="toolbar-btn" id="btnTextMode" title="Add Text (T)">
+          <i class="ri-text"></i>
+        </button>
         <button class="toolbar-btn" id="btnAdjustments" title="Color & Filters (E)">
           <i class="ri-equalizer-line"></i>
         </button>
@@ -253,8 +263,10 @@
       </div>
       <div class="crop-pill-divider"></div>
       <div class="crop-actions">
-        <button class="crop-action-btn btn-cancel" id="btnCancelCrop" title="Cancel Crop (Esc)"><i class="ri-close-line"></i> Cancel</button>
-        <button class="crop-action-btn btn-apply" id="btnApplyCrop" title="Apply Crop"><i class="ri-check-line"></i> Apply</button>
+        <button class="crop-action-btn btn-cancel" id="btnCancelCrop" title="Cancel Crop (Esc)"><i
+            class="ri-close-line"></i> Cancel</button>
+        <button class="crop-action-btn btn-apply" id="btnApplyCrop" title="Apply Crop"><i class="ri-check-line"></i>
+          Apply</button>
       </div>
     </div>
 
@@ -265,11 +277,13 @@
         <span>Draw</span>
       </div>
       <div class="draw-pill-divider"></div>
-      
+
       <!-- Mode Segmented Capsule -->
       <div class="draw-modes">
-        <button class="draw-mode-btn active" id="btnDrawPen" title="Pen Tool"><i class="ri-ball-pen-line"></i> Pen</button>
-        <button class="draw-mode-btn" id="btnDrawHighlighter" title="Highlighter Tool"><i class="ri-mark-pen-line"></i> Highlight</button>
+        <button class="draw-mode-btn active" id="btnDrawPen" title="Pen Tool"><i class="ri-ball-pen-line"></i>
+          Pen</button>
+        <button class="draw-mode-btn" id="btnDrawHighlighter" title="Highlighter Tool"><i class="ri-mark-pen-line"></i>
+          Highlight</button>
       </div>
       <div class="draw-pill-divider"></div>
 
@@ -283,13 +297,15 @@
         <div class="draw-popover draw-color-popover glass-panel hidden" id="drawColorPopover">
           <div class="draw-colors-grid">
             <button class="draw-color-chip active" data-color="#00f0ff" style="--chip-c: #00f0ff" title="Cyan"></button>
-            <button class="draw-color-chip" data-color="#ffea00" style="--chip-c: #ffea00" title="Highlighter Yellow"></button>
+            <button class="draw-color-chip" data-color="#ffea00" style="--chip-c: #ffea00"
+              title="Highlighter Yellow"></button>
             <button class="draw-color-chip" data-color="#ff3366" style="--chip-c: #ff3366" title="Coral Red"></button>
             <button class="draw-color-chip" data-color="#00ff66" style="--chip-c: #00ff66" title="Neon Green"></button>
             <button class="draw-color-chip" data-color="#a855f7" style="--chip-c: #a855f7" title="Purple"></button>
             <button class="draw-color-chip" data-color="#ff9900" style="--chip-c: #ff9900" title="Orange"></button>
             <button class="draw-color-chip" data-color="#ffffff" style="--chip-c: #ffffff" title="White"></button>
-            <button class="draw-color-chip" data-color="#242938" style="--chip-c: #242938" title="Obsidian Slate"></button>
+            <button class="draw-color-chip" data-color="#242938" style="--chip-c: #242938"
+              title="Obsidian Slate"></button>
           </div>
         </div>
       </div>
@@ -303,7 +319,8 @@
         </button>
         <div class="draw-popover draw-size-popover glass-panel hidden" id="drawSizePopover">
           <div class="draw-size-preview-wrap">
-            <div class="draw-size-preview-dot" id="drawSizePreviewDot" style="width: 10px; height: 10px; background-color: #00f0ff;"></div>
+            <div class="draw-size-preview-dot" id="drawSizePreviewDot"
+              style="width: 10px; height: 10px; background-color: #00f0ff;"></div>
           </div>
           <div class="draw-size-slider-wrap">
             <span class="slider-limit-label">150</span>
@@ -319,15 +336,210 @@
 
       <!-- History Controls -->
       <div class="draw-history">
-        <button class="draw-tool-btn" id="btnDrawUndo" title="Undo Stroke (Ctrl+Z)"><i class="ri-arrow-go-back-line"></i></button>
-        <button class="draw-tool-btn" id="btnDrawClear" title="Clear All Drawings"><i class="ri-delete-bin-line"></i></button>
+        <button class="draw-tool-btn" id="btnDrawUndo" title="Undo Stroke (Ctrl+Z)"><i
+            class="ri-arrow-go-back-line"></i></button>
+        <button class="draw-tool-btn" id="btnDrawRedo" title="Redo Stroke (Ctrl+Y)"><i
+            class="ri-arrow-go-forward-line"></i></button>
+        <button class="draw-tool-btn" id="btnDrawClear" title="Clear All Drawings"><i
+            class="ri-delete-bin-line"></i></button>
       </div>
       <div class="draw-pill-divider"></div>
 
       <!-- Actions -->
       <div class="draw-actions">
-        <button class="draw-action-btn btn-cancel" id="btnCancelDraw" title="Cancel (Esc)"><i class="ri-close-line"></i> Cancel</button>
-        <button class="draw-action-btn btn-apply" id="btnApplyDraw" title="Apply Drawing"><i class="ri-check-line"></i> Apply</button>
+        <button class="draw-action-btn btn-cancel" id="btnCancelDraw" title="Cancel (Esc)"><i class="ri-close-line"></i>
+          Cancel</button>
+        <button class="draw-action-btn btn-apply" id="btnApplyDraw" title="Apply Drawing"><i class="ri-check-line"></i>
+          Apply</button>
+      </div>
+    </div>
+
+    <!-- Typography & Text Sub-Toolbar -->
+    <div class="text-toolbar glass-panel hidden" id="textToolbar">
+      <div class="text-pill-brand">
+        <i class="ri-text"></i>
+        <span>Text</span>
+      </div>
+      <div class="text-pill-divider"></div>
+
+      <!-- Font Dropdown -->
+      <div class="text-popover-anchor">
+        <button class="text-pill-btn" id="btnTextFontPop" title="Font Family">
+          <span id="textFontBadge">Inter</span>
+          <i class="ri-arrow-up-s-line text-chevron"></i>
+        </button>
+        <div class="text-popover text-font-popover glass-panel hidden" id="textFontPopover">
+          <button class="text-font-option active" data-font="Inter, sans-serif">Inter</button>
+          <button class="text-font-option" data-font="'JetBrains Mono', monospace">JetBrains Mono</button>
+          <button class="text-font-option" data-font="Arial, sans-serif">Arial</button>
+          <button class="text-font-option" data-font="Impact, sans-serif">Impact</button>
+          <button class="text-font-option" data-font="Georgia, serif">Georgia</button>
+        </div>
+      </div>
+      <div class="text-pill-divider"></div>
+
+      <!-- Size Popover -->
+      <div class="text-popover-anchor">
+        <button class="text-pill-btn" id="btnTextSizePop" title="Font Size (14px - 140px)">
+          <span class="draw-size-badge" id="textSizeBadge">36px</span>
+          <i class="ri-arrow-up-s-line text-chevron"></i>
+        </button>
+        <div class="text-popover draw-size-popover glass-panel hidden" id="textSizePopover">
+          <div class="draw-size-slider-wrap">
+            <span class="slider-limit-label">140</span>
+            <div class="draw-slider-track" id="textSizeTrack">
+              <div class="draw-slider-fill" id="textSizeFill"></div>
+              <div class="draw-slider-thumb" id="textSizeThumb"></div>
+            </div>
+            <span class="slider-limit-label">14</span>
+          </div>
+        </div>
+      </div>
+      <div class="text-pill-divider"></div>
+
+      <!-- Style Segment (B / I / U / S) -->
+      <div class="text-styles">
+        <button class="text-style-btn" id="btnTextBold" title="Bold (Ctrl+B)"><i class="ri-bold"></i></button>
+        <button class="text-style-btn" id="btnTextItalic" title="Italic (Ctrl+I)"><i class="ri-italic"></i></button>
+        <button class="text-style-btn" id="btnTextUnderline" title="Underline (Ctrl+U)"><i
+            class="ri-underline"></i></button>
+        <button class="text-style-btn" id="btnTextStrike" title="Strikethrough"><i
+            class="ri-strikethrough-2"></i></button>
+      </div>
+      <div class="text-pill-divider"></div>
+
+      <!-- Text Color Popover -->
+      <div class="text-popover-anchor">
+        <button class="text-pill-btn" id="btnTextColorPop" title="Text Color">
+          <span class="draw-current-color-dot" id="textColorDot" style="background-color: #ffffff;"></span>
+          <span class="draw-pill-label">Color</span>
+          <i class="ri-arrow-up-s-line text-chevron"></i>
+        </button>
+        <div class="text-popover text-color-popover glass-panel hidden" id="textColorPopover">
+          <div class="text-colors-grid">
+            <button class="text-color-chip active" data-color="#ffffff" style="--chip-c: #ffffff"
+              title="White"></button>
+            <button class="text-color-chip" data-color="#00f0ff" style="--chip-c: #00f0ff" title="Cyan"></button>
+            <button class="text-color-chip" data-color="#ffea00" style="--chip-c: #ffea00" title="Yellow"></button>
+            <button class="text-color-chip" data-color="#ff3366" style="--chip-c: #ff3366" title="Coral Red"></button>
+            <button class="text-color-chip" data-color="#00ff66" style="--chip-c: #00ff66" title="Neon Green"></button>
+            <button class="text-color-chip" data-color="#a855f7" style="--chip-c: #a855f7" title="Purple"></button>
+            <button class="text-color-chip" data-color="#ff9900" style="--chip-c: #ff9900" title="Orange"></button>
+            <button class="text-color-chip" data-color="#242938" style="--chip-c: #242938"
+              title="Obsidian Slate"></button>
+          </div>
+        </div>
+      </div>
+      <div class="text-pill-divider"></div>
+
+      <!-- Canva-Style Shadow Popover -->
+      <div class="text-popover-anchor">
+        <button class="text-pill-btn" id="btnTextShadowPop" title="Text Shadow">
+          <i class="ri-shadow-line"></i>
+          <span>Shadow</span>
+          <i class="ri-arrow-up-s-line text-chevron"></i>
+        </button>
+        <div class="text-popover text-tuning-popover glass-panel hidden" id="textShadowPopover">
+          <div class="tuning-row-header">
+            <span>Shadow Effect</span>
+            <label class="tuning-switch">
+              <input type="checkbox" id="toggleTextShadow">
+              <span class="tuning-switch-slider"></span>
+            </label>
+          </div>
+          <div class="tuning-slider-group">
+            <div class="tuning-label-row">
+              <span>Blur</span>
+              <span class="tuning-val-badge" id="sliderShadowBlurVal">8px</span>
+            </div>
+            <input type="range" class="tuning-slider" id="sliderShadowBlur" min="0" max="30" value="8">
+          </div>
+          <div class="tuning-slider-group">
+            <div class="tuning-label-row">
+              <span>Opacity</span>
+              <span class="tuning-val-badge" id="sliderShadowOpacityVal">85%</span>
+            </div>
+            <input type="range" class="tuning-slider" id="sliderShadowOpacity" min="0" max="100" value="85">
+          </div>
+          <div class="tuning-slider-group">
+            <div class="tuning-label-row">
+              <span>Offset</span>
+              <span class="tuning-val-badge" id="sliderShadowOffsetVal">4px</span>
+            </div>
+            <input type="range" class="tuning-slider" id="sliderShadowOffset" min="-20" max="20" value="4">
+          </div>
+        </div>
+      </div>
+      <div class="text-pill-divider"></div>
+
+      <!-- Canva-Style Background Popover -->
+      <div class="text-popover-anchor">
+        <button class="text-pill-btn" id="btnTextBgPop" title="Background Backing">
+          <i class="ri-checkbox-blank-line"></i>
+          <span>Background</span>
+          <i class="ri-arrow-up-s-line text-chevron"></i>
+        </button>
+        <div class="text-popover text-tuning-popover glass-panel hidden" id="textBgPopover">
+          <div class="tuning-row-header">
+            <span>Background Box</span>
+            <label class="tuning-switch">
+              <input type="checkbox" id="toggleTextBg">
+              <span class="tuning-switch-slider"></span>
+            </label>
+          </div>
+          <div class="text-colors-grid">
+            <button class="bg-color-chip active" data-color="#0e121b" style="--chip-c: #0e121b"
+              title="Obsidian"></button>
+            <button class="bg-color-chip" data-color="#ffffff" style="--chip-c: #ffffff" title="White"></button>
+            <button class="bg-color-chip" data-color="#00f0ff" style="--chip-c: #00f0ff" title="Cyan"></button>
+            <button class="bg-color-chip" data-color="#ffea00" style="--chip-c: #ffea00" title="Yellow"></button>
+            <button class="bg-color-chip" data-color="#ff3366" style="--chip-c: #ff3366" title="Coral"></button>
+            <button class="bg-color-chip" data-color="#a855f7" style="--chip-c: #a855f7" title="Purple"></button>
+            <button class="bg-color-chip" data-color="#ff9900" style="--chip-c: #ff9900" title="Orange"></button>
+            <button class="bg-color-chip" data-color="#00ff66" style="--chip-c: #00ff66" title="Green"></button>
+          </div>
+          <div class="tuning-slider-group">
+            <div class="tuning-label-row">
+              <span>Roundness</span>
+              <span class="tuning-val-badge" id="sliderBgRoundnessVal">8px</span>
+            </div>
+            <input type="range" class="tuning-slider" id="sliderBgRoundness" min="0" max="32" value="8">
+          </div>
+          <div class="tuning-slider-group">
+            <div class="tuning-label-row">
+              <span>Opacity</span>
+              <span class="tuning-val-badge" id="sliderBgOpacityVal">85%</span>
+            </div>
+            <input type="range" class="tuning-slider" id="sliderBgOpacity" min="0" max="100" value="85">
+          </div>
+          <div class="tuning-slider-group">
+            <div class="tuning-label-row">
+              <span>Border</span>
+              <span class="tuning-val-badge" id="sliderBgBorderVal">0px</span>
+            </div>
+            <input type="range" class="tuning-slider" id="sliderBgBorder" min="0" max="8" value="0">
+          </div>
+        </div>
+      </div>
+      <div class="text-pill-divider"></div>
+
+      <!-- History Controls -->
+      <div class="text-history">
+        <button class="text-tool-btn" id="btnTextUndo" title="Undo (Ctrl+Z)"><i
+            class="ri-arrow-go-back-line"></i></button>
+        <button class="text-tool-btn" id="btnTextRedo" title="Redo (Ctrl+Y)"><i
+            class="ri-arrow-go-forward-line"></i></button>
+        <button class="text-tool-btn" id="btnTextClear" title="Clear All Text"><i
+            class="ri-delete-bin-line"></i></button>
+      </div>
+      <div class="text-pill-divider"></div>
+
+      <!-- Actions -->
+      <div class="text-actions">
+        <button class="text-action-btn btn-cancel" id="btnCancelText" title="Cancel (Esc)"><i class="ri-close-line"></i>
+          Cancel</button>
+        <button class="text-action-btn btn-apply" id="btnApplyText" title="Apply Text"><i class="ri-check-line"></i>
+          Apply</button>
       </div>
     </div>
 
@@ -401,7 +613,8 @@
         </div>
 
         <div class="panel-footer-actions">
-          <button class="glass-btn btn-secondary" id="btnResetFilters"><i class="ri-refresh-line"></i> Reset Filters</button>
+          <button class="glass-btn btn-secondary" id="btnResetFilters"><i class="ri-refresh-line"></i> Reset
+            Filters</button>
         </div>
       </div>
     </aside>
@@ -453,8 +666,10 @@
             </div>
             <div class="settings-coffee-row">
               <span class="coffee-label"><i class="ri-cup-line"></i> Buy me a coffee:</span>
-              <a href="https://saweria.co/curlyzed" target="_blank" class="coffee-chip"><span>Saweria</span> <i class="ri-arrow-right-up-line"></i></a>
-              <a href="https://paypal.me/BagusMassani" target="_blank" class="coffee-chip"><span>PayPal</span> <i class="ri-arrow-right-up-line"></i></a>
+              <a href="https://saweria.co/curlyzed" target="_blank" class="coffee-chip"><span>Saweria</span> <i
+                  class="ri-arrow-right-up-line"></i></a>
+              <a href="https://paypal.me/BagusMassani" target="_blank" class="coffee-chip"><span>PayPal</span> <i
+                  class="ri-arrow-right-up-line"></i></a>
             </div>
           </div>
 
@@ -538,7 +753,8 @@
 
           <!-- Action Grid -->
           <div class="settings-actions-grid">
-            <a href="https://docs.google.com/forms/d/e/1FAIpQLSciTFA6rWYPq98UwqOvJgLnqGh5P71Vcz5d2GPVdne9Tz34WA/viewform" target="_blank" class="settings-action-btn" id="btnReportBug">
+            <a href="https://docs.google.com/forms/d/e/1FAIpQLSciTFA6rWYPq98UwqOvJgLnqGh5P71Vcz5d2GPVdne9Tz34WA/viewform"
+              target="_blank" class="settings-action-btn" id="btnReportBug">
               <i class="ri-bug-line"></i> Report Bug / Feature <i class="ri-arrow-right-up-line"></i>
             </a>
           </div>
@@ -560,15 +776,20 @@
         </div>
         <div class="modal-body shortcuts-grid">
           <div class="shortcut-item"><kbd>Left</kbd> / <kbd>Right</kbd> <span>Navigate Batch Images</span></div>
-          <div class="shortcut-item"><kbd>Wheel</kbd> / <kbd>+</kbd> / <kbd>-</kbd> <span>Zoom In / Zoom Out</span></div>
+          <div class="shortcut-item"><kbd>Wheel</kbd> / <kbd>+</kbd> / <kbd>-</kbd> <span>Zoom In / Zoom Out</span>
+          </div>
           <div class="shortcut-item"><kbd>F</kbd> <span>Fit to Screen</span></div>
           <div class="shortcut-item"><kbd>1</kbd> <span>Actual Size (100%)</span></div>
           <div class="shortcut-item"><kbd>,</kbd> / <kbd>.</kbd> <span>Rotate Left / Right</span></div>
           <div class="shortcut-item"><kbd>H</kbd> / <kbd>V</kbd> <span>Flip Horizontal / Vertical</span></div>
           <div class="shortcut-item"><kbd>C</kbd> <span>Toggle Crop Mode</span></div>
           <div class="shortcut-item"><kbd>D</kbd> <span>Draw & Highlight</span></div>
+          <div class="shortcut-item"><kbd>T</kbd> <span>Add Text & Typography</span></div>
+          <div class="shortcut-item"><kbd>Ctrl</kbd> + <kbd>Z</kbd> <span>Undo Stroke / Text</span></div>
+          <div class="shortcut-item"><kbd>Ctrl</kbd> + <kbd>Y</kbd> <span>Redo Stroke / Text</span></div>
           <div class="shortcut-item"><kbd>E</kbd> <span>Toggle Color & Filters</span></div>
-          <div class="shortcut-item"><kbd>Alt+Shift+S</kbd> / <kbd>PrtScn</kbd> <span>Capture / Record Screen</span></div>
+          <div class="shortcut-item"><kbd>Alt+Shift+S</kbd> / <kbd>PrtScn</kbd> <span>Capture / Record Screen</span>
+          </div>
           <div class="shortcut-item"><kbd>I</kbd> <span>Image Properties / EXIF</span></div>
           <div class="shortcut-item"><kbd>B</kbd> <span>Toggle Background Theme</span></div>
           <div class="shortcut-item"><kbd>P</kbd> <span>Toggle Pixel Smoothing</span></div>
@@ -609,7 +830,8 @@
           <div class="confirm-modal-icon danger-icon"><i class="ri-delete-bin-line"></i></div>
           <div class="confirm-modal-title-wrap">
             <h3 class="confirm-modal-title" id="deleteModalTitle">Move to Recycle Bin?</h3>
-            <p class="confirm-modal-desc" id="deleteModalDesc">Are you sure you want to move this file to the Windows Recycle Bin?</p>
+            <p class="confirm-modal-desc" id="deleteModalDesc">Are you sure you want to move this file to the Windows
+              Recycle Bin?</p>
             <span class="delete-filename-tag" id="deleteModalFileName"></span>
           </div>
         </div>
@@ -625,4 +847,5 @@
 
   <script type="module" src="/src/app.js"></script>
 </body>
+
 </html>

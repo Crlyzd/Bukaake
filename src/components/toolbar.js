@@ -1,6 +1,6 @@
 /**
  * Bukaake Floating Glass Toolbar Component
- * Coordinates zoom, transforms, crop mode triggers, background mode, and batch counter
+ * Coordinates zoom, transforms, crop/draw/text mode triggers, background mode, and batch counter (< 265 lines).
  */
 
 export class Toolbar {
@@ -10,8 +10,9 @@ export class Toolbar {
     this.zoomPercentText = document.getElementById('zoomPercentText');
     this.cropToolbar = document.getElementById('cropToolbar');
     this.btnCropMode = document.getElementById('btnCropMode');
-    this.btnAdjustments = document.getElementById('btnAdjustments');
     this.btnDrawMode = document.getElementById('btnDrawMode');
+    this.btnTextMode = document.getElementById('btnTextMode');
+    this.btnAdjustments = document.getElementById('btnAdjustments');
     this.drawToolbar = document.getElementById('drawToolbar');
     this.btnSaveAs = document.getElementById('btnSaveAs');
 
@@ -26,56 +27,27 @@ export class Toolbar {
     this.bindDisplayToggles();
     this.bindCropControls();
     this.bindDrawControls();
+    this.bindTextControls();
   }
 
   bindNavigationButtons() {
-    document.getElementById('btnPrevImage')?.addEventListener('click', () => {
-      this.actions.onNavigateBatch?.(-1);
-    });
-
-    document.getElementById('btnNextImage')?.addEventListener('click', () => {
-      this.actions.onNavigateBatch?.(1);
-    });
+    document.getElementById('btnPrevImage')?.addEventListener('click', () => this.actions.onNavigateBatch?.(-1));
+    document.getElementById('btnNextImage')?.addEventListener('click', () => this.actions.onNavigateBatch?.(1));
   }
 
   bindZoomButtons() {
-    document.getElementById('btnZoomIn')?.addEventListener('click', () => {
-      this.actions.onZoomIn?.();
-    });
-
-    document.getElementById('btnZoomOut')?.addEventListener('click', () => {
-      this.actions.onZoomOut?.();
-    });
-
-    document.getElementById('btnFitScreen')?.addEventListener('click', () => {
-      this.actions.onFitScreen?.();
-    });
-
-    document.getElementById('btnActualSize')?.addEventListener('click', () => {
-      this.actions.onActualSize?.();
-    });
-
-    document.getElementById('btnZoomLabel')?.addEventListener('click', () => {
-      this.actions.onFitScreen?.();
-    });
+    document.getElementById('btnZoomIn')?.addEventListener('click', () => this.actions.onZoomIn?.());
+    document.getElementById('btnZoomOut')?.addEventListener('click', () => this.actions.onZoomOut?.());
+    document.getElementById('btnFitScreen')?.addEventListener('click', () => this.actions.onFitScreen?.());
+    document.getElementById('btnActualSize')?.addEventListener('click', () => this.actions.onActualSize?.());
+    document.getElementById('btnZoomLabel')?.addEventListener('click', () => this.actions.onFitScreen?.());
   }
 
   bindTransformButtons() {
-    document.getElementById('btnRotateLeft')?.addEventListener('click', () => {
-      this.actions.onRotateLeft?.();
-    });
-
-    document.getElementById('btnRotateRight')?.addEventListener('click', () => {
-      this.actions.onRotateRight?.();
-    });
-
-    document.getElementById('btnFlipH')?.addEventListener('click', () => {
-      this.actions.onFlipH?.();
-    });
-
-    document.getElementById('btnFlipV')?.addEventListener('click', () => {
-      this.actions.onFlipV?.();
-    });
+    document.getElementById('btnRotateLeft')?.addEventListener('click', () => this.actions.onRotateLeft?.());
+    document.getElementById('btnRotateRight')?.addEventListener('click', () => this.actions.onRotateRight?.());
+    document.getElementById('btnFlipH')?.addEventListener('click', () => this.actions.onFlipH?.());
+    document.getElementById('btnFlipV')?.addEventListener('click', () => this.actions.onFlipV?.());
   }
 
   bindDisplayToggles() {
@@ -83,62 +55,34 @@ export class Toolbar {
       const isPixelated = this.actions.onTogglePixelated?.();
       e.currentTarget.classList.toggle('active', isPixelated);
     });
-
-    document.getElementById('btnBgMode')?.addEventListener('click', () => {
-      this.actions.onToggleBgMode?.();
-    });
-
-    document.getElementById('btnRawFull')?.addEventListener('click', () => {
-      this.actions.onLoadFullRaw?.();
-    });
-
-    this.btnAdjustments?.addEventListener('click', () => {
-      this.actions.onToggleAdjustments?.();
-    });
-
-    document.getElementById('btnSaveAs')?.addEventListener('click', () => {
-      this.actions.onSaveImage?.();
-    });
+    document.getElementById('btnBgMode')?.addEventListener('click', () => this.actions.onToggleBgMode?.());
+    document.getElementById('btnRawFull')?.addEventListener('click', () => this.actions.onLoadFullRaw?.());
+    this.btnAdjustments?.addEventListener('click', () => this.actions.onToggleAdjustments?.());
+    document.getElementById('btnSaveAs')?.addEventListener('click', () => this.actions.onSaveImage?.());
   }
 
   bindCropControls() {
-    this.btnCropMode?.addEventListener('click', () => {
-      this.actions.onToggleCrop?.();
-    });
-
-    document.getElementById('btnCancelCrop')?.addEventListener('click', () => {
-      this.actions.onCancelCrop?.();
-    });
-
-    document.getElementById('btnApplyCrop')?.addEventListener('click', () => {
-      this.actions.onApplyCrop?.();
-    });
-
+    this.btnCropMode?.addEventListener('click', () => this.actions.onToggleCrop?.());
+    document.getElementById('btnCancelCrop')?.addEventListener('click', () => this.actions.onCancelCrop?.());
+    document.getElementById('btnApplyCrop')?.addEventListener('click', () => this.actions.onApplyCrop?.());
     document.querySelectorAll('.crop-preset-btn').forEach((btn) => {
       btn.addEventListener('click', (e) => {
         document.querySelectorAll('.crop-preset-btn').forEach((b) => b.classList.remove('active'));
         e.target.classList.add('active');
-        const ratio = e.target.getAttribute('data-ratio');
-        this.actions.onCropPreset?.(ratio);
+        this.actions.onCropPreset?.(e.target.getAttribute('data-ratio'));
       });
     });
   }
 
   bindDrawControls() {
-    this.btnDrawMode?.addEventListener('click', () => {
-      this.actions.onToggleDraw?.();
-    });
-
-    document.getElementById('btnCancelDraw')?.addEventListener('click', () => {
-      this.actions.onCancelDraw?.();
-    });
-
+    this.btnDrawMode?.addEventListener('click', () => this.actions.onToggleDraw?.());
+    document.getElementById('btnCancelDraw')?.addEventListener('click', () => this.actions.onCancelDraw?.());
     document.getElementById('btnApplyDraw')?.addEventListener('click', () => this.actions.onApplyDraw?.());
     document.getElementById('btnDrawUndo')?.addEventListener('click', () => this.actions.onDrawUndo?.());
+    document.getElementById('btnDrawRedo')?.addEventListener('click', () => this.actions.onDrawRedo?.());
     document.getElementById('btnDrawClear')?.addEventListener('click', () => this.actions.onDrawClear?.());
 
     const sizeAnchor = document.getElementById('drawSizeAnchor');
-
     document.getElementById('btnDrawPen')?.addEventListener('click', () => {
       document.getElementById('btnDrawPen')?.classList.add('active');
       document.getElementById('btnDrawHighlighter')?.classList.remove('active');
@@ -149,37 +93,29 @@ export class Toolbar {
     document.getElementById('btnDrawHighlighter')?.addEventListener('click', () => {
       document.getElementById('btnDrawHighlighter')?.classList.add('active');
       document.getElementById('btnDrawPen')?.classList.remove('active');
-      if (sizeAnchor) {
-        sizeAnchor.style.display = 'none';
-        closeDrawPopovers();
-      }
+      if (sizeAnchor) { sizeAnchor.style.display = 'none'; closeDrawPopovers(); }
       this.actions.onDrawMode?.('highlighter');
     });
 
-    const colorPop = document.getElementById('drawColorPopover');
-    const sizePop = document.getElementById('drawSizePopover');
-    const colorDot = document.getElementById('drawCurrentColorDot');
-    const sizeDot = document.getElementById('drawSizePreviewDot');
+    const colorPop = document.getElementById('drawColorPopover'), sizePop = document.getElementById('drawSizePopover');
+    const colorDot = document.getElementById('drawCurrentColorDot'), sizeDot = document.getElementById('drawSizePreviewDot');
     const sizeBadge = document.getElementById('drawSizeBadge');
 
     const closeDrawPopovers = () => {
-      colorPop?.classList.add('hidden');
-      sizePop?.classList.add('hidden');
+      colorPop?.classList.add('hidden'); sizePop?.classList.add('hidden');
       document.getElementById('btnDrawColorPop')?.classList.remove('active');
       document.getElementById('btnDrawSizePop')?.classList.remove('active');
     };
 
     document.getElementById('btnDrawColorPop')?.addEventListener('click', (e) => {
-      e.stopPropagation();
-      sizePop?.classList.add('hidden');
+      e.stopPropagation(); sizePop?.classList.add('hidden');
       document.getElementById('btnDrawSizePop')?.classList.remove('active');
       const isHidden = colorPop?.classList.toggle('hidden');
       document.getElementById('btnDrawColorPop')?.classList.toggle('active', !isHidden);
     });
 
     document.getElementById('btnDrawSizePop')?.addEventListener('click', (e) => {
-      e.stopPropagation();
-      colorPop?.classList.add('hidden');
+      e.stopPropagation(); colorPop?.classList.add('hidden');
       document.getElementById('btnDrawColorPop')?.classList.remove('active');
       const isHidden = sizePop?.classList.toggle('hidden');
       document.getElementById('btnDrawSizePop')?.classList.toggle('active', !isHidden);
@@ -201,8 +137,7 @@ export class Toolbar {
       });
     });
 
-    const sizeTrack = document.getElementById('drawSizeTrack');
-    const sizeFill = document.getElementById('drawSizeFill');
+    const sizeTrack = document.getElementById('drawSizeTrack'), sizeFill = document.getElementById('drawSizeFill');
     const sizeThumb = document.getElementById('drawSizeThumb');
     let currentSize = 24;
 
@@ -214,12 +149,10 @@ export class Toolbar {
       if (sizeBadge) sizeBadge.textContent = `${currentSize}px`;
       if (sizeDot) {
         const previewPx = Math.round(6 + pct * 26);
-        sizeDot.style.width = `${previewPx}px`;
-        sizeDot.style.height = `${previewPx}px`;
+        sizeDot.style.width = `${previewPx}px`; sizeDot.style.height = `${previewPx}px`;
       }
       this.actions.onDrawSize?.(currentSize);
     };
-
     updateSize(24);
 
     let isDraggingSize = false;
@@ -230,25 +163,17 @@ export class Toolbar {
       updateSize(Math.round(10 + ratio * (150 - 10)));
     };
 
-    sizeTrack?.addEventListener('mousedown', (e) => {
-      e.stopPropagation();
-      e.preventDefault();
-      isDraggingSize = true;
-      handleTrackMove(e);
-    });
-
+    sizeTrack?.addEventListener('mousedown', (e) => { e.stopPropagation(); e.preventDefault(); isDraggingSize = true; handleTrackMove(e); });
     window.addEventListener('mousemove', (e) => { if (isDraggingSize) handleTrackMove(e); });
     window.addEventListener('mouseup', () => { isDraggingSize = false; });
-
     sizePop?.addEventListener('wheel', (e) => {
-      e.stopPropagation();
-      e.preventDefault();
-      updateSize(currentSize + (e.deltaY < 0 ? 5 : -5));
+      e.stopPropagation(); e.preventDefault(); updateSize(currentSize + (e.deltaY < 0 ? 5 : -5));
     }, { passive: false });
+    document.addEventListener('click', (e) => { if (!e.target.closest('#drawToolbar, .draw-popover')) closeDrawPopovers(); });
+  }
 
-    document.addEventListener('click', (e) => {
-      if (!e.target.closest('#drawToolbar, .draw-popover')) closeDrawPopovers();
-    });
+  bindTextControls() {
+    this.btnTextMode?.addEventListener('click', () => this.actions.onToggleText?.());
   }
 
   updateCounter(total, currentIndex) {
@@ -265,10 +190,7 @@ export class Toolbar {
   _setLocked(ids, active) {
     for (const id of ids) {
       const el = document.getElementById(id);
-      if (el) {
-        el.disabled = active;
-        el.classList.toggle('tool-locked', active);
-      }
+      if (el) { el.disabled = active; el.classList.toggle('tool-locked', active); }
     }
   }
 
@@ -276,8 +198,7 @@ export class Toolbar {
     if (this.btnCropMode) this.btnCropMode.classList.toggle('active', active);
     if (this.cropToolbar) this.cropToolbar.classList.toggle('hidden', !active);
     if (this.container) this.container.classList.toggle('crop-locked', active);
-    // Transforms remain enabled in crop mode per user preference
-    this._setLocked(['btnPrevImage', 'btnNextImage', 'btnDrawMode', 'btnAdjustments', 'btnPixelated', 'btnBgMode', 'btnRawFull', 'btnSaveAs'], active);
+    this._setLocked(['btnPrevImage', 'btnNextImage', 'btnDrawMode', 'btnTextMode', 'btnAdjustments', 'btnPixelated', 'btnBgMode', 'btnRawFull', 'btnSaveAs'], active);
   }
 
   setDrawActive(active) {
@@ -290,21 +211,30 @@ export class Toolbar {
       document.getElementById('btnDrawColorPop')?.classList.remove('active');
       document.getElementById('btnDrawSizePop')?.classList.remove('active');
     }
-    this._setLocked(['btnPrevImage', 'btnNextImage', 'btnRotateLeft', 'btnRotateRight', 'btnFlipH', 'btnFlipV', 'btnCropMode', 'btnAdjustments', 'btnPixelated', 'btnBgMode', 'btnRawFull', 'btnSaveAs'], active);
+    this._setLocked(['btnPrevImage', 'btnNextImage', 'btnRotateLeft', 'btnRotateRight', 'btnFlipH', 'btnFlipV', 'btnCropMode', 'btnTextMode', 'btnAdjustments', 'btnPixelated', 'btnBgMode', 'btnRawFull', 'btnSaveAs'], active);
+  }
+
+  setTextActive(active) {
+    if (this.btnTextMode) this.btnTextMode.classList.toggle('active', active);
+    const tt = document.getElementById('textToolbar');
+    if (tt) tt.classList.toggle('hidden', !active);
+    if (this.container) this.container.classList.toggle('text-locked', active);
+    if (!active) {
+      document.querySelectorAll('.text-popover').forEach((p) => p.classList.add('hidden'));
+    }
+    this._setLocked(['btnPrevImage', 'btnNextImage', 'btnRotateLeft', 'btnRotateRight', 'btnFlipH', 'btnFlipV', 'btnCropMode', 'btnDrawMode', 'btnAdjustments', 'btnPixelated', 'btnBgMode', 'btnRawFull', 'btnSaveAs'], active);
   }
 
   setAdjustmentsActive(active) {
     if (this.btnAdjustments) this.btnAdjustments.classList.toggle('active', active);
     if (this.container) this.container.classList.toggle('adjustments-locked', active);
-    this._setLocked(['btnPrevImage', 'btnNextImage', 'btnRotateLeft', 'btnRotateRight', 'btnFlipH', 'btnFlipV', 'btnCropMode', 'btnDrawMode', 'btnPixelated', 'btnBgMode', 'btnRawFull', 'btnSaveAs'], active);
+    this._setLocked(['btnPrevImage', 'btnNextImage', 'btnRotateLeft', 'btnRotateRight', 'btnFlipH', 'btnFlipV', 'btnCropMode', 'btnDrawMode', 'btnTextMode', 'btnPixelated', 'btnBgMode', 'btnRawFull', 'btnSaveAs'], active);
   }
 
-  /** Show / hide the Full Sensor Decode button based on whether a RAW file is active. */
   setRawFile(isRaw) {
     document.body.classList.toggle('is-raw', Boolean(isRaw));
   }
 
-  /** Toggle the in-flight spinner on #btnRawFull during the decode IPC call. */
   setRawDecoding(loading) {
     const btn = document.getElementById('btnRawFull');
     if (!btn) return;

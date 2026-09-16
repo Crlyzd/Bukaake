@@ -29,9 +29,15 @@ export class ShortcutsRegistry {
       } else if (e.key === 's' || e.key === 'S') {
         e.preventDefault();
         this.actions.onSaveImage?.();
+      } else if (e.shiftKey && (e.key === 'z' || e.key === 'Z')) {
+        e.preventDefault();
+        this.actions.onRedo?.();
+      } else if (e.key === 'y' || e.key === 'Y') {
+        e.preventDefault();
+        this.actions.onRedo?.();
       } else if (e.key === 'z' || e.key === 'Z') {
         e.preventDefault();
-        this.actions.onDrawUndo?.();
+        this.actions.onUndo?.();
       } else if (e.key === 'c' || e.key === 'C') {
         e.preventDefault();
         this.actions.onCopyImage?.();
@@ -103,6 +109,11 @@ export class ShortcutsRegistry {
       case 'D':
         e.preventDefault();
         this.actions.onToggleDraw?.();
+        break;
+      case 't':
+      case 'T':
+        e.preventDefault();
+        this.actions.onToggleText?.();
         break;
       case 'e':
       case 'E':

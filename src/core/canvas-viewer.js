@@ -280,14 +280,20 @@ export class CanvasViewer {
     };
   }
 
+  /** Inverse of screenToImageCoords: image pixel → canvas-space pixel */
+  imageToScreenCoords(ix, iy) {
+    if (!this.img) return { x: 0, y: 0 };
+    const isVert = this.rotation === 90 || this.rotation === 270;
+    const cx = this.panX + (isVert ? this.img.height : this.img.width) * this.scale / 2;
+    const cy = this.panY + (isVert ? this.img.width : this.img.height) * this.scale / 2;
+    const rx = this.flipH ? this.img.width / 2 - ix : ix - this.img.width / 2;
+    const ry = this.flipV ? this.img.height / 2 - iy : iy - this.img.height / 2;
+    const rad = this.rotation * Math.PI / 180;
+    return { x: (rx * Math.cos(rad) - ry * Math.sin(rad)) * this.scale + cx,
+             y: (rx * Math.sin(rad) + ry * Math.cos(rad)) * this.scale + cy };
+  }
+
   getProcessedCanvas(cropRect = null, filterCss = '') {
-    return renderOffscreenCanvas(this.img, {
-      rotation: this.rotation,
-      flipH: this.flipH,
-      flipV: this.flipV,
-      pixelSmoothing: this.pixelSmoothing,
-      cropRect,
-      filterCss,
-    });
+    return renderOffscreenCanvas(this.img, { rotation: this.rotation, flipH: this.flipH, flipV: this.flipV, pixelSmoothing: this.pixelSmoothing, cropRect, filterCss });
   }
 }

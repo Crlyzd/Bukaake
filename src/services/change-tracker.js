@@ -9,6 +9,7 @@ export class ChangeTracker {
     this.cropModified = false;
     this.colorModified = false;
     this.drawModified = false;
+    this.textModified = false;
     this.listeners = [];
   }
 
@@ -40,14 +41,20 @@ export class ChangeTracker {
     this.notify();
   }
 
+  markText(isDirty = true) {
+    this.textModified = isDirty;
+    this.notify();
+  }
+
   hasUnsavedChanges() {
-    return this.cropModified || this.colorModified || this.drawModified;
+    return this.cropModified || this.colorModified || this.drawModified || this.textModified;
   }
 
   markSaved() {
     this.cropModified = false;
     this.colorModified = false;
     this.drawModified = false;
+    this.textModified = false;
     this.notify();
   }
 

@@ -7,10 +7,11 @@ import { changeTracker } from './change-tracker.js';
 import { toast } from '../components/toast.js';
 
 export class CanvasToolsManager {
-  constructor({ viewer, cropper, drawingTool, toolbar, fileLoader, adjustmentsPanel }) {
+  constructor({ viewer, cropper, drawingTool, textTool, toolbar, fileLoader, adjustmentsPanel }) {
     this.viewer = viewer;
     this.cropper = cropper;
     this.drawingTool = drawingTool;
+    this.textTool = textTool;
     this.toolbar = toolbar;
     this.fileLoader = fileLoader;
     this.adjustmentsPanel = adjustmentsPanel;
@@ -20,6 +21,7 @@ export class CanvasToolsManager {
     return Boolean(
       this.cropper?.active ||
       this.drawingTool?.active ||
+      this.textTool?.active ||
       this.adjustmentsPanel?.isOpen()
     );
   }
@@ -37,6 +39,7 @@ export class CanvasToolsManager {
       if (!this.viewer.img) return toast.show('Load an image first for adjustments');
       if (this.cropper?.active) this.toggleCrop(false);
       if (this.drawingTool?.active) this.toggleDraw(false);
+      if (this.textTool?.active) this.toggleText(false);
     }
     const active = this.adjustmentsPanel?.toggle();
     this.toolbar?.setAdjustmentsActive(active);
@@ -47,7 +50,8 @@ export class CanvasToolsManager {
     const should = forceState !== null ? forceState : !this.cropper.active;
     if (should) {
       if (!this.viewer.img) return toast.show('Load an image first to crop');
-      if (this.drawingTool.active) this.toggleDraw(false);
+      if (this.drawingTool?.active) this.toggleDraw(false);
+      if (this.textTool?.active) this.toggleText(false);
       this.closeAdjustments();
       this.viewer.setBottomInset(110, false);
       this.cropper.show();
@@ -90,7 +94,8 @@ export class CanvasToolsManager {
     const should = forceState !== null ? forceState : !this.drawingTool.active;
     if (should) {
       if (!this.viewer.img) return toast.show('Load an image first to draw');
-      if (this.cropper.active) this.toggleCrop(false);
+      if (this.cropper?.active) this.toggleCrop(false);
+      if (this.textTool?.active) this.toggleText(false);
       this.closeAdjustments();
       this.viewer.setBottomInset(110, false);
       this.drawingTool.show();
@@ -116,5 +121,48 @@ export class CanvasToolsManager {
       changeTracker.markDraw(true);
       toast.show('Applied drawing to image');
     };
+  }
+
+  toggleText(forceState = null) {
+    const should = forceState !== null ? forceState : !this.textTool?.active;
+    if (should) {
+      if (!this.viewer.img) return toast.show('Load an image first to add text');
+      if (this.cropper?.active) this.toggleCrop(false);
+      if (this.drawingTool?.active) this.toggleDraw(false);
+      this.closeAdjustments();
+      this.viewer.setBottomInset(110, false);
+      this.textTool?.show();
+      this.toolbar.setTextActive(true);
+    } else {
+      this.viewer.setBottomInset(0, true);
+      this.textTool?.hide();
+      this.toolbar.setTextActive(false);
+      changeTracker.markText(false);
+    }
+  }
+
+  applyText() {
+    const baked = this.textTool?.bakeToImage();
+    if (!baked) return toast.show('No text to apply');
+    const currentMeta = this.fileLoader.currentMeta || {};
+    baked.onload = () => {
+      this.fileLoader.loadDirectImage(baked, {
+        ...currentMeta,
+        name: currentMeta.name || 'Edited Image',
+      });
+      this.toggleText(false);
+      changeTracker.markText(true);
+      toast.show('Applied text to image');
+    };
+  }
+
+  handleUndo() {
+    if (this.textTool?.active) return this.textTool.undo();
+    if (this.drawingTool?.active) return this.drawingTool.undo();
+  }
+
+  handleRedo() {
+    if (this.textTool?.active) return this.textTool.redo();
+    if (this.drawingTool?.active) return this.drawingTool.redo();
   }
 }

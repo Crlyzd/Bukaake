@@ -9,6 +9,7 @@ export class DrawingTool {
     this.ctx = this.canvas.getContext('2d');
     this.viewer = canvasViewer;
     this.onModified = options.onModified || null;
+    this.onHistoryChange = options.onHistoryChange || null;
     this.cursorRing = document.getElementById('drawCursorRing');
 
     this.active = false;
@@ -21,6 +22,7 @@ export class DrawingTool {
     this.panStartY = 0;
 
     this.strokes = [];
+    this.redoStrokes = [];
     this.currentStroke = null;
 
     this.initEvents();
@@ -46,6 +48,7 @@ export class DrawingTool {
 
       e.stopPropagation();
       this.isDrawing = true;
+      this.redoStrokes = [];
       const isHighlighter = this.mode === 'highlighter';
       const strokeSize = isHighlighter ? (20 / (this.viewer.scale || 1)) : this.size;
       this.currentStroke = {
@@ -54,6 +57,7 @@ export class DrawingTool {
       this.strokes.push(this.currentStroke);
       this.redraw();
       this.onModified?.(true);
+      this._notifyHistory();
     });
 
     window.addEventListener('mousemove', (e) => {
@@ -99,33 +103,17 @@ export class DrawingTool {
       this.updateCursor(e);
     }, { passive: false });
 
-    this.canvas.addEventListener('auxclick', (e) => {
-      if (e.button === 1) e.preventDefault();
-    });
-
-    this.canvas.addEventListener('mouseleave', () => {
-      this.cursorRing?.classList.add('hidden');
-    });
-
-    this.canvas.addEventListener('mouseenter', (e) => {
-      this.updateCursor(e);
-    });
-
-    window.addEventListener('resize', () => {
-      if (this.active) this.syncCanvasSize();
-    });
+    this.canvas.addEventListener('auxclick', (e) => { if (e.button === 1) e.preventDefault(); });
+    this.canvas.addEventListener('mouseleave', () => this.cursorRing?.classList.add('hidden'));
+    this.canvas.addEventListener('mouseenter', (e) => this.updateCursor(e));
+    window.addEventListener('resize', () => { if (this.active) this.syncCanvasSize(); });
   }
 
   updateCursor(e) {
     if (!this.active || this.isPanning || !e) return;
     const hitEl = (e.clientX !== undefined && e.clientY !== undefined)
-      ? document.elementFromPoint(e.clientX, e.clientY) || e.target
-      : e.target;
-    const isOverChrome = Boolean(
-      e.clientY <= 44 ||
-      hitEl?.closest?.('#appTitlebar, .app-titlebar, #floatingToolbar, .floating-toolbar, #drawToolbar, .draw-toolbar, .draw-popover, .context-menu, .modal-backdrop, .dialog-card')
-    );
-
+      ? document.elementFromPoint(e.clientX, e.clientY) || e.target : e.target;
+    const isOverChrome = Boolean(e.clientY <= 44 || hitEl?.closest?.('#appTitlebar, #floatingToolbar, #drawToolbar, .draw-popover, .context-menu, .modal-backdrop, .dialog-card'));
     const rect = this.canvas.getBoundingClientRect();
     const pt = this.viewer.screenToImageCoords(e.clientX - rect.left, e.clientY - rect.top);
     const isOutside = pt.x < 0 || pt.x > this.viewer.img.width || pt.y < 0 || pt.y > this.viewer.img.height;
@@ -135,37 +123,33 @@ export class DrawingTool {
       this.canvas.classList.remove('cursor-highlighter');
       return;
     }
-    if (this.mode === 'pen') {
-      this.canvas.classList.remove('cursor-highlighter');
-      if (this.cursorRing) {
+    const isPen = this.mode === 'pen';
+    this.canvas.classList.toggle('cursor-highlighter', !isPen);
+    if (this.cursorRing) {
+      if (isPen) {
         const diam = Math.max(4, Math.round(this.size * this.viewer.scale));
         this.cursorRing.style.width = `${diam}px`;
         this.cursorRing.style.height = `${diam}px`;
         this.cursorRing.style.left = `${e.clientX}px`;
         this.cursorRing.style.top = `${e.clientY}px`;
         this.cursorRing.classList.remove('hidden');
+      } else {
+        this.cursorRing.classList.add('hidden');
       }
-    } else {
-      this.cursorRing?.classList.add('hidden');
-      this.canvas.classList.add('cursor-highlighter');
     }
   }
 
   updateCursorMode() {
     if (!this.active) return;
-    if (this.mode === 'highlighter') {
-      this.cursorRing?.classList.add('hidden');
-      this.canvas.classList.add('cursor-highlighter');
-    } else {
-      this.canvas.classList.remove('cursor-highlighter');
-    }
+    const isHighlighter = this.mode === 'highlighter';
+    this.cursorRing?.classList.toggle('hidden', isHighlighter);
+    this.canvas.classList.toggle('cursor-highlighter', isHighlighter);
   }
 
   syncCanvasSize() {
     const target = this.viewer.canvas || this.viewer.container;
     if (!target) return;
-    const w = target.width || target.clientWidth;
-    const h = target.height || target.clientHeight;
+    const w = target.width || target.clientWidth, h = target.height || target.clientHeight;
     if (w > 0 && h > 0 && (this.canvas.width !== w || this.canvas.height !== h)) {
       this.canvas.width = w;
       this.canvas.height = h;
@@ -204,17 +188,31 @@ export class DrawingTool {
   }
 
   undo() {
-    if (this.strokes.length > 0) {
-      this.strokes.pop();
-      this.redraw();
-      this.onModified?.(this.strokes.length > 0);
-    }
+    if (this.strokes.length === 0) return;
+    this.redoStrokes.push(this.strokes.pop());
+    this.redraw();
+    this.onModified?.(this.strokes.length > 0);
+    this._notifyHistory();
+  }
+
+  redo() {
+    if (this.redoStrokes.length === 0) return;
+    this.strokes.push(this.redoStrokes.pop());
+    this.redraw();
+    this.onModified?.(true);
+    this._notifyHistory();
   }
 
   clear() {
     this.strokes = [];
+    this.redoStrokes = [];
     this.redraw();
     this.onModified?.(false);
+    this._notifyHistory();
+  }
+
+  _notifyHistory() {
+    this.onHistoryChange?.({ canUndo: this.strokes.length > 0, canRedo: this.redoStrokes.length > 0 });
   }
 
   hasStrokes() { return this.strokes.length > 0; }

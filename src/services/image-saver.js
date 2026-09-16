@@ -13,10 +13,11 @@ function getEditTimestamp() {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}_${pad(d.getHours())}-${pad(d.getMinutes())}-${pad(d.getSeconds())}`;
 }
 
-export async function exportImage(viewer, filters, fileLoader, isCropActive, isDrawActive) {
+export async function exportImage(viewer, filters, fileLoader, isCropActive, isDrawActive, isTextActive) {
   if (!viewer.img) { toast.show('No image loaded to save'); return false; }
   if (isCropActive) { toast.show('Please apply or cancel crop before saving'); return false; }
   if (isDrawActive) { toast.show('Please apply or cancel drawing before saving'); return false; }
+  if (isTextActive) { toast.show('Please apply or cancel text before saving'); return false; }
 
   const off = viewer.getProcessedCanvas(null, filters.getFilterCssString());
   if (!off) return false;
