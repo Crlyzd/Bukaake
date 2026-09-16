@@ -50,17 +50,15 @@ export class TextTool {
 
   show() {
     if (!this.viewer.img) return;
-    this.resetDefaults();
-    this.active = true; this.canvas.classList.remove('hidden'); this.overlayContainer?.classList.remove('hidden');
+    this.resetDefaults(); this.active = true;
+    this.canvas.classList.remove('hidden'); this.overlayContainer?.classList.remove('hidden');
     this.syncCanvasSize();
     this.createItemAt(Math.round(this.viewer.img.width / 2), Math.round(this.viewer.img.height / 2));
   }
 
   hide() {
-    this.active = false;
-    this.canvas.classList.add('hidden'); this.overlayContainer?.classList.add('hidden');
-    this.resetDefaults();
-    this.redraw();
+    this.active = false; this.canvas.classList.add('hidden'); this.overlayContainer?.classList.add('hidden');
+    this.resetDefaults(); this.redraw();
   }
 
   createItemAt(cx, cy) {
@@ -79,9 +77,7 @@ export class TextTool {
   selectItem(item, selectAll = false, initialDragEvent = null) {
     this.commitActiveInput();
     this.activeItem = item; this.isEditing = selectAll;
-    this.onActiveChange?.(item);
-    this.renderOverlayInput(item, selectAll, initialDragEvent);
-    this.redraw();
+    this.onActiveChange?.(item); this.renderOverlayInput(item, selectAll, initialDragEvent); this.redraw();
   }
 
   renderOverlayInput(item, selectAll = false, initialDragEvent = null) {
@@ -103,9 +99,10 @@ export class TextTool {
       h.className = `text-handle text-handle-${dir}`; h.dataset.handle = dir;
       box.appendChild(h);
     }
-    let isDragging = false, startMx = 0, startMy = 0, startX = item.x, startY = item.y;
+    let isDragging = false, startMx = 0, startMy = 0, startX = item.x, startY = item.y, preDragSnap = null;
     const startDrag = (mx, my) => {
       isDragging = true; startMx = mx; startMy = my; startX = item.x; startY = item.y;
+      preDragSnap = JSON.parse(JSON.stringify(this.items));
       box.classList.add('is-dragging');
     };
     if (initialDragEvent && !selectAll) startDrag(initialDragEvent.clientX, initialDragEvent.clientY);
@@ -115,6 +112,7 @@ export class TextTool {
       const handle = e.target.closest('[data-handle]')?.dataset?.handle;
       if (handle) {
         e.preventDefault(); e.stopPropagation();
+        const preResizeSnap = JSON.parse(JSON.stringify(this.items));
         const boxRect = box.getBoundingClientRect();
         const cx = boxRect.left + boxRect.width / 2, cy = boxRect.top + boxRect.height / 2;
         const l = computeTextLayout(this.ctx, item);
@@ -130,16 +128,13 @@ export class TextTool {
           const nl = computeTextLayout(this.ctx, item);
           item.x = Math.round(imgCx - (nl.boxW / 2 - nl.padX));
           item.y = Math.round(imgCy - (nl.boxH / 2 - nl.padY));
-          this.updateOverlayBox();
-          this.redraw();
-          this.onActiveChange?.(item);
+          this.updateOverlayBox(); this.redraw(); this.onActiveChange?.(item);
         };
         window.addEventListener('mousemove', onRM);
         window.addEventListener('mouseup', () => {
           window.removeEventListener('mousemove', onRM);
-          this.currentSize = item.size;
-          this.onActiveChange?.(item);
-          this._pushHistory();
+          this.currentSize = item.size; this.onActiveChange?.(item);
+          if (item.size !== startSize) { this.undoStack.push(preResizeSnap); this.redoStack = []; this._notifyHistory(); }
         }, { once: true });
         return;
       }
@@ -149,14 +144,20 @@ export class TextTool {
       }
     });
 
+    let preEditSnap = null;
     box.addEventListener('dblclick', (e) => {
       e.stopPropagation(); this.isEditing = true; box.classList.add('editing'); this.redraw();
+      preEditSnap = JSON.parse(JSON.stringify(this.items));
       ta.focus(); ta.select();
     });
 
     ta.addEventListener('blur', () => {
       this.isEditing = false; box.classList.remove('editing');
-      item.text = ta.value.trim() || 'Text';
+      const val = ta.value.trim() || 'Text';
+      if (preEditSnap && item.text !== val) {
+        this.undoStack.push(preEditSnap); this.redoStack = []; this._notifyHistory();
+      }
+      item.text = val; preEditSnap = null;
       this.updateOverlayBox(); this.redraw();
     });
 
@@ -172,7 +173,14 @@ export class TextTool {
       this.snapper?.updateGuides(this.viewer, snap.snapH, snap.snapV);
       this.updateOverlayBox(); this.redraw();
     };
-    const onUp = () => { if (isDragging) { isDragging = false; box.classList.remove('is-dragging'); this.snapper?.clearGuides(); this._pushHistory(); } };
+    const onUp = () => {
+      if (!isDragging) return;
+      isDragging = false; box.classList.remove('is-dragging'); this.snapper?.clearGuides();
+      if (preDragSnap && (item.x !== startX || item.y !== startY)) {
+        this.undoStack.push(preDragSnap); this.redoStack = []; this._notifyHistory();
+      }
+      preDragSnap = null;
+    };
     window.addEventListener('mousemove', onMove);
     window.addEventListener('mouseup', onUp);
 
@@ -189,6 +197,7 @@ export class TextTool {
     this.updateOverlayBox();
     if (selectAll) {
       this.isEditing = true; box.classList.add('editing'); this.redraw();
+      preEditSnap = JSON.parse(JSON.stringify(this.items));
       setTimeout(() => { ta.focus(); ta.select(); }, 10);
     }
   }
@@ -202,12 +211,9 @@ export class TextTool {
         else this.activeItem[k] = v;
       }
     }
-    const box = document.getElementById('activeTextBox');
-    const ta = box?.querySelector('textarea');
+    const box = document.getElementById('activeTextBox'), ta = box?.querySelector('textarea');
     if (box) applyStylesToTextInput(box, ta, this.activeItem, this.viewer.scale || 1);
-    this.updateOverlayBox();
-    this.redraw();
-    this.onModified?.(true);
+    this.updateOverlayBox(); this.redraw(); this.onModified?.(true);
     if (pushHistory) this._pushHistory();
   }
 
@@ -215,12 +221,9 @@ export class TextTool {
     const box = document.getElementById('activeTextBox');
     if (!box || !this.activeItem) return;
     const l = computeTextLayout(this.ctx, this.activeItem);
-    const pt = this.viewer.imageToScreenCoords(l.boxX, l.boxY);
-    const s = this.viewer.scale || 1;
-    box.style.left = `${Math.round(pt.x)}px`;
-    box.style.top = `${Math.round(pt.y)}px`;
-    box.style.width = `${Math.round(l.boxW * s)}px`;
-    box.style.height = `${Math.round(l.boxH * s)}px`;
+    const pt = this.viewer.imageToScreenCoords(l.boxX, l.boxY), s = this.viewer.scale || 1;
+    box.style.left = `${Math.round(pt.x)}px`; box.style.top = `${Math.round(pt.y)}px`;
+    box.style.width = `${Math.round(l.boxW * s)}px`; box.style.height = `${Math.round(l.boxH * s)}px`;
     box.style.borderRadius = `${Math.round(l.roundness * s)}px`;
     const ta = box.querySelector('textarea');
     if (ta) applyStylesToTextInput(box, ta, this.activeItem, s);
@@ -232,8 +235,7 @@ export class TextTool {
     if (ta) this.activeItem.text = ta.value.trim() || 'Text';
     this.activeItem = null; this.isEditing = false;
     this.overlayContainer?.querySelectorAll('.canvas-text-box').forEach((el) => el.remove());
-    this.onActiveChange?.(null);
-    this.redraw();
+    this.onActiveChange?.(null); this.redraw();
   }
 
   deleteActiveItem() {
@@ -242,8 +244,7 @@ export class TextTool {
     this.items = this.items.filter((it) => it !== this.activeItem);
     this.activeItem = null; this.isEditing = false;
     this.overlayContainer?.querySelectorAll('.canvas-text-box').forEach((el) => el.remove());
-    this.onActiveChange?.(null);
-    this.redraw(); this.onModified?.(this.items.length > 0);
+    this.onActiveChange?.(null); this.redraw(); this.onModified?.(this.items.length > 0);
   }
 
   _pushHistory() { this.undoStack.push(JSON.parse(JSON.stringify(this.items))); this.redoStack = []; this._notifyHistory(); }
