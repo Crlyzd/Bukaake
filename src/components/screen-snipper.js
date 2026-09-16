@@ -40,7 +40,7 @@ export class ScreenSnipper {
       </div>
       <div class="snipper-action-dock glass-panel hidden">
         <button class="snipper-btn confirm" id="btnSnipConfirm" title="Open in Bukaake (Enter)"><i class="ri-check-line"></i> <span id="snipConfirmLabel">Open</span></button>
-        <button class="snipper-btn" id="btnSnipCopy" title="Copy to Clipboard (Ctrl+C)"><i class="ri-clipboard-line"></i> Copy</button>
+        <button class="snipper-btn" id="btnSnipCopy" title="Copy to Clipboard (Ctrl+C)"><i class="ri-file-copy-line"></i> Copy</button>
         <button class="snipper-btn cancel" id="btnSnipCancel" title="Cancel (Esc)"><i class="ri-close-line"></i></button>
       </div>
     `;

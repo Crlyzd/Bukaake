@@ -30,14 +30,14 @@
   height: 100%;
   object-fit: fill;
   pointer-events: none;
-  filter: brightness(0.85);
+  filter: brightness(0.75);
 }
 
 .snipper-selection-box {
   position: absolute;
   box-sizing: border-box;
-  box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.55), 0 0 14px rgba(0, 162, 255, 0.85);
-  border: 3px solid #00a2ff;
+  box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.50), 0 0 14px rgba(0, 162, 255, 0.85);
+  border: 1px solid #00a2ff;
   outline: none !important;
   pointer-events: auto;
   border-radius: 4px;

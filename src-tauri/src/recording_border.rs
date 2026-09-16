@@ -67,7 +67,7 @@ mod win_border {
                 };
                 let border_brush = CreateSolidBrush(border_bgr);
 
-                let bw = 2;
+                let bw = 1;
                 let w = rc.right - rc.left;
                 let h = rc.bottom - rc.top;
 
