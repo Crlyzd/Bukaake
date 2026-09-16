@@ -26,9 +26,8 @@ export class TextToolbar {
       if (r) r.disabled = !canRedo;
     };
 
-    this.tool.onActiveChange = (item) => {
-      if (item) this.syncActiveToUI(item);
-    };
+    this.tool.onActiveChange = (item) => this.updateSelectionState(item);
+    this.updateSelectionState(this.tool.activeItem);
   }
 
   bindPopovers() {
@@ -85,47 +84,36 @@ export class TextToolbar {
       opt.addEventListener('click', (e) => {
         e.stopPropagation();
         const font = opt.getAttribute('data-font');
-        const label = opt.textContent;
         document.querySelectorAll('.text-font-option').forEach((o) => o.classList.remove('active'));
         opt.classList.add('active');
         const badge = document.getElementById('textFontBadge');
-        if (badge) badge.textContent = label;
+        if (badge) badge.textContent = opt.textContent;
         this.tool.currentFont = font;
-        if (this.tool.activeItem) {
-          this.tool.activeItem.font = font;
-          this.tool.renderOverlayInput(this.tool.activeItem);
-        }
+        this.tool.updateActiveItem({ font }, true);
         this.closeAllPopovers();
       });
     });
 
-    const sizeTrack = document.getElementById('textSizeTrack'), sizeFill = document.getElementById('textSizeFill');
-    const sizeThumb = document.getElementById('textSizeThumb'), sizeBadge = document.getElementById('textSizeBadge');
-
-    const setSize = (px) => {
-      const val = Math.min(140, Math.max(14, px));
-      const pct = (val - 14) / (140 - 14);
-      if (sizeFill) sizeFill.style.height = `${pct * 100}%`;
-      if (sizeThumb) sizeThumb.style.bottom = `${pct * 100}%`;
-      if (sizeBadge) sizeBadge.textContent = `${val}px`;
+    const sizeTrack = document.getElementById('textSizeTrack');
+    const setSize = (px, pushHistory = false) => {
+      const val = this.updateSliderUI(px);
       this.tool.currentSize = val;
-      if (this.tool.activeItem) {
-        this.tool.activeItem.size = Math.round(val / (this.tool.viewer.scale || 1));
-        this.tool.renderOverlayInput(this.tool.activeItem);
-      }
+      this.tool.updateActiveItem({ size: val }, pushHistory);
     };
-    setSize(36);
+    this.updateSliderUI(this.tool.currentSize || 36);
 
     let draggingSize = false;
     const onTrack = (e) => {
       if (!sizeTrack) return;
       const rect = sizeTrack.getBoundingClientRect();
       const r = Math.max(0, Math.min(1, (rect.bottom - e.clientY) / rect.height));
-      setSize(Math.round(14 + r * (140 - 14)));
+      setSize(Math.round(12 + r * (200 - 12)), false);
     };
     sizeTrack?.addEventListener('mousedown', (e) => { e.stopPropagation(); draggingSize = true; onTrack(e); });
     window.addEventListener('mousemove', (e) => { if (draggingSize) onTrack(e); });
-    window.addEventListener('mouseup', () => { draggingSize = false; });
+    window.addEventListener('mouseup', () => {
+      if (draggingSize) { draggingSize = false; this.tool._pushHistory(); }
+    });
 
     const styles = [
       { id: 'btnTextBold', prop: 'bold', key: 'currentBold' },
@@ -133,15 +121,11 @@ export class TextToolbar {
       { id: 'btnTextUnderline', prop: 'underline', key: 'currentUnderline' },
       { id: 'btnTextStrike', prop: 'strike', key: 'currentStrike' },
     ];
-
     styles.forEach(({ id, prop, key }) => {
       document.getElementById(id)?.addEventListener('click', (e) => {
         const active = e.currentTarget.classList.toggle('active');
         this.tool[key] = active;
-        if (this.tool.activeItem) {
-          this.tool.activeItem[prop] = active;
-          this.tool.renderOverlayInput(this.tool.activeItem);
-        }
+        this.tool.updateActiveItem({ [prop]: active }, true);
       });
     });
 
@@ -154,10 +138,7 @@ export class TextToolbar {
         const dot = document.getElementById('textColorDot');
         if (dot) dot.style.backgroundColor = color;
         this.tool.currentColor = color;
-        if (this.tool.activeItem) {
-          this.tool.activeItem.color = color;
-          this.tool.renderOverlayInput(this.tool.activeItem);
-        }
+        this.tool.updateActiveItem({ color }, true);
         this.closeAllPopovers();
       });
     });
@@ -167,10 +148,7 @@ export class TextToolbar {
     const tog = document.getElementById('toggleTextShadow');
     tog?.addEventListener('change', () => {
       this.tool.currentShadow.enabled = tog.checked;
-      if (this.tool.activeItem) {
-        this.tool.activeItem.shadow.enabled = tog.checked;
-        this.tool.renderOverlayInput(this.tool.activeItem);
-      }
+      this.tool.updateActiveItem({ shadow: { enabled: tog.checked } }, true);
     });
 
     const bindRange = (id, prop, unit, scale = 1) => {
@@ -180,11 +158,9 @@ export class TextToolbar {
         this.tool.currentShadow[prop] = val;
         const b = document.getElementById(`${id}Val`);
         if (b) b.textContent = `${el.value}${unit}`;
-        if (this.tool.activeItem) {
-          this.tool.activeItem.shadow[prop] = val;
-          this.tool.renderOverlayInput(this.tool.activeItem);
-        }
+        this.tool.updateActiveItem({ shadow: { [prop]: val } }, false);
       });
+      el?.addEventListener('change', () => this.tool._pushHistory());
     };
     bindRange('sliderShadowBlur', 'blur', 'px');
     bindRange('sliderShadowOpacity', 'opacity', '%', 0.01);
@@ -195,10 +171,7 @@ export class TextToolbar {
     const tog = document.getElementById('toggleTextBg');
     tog?.addEventListener('change', () => {
       this.tool.currentBg.enabled = tog.checked;
-      if (this.tool.activeItem) {
-        this.tool.activeItem.bg.enabled = tog.checked;
-        this.tool.renderOverlayInput(this.tool.activeItem);
-      }
+      this.tool.updateActiveItem({ bg: { enabled: tog.checked } }, true);
     });
 
     document.querySelectorAll('.bg-color-chip').forEach((chip) => {
@@ -208,10 +181,7 @@ export class TextToolbar {
         document.querySelectorAll('.bg-color-chip').forEach((c) => c.classList.remove('active'));
         chip.classList.add('active');
         this.tool.currentBg.color = color;
-        if (this.tool.activeItem) {
-          this.tool.activeItem.bg.color = color;
-          this.tool.renderOverlayInput(this.tool.activeItem);
-        }
+        this.tool.updateActiveItem({ bg: { color } }, true);
       });
     });
 
@@ -222,11 +192,9 @@ export class TextToolbar {
         this.tool.currentBg[prop] = val;
         const b = document.getElementById(`${id}Val`);
         if (b) b.textContent = `${el.value}${unit}`;
-        if (this.tool.activeItem) {
-          this.tool.activeItem.bg[prop] = val;
-          this.tool.renderOverlayInput(this.tool.activeItem);
-        }
+        this.tool.updateActiveItem({ bg: { [prop]: val } }, false);
       });
+      el?.addEventListener('change', () => this.tool._pushHistory());
     };
     bindBgRange('sliderBgRoundness', 'roundness', 'px');
     bindBgRange('sliderBgOpacity', 'opacity', '%', 0.01);
@@ -236,9 +204,33 @@ export class TextToolbar {
   bindHistoryAndActions() {
     document.getElementById('btnTextUndo')?.addEventListener('click', () => this.tool.undo());
     document.getElementById('btnTextRedo')?.addEventListener('click', () => this.tool.redo());
-    document.getElementById('btnTextClear')?.addEventListener('click', () => this.tool.clear());
+    document.getElementById('btnTextClear')?.addEventListener('click', () => {
+      if (this.tool.activeItem) this.tool.deleteActiveItem();
+    });
     document.getElementById('btnCancelText')?.addEventListener('click', () => this.actions.onCancel?.());
     document.getElementById('btnApplyText')?.addEventListener('click', () => this.actions.onApply?.());
+  }
+
+  updateSelectionState(item) {
+    const isSelected = Boolean(item);
+    this.container?.classList.toggle('has-no-selection', !isSelected);
+    const del = document.getElementById('btnTextClear');
+    if (del) {
+      del.disabled = !isSelected;
+      del.title = isSelected ? 'Delete Text (Del)' : 'No text selected';
+    }
+    if (isSelected) this.syncActiveToUI(item);
+    else this.closeAllPopovers();
+  }
+
+  updateSliderUI(px) {
+    const val = Math.min(200, Math.max(12, Math.round(px || 36)));
+    const pct = (val - 12) / (200 - 12);
+    const fill = document.getElementById('textSizeFill'), thumb = document.getElementById('textSizeThumb'), badge = document.getElementById('textSizeBadge');
+    if (fill) fill.style.height = `${pct * 100}%`;
+    if (thumb) thumb.style.bottom = `${pct * 100}%`;
+    if (badge) badge.textContent = `${val}px`;
+    return val;
   }
 
   syncActiveToUI(item) {
@@ -253,5 +245,14 @@ export class TextToolbar {
     if (togS) togS.checked = Boolean(item.shadow?.enabled);
     const togB = document.getElementById('toggleTextBg');
     if (togB) togB.checked = Boolean(item.bg?.enabled);
+    if (item.size) {
+      this.updateSliderUI(item.size);
+      this.tool.currentSize = item.size;
+    }
+    const fontBadge = document.getElementById('textFontBadge');
+    if (fontBadge && item.font) {
+      const match = document.querySelector(`.text-font-option[data-font="${item.font}"]`);
+      if (match) fontBadge.textContent = match.textContent;
+    }
   }
 }

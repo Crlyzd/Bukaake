@@ -15,11 +15,11 @@
 }
 #textOverlayContainer.hidden { display: none !important; }
 
-/* Active Floating Text Box over Canvas (Canva-style selection) */
+/* Active Floating Text Box over Canvas (Canva-style selection frame) */
 .canvas-text-box {
-  position: absolute; pointer-events: auto; display: inline-block;
-  box-sizing: border-box; width: fit-content; border: 1.5px solid #8b5cf6;
-  border-radius: 2px; background: transparent; box-shadow: none !important;
+  position: absolute; pointer-events: auto; display: block;
+  box-sizing: border-box; border: 1.5px solid #8b5cf6;
+  background: transparent !important; box-shadow: none !important;
   cursor: default; -webkit-user-select: none; user-select: none;
 }
 .canvas-text-box:hover { box-shadow: none !important; }
@@ -27,13 +27,14 @@
 .text-input-field {
   background: transparent; border: none !important; outline: none !important;
   resize: none; overflow: hidden; white-space: pre; box-sizing: border-box;
-  display: block; width: auto; min-width: 16px; min-height: 0; height: auto;
+  display: block; width: 100%; height: 100%; min-width: 16px; min-height: 0;
   line-height: 1.25; cursor: default; pointer-events: none; user-select: none;
-  -webkit-user-select: none; padding: 0; margin: 0; caret-color: #8b5cf6;
+  -webkit-user-select: none; margin: 0; caret-color: #8b5cf6;
+  opacity: 0;
 }
 
 .canvas-text-box.editing .text-input-field {
-  cursor: text; pointer-events: auto; user-select: text; -webkit-user-select: text;
+  opacity: 1; cursor: text; pointer-events: auto; user-select: text; -webkit-user-select: text;
 }
 
 /* Bottom Floating Text Sub-Toolbar with Hard Framing Bounds */
@@ -99,6 +100,16 @@ body.mode-viewer .text-toolbar { bottom: 132px !important; }
 .text-style-btn.active {
   background: var(--action-bg) !important; color: var(--action-text) !important;
   box-shadow: var(--btn-shadow);
+}
+
+/* Uninteractable formatting state when no text item is selected */
+.text-toolbar.has-no-selection .text-popover-anchor,
+.text-toolbar.has-no-selection .text-styles,
+.text-toolbar.has-no-selection #btnTextClear {
+  opacity: 0.35;
+  pointer-events: none !important;
+  cursor: default !important;
+  transition: opacity var(--transition-fast);
 }
 
 /* History Controls & Action Buttons */

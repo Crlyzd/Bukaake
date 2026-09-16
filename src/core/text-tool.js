@@ -1,9 +1,9 @@
 /**
  * Bukaake Interactive Typography Engine
- * Text item lifecycle, overlay box, corner-resize font-sync, multi-tier magnetic snap, undo/redo (< 300 lines).
+ * Text item lifecycle, overlay box, corner-resize font-sync, multi-tier magnetic snap, undo/redo (< 275 lines).
  */
 
-import { renderVectorTextItem, applyStylesToTextInput, autoSizeTextarea, measureTextDimensions, hitTestTextItems, bakeTextToCanvas } from './text-renderer.js';
+import { renderVectorTextItem, applyStylesToTextInput, computeTextLayout, hitTestTextItems, bakeTextToCanvas } from './text-renderer.js';
 import { TextSnapper } from './text-snapping.js';
 
 export class TextTool {
@@ -12,17 +12,8 @@ export class TextTool {
     this.ctx = this.canvas.getContext('2d');
     this.viewer = canvasViewer;
     this.overlayContainer = document.getElementById('textOverlayContainer');
-    this.onModified = options.onModified || null;
-    this.onHistoryChange = options.onHistoryChange || null;
-    this.onActiveChange = options.onActiveChange || null;
-
-    this.active = false;
-    this.items = [];
-    this.activeItem = null;
-    this.undoStack = [];
-    this.redoStack = [];
-
-    // Typography presets
+    this.onModified = options.onModified || null; this.onHistoryChange = options.onHistoryChange || null; this.onActiveChange = options.onActiveChange || null;
+    this.active = false; this.items = []; this.activeItem = null; this.isEditing = false; this.undoStack = []; this.redoStack = [];
     this.currentFont = 'Inter, sans-serif'; this.currentSize = 36; this.currentColor = '#ffffff';
     this.currentBold = false; this.currentItalic = false; this.currentUnderline = false; this.currentStrike = false;
     this.currentShadow = { enabled: false, blur: 8, opacity: 0.85, offsetX: 2, offsetY: 4, color: '#000000' };
@@ -37,64 +28,59 @@ export class TextTool {
       const rect = this.canvas.getBoundingClientRect();
       const pt = this.viewer.screenToImageCoords(e.clientX - rect.left, e.clientY - rect.top);
       if (pt.x < 0 || pt.x > this.viewer.img.width || pt.y < 0 || pt.y > this.viewer.img.height) return;
-
-      const hit = hitTestTextItems(this.items, pt.x, pt.y);
-      if (hit) this.selectItem(hit);
+      const hit = hitTestTextItems(this.items, pt.x, pt.y, this.ctx);
+      if (hit) this.selectItem(hit, false, e);
       else this.commitActiveInput();
     });
-
+    this.canvas.addEventListener('dblclick', (e) => {
+      if (!this.active || !this.viewer.img || e.button !== 0) return;
+      const rect = this.canvas.getBoundingClientRect();
+      const pt = this.viewer.screenToImageCoords(e.clientX - rect.left, e.clientY - rect.top);
+      if (pt.x >= 0 && pt.x <= this.viewer.img.width && pt.y >= 0 && pt.y <= this.viewer.img.height && !hitTestTextItems(this.items, pt.x, pt.y, this.ctx)) {
+        this.createItemAt(pt.x, pt.y);
+      }
+    });
     window.addEventListener('resize', () => { if (this.active) { this.syncCanvasSize(); this.updateOverlayBox(); } });
   }
 
   show() {
     if (!this.viewer.img) return;
-    this.active = true;
-    this.canvas.classList.remove('hidden');
-    this.overlayContainer?.classList.remove('hidden');
+    this.active = true; this.canvas.classList.remove('hidden'); this.overlayContainer?.classList.remove('hidden');
     this.syncCanvasSize();
-    if (this.items.length === 0) {
-      this.createItemAt(Math.round(this.viewer.img.width / 2), Math.round(this.viewer.img.height / 2));
-    } else {
-      this.selectItem(this.items[this.items.length - 1], false);
-    }
+    if (this.items.length === 0) this.createItemAt(Math.round(this.viewer.img.width / 2), Math.round(this.viewer.img.height / 2));
+    else this.selectItem(this.items[this.items.length - 1], false);
   }
 
   hide() {
     this.commitActiveInput();
-    this.active = false; this.activeItem = null;
-    this.canvas.classList.add('hidden');
-    this.overlayContainer?.classList.add('hidden');
+    this.active = false; this.activeItem = null; this.isEditing = false;
+    this.canvas.classList.add('hidden'); this.overlayContainer?.classList.add('hidden');
     this.overlayContainer?.querySelectorAll('.canvas-text-box').forEach((el) => el.remove());
-    this.snapper?.clearGuides();
-    this.clear();
+    this.snapper?.clearGuides(); this.clear();
   }
 
   createItemAt(cx, cy) {
     this._pushHistory();
     const size = Math.max(16, Math.min(200, Math.round(Math.min(this.viewer.img.width, this.viewer.img.height) * 0.10)));
-    const dims = measureTextDimensions(this.ctx, 'Type text...', this.currentFont, size, this.currentBold, this.currentItalic, 1);
-    const item = {
-      id: `txt_${Date.now()}`, text: 'Type text...', font: this.currentFont, size,
-      x: Math.round(cx - dims.width / 2), y: Math.round(cy - dims.height / 2),
-      color: this.currentColor, bold: this.currentBold, italic: this.currentItalic,
-      underline: this.currentUnderline, strike: this.currentStrike,
-      shadow: { ...this.currentShadow }, bg: { ...this.currentBg }
-    };
+    const item = { id: `txt_${Date.now()}`, text: 'Type text...', font: this.currentFont, size, x: cx, y: cy,
+      color: this.currentColor, bold: this.currentBold, italic: this.currentItalic, underline: this.currentUnderline,
+      strike: this.currentStrike, shadow: { ...this.currentShadow }, bg: { ...this.currentBg } };
+    const l = computeTextLayout(this.ctx, item);
+    item.x = Math.round(cx - l.maxW / 2); item.y = Math.round(cy - l.textH / 2);
     this.items.push(item);
     this.selectItem(item, true);
-    this.redraw();
-    this.onModified?.(true);
+    this.redraw(); this.onModified?.(true);
   }
 
-  selectItem(item, selectAll = false) {
+  selectItem(item, selectAll = false, initialDragEvent = null) {
     this.commitActiveInput();
-    this.activeItem = item;
+    this.activeItem = item; this.isEditing = selectAll;
     this.onActiveChange?.(item);
-    this.renderOverlayInput(item, selectAll);
+    this.renderOverlayInput(item, selectAll, initialDragEvent);
     this.redraw();
   }
 
-  renderOverlayInput(item, selectAll = false) {
+  renderOverlayInput(item, selectAll = false, initialDragEvent = null) {
     if (!this.overlayContainer) return;
     this.overlayContainer.querySelectorAll('.canvas-text-box').forEach((el) => el.remove());
     if (!item) return;
@@ -104,34 +90,31 @@ export class TextTool {
     box.id = 'activeTextBox';
 
     const ta = document.createElement('textarea');
-    ta.className = 'text-input-field';
-    ta.value = item.text;
-    ta.rows = 1;
-    ta.spellcheck = false;
-
+    ta.className = 'text-input-field'; ta.value = item.text; ta.rows = 1; ta.spellcheck = false;
     applyStylesToTextInput(box, ta, item, this.viewer.scale || 1);
     box.appendChild(ta);
 
-    // Canva-style corner handles, side pills & top/bottom dots
     for (const dir of ['nw', 'ne', 'sw', 'se', 'ml', 'mr', 'tc', 'bc']) {
       const h = document.createElement('div');
-      h.className = `text-handle text-handle-${dir}`;
-      h.dataset.handle = dir;
+      h.className = `text-handle text-handle-${dir}`; h.dataset.handle = dir;
       box.appendChild(h);
     }
-
     let isDragging = false, startMx = 0, startMy = 0, startX = item.x, startY = item.y;
+    const startDrag = (mx, my) => {
+      isDragging = true; startMx = mx; startMy = my; startX = item.x; startY = item.y;
+      box.classList.add('is-dragging');
+    };
+    if (initialDragEvent && !selectAll) startDrag(initialDragEvent.clientX, initialDragEvent.clientY);
 
     box.addEventListener('mousedown', (e) => {
       if (e.button !== 0) return;
       const handle = e.target.closest('[data-handle]')?.dataset?.handle;
       if (handle) {
-        // Center-anchored resize: scales symmetrically around box center
         e.preventDefault(); e.stopPropagation();
         const boxRect = box.getBoundingClientRect();
         const cx = boxRect.left + boxRect.width / 2, cy = boxRect.top + boxRect.height / 2;
-        const initDims = measureTextDimensions(this.ctx, item.text, item.font, item.size, item.bold, item.italic, 1);
-        const imgCx = item.x + initDims.width / 2, imgCy = item.y + initDims.height / 2;
+        const l = computeTextLayout(this.ctx, item);
+        const imgCx = l.boxX + l.boxW / 2, imgCy = l.boxY + l.boxH / 2;
         const isH = (handle === 'ml' || handle === 'mr'), isV = (handle === 'tc' || handle === 'bc');
         const startDist = isH ? Math.max(10, Math.abs(e.clientX - cx)) : isV ? Math.max(10, Math.abs(e.clientY - cy)) : Math.max(10, Math.hypot(e.clientX - cx, e.clientY - cy));
         const startSize = item.size;
@@ -140,41 +123,37 @@ export class TextTool {
           item.size = Math.max(12, Math.min(200, Math.round(startSize * (curDist / startDist))));
           this.currentSize = item.size;
           applyStylesToTextInput(box, ta, item, this.viewer.scale || 1);
-          this._autoSizeTextarea(ta, item);
-          const newDims = measureTextDimensions(this.ctx, item.text, item.font, item.size, item.bold, item.italic, 1);
-          item.x = Math.round(imgCx - newDims.width / 2);
-          item.y = Math.round(imgCy - newDims.height / 2);
+          const nl = computeTextLayout(this.ctx, item);
+          item.x = Math.round(imgCx - (nl.boxW / 2 - nl.padX));
+          item.y = Math.round(imgCy - (nl.boxH / 2 - nl.padY));
           this.updateOverlayBox();
           this.redraw();
-          const badge = document.getElementById('textSizeBadge');
-          if (badge) badge.textContent = `${item.size}px`;
+          this.onActiveChange?.(item);
         };
         window.addEventListener('mousemove', onRM);
         window.addEventListener('mouseup', () => {
           window.removeEventListener('mousemove', onRM);
           this.currentSize = item.size;
+          this.onActiveChange?.(item);
           this._pushHistory();
         }, { once: true });
         return;
       }
-      if (!box.classList.contains('editing') || e.target !== ta) {
+      if (!this.isEditing || e.target !== ta) {
         e.preventDefault(); e.stopPropagation();
-        isDragging = true; startMx = e.clientX; startMy = e.clientY;
-        startX = item.x; startY = item.y;
+        startDrag(e.clientX, e.clientY);
       }
     });
 
     box.addEventListener('dblclick', (e) => {
-      e.stopPropagation();
-      box.classList.add('editing');
-      ta.focus();
-      ta.select();
+      e.stopPropagation(); this.isEditing = true; box.classList.add('editing'); this.redraw();
+      ta.focus(); ta.select();
     });
 
     ta.addEventListener('blur', () => {
-      box.classList.remove('editing');
+      this.isEditing = false; box.classList.remove('editing');
       item.text = ta.value.trim() || 'Text';
-      this.redraw();
+      this.updateOverlayBox(); this.redraw();
     });
 
     const onMove = (e) => {
@@ -182,9 +161,9 @@ export class TextTool {
       box.classList.add('is-dragging');
       const rawX = Math.round(startX + (e.clientX - startMx) / this.viewer.scale);
       const rawY = Math.round(startY + (e.clientY - startMy) / this.viewer.scale);
-      const bRect = box.getBoundingClientRect(), s = this.viewer.scale || 1;
-      const offX = item.bg?.enabled ? Math.round(8 * s) + 2 : 3, offY = item.bg?.enabled ? Math.round(4 * s) + 2 : 2;
-      const snap = this.snapper?.computeSnap(this.viewer, rawX, rawY, bRect.width, bRect.height, offX, offY) ?? { x: rawX, y: rawY, snapH: null, snapV: null };
+      const s = this.viewer.scale || 1, l = computeTextLayout(this.ctx, item);
+      const offX = Math.round(l.padX * s), offY = Math.round(l.padY * s);
+      const snap = this.snapper?.computeSnap(this.viewer, rawX, rawY, l.boxW * s, l.boxH * s, offX, offY) ?? { x: rawX, y: rawY, snapH: null, snapV: null };
       item.x = snap.x; item.y = snap.y;
       this.snapper?.updateGuides(this.viewer, snap.snapH, snap.snapV);
       this.updateOverlayBox(); this.redraw();
@@ -195,70 +174,90 @@ export class TextTool {
 
     ta.addEventListener('input', () => {
       item.text = ta.value;
-      this._autoSizeTextarea(ta, item);
-      this.updateOverlayBox();
-      this.redraw();
-      this.onModified?.(true);
+      applyStylesToTextInput(box, ta, item, this.viewer.scale || 1);
+      this.updateOverlayBox(); this.redraw(); this.onModified?.(true);
     });
-
     ta.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') { e.stopPropagation(); box.classList.remove('editing'); ta.blur(); }
+      if (e.key === 'Escape' || (e.key === 'Enter' && !e.shiftKey)) { e.stopPropagation(); e.preventDefault(); ta.blur(); }
     });
 
     this.overlayContainer.appendChild(box);
-    this._autoSizeTextarea(ta, item);
     this.updateOverlayBox();
-    setTimeout(() => {
-      this._autoSizeTextarea(ta, item);
-      if (selectAll) { box.classList.add('editing'); ta.focus(); ta.select(); }
-    }, 10);
+    if (selectAll) {
+      this.isEditing = true; box.classList.add('editing'); this.redraw();
+      setTimeout(() => { ta.focus(); ta.select(); }, 10);
+    }
   }
 
-  _autoSizeTextarea(ta, item) {
-    autoSizeTextarea(this.ctx, ta, item || this.activeItem, this.viewer.scale || 1);
+  updateActiveItem(mutations, pushHistory = false) {
+    if (!this.activeItem) return;
+    if (typeof mutations === 'function') mutations(this.activeItem);
+    else {
+      for (const [k, v] of Object.entries(mutations)) {
+        if (v && typeof v === 'object' && !Array.isArray(v) && this.activeItem[k]) Object.assign(this.activeItem[k], v);
+        else this.activeItem[k] = v;
+      }
+    }
+    const box = document.getElementById('activeTextBox');
+    const ta = box?.querySelector('textarea');
+    if (box) applyStylesToTextInput(box, ta, this.activeItem, this.viewer.scale || 1);
+    this.updateOverlayBox();
+    this.redraw();
+    this.onModified?.(true);
+    if (pushHistory) this._pushHistory();
   }
 
   updateOverlayBox() {
     const box = document.getElementById('activeTextBox');
     if (!box || !this.activeItem) return;
-    const pt = this.viewer.imageToScreenCoords(this.activeItem.x, this.activeItem.y);
+    const l = computeTextLayout(this.ctx, this.activeItem);
+    const pt = this.viewer.imageToScreenCoords(l.boxX, l.boxY);
     const s = this.viewer.scale || 1;
-    const offX = this.activeItem.bg?.enabled ? Math.round(8 * s) + 2 : 3;
-    const offY = this.activeItem.bg?.enabled ? Math.round(4 * s) + 2 : 2;
-    box.style.left = `${Math.round(pt.x) - offX}px`;
-    box.style.top = `${Math.round(pt.y) - offY}px`;
+    box.style.left = `${Math.round(pt.x)}px`;
+    box.style.top = `${Math.round(pt.y)}px`;
+    box.style.width = `${Math.round(l.boxW * s)}px`;
+    box.style.height = `${Math.round(l.boxH * s)}px`;
+    box.style.borderRadius = `${Math.round(l.roundness * s)}px`;
+    const ta = box.querySelector('textarea');
+    if (ta) applyStylesToTextInput(box, ta, this.activeItem, s);
   }
 
   commitActiveInput() {
     if (!this.activeItem) return;
     const ta = this.overlayContainer?.querySelector('textarea');
     if (ta) this.activeItem.text = ta.value.trim() || 'Text';
-    this.activeItem = null;
+    this.activeItem = null; this.isEditing = false;
     this.overlayContainer?.querySelectorAll('.canvas-text-box').forEach((el) => el.remove());
     this.onActiveChange?.(null);
     this.redraw();
   }
 
-  _pushHistory() {
-    this.undoStack.push(JSON.parse(JSON.stringify(this.items)));
-    this.redoStack = []; this._notifyHistory();
+  deleteActiveItem() {
+    if (!this.activeItem) return;
+    this._pushHistory();
+    this.items = this.items.filter((it) => it !== this.activeItem);
+    this.activeItem = null; this.isEditing = false;
+    this.overlayContainer?.querySelectorAll('.canvas-text-box').forEach((el) => el.remove());
+    this.onActiveChange?.(null);
+    this.redraw(); this.onModified?.(this.items.length > 0);
   }
 
+  _pushHistory() { this.undoStack.push(JSON.parse(JSON.stringify(this.items))); this.redoStack = []; this._notifyHistory(); }
   _applyHistoryStep(from, to, modifiedState) {
     if (from.length === 0) return;
     to.push(JSON.parse(JSON.stringify(this.items)));
     this.items = from.pop() || [];
-    this.activeItem = null;
+    this.activeItem = null; this.isEditing = false;
     this.overlayContainer?.querySelectorAll('.canvas-text-box').forEach((el) => el.remove());
-    this.redraw();
-    this.onModified?.(modifiedState ?? this.items.length > 0);
-    this._notifyHistory();
+    this.onActiveChange?.(null);
+    this.redraw(); this.onModified?.(modifiedState ?? this.items.length > 0); this._notifyHistory();
   }
-
-  undo() { this._applyHistoryStep(this.undoStack, this.redoStack, null); } redo() { this._applyHistoryStep(this.redoStack, this.undoStack, true); }
+  undo() { this._applyHistoryStep(this.undoStack, this.redoStack, null); }
+  redo() { this._applyHistoryStep(this.redoStack, this.undoStack, true); }
   clear() {
-    this.items = []; this.undoStack = []; this.redoStack = []; this.activeItem = null;
+    this.items = []; this.undoStack = []; this.redoStack = []; this.activeItem = null; this.isEditing = false;
     this.overlayContainer?.querySelectorAll('.canvas-text-box').forEach((el) => el.remove());
+    this.onActiveChange?.(null);
     this.redraw(); this.onModified?.(false); this._notifyHistory();
   }
   _notifyHistory() { this.onHistoryChange?.({ canUndo: this.undoStack.length > 0, canRedo: this.redoStack.length > 0 }); }
@@ -279,12 +278,12 @@ export class TextTool {
     const imgW = (isVert ? this.viewer.img.height : this.viewer.img.width) * this.viewer.scale;
     const imgH = (isVert ? this.viewer.img.width : this.viewer.img.height) * this.viewer.scale;
     this.ctx.translate(this.viewer.panX + imgW / 2, this.viewer.panY + imgH / 2);
-    this.ctx.scale(this.viewer.scale, this.viewer.scale);
+    this.ctx.scale(this.viewer.scale * (this.viewer.flipH ? -1 : 1), this.viewer.scale * (this.viewer.flipV ? -1 : 1));
     this.ctx.rotate((this.viewer.rotation * Math.PI) / 180);
-    this.ctx.scale(this.viewer.flipH ? -1 : 1, this.viewer.flipV ? -1 : 1);
     this.ctx.translate(-this.viewer.img.width / 2, -this.viewer.img.height / 2);
     for (const item of this.items) {
-      if (item !== this.activeItem) renderVectorTextItem(this.ctx, item);
+      const isEditing = (item === this.activeItem && this.isEditing);
+      renderVectorTextItem(this.ctx, item, null, isEditing);
     }
     this.ctx.restore();
     this.updateOverlayBox();

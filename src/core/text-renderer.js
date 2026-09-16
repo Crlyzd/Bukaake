@@ -1,7 +1,10 @@
 /**
  * Bukaake Text Vector Rendering & Styling Helper
- * Handles Canvas 2D text layout, Underline/Strike vectors, Canva-style background & shadows (< 120 lines).
+ * Optical Canvas 2D & DOM layout, symmetrical padding and stroke-free rounded pathing (< 190 lines).
  */
+
+const _measureCanvas = typeof document !== 'undefined' ? document.createElement('canvas') : null;
+const _measureCtx = _measureCanvas?.getContext('2d') || null;
 
 export function hexToRgba(hex, alpha = 1) {
   if (!hex || typeof hex !== 'string') return `rgba(255, 255, 255, ${alpha})`;
@@ -11,98 +14,144 @@ export function hexToRgba(hex, alpha = 1) {
   return `rgba(${(num >> 16) & 255}, ${(num >> 8) & 255}, ${num & 255}, ${alpha})`;
 }
 
-export function applyStylesToTextInput(box, ta, item, scale = 1) {
-  const fs = Math.max(10, Math.round(item.size * scale));
-  ta.style.fontFamily = item.font;
-  ta.style.fontSize = `${fs}px`;
-  ta.style.color = item.color;
-  ta.style.fontWeight = item.bold ? '700' : '400';
-  ta.style.fontStyle = item.italic ? 'italic' : 'normal';
-  const dec = [item.underline && 'underline', item.strike && 'line-through'].filter(Boolean).join(' ');
-  ta.style.textDecoration = dec || 'none';
-
-  if (item.shadow?.enabled) {
-    const s = item.shadow;
-    const ox = Math.round(s.offsetX * scale), oy = Math.round(s.offsetY * scale), bl = Math.round(s.blur * scale);
-    ta.style.textShadow = `${ox}px ${oy}px ${bl}px ${hexToRgba(s.color, s.opacity)}`;
+/** Robust geometric rounded rectangle path via arcTo; guarantees smooth corners across all WebView2 environments. */
+export function drawRoundRectPath(ctx, x, y, w, h, r) {
+  const radius = Math.max(0, Math.min(r || 0, w / 2, h / 2));
+  ctx.beginPath();
+  if (radius <= 0) {
+    ctx.rect(x, y, w, h);
   } else {
-    ta.style.textShadow = 'none';
+    ctx.moveTo(x + radius, y);
+    ctx.lineTo(x + w - radius, y);
+    ctx.arcTo(x + w, y, x + w, y + radius, radius);
+    ctx.lineTo(x + w, y + h - radius);
+    ctx.arcTo(x + w, y + h, x + w - radius, y + h, radius);
+    ctx.lineTo(x + radius, y + h);
+    ctx.arcTo(x, y + h, x, y + h - radius, radius);
+    ctx.lineTo(x, y + radius);
+    ctx.arcTo(x, y, x + radius, y, radius);
+    ctx.closePath();
+  }
+}
+
+/** Single source of truth for optical text layout, dimensions, symmetrical paddings and corner roundness. */
+export function computeTextLayout(ctx, item) {
+  const c = ctx || _measureCtx;
+  const lines = (item.text || '').split('\n');
+  const fontSize = Math.max(10, Math.round(item.size || 36));
+  const fontStr = `${item.italic ? 'italic ' : ''}${item.bold ? 'bold ' : 'normal '}${fontSize}px ${item.font || 'Inter, sans-serif'}`;
+
+  let maxW = 0;
+  const widths = [];
+  let maxAscent = Math.round(fontSize * 0.78);
+  let maxDescent = Math.round(fontSize * 0.22);
+
+  if (c) {
+    c.save();
+    c.font = fontStr;
+    for (const line of lines) {
+      const m = c.measureText(line || ' ');
+      const w = m.width;
+      widths.push(w);
+      if (w > maxW) maxW = w;
+      if (m.actualBoundingBoxAscent) maxAscent = Math.max(maxAscent, Math.round(m.actualBoundingBoxAscent));
+      if (m.actualBoundingBoxDescent) maxDescent = Math.max(maxDescent, Math.round(m.actualBoundingBoxDescent));
+    }
+    c.restore();
+  } else {
+    for (const line of lines) {
+      const w = Math.max(16, (line.length || 1) * fontSize * 0.55);
+      widths.push(w);
+      if (w > maxW) maxW = w;
+    }
   }
 
+  const singleLineH = Math.round(maxAscent + maxDescent);
+  const lh = Math.round(fontSize * 1.25);
+  const textH = lines.length === 1 ? singleLineH : Math.round((lines.length - 1) * lh + singleLineH);
+
+  const padX = item.bg?.enabled ? Math.max(8, Math.round(fontSize * 0.22)) : 4;
+  const padY = item.bg?.enabled ? Math.max(6, Math.round(fontSize * 0.16)) : 2;
+
+  const boxX = item.x - padX;
+  const boxY = item.y - padY;
+  const boxW = Math.max(20, Math.ceil(maxW)) + padX * 2;
+  const boxH = textH + padY * 2;
+
+  const roundness = item.bg?.enabled ? Math.round((item.bg.roundness ?? 8) * (fontSize / 36)) : 0;
+
+  return { lines, fontSize, fontStr, widths, maxW, lh, maxAscent, maxDescent, textH, padX, padY, boxX, boxY, boxW, boxH, roundness };
+}
+
+export function applyStylesToTextInput(box, ta, item, scale = 1) {
+  const l = computeTextLayout(null, item);
+  box.style.background = 'transparent';
   box.style.boxShadow = 'none';
-  if (item.bg?.enabled) {
-    const b = item.bg;
-    box.style.backgroundColor = hexToRgba(b.color, b.opacity);
-    box.style.borderRadius = `${Math.round(b.roundness * scale)}px`;
-    box.style.border = b.borderSize > 0 ? `${Math.max(1, Math.round(b.borderSize * scale))}px solid ${b.borderColor}` : 'none';
-    box.style.outline = '1.5px solid #8b5cf6';
-    box.style.padding = `${Math.round(4 * scale)}px ${Math.round(8 * scale)}px`;
-  } else {
-    box.style.backgroundColor = 'transparent';
-    box.style.borderRadius = '2px';
-    box.style.border = '1.5px solid #8b5cf6';
-    box.style.outline = 'none';
-    box.style.padding = '1px 2px';
+  box.style.border = '1.5px solid #8b5cf6';
+  box.style.outline = 'none';
+  box.style.padding = '0';
+  box.style.borderRadius = `${Math.round(l.roundness * scale)}px`;
+
+  if (ta) {
+    const fs = Math.max(10, Math.round(item.size * scale));
+    ta.style.fontFamily = item.font || 'Inter, sans-serif';
+    ta.style.fontSize = `${fs}px`;
+    ta.style.fontWeight = item.bold ? '700' : '400';
+    ta.style.fontStyle = item.italic ? 'italic' : 'normal';
+    ta.style.lineHeight = `${Math.round(l.lh * scale)}px`;
+    ta.style.color = item.color;
+    const dec = [item.underline && 'underline', item.strike && 'line-through'].filter(Boolean).join(' ');
+    ta.style.textDecoration = dec || 'none';
+    ta.style.paddingLeft = `${Math.round(l.padX * scale)}px`;
+    ta.style.paddingRight = `${Math.round(l.padX * scale)}px`;
+    ta.style.paddingTop = `${Math.round(l.padY * scale)}px`;
+    ta.style.paddingBottom = `${Math.round(l.padY * scale)}px`;
+
+    if (item.shadow?.enabled) {
+      const s = item.shadow;
+      const ox = Math.round(s.offsetX * scale), oy = Math.round(s.offsetY * scale), bl = Math.round(s.blur * scale);
+      ta.style.textShadow = `${ox}px ${oy}px ${bl}px ${hexToRgba(s.color, s.opacity)}`;
+    } else {
+      ta.style.textShadow = 'none';
+    }
   }
 }
 
 /** Returns { width, height, lines } for a text item at given scale */
 export function measureTextDimensions(ctx, text, font, size, bold, italic, scale = 1) {
-  const fs = Math.max(10, Math.round(size * scale));
-  const lines = (text || '').split('\n');
-  let maxW = 0;
-  if (ctx) {
-    ctx.save();
-    ctx.font = `${italic ? 'italic ' : ''}${bold ? 'bold ' : 'normal '}${fs}px ${font}`;
-    for (const line of lines) {
-      const w = ctx.measureText(line || ' ').width;
-      if (w > maxW) maxW = w;
-    }
-    ctx.restore();
-  } else {
-    maxW = Math.max(...lines.map((l) => (l.length || 1) * fs * 0.55));
-  }
-  const w = Math.max(16, Math.ceil(maxW) + 1);
-  const lineH = Math.round(fs * 1.25);
-  const h = Math.max(lineH, lines.length * lineH);
-  return { width: w, height: h, lines };
+  const dummy = { text, font, size: Math.round(size * scale), bold, italic };
+  const l = computeTextLayout(ctx, dummy);
+  return { width: l.boxW, height: l.boxH, lines: l.lines };
 }
 
-/** Tightly sizes the textarea width and height to match its text content */
 export function autoSizeTextarea(ctx, ta, item, scale = 1) {
   if (!ta || !item) return;
   ta.rows = 1;
-  const dims = measureTextDimensions(ctx, ta.value || '', item.font, item.size, item.bold, item.italic, scale);
-  ta.style.width = `${dims.width}px`;
-  ta.style.height = `${dims.height}px`;
 }
 
-export function renderVectorTextItem(ctx, it) {
-  const lines = (it.text || '').split('\n');
-  const lh = it.size * 1.25;
+export function renderVectorTextBackground(ctx, item, layout) {
+  if (!item.bg?.enabled) return;
+  const l = layout || computeTextLayout(ctx, item);
   ctx.save();
-  ctx.font = `${it.italic ? 'italic ' : ''}${it.bold ? 'bold ' : ''}${it.size}px ${it.font}`;
-  ctx.textBaseline = 'top';
-
-  let maxW = 0;
-  const widths = lines.map((l) => { const w = ctx.measureText(l).width; if (w > maxW) maxW = w; return w; });
-  const pad = it.bg?.enabled ? 8 : 0;
-  const totalH = lines.length * lh;
-
-  if (it.bg?.enabled) {
-    ctx.save();
-    ctx.fillStyle = hexToRgba(it.bg.color, it.bg.opacity);
-    ctx.beginPath();
-    if (ctx.roundRect) ctx.roundRect(it.x - pad, it.y - pad, maxW + pad * 2, totalH + pad * 2, it.bg.roundness);
-    else ctx.rect(it.x - pad, it.y - pad, maxW + pad * 2, totalH + pad * 2);
-    ctx.fill();
-    if (it.bg.borderSize > 0) {
-      ctx.lineWidth = it.bg.borderSize;
-      ctx.strokeStyle = it.bg.borderColor || '#ffffff';
-      ctx.stroke();
-    }
-    ctx.restore();
+  ctx.fillStyle = hexToRgba(item.bg.color, item.bg.opacity);
+  drawRoundRectPath(ctx, l.boxX, l.boxY, l.boxW, l.boxH, l.roundness);
+  ctx.fill();
+  if (item.bg.borderSize > 0) {
+    ctx.lineWidth = item.bg.borderSize;
+    ctx.strokeStyle = item.bg.borderColor || '#ffffff';
+    ctx.stroke();
   }
+  ctx.restore();
+}
+
+export function renderVectorTextItem(ctx, it, layout = null, skipText = false) {
+  const l = layout || computeTextLayout(ctx, it);
+  renderVectorTextBackground(ctx, it, l);
+  if (skipText) return;
+
+  ctx.save();
+  ctx.font = l.fontStr;
+  ctx.textBaseline = 'alphabetic';
 
   if (it.shadow?.enabled) {
     ctx.shadowColor = hexToRgba(it.shadow.color, it.shadow.opacity);
@@ -112,26 +161,23 @@ export function renderVectorTextItem(ctx, it) {
   }
 
   ctx.fillStyle = it.color;
-  lines.forEach((line, idx) => {
-    const ly = it.y + idx * lh;
+  l.lines.forEach((line, idx) => {
+    const ly = it.y + l.maxAscent + (idx * l.lh);
     ctx.fillText(line, it.x, ly);
-    const lw = widths[idx];
+    const lw = l.widths[idx];
     const th = Math.max(1.5, it.size * 0.07);
-    if (it.underline) ctx.fillRect(it.x, ly + it.size * 1.05, lw, th);
-    if (it.strike) ctx.fillRect(it.x, ly + it.size * 0.55, lw, th);
+    if (it.underline) ctx.fillRect(it.x, ly + 3, lw, th);
+    if (it.strike) ctx.fillRect(it.x, ly - l.maxAscent * 0.4, lw, th);
   });
   ctx.restore();
 }
 
 /** Hit-test: returns the topmost item whose bounding rect contains (imgX, imgY). */
-export function hitTestTextItems(items, imgX, imgY) {
+export function hitTestTextItems(items, imgX, imgY, ctx) {
   for (let i = items.length - 1; i >= 0; i--) {
     const it = items[i];
-    const lines = (it.text || '').split('\n');
-    const lh = it.size * 1.25, h = lines.length * lh;
-    const maxW = Math.max(...lines.map((l) => (l.length || 1) * it.size * 0.65));
-    const pad = it.bg?.enabled ? 8 : 4;
-    if (imgX >= it.x - pad && imgX <= it.x + maxW + pad && imgY >= it.y - pad && imgY <= it.y + h + pad) return it;
+    const l = computeTextLayout(ctx, it);
+    if (imgX >= l.boxX && imgX <= l.boxX + l.boxW && imgY >= l.boxY && imgY <= l.boxY + l.boxH) return it;
   }
   return null;
 }
@@ -149,4 +195,3 @@ export function bakeTextToCanvas(viewer, items) {
   baked.src = off.toDataURL('image/png');
   return baked;
 }
-
