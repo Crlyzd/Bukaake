@@ -3,6 +3,8 @@
  * Coordinates font, size, styles (B/I/U/S), Canva-style Shadow & Background popovers (< 260 lines).
  */
 
+import { TEXT_SIZE_MIN, TEXT_SIZE_MAX, sliderRatioToTextSize, textSizeToSliderRatio, stepTextSize } from '../core/text-renderer.js';
+
 export class TextToolbar {
   constructor(textTool, options = {}) {
     this.tool = textTool;
@@ -95,7 +97,7 @@ export class TextToolbar {
       });
     });
 
-    const sizeTrack = document.getElementById('textSizeTrack');
+    const sizeTrack = document.getElementById('textSizeTrack'), sizePop = document.getElementById('textSizePopover'), btnSize = document.getElementById('btnTextSizePop');
     const setSize = (px, pushHistory = false) => {
       const val = this.updateSliderUI(px);
       this.tool.currentSize = val;
@@ -108,13 +110,19 @@ export class TextToolbar {
       if (!sizeTrack) return;
       const rect = sizeTrack.getBoundingClientRect();
       const r = Math.max(0, Math.min(1, (rect.bottom - e.clientY) / rect.height));
-      setSize(Math.round(12 + r * (200 - 12)), false);
+      setSize(sliderRatioToTextSize(r), false);
     };
     sizeTrack?.addEventListener('mousedown', (e) => { e.stopPropagation(); draggingSize = true; onTrack(e); });
     window.addEventListener('mousemove', (e) => { if (draggingSize) onTrack(e); });
-    window.addEventListener('mouseup', () => {
-      if (draggingSize) { draggingSize = false; this.tool._pushHistory(); }
-    });
+    window.addEventListener('mouseup', () => { if (draggingSize) { draggingSize = false; this.tool._pushHistory(); } });
+
+    const onWheel = (e) => {
+      e.stopPropagation(); e.preventDefault();
+      const next = stepTextSize(this.tool.currentSize, e.deltaY < 0 ? 1 : -1, e.shiftKey);
+      setSize(next, true);
+    };
+    sizePop?.addEventListener('wheel', onWheel, { passive: false });
+    btnSize?.addEventListener('wheel', onWheel, { passive: false });
 
     const styles = [
       { id: 'btnTextBold', prop: 'bold', key: 'currentBold' },
@@ -226,8 +234,8 @@ export class TextToolbar {
   }
 
   updateSliderUI(px) {
-    const val = Math.min(200, Math.max(12, Math.round(px || 36)));
-    const pct = (val - 12) / (200 - 12);
+    const val = Math.min(TEXT_SIZE_MAX, Math.max(TEXT_SIZE_MIN, Math.round(px || 36)));
+    const pct = textSizeToSliderRatio(val);
     const fill = document.getElementById('textSizeFill'), thumb = document.getElementById('textSizeThumb'), badge = document.getElementById('textSizeBadge');
     if (fill) fill.style.height = `${pct * 100}%`;
     if (thumb) thumb.style.bottom = `${pct * 100}%`;
@@ -237,20 +245,14 @@ export class TextToolbar {
 
   syncActiveToUI(item) {
     if (!item) return;
-    document.getElementById('btnTextBold')?.classList.toggle('active', Boolean(item.bold));
-    document.getElementById('btnTextItalic')?.classList.toggle('active', Boolean(item.italic));
-    document.getElementById('btnTextUnderline')?.classList.toggle('active', Boolean(item.underline));
-    document.getElementById('btnTextStrike')?.classList.toggle('active', Boolean(item.strike));
+    for (const [id, val] of [['btnTextBold', item.bold], ['btnTextItalic', item.italic], ['btnTextUnderline', item.underline], ['btnTextStrike', item.strike]]) {
+      document.getElementById(id)?.classList.toggle('active', Boolean(val));
+    }
     const dot = document.getElementById('textColorDot');
     if (dot && item.color) dot.style.backgroundColor = item.color;
-    const togS = document.getElementById('toggleTextShadow');
-    if (togS) togS.checked = Boolean(item.shadow?.enabled);
-    const togB = document.getElementById('toggleTextBg');
-    if (togB) togB.checked = Boolean(item.bg?.enabled);
-    if (item.size) {
-      this.updateSliderUI(item.size);
-      this.tool.currentSize = item.size;
-    }
+    const togS = document.getElementById('toggleTextShadow'); if (togS) togS.checked = Boolean(item.shadow?.enabled);
+    const togB = document.getElementById('toggleTextBg'); if (togB) togB.checked = Boolean(item.bg?.enabled);
+    if (item.size) { this.updateSliderUI(item.size); this.tool.currentSize = item.size; }
     const fontBadge = document.getElementById('textFontBadge');
     if (fontBadge && item.font) {
       const match = document.querySelector(`.text-font-option[data-font="${item.font}"]`);
@@ -266,25 +268,15 @@ export class TextToolbar {
       o.classList.toggle('active', o.getAttribute('data-font') === 'Inter, sans-serif');
     });
     this.updateSliderUI(this.tool.currentSize);
-    ['btnTextBold', 'btnTextItalic', 'btnTextUnderline', 'btnTextStrike'].forEach((id) => {
-      document.getElementById(id)?.classList.remove('active');
-    });
-    const dot = document.getElementById('textColorDot');
-    if (dot) dot.style.backgroundColor = '#ffffff';
-    document.querySelectorAll('.text-color-chip').forEach((c) => {
-      c.classList.toggle('active', c.getAttribute('data-color') === '#ffffff');
-    });
+    ['btnTextBold', 'btnTextItalic', 'btnTextUnderline', 'btnTextStrike'].forEach((id) => document.getElementById(id)?.classList.remove('active'));
+    const dot = document.getElementById('textColorDot'); if (dot) dot.style.backgroundColor = '#ffffff';
+    document.querySelectorAll('.text-color-chip').forEach((c) => c.classList.toggle('active', c.getAttribute('data-color') === '#ffffff'));
     const togS = document.getElementById('toggleTextShadow'); if (togS) togS.checked = false;
     const togB = document.getElementById('toggleTextBg'); if (togB) togB.checked = false;
-    const setR = (id, val, u) => {
-      const el = document.getElementById(id), b = document.getElementById(`${id}Val`);
-      if (el) el.value = val; if (b) b.textContent = `${val}${u}`;
-    };
+    const setR = (id, val, u) => { const el = document.getElementById(id), b = document.getElementById(`${id}Val`); if (el) el.value = val; if (b) b.textContent = `${val}${u}`; };
     setR('sliderShadowBlur', 8, 'px'); setR('sliderShadowOpacity', 85, '%'); setR('sliderShadowOffset', 4, 'px');
     setR('sliderBgRoundness', 8, 'px'); setR('sliderBgOpacity', 85, '%'); setR('sliderBgBorder', 0, 'px');
-    document.querySelectorAll('.bg-color-chip').forEach((c) => {
-      c.classList.toggle('active', c.getAttribute('data-color') === '#0e121b');
-    });
+    document.querySelectorAll('.bg-color-chip').forEach((c) => c.classList.toggle('active', c.getAttribute('data-color') === '#0e121b'));
     document.getElementById('tabBtnShadow')?.classList.add('active');
     document.getElementById('tabBtnBg')?.classList.remove('active');
     document.getElementById('panelTextShadow')?.classList.remove('hidden');

@@ -195,3 +195,27 @@ export function bakeTextToCanvas(viewer, items) {
   baked.src = off.toDataURL('image/png');
   return baked;
 }
+
+export const TEXT_SIZE_MIN = 12;
+export const TEXT_SIZE_MAX = 600;
+export const TEXT_SIZE_DEFAULT = 36;
+
+export function sliderRatioToTextSize(ratio) {
+  const r = Math.max(0, Math.min(1, ratio));
+  return Math.round(TEXT_SIZE_MIN + Math.pow(r, 2) * (TEXT_SIZE_MAX - TEXT_SIZE_MIN));
+}
+
+export function textSizeToSliderRatio(size) {
+  const s = Math.max(TEXT_SIZE_MIN, Math.min(TEXT_SIZE_MAX, size || TEXT_SIZE_DEFAULT));
+  return Math.sqrt((s - TEXT_SIZE_MIN) / (TEXT_SIZE_MAX - TEXT_SIZE_MIN));
+}
+
+export function stepTextSize(currentSize, direction, isShift = false) {
+  const s = currentSize || TEXT_SIZE_DEFAULT;
+  let step = 2;
+  if (isShift) step = s >= 100 ? 50 : 20;
+  else if (s >= 100) step = 20;
+  else if (s >= 32) step = 5;
+  const next = s + (direction > 0 ? step : -step);
+  return Math.max(TEXT_SIZE_MIN, Math.min(TEXT_SIZE_MAX, next));
+}

@@ -3,7 +3,7 @@
  * Text item lifecycle, overlay box, corner-resize font-sync, multi-tier magnetic snap, undo/redo (< 250 lines).
  */
 
-import { renderVectorTextItem, applyStylesToTextInput, computeTextLayout, bakeTextToCanvas } from './text-renderer.js';
+import { renderVectorTextItem, applyStylesToTextInput, computeTextLayout, bakeTextToCanvas, TEXT_SIZE_MIN, TEXT_SIZE_MAX } from './text-renderer.js';
 import { TextSnapper } from './text-snapping.js';
 import { attachTextInteractions } from './text-events.js';
 
@@ -24,7 +24,7 @@ export class TextTool {
     this.currentBold = false; this.currentItalic = false; this.currentUnderline = false; this.currentStrike = false;
     this.currentShadow = { enabled: false, blur: 8, opacity: 0.85, offsetX: 2, offsetY: 4, color: '#000000' };
     this.currentBg = { enabled: false, color: '#0e121b', opacity: 0.85, roundness: 8, borderSize: 0, borderColor: '#ffffff' };
-    this.currentSize = this.viewer?.img ? Math.max(16, Math.min(200, Math.round(Math.min(this.viewer.img.width, this.viewer.img.height) * 0.10))) : 36;
+    this.currentSize = this.viewer?.img ? Math.max(16, Math.min(TEXT_SIZE_MAX, Math.round(Math.min(this.viewer.img.width, this.viewer.img.height) * 0.10))) : 36;
     this.overlayContainer?.querySelectorAll('.canvas-text-box').forEach((el) => el.remove());
     this.snapper?.clearGuides(); this.onActiveChange?.(null); this.onModified?.(false); this._notifyHistory(); this.onReset?.();
   }
@@ -53,7 +53,7 @@ export class TextTool {
 
   createItemAt(cx, cy) {
     this._pushHistory();
-    const size = Math.max(16, Math.min(200, Math.round(Math.min(this.viewer.img.width, this.viewer.img.height) * 0.10)));
+    const size = Math.max(16, Math.min(TEXT_SIZE_MAX, Math.round(Math.min(this.viewer.img.width, this.viewer.img.height) * 0.10)));
     const item = { id: `txt_${Date.now()}`, text: 'Type text...', font: this.currentFont, size, x: cx, y: cy,
       color: this.currentColor, bold: this.currentBold, italic: this.currentItalic, underline: this.currentUnderline,
       strike: this.currentStrike, shadow: { ...this.currentShadow }, bg: { ...this.currentBg } };
@@ -110,7 +110,7 @@ export class TextTool {
         const startSize = item.size;
         const onRM = (ev) => {
           const curDist = isH ? Math.abs(ev.clientX - cx) : isV ? Math.abs(ev.clientY - cy) : Math.hypot(ev.clientX - cx, ev.clientY - cy);
-          item.size = Math.max(12, Math.min(200, Math.round(startSize * (curDist / startDist))));
+          item.size = Math.max(TEXT_SIZE_MIN, Math.min(TEXT_SIZE_MAX, Math.round(startSize * (curDist / startDist))));
           this.currentSize = item.size;
           applyStylesToTextInput(box, ta, item, this.viewer.scale || 1);
           const nl = computeTextLayout(this.ctx, item);
