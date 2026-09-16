@@ -49,6 +49,7 @@ Most photo viewers on Windows today are slow to launch, cluttered with heavy too
 - ⚡ **Auto-Hiding Controls**: Relax and enjoy your photos in peace. The second your mouse stops moving, all buttons and titles gently fade away.
 - 🚀 **Instant Launch**: Opens in the blink of an eye and uses almost no RAM. A single ~5 MB portable file—no installation needed.
 - 🖱️ **Smooth Navigation**: Zoom like butter with your mouse wheel right into the fine details, click-and-drag to pan, and flip effortlessly through folders with your arrow keys.
+- ✍️ **Vector Typography & Markup**: Add scalable text overlays with 8-point handles, dynamic shadows, rounded fills, pen, and highlighter without external editors.
 - 🗑️ **Stress-Free & Safe**: Send bad photos straight to your **Windows Recycle Bin** with `Delete`—easily restore them if you ever change your mind!
 - 📸 **Built-in Snip & Record**: Take instant screenshots of any monitor or region, or record video clips right from the app with zero extra tools.
 
@@ -63,9 +64,9 @@ Most photo viewers on Windows today are slow to launch, cluttered with heavy too
 | 🪟 **Desktop-Immersive Transparency** | Translucent dimmed background lets your desktop show through without heavy borders. |
 | ⚡ **Sub-10ms Launch & Standby** | Instant tray daemon with automatic memory trimming down to ~8–15 MB RAM. |
 | 📷 **49+ Formats & Camera RAW** | Native iPhone HEIC/HEIF (100% free), 24+ RAW camera formats, and 3D VFX textures. |
+| ✍️ **Vector Typography & Crop** | Vector text engine with 8-point handles, dynamic shadows, laser-guided crop, pen & highlighter. |
 | 📸 **Integrated Screen Snipper** | Multi-monitor crosshair capture with instant clipboard copy and auto-saved PNGs. |
 | 🎥 **Desktop Screen Recording** | Floating frosted control dock streaming lightweight WebM (VP9) video to disk. |
-| ✍️ **Annotation & Magnetic Crop** | Freehand pen, translucent highlighter, discrete undo/redo, and laser-guided crop. |
 | 🗑️ **Safe Recycle Bin Deletion** | Win32 Recycle Bin integration (`Delete` to trash, `Shift+Delete` to shred). |
 | 🎨 **Stroke-Free Frosted Glass** | Dual theme engine: Deep Obsidian Dark Mode & Frosted Slate Light Mode. |
 
@@ -114,7 +115,7 @@ Capture and share anything on your screen without launching heavy third-party so
 #### 📸 Precision Screen Snipper
 - **Capture Modes**: Snip your Full Screen, Active Display, or drag any Custom Region.
 - **Smart Alignment**: Live coordinate crosshairs and dimension badges.
-- **Direct Clipboard Delivery**: Automatically copies snips to your clipboard in `CF_DIB` format for instant pasting (`Ctrl+V`) into Discord, Slack, WhatsApp, or Word.
+- **Direct Clipboard Delivery**: Automatically copies snips to your clipboard in `CF_DIB` format for instant pasting (`Ctrl+V`) into chats, documents, and other applications.
 - **Timestamped Auto-Save**: Clean PNG files automatically save to your `Pictures/Screenshots` folder.
 
 </td>
@@ -139,12 +140,14 @@ Capture and share anything on your screen without launching heavy third-party so
 
 ---
 
-### ✍️ 4. Creative Annotation & Precision Crop
-Quickly mark up screenshots or adjust composition with built-in creative tools:
-- **Freehand Pen & Highlighter (`D`)**: Draw sharp annotations or mark lines with translucent ink. Features curated palettes, stroke thickness sliders, and multi-step **Undo (`Ctrl+Z`)** to quickly revert strokes.
+### ✍️ 4. Vector Typography, Markup & Precision Crop
+Quickly add text captions, mark up screenshots, or adjust composition with built-in creative tools:
+- **Precision Typography Engine (`T`)**: Add rich, draggable vector text with **center-anchored scaling** and 8-point handles. Features font sizes up to **600px** with quadratic precision, scroll-wheel sizing, unified tabbed popovers for soft shadows and rounded background fills, and **magnetic laser guides** for flush center and edge snapping.
+- **Freehand Pen & Highlighter (`D`)**: Draw sharp annotations or mark lines with translucent ink. Features curated palettes, stroke thickness sliders, and multi-step **Undo (`Ctrl+Z`)** and **Redo (`Ctrl+Y`)**.
 - **Laser-Guided Crop (`C`)**: Standard aspect presets (1:1, 16:9, 9:16, 4:3, Freeform) featuring dynamic magnetic guides that snap directly to image centers and edges.
+- **Universal Enter-to-Commit**: Press **`Enter`** to immediately apply and commit changes across Text, Crop, and Drawing tools.
 - **Real-Time Color Filters (`E`)**: Adjust Brightness, Contrast, Saturation, Exposure, and Temperature on-the-fly with 60 FPS GPU-accelerated rendering.
-- **Alitken Tandem Integration**: One-click bridge to send images to external editors and automatically reload your edits on save.
+- **[Alitken](https://github.com/Crlyzd/Alitken-GUI) Tandem Integration**: One-click bridge to send images to [Alitken](https://github.com/Crlyzd/Alitken-GUI) for advanced editing and automatically reload your edits on save.
 
 <p align="center">
   <img width="800" alt="Drawing and Crop Tools" src="https://github.com/user-attachments/assets/846ec474-a1e3-440e-9c35-ac00fe7116cb" style="border-radius: 10px;" />
@@ -166,6 +169,7 @@ Designed from the ground up for modern Windows aesthetics:
 
 ### ⚡ 6. Native Windows Performance & Portability
 - **Sub-10ms Launch via Tray Standby**: Keeps Bukaake pre-warmed in your notification tray. Double-clicking any image opens instantaneously.
+- **Windows 11 DWM 1px Border Elimination**: Seamless frameless geometry achieved by preserving native `WS_THICKFRAME`, retaining rounded corners, drop shadows, and acrylic transparency without white outline artifacts or window resize flash.
 - **Automatic Memory Trimming**: Uses Win32 working-set trimming to shrink idle background memory down to ~8–15 MB RAM.
 - **Multi-Monitor Position Memory**: Restores to your preferred monitor and window coordinates without annoying screen-jumping.
 - **1-Click Shell Association**: Make Bukaake your default photo viewer for 49 formats under `HKCU` without annoying UAC permission prompts.
@@ -181,7 +185,7 @@ Designed from the ground up for modern Windows aesthetics:
 <table width="100%">
 <tr>
 <th width="33%">🧭 Navigation & Zoom</th>
-<th width="33%">🎨 Editing & Tools</th>
+<th width="33%">🎨 Creative Tools</th>
 <th width="33%">⚙️ Window & System</th>
 </tr>
 <tr>
@@ -191,6 +195,7 @@ Designed from the ground up for modern Windows aesthetics:
 | :--- | :--- |
 | `Left` / `Right` | Previous / Next photo |
 | `Mouse Wheel` | Zoom anchored to cursor |
+| `Middle Click` | Pan image canvas |
 | `F` | Fit image to window |
 | `1` | 100% actual size (1:1) |
 | `,` / `.` | Rotate 90° Left / Right |
@@ -202,12 +207,15 @@ Designed from the ground up for modern Windows aesthetics:
 
 | Key | Action |
 | :--- | :--- |
+| **`T`** | **Toggle Typography & Text Tool** |
 | `D` | Toggle Pen & Highlighter |
 | `C` | Toggle Precision Crop |
 | `E` | Toggle Color Adjustments |
 | `Q` | Full Sensor RAW Develop |
 | `I` | Toggle EXIF Info Drawer |
-| `Ctrl + Z` | Undo drawing stroke |
+| **`Enter`** | **Apply & commit active tool** |
+| `Ctrl + Z` | Undo action / stroke |
+| `Ctrl + Y` | Redo action / stroke |
 
 </td>
 <td valign="top">
@@ -219,8 +227,9 @@ Designed from the ground up for modern Windows aesthetics:
 | `Ctrl + C` | Copy image to clipboard |
 | `Ctrl + V` | Paste image from clipboard |
 | `Ctrl + S` | Save active changes |
+| `Ctrl + Shift + S` | Save As new image file |
 | `Ctrl + ,` | Open Settings window |
-| `Esc` | Close tool / Exit mode |
+| `Esc` | Cancel tool / Close window |
 
 </td>
 </tr>
@@ -294,6 +303,7 @@ If you love using Bukaake and want to support independent, high-performance desk
 </p>
 
 - 🌐 **Personal Website**: [kaleksananbagus.com](https://kaleksananbagus.com)
+- 🎨 **Companion Editor**: [Crlyzd/Alitken-GUI](https://github.com/Crlyzd/Alitken-GUI)
 - 🐛 **Report a Bug or Suggest a Feature**: [Feedback Form](https://docs.google.com/forms/d/e/1FAIpQLSciTFA6rWYPq98UwqOvJgLnqGh5P71Vcz5d2GPVdne9Tz34WA/viewform) or open an [Issue](https://github.com/Crlyzd/Bukaake/issues).
 
 <br />
