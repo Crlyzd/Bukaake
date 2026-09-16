@@ -170,6 +170,7 @@ class BukaakeApp {
     });
 
     this.shortcuts = new ShortcutsRegistry({
+      isEditing: () => this.toolsManager?.isEditing(), onEnterCommit: () => this.toolsManager?.handleEnter(this.filters),
       onOpenFile: () => this.confirmModal.promptIfDirty(() => this.openFile(), () => this.saveImage()),
       onPasteClipboard: () => this.confirmModal.promptIfDirty(() => this.fileLoader.loadFromClipboard(), () => this.saveImage()),
       onCopyImage: () => this.copyImage(), onSaveImage: () => this.saveImage(),
@@ -337,8 +338,7 @@ class BukaakeApp {
   }
 
   async wakeFromStandby() {
-    this.handleEmptyState();
-    await this.windowModeManager.setMode(MODE_REGULAR);
+    this.handleEmptyState(); await this.windowModeManager.setMode(MODE_REGULAR);
   }
 }
 

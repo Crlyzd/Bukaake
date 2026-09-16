@@ -22,6 +22,8 @@ export class ShortcutsRegistry {
       return;
     }
 
+    const isEditing = Boolean(this.actions.isEditing?.());
+
     if (e.ctrlKey || e.metaKey) {
       if (e.key === 'o' || e.key === 'O') {
         e.preventDefault();
@@ -103,21 +105,25 @@ export class ShortcutsRegistry {
       case 'c':
       case 'C':
         e.preventDefault();
+        if (isEditing) return;
         this.actions.onToggleCrop?.();
         break;
       case 'd':
       case 'D':
         e.preventDefault();
+        if (isEditing) return;
         this.actions.onToggleDraw?.();
         break;
       case 't':
       case 'T':
         e.preventDefault();
+        if (isEditing) return;
         this.actions.onToggleText?.();
         break;
       case 'e':
       case 'E':
         e.preventDefault();
+        if (isEditing) return;
         this.actions.onToggleAdjustments?.();
         break;
       case 'i':
@@ -141,6 +147,10 @@ export class ShortcutsRegistry {
         this.actions.onLoadFullRaw?.();
         break;
       case 'Enter':
+        e.preventDefault();
+        if (this.actions.onEnterCommit?.()) return;
+        this.actions.onToggleMaximize?.();
+        break;
       case 'F11':
         e.preventDefault();
         this.actions.onToggleMaximize?.();

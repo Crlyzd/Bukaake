@@ -165,4 +165,11 @@ export class CanvasToolsManager {
     if (this.textTool?.active) return this.textTool.redo();
     if (this.drawingTool?.active) return this.drawingTool.redo();
   }
+
+  handleEnter(filters) {
+    if (this.cropper?.active) { this.applyCrop(filters); return true; }
+    if (this.drawingTool?.active) { this.applyDraw(); return true; }
+    if (this.textTool?.active) { this.applyText(); return true; }
+    return false;
+  }
 }

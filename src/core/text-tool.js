@@ -45,6 +45,12 @@ export class TextTool {
         this.createItemAt(pt.x, pt.y);
       }
     });
+    this.canvas.addEventListener('wheel', (e) => {
+      if (!this.active || !this.viewer.img) return;
+      e.preventDefault();
+      const zoomFactor = e.deltaY < 0 ? 1.15 : 0.85, rect = this.canvas.getBoundingClientRect();
+      this.viewer.zoomTo(this.viewer.targetScale * zoomFactor, false, e.clientX - rect.left, e.clientY - rect.top);
+    }, { passive: false });
     window.addEventListener('resize', () => { if (this.active) { this.syncCanvasSize(); this.updateOverlayBox(); } });
   }
 
@@ -52,8 +58,7 @@ export class TextTool {
     if (!this.viewer.img) return;
     this.resetDefaults(); this.active = true;
     this.canvas.classList.remove('hidden'); this.overlayContainer?.classList.remove('hidden');
-    this.syncCanvasSize();
-    this.createItemAt(Math.round(this.viewer.img.width / 2), Math.round(this.viewer.img.height / 2));
+    this.syncCanvasSize(); this.createItemAt(Math.round(this.viewer.img.width / 2), Math.round(this.viewer.img.height / 2));
   }
 
   hide() {
@@ -86,9 +91,7 @@ export class TextTool {
     if (!item) return;
 
     const box = document.createElement('div');
-    box.className = 'canvas-text-box';
-    box.id = 'activeTextBox';
-
+    box.className = 'canvas-text-box'; box.id = 'activeTextBox';
     const ta = document.createElement('textarea');
     ta.className = 'text-input-field'; ta.value = item.text; ta.rows = 1; ta.spellcheck = false;
     applyStylesToTextInput(box, ta, item, this.viewer.scale || 1);
@@ -190,7 +193,7 @@ export class TextTool {
       this.updateOverlayBox(); this.redraw(); this.onModified?.(true);
     });
     ta.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' || (e.key === 'Enter' && !e.shiftKey)) { e.stopPropagation(); e.preventDefault(); ta.blur(); }
+      if (e.key === 'Escape') { e.stopPropagation(); e.preventDefault(); ta.blur(); }
     });
 
     this.overlayContainer.appendChild(box);
@@ -220,8 +223,7 @@ export class TextTool {
   updateOverlayBox() {
     const box = document.getElementById('activeTextBox');
     if (!box || !this.activeItem) return;
-    const l = computeTextLayout(this.ctx, this.activeItem);
-    const pt = this.viewer.imageToScreenCoords(l.boxX, l.boxY), s = this.viewer.scale || 1;
+    const l = computeTextLayout(this.ctx, this.activeItem), pt = this.viewer.imageToScreenCoords(l.boxX, l.boxY), s = this.viewer.scale || 1;
     box.style.left = `${Math.round(pt.x)}px`; box.style.top = `${Math.round(pt.y)}px`;
     box.style.width = `${Math.round(l.boxW * s)}px`; box.style.height = `${Math.round(l.boxH * s)}px`;
     box.style.borderRadius = `${Math.round(l.roundness * s)}px`;
@@ -254,11 +256,9 @@ export class TextTool {
     this.items = from.pop() || [];
     this.activeItem = null; this.isEditing = false;
     this.overlayContainer?.querySelectorAll('.canvas-text-box').forEach((el) => el.remove());
-    this.onActiveChange?.(null);
-    this.redraw(); this.onModified?.(modifiedState ?? this.items.length > 0); this._notifyHistory();
+    this.onActiveChange?.(null); this.redraw(); this.onModified?.(modifiedState ?? this.items.length > 0); this._notifyHistory();
   }
-  undo() { this._applyHistoryStep(this.undoStack, this.redoStack, null); }
-  redo() { this._applyHistoryStep(this.redoStack, this.undoStack, true); }
+  undo() { this._applyHistoryStep(this.undoStack, this.redoStack, null); } redo() { this._applyHistoryStep(this.redoStack, this.undoStack, true); }
   clear() { this.resetDefaults(); this.redraw(); }
   _notifyHistory() { this.onHistoryChange?.({ canUndo: this.undoStack.length > 0, canRedo: this.redoStack.length > 0 }); }
 
