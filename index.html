@@ -358,7 +358,7 @@
     <div class="text-toolbar glass-panel hidden" id="textToolbar">
       <div class="text-pill-brand">
         <i class="ri-text"></i>
-        <span>Text</span>
+        <span class="text-brand-text">Text</span>
       </div>
       <div class="text-pill-divider"></div>
 
@@ -403,7 +403,7 @@
         <button class="text-style-btn" id="btnTextItalic" title="Italic (Ctrl+I)"><i class="ri-italic"></i></button>
         <button class="text-style-btn" id="btnTextUnderline" title="Underline (Ctrl+U)"><i
             class="ri-underline"></i></button>
-        <button class="text-style-btn" id="btnTextStrike" title="Strikethrough"><i
+        <button class="text-style-btn text-style-strike" id="btnTextStrike" title="Strikethrough"><i
             class="ri-strikethrough-2"></i></button>
       </div>
       <div class="text-pill-divider"></div>
@@ -412,7 +412,7 @@
       <div class="text-popover-anchor">
         <button class="text-pill-btn" id="btnTextColorPop" title="Text Color">
           <span class="draw-current-color-dot" id="textColorDot" style="background-color: #ffffff;"></span>
-          <span class="draw-pill-label">Color</span>
+          <span class="text-pill-label">Color</span>
           <i class="ri-arrow-up-s-line text-chevron"></i>
         </button>
         <div class="text-popover text-color-popover glass-panel hidden" id="textColorPopover">
@@ -432,92 +432,97 @@
       </div>
       <div class="text-pill-divider"></div>
 
-      <!-- Canva-Style Shadow Popover -->
+      <!-- Canva-Style Unified Effects Popover (Shadow & Background) -->
       <div class="text-popover-anchor">
-        <button class="text-pill-btn" id="btnTextShadowPop" title="Text Shadow">
-          <i class="ri-shadow-line"></i>
-          <span>Shadow</span>
+        <button class="text-pill-btn" id="btnTextEffectsPop" title="Text Effects (Shadow & Background)">
+          <i class="ri-magic-line"></i>
+          <span class="text-pill-label">Effects</span>
           <i class="ri-arrow-up-s-line text-chevron"></i>
         </button>
-        <div class="text-popover text-tuning-popover glass-panel hidden" id="textShadowPopover">
-          <div class="tuning-row-header">
-            <span>Shadow Effect</span>
-            <label class="tuning-switch">
-              <input type="checkbox" id="toggleTextShadow">
-              <span class="tuning-switch-slider"></span>
-            </label>
+        <div class="text-popover text-effects-popover glass-panel hidden" id="textEffectsPopover">
+          <!-- Segmented Tab Switcher -->
+          <div class="effects-tab-group">
+            <button class="effects-tab-btn active" id="tabBtnShadow" data-tab="shadow">
+              <i class="ri-shadow-line"></i> Shadow
+            </button>
+            <button class="effects-tab-btn" id="tabBtnBg" data-tab="bg">
+              <i class="ri-checkbox-blank-line"></i> Background
+            </button>
           </div>
-          <div class="tuning-slider-group">
-            <div class="tuning-label-row">
-              <span>Blur</span>
-              <span class="tuning-val-badge" id="sliderShadowBlurVal">8px</span>
-            </div>
-            <input type="range" class="tuning-slider" id="sliderShadowBlur" min="0" max="30" value="8">
-          </div>
-          <div class="tuning-slider-group">
-            <div class="tuning-label-row">
-              <span>Opacity</span>
-              <span class="tuning-val-badge" id="sliderShadowOpacityVal">85%</span>
-            </div>
-            <input type="range" class="tuning-slider" id="sliderShadowOpacity" min="0" max="100" value="85">
-          </div>
-          <div class="tuning-slider-group">
-            <div class="tuning-label-row">
-              <span>Offset</span>
-              <span class="tuning-val-badge" id="sliderShadowOffsetVal">4px</span>
-            </div>
-            <input type="range" class="tuning-slider" id="sliderShadowOffset" min="-20" max="20" value="4">
-          </div>
-        </div>
-      </div>
-      <div class="text-pill-divider"></div>
 
-      <!-- Canva-Style Background Popover -->
-      <div class="text-popover-anchor">
-        <button class="text-pill-btn" id="btnTextBgPop" title="Background Backing">
-          <i class="ri-checkbox-blank-line"></i>
-          <span>Background</span>
-          <i class="ri-arrow-up-s-line text-chevron"></i>
-        </button>
-        <div class="text-popover text-tuning-popover glass-panel hidden" id="textBgPopover">
-          <div class="tuning-row-header">
-            <span>Background Box</span>
-            <label class="tuning-switch">
-              <input type="checkbox" id="toggleTextBg">
-              <span class="tuning-switch-slider"></span>
-            </label>
-          </div>
-          <div class="text-colors-grid">
-            <button class="bg-color-chip active" data-color="#0e121b" style="--chip-c: #0e121b"
-              title="Obsidian"></button>
-            <button class="bg-color-chip" data-color="#ffffff" style="--chip-c: #ffffff" title="White"></button>
-            <button class="bg-color-chip" data-color="#00f0ff" style="--chip-c: #00f0ff" title="Cyan"></button>
-            <button class="bg-color-chip" data-color="#ffea00" style="--chip-c: #ffea00" title="Yellow"></button>
-            <button class="bg-color-chip" data-color="#ff3366" style="--chip-c: #ff3366" title="Coral"></button>
-            <button class="bg-color-chip" data-color="#a855f7" style="--chip-c: #a855f7" title="Purple"></button>
-            <button class="bg-color-chip" data-color="#ff9900" style="--chip-c: #ff9900" title="Orange"></button>
-            <button class="bg-color-chip" data-color="#00ff66" style="--chip-c: #00ff66" title="Green"></button>
-          </div>
-          <div class="tuning-slider-group">
-            <div class="tuning-label-row">
-              <span>Roundness</span>
-              <span class="tuning-val-badge" id="sliderBgRoundnessVal">8px</span>
+          <!-- Shadow Panel -->
+          <div class="effects-tab-panel" id="panelTextShadow">
+            <div class="tuning-row-header">
+              <span>Shadow Effect</span>
+              <label class="tuning-switch">
+                <input type="checkbox" id="toggleTextShadow">
+                <span class="tuning-switch-slider"></span>
+              </label>
             </div>
-            <input type="range" class="tuning-slider" id="sliderBgRoundness" min="0" max="32" value="8">
-          </div>
-          <div class="tuning-slider-group">
-            <div class="tuning-label-row">
-              <span>Opacity</span>
-              <span class="tuning-val-badge" id="sliderBgOpacityVal">85%</span>
+            <div class="tuning-slider-group">
+              <div class="tuning-label-row">
+                <span>Blur</span>
+                <span class="tuning-val-badge" id="sliderShadowBlurVal">8px</span>
+              </div>
+              <input type="range" class="tuning-slider" id="sliderShadowBlur" min="0" max="30" value="8">
             </div>
-            <input type="range" class="tuning-slider" id="sliderBgOpacity" min="0" max="100" value="85">
-          </div>
-          <div class="tuning-slider-group">
-            <div class="tuning-label-row">
-              <span>Border</span>
-              <span class="tuning-val-badge" id="sliderBgBorderVal">0px</span>
+            <div class="tuning-slider-group">
+              <div class="tuning-label-row">
+                <span>Opacity</span>
+                <span class="tuning-val-badge" id="sliderShadowOpacityVal">85%</span>
+              </div>
+              <input type="range" class="tuning-slider" id="sliderShadowOpacity" min="0" max="100" value="85">
             </div>
-            <input type="range" class="tuning-slider" id="sliderBgBorder" min="0" max="8" value="0">
+            <div class="tuning-slider-group">
+              <div class="tuning-label-row">
+                <span>Offset</span>
+                <span class="tuning-val-badge" id="sliderShadowOffsetVal">4px</span>
+              </div>
+              <input type="range" class="tuning-slider" id="sliderShadowOffset" min="-20" max="20" value="4">
+            </div>
+          </div>
+
+          <!-- Background Panel -->
+          <div class="effects-tab-panel hidden" id="panelTextBg">
+            <div class="tuning-row-header">
+              <span>Background Box</span>
+              <label class="tuning-switch">
+                <input type="checkbox" id="toggleTextBg">
+                <span class="tuning-switch-slider"></span>
+              </label>
+            </div>
+            <div class="text-colors-grid">
+              <button class="bg-color-chip active" data-color="#0e121b" style="--chip-c: #0e121b"
+                title="Obsidian"></button>
+              <button class="bg-color-chip" data-color="#ffffff" style="--chip-c: #ffffff" title="White"></button>
+              <button class="bg-color-chip" data-color="#00f0ff" style="--chip-c: #00f0ff" title="Cyan"></button>
+              <button class="bg-color-chip" data-color="#ffea00" style="--chip-c: #ffea00" title="Yellow"></button>
+              <button class="bg-color-chip" data-color="#ff3366" style="--chip-c: #ff3366" title="Coral"></button>
+              <button class="bg-color-chip" data-color="#a855f7" style="--chip-c: #a855f7" title="Purple"></button>
+              <button class="bg-color-chip" data-color="#ff9900" style="--chip-c: #ff9900" title="Orange"></button>
+              <button class="bg-color-chip" data-color="#00ff66" style="--chip-c: #00ff66" title="Green"></button>
+            </div>
+            <div class="tuning-slider-group">
+              <div class="tuning-label-row">
+                <span>Roundness</span>
+                <span class="tuning-val-badge" id="sliderBgRoundnessVal">8px</span>
+              </div>
+              <input type="range" class="tuning-slider" id="sliderBgRoundness" min="0" max="32" value="8">
+            </div>
+            <div class="tuning-slider-group">
+              <div class="tuning-label-row">
+                <span>Opacity</span>
+                <span class="tuning-val-badge" id="sliderBgOpacityVal">85%</span>
+              </div>
+              <input type="range" class="tuning-slider" id="sliderBgOpacity" min="0" max="100" value="85">
+            </div>
+            <div class="tuning-slider-group">
+              <div class="tuning-label-row">
+                <span>Border</span>
+                <span class="tuning-val-badge" id="sliderBgBorderVal">0px</span>
+              </div>
+              <input type="range" class="tuning-slider" id="sliderBgBorder" min="0" max="8" value="0">
+            </div>
           </div>
         </div>
       </div>
@@ -537,9 +542,9 @@
       <!-- Actions -->
       <div class="text-actions">
         <button class="text-action-btn btn-cancel" id="btnCancelText" title="Cancel (Esc)"><i class="ri-close-line"></i>
-          Cancel</button>
+          <span class="action-btn-text">Cancel</span></button>
         <button class="text-action-btn btn-apply" id="btnApplyText" title="Apply Text"><i class="ri-check-line"></i>
-          Apply</button>
+          <span class="action-btn-text">Apply</span></button>
       </div>
     </div>
 

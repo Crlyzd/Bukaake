@@ -15,6 +15,7 @@ export class TextToolbar {
   init() {
     this.bindPopovers();
     this.bindTypographyControls();
+    this.bindEffectsTabs();
     this.bindShadowControls();
     this.bindBackgroundControls();
     this.bindHistoryAndActions();
@@ -35,8 +36,7 @@ export class TextToolbar {
       { btn: 'btnTextFontPop', pop: 'textFontPopover' },
       { btn: 'btnTextSizePop', pop: 'textSizePopover' },
       { btn: 'btnTextColorPop', pop: 'textColorPopover' },
-      { btn: 'btnTextShadowPop', pop: 'textShadowPopover' },
-      { btn: 'btnTextBgPop', pop: 'textBgPopover' },
+      { btn: 'btnTextEffectsPop', pop: 'textEffectsPopover' },
     ];
 
     triggers.forEach(({ btn, pop }) => {
@@ -54,6 +54,24 @@ export class TextToolbar {
 
     document.addEventListener('click', (e) => {
       if (!e.target.closest('#textToolbar, .text-popover')) this.closeAllPopovers();
+    });
+  }
+
+  bindEffectsTabs() {
+    const tabs = [
+      { btn: 'tabBtnShadow', panel: 'panelTextShadow' },
+      { btn: 'tabBtnBg', panel: 'panelTextBg' },
+    ];
+    tabs.forEach(({ btn, panel }) => {
+      document.getElementById(btn)?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        tabs.forEach((t) => {
+          document.getElementById(t.btn)?.classList.remove('active');
+          document.getElementById(t.panel)?.classList.add('hidden');
+        });
+        document.getElementById(btn)?.classList.add('active');
+        document.getElementById(panel)?.classList.remove('hidden');
+      });
     });
   }
 

@@ -42,7 +42,7 @@ export function applyStylesToTextInput(box, ta, item, scale = 1) {
     box.style.borderRadius = '2px';
     box.style.border = '1.5px solid #8b5cf6';
     box.style.outline = 'none';
-    box.style.padding = '1px 3px';
+    box.style.padding = '1px 2px';
   }
 }
 
@@ -53,16 +53,16 @@ export function measureTextDimensions(ctx, text, font, size, bold, italic, scale
   let maxW = 0;
   if (ctx) {
     ctx.save();
-    ctx.font = `${italic ? 'italic ' : ''}${bold ? '700 ' : '400 '}${fs}px ${font}`;
+    ctx.font = `${italic ? 'italic ' : ''}${bold ? 'bold ' : 'normal '}${fs}px ${font}`;
     for (const line of lines) {
       const w = ctx.measureText(line || ' ').width;
       if (w > maxW) maxW = w;
     }
     ctx.restore();
   } else {
-    maxW = Math.max(...lines.map((l) => (l.length || 1) * fs * 0.6));
+    maxW = Math.max(...lines.map((l) => (l.length || 1) * fs * 0.55));
   }
-  const w = Math.max(20, Math.ceil(maxW) + 6);
+  const w = Math.max(16, Math.ceil(maxW) + 1);
   const lineH = Math.round(fs * 1.25);
   const h = Math.max(lineH, lines.length * lineH);
   return { width: w, height: h, lines };
@@ -129,8 +129,9 @@ export function hitTestTextItems(items, imgX, imgY) {
     const it = items[i];
     const lines = (it.text || '').split('\n');
     const lh = it.size * 1.25, h = lines.length * lh;
-    const maxW = Math.max(...lines.map((l) => l.length * it.size * 0.6));
-    if (imgX >= it.x && imgX <= it.x + maxW && imgY >= it.y && imgY <= it.y + h) return it;
+    const maxW = Math.max(...lines.map((l) => (l.length || 1) * it.size * 0.65));
+    const pad = it.bg?.enabled ? 8 : 4;
+    if (imgX >= it.x - pad && imgX <= it.x + maxW + pad && imgY >= it.y - pad && imgY <= it.y + h + pad) return it;
   }
   return null;
 }

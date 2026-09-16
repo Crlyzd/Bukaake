@@ -179,15 +179,17 @@ export class TextTool {
 
     const onMove = (e) => {
       if (!isDragging) return;
+      box.classList.add('is-dragging');
       const rawX = Math.round(startX + (e.clientX - startMx) / this.viewer.scale);
       const rawY = Math.round(startY + (e.clientY - startMy) / this.viewer.scale);
-      const bRect = box.getBoundingClientRect();
-      const snap = this.snapper?.computeSnap(this.viewer, rawX, rawY, bRect.width, bRect.height) ?? { x: rawX, y: rawY, snapH: null, snapV: null };
+      const bRect = box.getBoundingClientRect(), s = this.viewer.scale || 1;
+      const offX = item.bg?.enabled ? Math.round(8 * s) + 2 : 3, offY = item.bg?.enabled ? Math.round(4 * s) + 2 : 2;
+      const snap = this.snapper?.computeSnap(this.viewer, rawX, rawY, bRect.width, bRect.height, offX, offY) ?? { x: rawX, y: rawY, snapH: null, snapV: null };
       item.x = snap.x; item.y = snap.y;
       this.snapper?.updateGuides(this.viewer, snap.snapH, snap.snapV);
       this.updateOverlayBox(); this.redraw();
     };
-    const onUp = () => { if (isDragging) { isDragging = false; this.snapper?.clearGuides(); this._pushHistory(); } };
+    const onUp = () => { if (isDragging) { isDragging = false; box.classList.remove('is-dragging'); this.snapper?.clearGuides(); this._pushHistory(); } };
     window.addEventListener('mousemove', onMove);
     window.addEventListener('mouseup', onUp);
 
@@ -221,7 +223,7 @@ export class TextTool {
     if (!box || !this.activeItem) return;
     const pt = this.viewer.imageToScreenCoords(this.activeItem.x, this.activeItem.y);
     const s = this.viewer.scale || 1;
-    const offX = this.activeItem.bg?.enabled ? Math.round(8 * s) + 2 : 4;
+    const offX = this.activeItem.bg?.enabled ? Math.round(8 * s) + 2 : 3;
     const offY = this.activeItem.bg?.enabled ? Math.round(4 * s) + 2 : 2;
     box.style.left = `${Math.round(pt.x) - offX}px`;
     box.style.top = `${Math.round(pt.y) - offY}px`;
@@ -239,8 +241,7 @@ export class TextTool {
 
   _pushHistory() {
     this.undoStack.push(JSON.parse(JSON.stringify(this.items)));
-    this.redoStack = [];
-    this._notifyHistory();
+    this.redoStack = []; this._notifyHistory();
   }
 
   _applyHistoryStep(from, to, modifiedState) {
@@ -254,8 +255,7 @@ export class TextTool {
     this._notifyHistory();
   }
 
-  undo() { this._applyHistoryStep(this.undoStack, this.redoStack, null); }
-  redo() { this._applyHistoryStep(this.redoStack, this.undoStack, true); }
+  undo() { this._applyHistoryStep(this.undoStack, this.redoStack, null); } redo() { this._applyHistoryStep(this.redoStack, this.undoStack, true); }
   clear() {
     this.items = []; this.undoStack = []; this.redoStack = []; this.activeItem = null;
     this.overlayContainer?.querySelectorAll('.canvas-text-box').forEach((el) => el.remove());

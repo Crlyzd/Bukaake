@@ -17,7 +17,13 @@
   z-index: 5;
   pointer-events: auto;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
-  transition: transform 0.08s ease;
+  transition: transform 0.08s ease, opacity 0.08s ease;
+}
+
+/* Hide all handle dots when dragging so box edge snaps flush against magnetic guides */
+.canvas-text-box.is-dragging .text-handle {
+  opacity: 0 !important;
+  pointer-events: none !important;
 }
 
 /* 4 Corner Circular Handles & 2 Top/Bottom Circular Handles */

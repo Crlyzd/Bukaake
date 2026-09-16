@@ -1,0 +1,261 @@
+/* ==========================================================================
+   Bukaake Text Popovers Submodule
+   Stroke-free frosted glass styling adhering to Pillar 1 & 2 (< 220 lines)
+   ========================================================================== */
+
+/* Base Popover Anchor & Containers */
+.text-popover-anchor {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.text-popover {
+  position: absolute;
+  bottom: calc(100% + 10px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--glass-island-bg);
+  backdrop-filter: blur(28px) saturate(180%);
+  -webkit-backdrop-filter: blur(28px) saturate(180%);
+  border-radius: var(--radius-md);
+  box-shadow: var(--glass-island-shadow);
+  border: none !important;
+  animation: textPopoverUp 0.16s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 65;
+  cursor: default !important;
+}
+
+@keyframes textPopoverUp {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+/* Font Dropdown Popover */
+.text-font-popover {
+  width: 150px;
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.text-font-option {
+  background: transparent;
+  border: none !important;
+  outline: none !important;
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  color: var(--text-muted);
+  text-align: left;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.text-font-option:hover {
+  background: var(--glass-bg-hover);
+  color: var(--text-main);
+}
+
+.text-font-option.active {
+  background: var(--action-bg);
+  color: var(--action-text);
+  font-weight: 600;
+}
+
+/* Color Chips Grid */
+.text-color-popover {
+  width: 136px;
+  padding: 8px;
+}
+
+.text-colors-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  place-items: center;
+}
+
+.text-color-chip,
+.bg-color-chip {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--chip-c);
+  border: none !important;
+  outline: none !important;
+  cursor: pointer;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.text-color-chip:hover,
+.bg-color-chip:hover {
+  transform: scale(1.15);
+}
+
+.text-color-chip.active,
+.bg-color-chip.active {
+  transform: scale(1.15);
+  box-shadow: 0 0 0 2px var(--action-bg), 0 2px 8px rgba(0, 0, 0, 0.45);
+}
+
+/* Unified Effects Popover (Shadow & Background) */
+.text-effects-popover {
+  width: 210px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.effects-tab-group {
+  display: flex;
+  background: var(--glass-bg);
+  padding: 2px;
+  border-radius: var(--radius-pill);
+  gap: 2px;
+}
+
+.effects-tab-btn {
+  flex: 1;
+  background: transparent;
+  border: none !important;
+  outline: none !important;
+  color: var(--text-muted);
+  padding: 4px 6px;
+  border-radius: var(--radius-pill);
+  font-size: 11px;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+}
+
+.effects-tab-btn:hover {
+  color: var(--text-main);
+}
+
+.effects-tab-btn.active {
+  background: var(--action-bg);
+  color: var(--action-text);
+  font-weight: 600;
+  box-shadow: var(--btn-shadow);
+}
+
+.effects-tab-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.effects-tab-panel.hidden {
+  display: none !important;
+}
+
+/* Tuning Sliders & Headers */
+.tuning-row-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-main);
+  padding-bottom: 2px;
+}
+
+.tuning-slider-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.tuning-label-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  color: var(--text-muted);
+}
+
+.tuning-val-badge {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--text-main);
+}
+
+.tuning-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--glass-bg-hover);
+  outline: none !important;
+  cursor: pointer;
+}
+
+.tuning-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--action-bg);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+  cursor: grab;
+}
+
+/* Switch Toggle */
+.tuning-switch {
+  position: relative;
+  display: inline-block;
+  width: 28px;
+  height: 16px;
+}
+
+.tuning-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.tuning-switch-slider {
+  position: absolute;
+  cursor: pointer;
+  inset: 0;
+  background: var(--glass-bg-hover);
+  border-radius: 16px;
+  transition: 0.2s;
+}
+
+.tuning-switch-slider:before {
+  position: absolute;
+  content: "";
+  height: 12px;
+  width: 12px;
+  left: 2px;
+  bottom: 2px;
+  background: var(--text-dim);
+  border-radius: 50%;
+  transition: 0.2s;
+}
+
+.tuning-switch input:checked + .tuning-switch-slider {
+  background: var(--action-bg);
+}
+
+.tuning-switch input:checked + .tuning-switch-slider:before {
+  transform: translateX(12px);
+  background: var(--action-text);
+}

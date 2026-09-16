@@ -45,12 +45,14 @@ export class TextSnapper {
    * @param {number} [boxH=0] box height in screen px
    * @returns {{ x, y, snapH, snapV }}
    */
-  computeSnap(viewer, imgX, imgY, boxW = 0, boxH = 0) {
+  computeSnap(viewer, imgX, imgY, boxW = 0, boxH = 0, offX = 0, offY = 0) {
     const img = getImgRect(viewer);
     if (!img) return { x: imgX, y: imgY, snapH: null, snapV: null };
 
     const sc = viewer.imageToScreenCoords(imgX, imgY);
     let sx = sc.x, sy = sc.y;
+    const boxLeft = sc.x - offX;
+    const boxTop = sc.y - offY;
     let snapV = null, snapH = null;
 
     // X Axis snap targets: [target, isCenter, isRightEdge]
@@ -63,9 +65,10 @@ export class TextSnapper {
     ];
 
     for (const [t, isCenter, isRight] of xTargets) {
-      const boxEdge = isCenter ? sx + boxW * 0.5 : isRight ? sx + boxW : sx;
+      const boxEdge = isCenter ? boxLeft + boxW * 0.5 : isRight ? boxLeft + boxW : boxLeft;
       if (Math.abs(boxEdge - t) < SNAP_T) {
-        sx = isCenter ? t - boxW * 0.5 : isRight ? t - boxW : t;
+        const newBoxLeft = isCenter ? t - boxW * 0.5 : isRight ? t - boxW : t;
+        sx = newBoxLeft + offX;
         snapV = t;
         break;
       }
@@ -81,9 +84,10 @@ export class TextSnapper {
     ];
 
     for (const [t, isCenter, isBottom] of yTargets) {
-      const boxEdge = isCenter ? sy + boxH * 0.5 : isBottom ? sy + boxH : sy;
+      const boxEdge = isCenter ? boxTop + boxH * 0.5 : isBottom ? boxTop + boxH : boxTop;
       if (Math.abs(boxEdge - t) < SNAP_T) {
-        sy = isCenter ? t - boxH * 0.5 : isBottom ? t - boxH : t;
+        const newBoxTop = isCenter ? t - boxH * 0.5 : isBottom ? t - boxH : t;
+        sy = newBoxTop + offY;
         snapH = t;
         break;
       }
