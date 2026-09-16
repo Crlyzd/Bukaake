@@ -54,7 +54,6 @@ pub fn activate_main_window(app: &tauri::AppHandle) {
 
         if !is_visible {
             let _ = win.set_fullscreen(false);
-            let _ = win.set_resizable(false);
             let _ = win.set_size(tauri::Size::Logical(tauri::LogicalSize { width: 680.0, height: 480.0 }));
             let _ = win.emit("bukaake://wake-from-standby", ());
         }

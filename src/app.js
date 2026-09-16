@@ -229,7 +229,6 @@ class BukaakeApp {
       } else {
         if (initial?.error) toast.warn(initial.error);
         await tauriBridge.resizeAndCenter(680, 480);
-        await tauriBridge.setResizable(false);
       }
     } catch (err) { console.warn('[Bukaake] Startup check failed:', err); }
     await tauriBridge.invoke('show_main_window');
@@ -298,7 +297,6 @@ class BukaakeApp {
     this.titlebar.setFileName(''); this.titlebar.setHasImage(false);
     this.toolbar.updateCounter(0, -1); this.idleController?.refreshState();
     this.toolbar.setRawFile(false);
-    tauriBridge.setResizable(false);
   }
 
   handleNavigateBatch(delta) {

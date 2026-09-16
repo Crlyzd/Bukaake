@@ -85,7 +85,6 @@ fn main() {
                     let _ = win.set_fullscreen(false);
                     let _ = win.unminimize();
                     let _ = win.set_maximizable(false);
-                    let _ = win.set_resizable(false);
                     let _ = win.emit("bukaake://wake-from-standby", ());
                 }
                 let _ = win.show();
@@ -117,7 +116,6 @@ fn main() {
                     } else {
                         let _ = window_vibrancy::apply_acrylic(&main_win, tint);
                         let _ = main_win.set_maximizable(false);
-                        let _ = main_win.set_resizable(false);
                     }
                 }
                 if let Some(w) = app.get_webview_window("settings") {
