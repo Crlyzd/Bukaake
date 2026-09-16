@@ -8,18 +8,23 @@ import { TextSnapper } from './text-snapping.js';
 
 export class TextTool {
   constructor(canvasElement, canvasViewer, options = {}) {
-    this.canvas = canvasElement;
-    this.ctx = this.canvas.getContext('2d');
-    this.viewer = canvasViewer;
+    this.canvas = canvasElement; this.ctx = this.canvas.getContext('2d'); this.viewer = canvasViewer;
     this.overlayContainer = document.getElementById('textOverlayContainer');
-    this.onModified = options.onModified || null; this.onHistoryChange = options.onHistoryChange || null; this.onActiveChange = options.onActiveChange || null;
-    this.active = false; this.items = []; this.activeItem = null; this.isEditing = false; this.undoStack = []; this.redoStack = [];
-    this.currentFont = 'Inter, sans-serif'; this.currentSize = 36; this.currentColor = '#ffffff';
+    this.onModified = options.onModified || null; this.onHistoryChange = options.onHistoryChange || null;
+    this.onActiveChange = options.onActiveChange || null; this.onReset = options.onReset || null;
+    this.active = false; this.snapper = this.overlayContainer ? new TextSnapper(this.overlayContainer) : null;
+    this.resetDefaults(); this.initEvents();
+  }
+
+  resetDefaults() {
+    this.items = []; this.undoStack = []; this.redoStack = []; this.activeItem = null; this.isEditing = false;
+    this.currentFont = 'Inter, sans-serif'; this.currentColor = '#ffffff';
     this.currentBold = false; this.currentItalic = false; this.currentUnderline = false; this.currentStrike = false;
     this.currentShadow = { enabled: false, blur: 8, opacity: 0.85, offsetX: 2, offsetY: 4, color: '#000000' };
     this.currentBg = { enabled: false, color: '#0e121b', opacity: 0.85, roundness: 8, borderSize: 0, borderColor: '#ffffff' };
-    this.snapper = this.overlayContainer ? new TextSnapper(this.overlayContainer) : null;
-    this.initEvents();
+    this.currentSize = this.viewer?.img ? Math.max(16, Math.min(200, Math.round(Math.min(this.viewer.img.width, this.viewer.img.height) * 0.10))) : 36;
+    this.overlayContainer?.querySelectorAll('.canvas-text-box').forEach((el) => el.remove());
+    this.snapper?.clearGuides(); this.onActiveChange?.(null); this.onModified?.(false); this._notifyHistory(); this.onReset?.();
   }
 
   initEvents() {
@@ -45,18 +50,17 @@ export class TextTool {
 
   show() {
     if (!this.viewer.img) return;
+    this.resetDefaults();
     this.active = true; this.canvas.classList.remove('hidden'); this.overlayContainer?.classList.remove('hidden');
     this.syncCanvasSize();
-    if (this.items.length === 0) this.createItemAt(Math.round(this.viewer.img.width / 2), Math.round(this.viewer.img.height / 2));
-    else this.selectItem(this.items[this.items.length - 1], false);
+    this.createItemAt(Math.round(this.viewer.img.width / 2), Math.round(this.viewer.img.height / 2));
   }
 
   hide() {
-    this.commitActiveInput();
-    this.active = false; this.activeItem = null; this.isEditing = false;
+    this.active = false;
     this.canvas.classList.add('hidden'); this.overlayContainer?.classList.add('hidden');
-    this.overlayContainer?.querySelectorAll('.canvas-text-box').forEach((el) => el.remove());
-    this.snapper?.clearGuides(); this.clear();
+    this.resetDefaults();
+    this.redraw();
   }
 
   createItemAt(cx, cy) {
@@ -254,12 +258,7 @@ export class TextTool {
   }
   undo() { this._applyHistoryStep(this.undoStack, this.redoStack, null); }
   redo() { this._applyHistoryStep(this.redoStack, this.undoStack, true); }
-  clear() {
-    this.items = []; this.undoStack = []; this.redoStack = []; this.activeItem = null; this.isEditing = false;
-    this.overlayContainer?.querySelectorAll('.canvas-text-box').forEach((el) => el.remove());
-    this.onActiveChange?.(null);
-    this.redraw(); this.onModified?.(false); this._notifyHistory();
-  }
+  clear() { this.resetDefaults(); this.redraw(); }
   _notifyHistory() { this.onHistoryChange?.({ canUndo: this.undoStack.length > 0, canRedo: this.redoStack.length > 0 }); }
 
   syncCanvasSize() {

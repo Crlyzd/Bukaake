@@ -27,6 +27,7 @@ export class TextToolbar {
     };
 
     this.tool.onActiveChange = (item) => this.updateSelectionState(item);
+    this.tool.onReset = () => this.resetUI();
     this.updateSelectionState(this.tool.activeItem);
   }
 
@@ -254,5 +255,42 @@ export class TextToolbar {
       const match = document.querySelector(`.text-font-option[data-font="${item.font}"]`);
       if (match) fontBadge.textContent = match.textContent;
     }
+  }
+
+  resetUI() {
+    this.closeAllPopovers();
+    const fontBadge = document.getElementById('textFontBadge');
+    if (fontBadge) fontBadge.textContent = 'Inter';
+    document.querySelectorAll('.text-font-option').forEach((o) => {
+      o.classList.toggle('active', o.getAttribute('data-font') === 'Inter, sans-serif');
+    });
+    this.updateSliderUI(this.tool.currentSize);
+    ['btnTextBold', 'btnTextItalic', 'btnTextUnderline', 'btnTextStrike'].forEach((id) => {
+      document.getElementById(id)?.classList.remove('active');
+    });
+    const dot = document.getElementById('textColorDot');
+    if (dot) dot.style.backgroundColor = '#ffffff';
+    document.querySelectorAll('.text-color-chip').forEach((c) => {
+      c.classList.toggle('active', c.getAttribute('data-color') === '#ffffff');
+    });
+    const togS = document.getElementById('toggleTextShadow');
+    if (togS) togS.checked = false;
+    const togB = document.getElementById('toggleTextBg');
+    if (togB) togB.checked = false;
+    const setR = (id, val, u) => {
+      const el = document.getElementById(id), b = document.getElementById(`${id}Val`);
+      if (el) el.value = val; if (b) b.textContent = `${val}${u}`;
+    };
+    setR('sliderShadowBlur', 8, 'px'); setR('sliderShadowOpacity', 85, '%'); setR('sliderShadowOffset', 4, 'px');
+    setR('sliderBgRoundness', 8, 'px'); setR('sliderBgOpacity', 85, '%'); setR('sliderBgBorder', 0, 'px');
+    document.querySelectorAll('.bg-color-chip').forEach((c) => {
+      c.classList.toggle('active', c.getAttribute('data-color') === '#0e121b');
+    });
+    document.getElementById('tabBtnShadow')?.classList.add('active');
+    document.getElementById('tabBtnBg')?.classList.remove('active');
+    document.getElementById('panelTextShadow')?.classList.remove('hidden');
+    document.getElementById('panelTextBg')?.classList.add('hidden');
+    const u = document.getElementById('btnTextUndo'), r = document.getElementById('btnTextRedo');
+    if (u) u.disabled = true; if (r) r.disabled = true;
   }
 }
