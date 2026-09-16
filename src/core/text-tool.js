@@ -1,10 +1,11 @@
 /**
  * Bukaake Interactive Typography Engine
- * Text item lifecycle, overlay box, corner-resize font-sync, multi-tier magnetic snap, undo/redo (< 275 lines).
+ * Text item lifecycle, overlay box, corner-resize font-sync, multi-tier magnetic snap, undo/redo (< 250 lines).
  */
 
-import { renderVectorTextItem, applyStylesToTextInput, computeTextLayout, hitTestTextItems, bakeTextToCanvas } from './text-renderer.js';
+import { renderVectorTextItem, applyStylesToTextInput, computeTextLayout, bakeTextToCanvas } from './text-renderer.js';
 import { TextSnapper } from './text-snapping.js';
+import { attachTextInteractions } from './text-events.js';
 
 export class TextTool {
   constructor(canvasElement, canvasViewer, options = {}) {
@@ -13,7 +14,8 @@ export class TextTool {
     this.onModified = options.onModified || null; this.onHistoryChange = options.onHistoryChange || null;
     this.onActiveChange = options.onActiveChange || null; this.onReset = options.onReset || null;
     this.active = false; this.snapper = this.overlayContainer ? new TextSnapper(this.overlayContainer) : null;
-    this.resetDefaults(); this.initEvents();
+    this.resetDefaults();
+    attachTextInteractions(this);
   }
 
   resetDefaults() {
@@ -27,33 +29,6 @@ export class TextTool {
     this.snapper?.clearGuides(); this.onActiveChange?.(null); this.onModified?.(false); this._notifyHistory(); this.onReset?.();
   }
 
-  initEvents() {
-    this.canvas.addEventListener('mousedown', (e) => {
-      if (!this.active || !this.viewer.img || e.button !== 0) return;
-      const rect = this.canvas.getBoundingClientRect();
-      const pt = this.viewer.screenToImageCoords(e.clientX - rect.left, e.clientY - rect.top);
-      if (pt.x < 0 || pt.x > this.viewer.img.width || pt.y < 0 || pt.y > this.viewer.img.height) return;
-      const hit = hitTestTextItems(this.items, pt.x, pt.y, this.ctx);
-      if (hit) this.selectItem(hit, false, e);
-      else this.commitActiveInput();
-    });
-    this.canvas.addEventListener('dblclick', (e) => {
-      if (!this.active || !this.viewer.img || e.button !== 0) return;
-      const rect = this.canvas.getBoundingClientRect();
-      const pt = this.viewer.screenToImageCoords(e.clientX - rect.left, e.clientY - rect.top);
-      if (pt.x >= 0 && pt.x <= this.viewer.img.width && pt.y >= 0 && pt.y <= this.viewer.img.height && !hitTestTextItems(this.items, pt.x, pt.y, this.ctx)) {
-        this.createItemAt(pt.x, pt.y);
-      }
-    });
-    this.canvas.addEventListener('wheel', (e) => {
-      if (!this.active || !this.viewer.img) return;
-      e.preventDefault();
-      const zoomFactor = e.deltaY < 0 ? 1.15 : 0.85, rect = this.canvas.getBoundingClientRect();
-      this.viewer.zoomTo(this.viewer.targetScale * zoomFactor, false, e.clientX - rect.left, e.clientY - rect.top);
-    }, { passive: false });
-    window.addEventListener('resize', () => { if (this.active) { this.syncCanvasSize(); this.updateOverlayBox(); } });
-  }
-
   show() {
     if (!this.viewer.img) return;
     this.resetDefaults(); this.active = true;
@@ -64,6 +39,16 @@ export class TextTool {
   hide() {
     this.active = false; this.canvas.classList.add('hidden'); this.overlayContainer?.classList.add('hidden');
     this.resetDefaults(); this.redraw();
+  }
+
+  addNewTextBox() {
+    if (!this.viewer.img) return;
+    const cx = Math.round(this.viewer.canvas.width / 2);
+    const cy = Math.round(this.viewer.canvas.height / 2);
+    const pt = this.viewer.screenToImageCoords(cx, cy);
+    const clampX = Math.max(0, Math.min(this.viewer.img.width, pt.x));
+    const clampY = Math.max(0, Math.min(this.viewer.img.height, pt.y));
+    this.createItemAt(clampX, clampY);
   }
 
   createItemAt(cx, cy) {
@@ -151,7 +136,9 @@ export class TextTool {
     box.addEventListener('dblclick', (e) => {
       e.stopPropagation(); this.isEditing = true; box.classList.add('editing'); this.redraw();
       preEditSnap = JSON.parse(JSON.stringify(this.items));
-      ta.focus(); ta.select();
+      ta.focus();
+      const len = ta.value.length;
+      ta.setSelectionRange(len, len);
     });
 
     ta.addEventListener('blur', () => {
@@ -271,6 +258,10 @@ export class TextTool {
   }
 
   redraw() {
+    if (this.viewer.canvas && (this.canvas.width !== this.viewer.canvas.width || this.canvas.height !== this.viewer.canvas.height)) {
+      this.canvas.width = this.viewer.canvas.width;
+      this.canvas.height = this.viewer.canvas.height;
+    }
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
     if (!this.active || !this.viewer.img) return;
     this.ctx.save();

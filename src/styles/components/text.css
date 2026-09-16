@@ -8,6 +8,17 @@
   pointer-events: auto; z-index: 39;
 }
 #textCanvas.hidden { display: none !important; }
+#textCanvas.is-panning { cursor: grabbing !important; }
+
+body.text-panning,
+body.text-panning *,
+body.text-panning #textCanvas,
+body.text-panning .canvas-text-box,
+body.text-panning .text-input-field {
+  cursor: grabbing !important;
+  user-select: none !important;
+  -webkit-user-select: none !important;
+}
 
 #textOverlayContainer {
   position: absolute; inset: 0; width: 100%; height: 100%;
@@ -78,6 +89,9 @@ body.mode-viewer .text-toolbar { bottom: 132px !important; }
 }
 .text-pill-btn:hover, .text-pill-btn.active { background: var(--glass-bg-hover); }
 
+.text-add-btn i { font-size: 13px; color: var(--accent-cyan); transition: transform var(--transition-fast); }
+.text-add-btn:hover i { transform: scale(1.15); }
+
 .text-chevron {
   font-size: 12px; color: var(--text-dim); transition: transform var(--transition-fast);
 }
@@ -146,18 +160,23 @@ body.mode-viewer .text-toolbar { bottom: 132px !important; }
   background: var(--action-hover-bg); box-shadow: var(--btn-shadow-hover); transform: translateY(-1px);
 }
 
-/* Responsive Compacting to guarantee frame containment */
-@media (max-width: 820px) {
+/* Responsive Compacting hierarchy to guarantee frame containment at all window widths */
+@media (max-width: 900px) {
   .text-brand-text { display: none !important; }
   .text-pill-label { display: none !important; }
   .text-pill-brand { padding: 0 4px 0 8px; }
   .text-pill-btn { padding: 4px 6px; gap: 3px; }
 }
 
-@media (max-width: 600px) {
-  .text-style-strike { display: none !important; }
+@media (max-width: 800px) {
   .action-btn-text { display: none !important; }
-  .text-action-btn { padding: 0 8px !important; }
+  .text-action-btn { width: 28px; padding: 0 !important; justify-content: center; font-size: 13px; }
+  .text-style-strike { display: none !important; }
+  .text-pill-divider { margin: 0 2px !important; }
+}
+
+@media (max-width: 600px) {
   .text-pill-brand { display: none !important; }
   .text-toolbar > .text-pill-divider:first-of-type { display: none !important; }
+  #textFontBadge { max-width: 50px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 }

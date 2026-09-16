@@ -203,6 +203,7 @@ export class TextToolbar {
   }
 
   bindHistoryAndActions() {
+    document.getElementById('btnTextAdd')?.addEventListener('click', () => this.tool.addNewTextBox());
     document.getElementById('btnTextUndo')?.addEventListener('click', () => this.tool.undo());
     document.getElementById('btnTextRedo')?.addEventListener('click', () => this.tool.redo());
     document.getElementById('btnTextClear')?.addEventListener('click', () => {
@@ -273,10 +274,8 @@ export class TextToolbar {
     document.querySelectorAll('.text-color-chip').forEach((c) => {
       c.classList.toggle('active', c.getAttribute('data-color') === '#ffffff');
     });
-    const togS = document.getElementById('toggleTextShadow');
-    if (togS) togS.checked = false;
-    const togB = document.getElementById('toggleTextBg');
-    if (togB) togB.checked = false;
+    const togS = document.getElementById('toggleTextShadow'); if (togS) togS.checked = false;
+    const togB = document.getElementById('toggleTextBg'); if (togB) togB.checked = false;
     const setR = (id, val, u) => {
       const el = document.getElementById(id), b = document.getElementById(`${id}Val`);
       if (el) el.value = val; if (b) b.textContent = `${val}${u}`;

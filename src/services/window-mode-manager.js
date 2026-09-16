@@ -126,9 +126,8 @@ export class WindowModeManager {
         await tauriBridge.resizeAndCenter(this.lastAspectSize.width, this.lastAspectSize.height);
       }
     }
-    setTimeout(() => {
-      this.viewer?.fitToScreen();
-    }, 80);
+    setTimeout(() => { this.viewer?.fitToScreen(); }, 80);
+    setTimeout(() => { this.viewer?.fitToScreen(); }, 220);
   }
 
   async toggleMode() {

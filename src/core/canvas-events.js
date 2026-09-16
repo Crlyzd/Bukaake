@@ -5,9 +5,23 @@
 export function attachCanvasInteractions(viewer) {
   const { canvas } = viewer;
 
-  window.addEventListener('resize', () => viewer.resizeCanvas());
+  const handleResize = () => {
+    if (!viewer.img) {
+      viewer.resizeCanvas();
+      return;
+    }
+    const isRegular = !document.body.classList.contains('mode-viewer');
+    const oldFit = viewer.calculateFitScale();
+    const wasFitted = Math.abs(viewer.scale - oldFit) < 0.05 || (isRegular && viewer.scale <= oldFit);
+    viewer.resizeCanvas();
+    if (isRegular && wasFitted) {
+      viewer.fitToScreen(true);
+    }
+  };
+
+  window.addEventListener('resize', handleResize);
   if (window.ResizeObserver && viewer.container) {
-    viewer.resizeObserver = new ResizeObserver(() => viewer.resizeCanvas());
+    viewer.resizeObserver = new ResizeObserver(handleResize);
     viewer.resizeObserver.observe(viewer.container);
   }
 
