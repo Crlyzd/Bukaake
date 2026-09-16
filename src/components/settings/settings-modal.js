@@ -4,12 +4,12 @@
  * and appearance controls (vibrancy material dropdown and glass opacity slider) (< 150 lines)
  */
 
-import { toast } from './toast.js';
-import { themeManager } from '../services/theme-manager.js';
-import { updaterService, APP_VERSION, hydrateAppVersions } from '../services/updater-service.js';
-import { fileAssocService } from '../services/file-assoc-service.js';
-import { autostartService } from '../services/autostart-service.js';
-import { tauriBridge } from '../services/tauri-bridge.js';
+import { toast } from '../toast.js';
+import { themeManager } from '../../services/theme-manager.js';
+import { updaterService, APP_VERSION, hydrateAppVersions } from '../../services/updater-service.js';
+import { fileAssocService } from '../../services/file-assoc-service.js';
+import { autostartService } from '../../services/autostart-service.js';
+import { tauriBridge } from '../../services/tauri-bridge.js';
 
 export class SettingsModal {
   constructor(options = {}) {

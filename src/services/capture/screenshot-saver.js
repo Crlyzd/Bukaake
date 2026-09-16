@@ -4,7 +4,7 @@
  */
 
 import { invoke } from '@tauri-apps/api/core';
-import { toast } from '../components/toast.js';
+import { toast } from '../../components/toast.js';
 
 export class ScreenshotSaver {
   /**

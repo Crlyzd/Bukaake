@@ -9,7 +9,7 @@ import { toast } from './components/toast.js';
 import { updaterService, APP_VERSION, hydrateAppVersions } from './services/updater-service.js';
 import { fileAssocService } from './services/file-assoc-service.js';
 import { autostartService } from './services/autostart-service.js';
-import { bindCaptureSettings } from './components/settings-capture-section.js';
+import { bindCaptureSettings } from './components/settings/settings-capture-section.js';
 import { initHeartSprouter } from './components/heart-sprouter.js';
 
 class SettingsApp {

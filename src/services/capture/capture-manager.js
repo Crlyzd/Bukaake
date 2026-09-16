@@ -7,13 +7,13 @@ import { invoke } from '@tauri-apps/api/core';
 import { listen } from '@tauri-apps/api/event';
 import { screenCaptureService } from './screen-capture-service.js';
 import { screenRecorderService } from './screen-recorder-service.js';
-import { alitkenService } from './alitken-service.js';
-import { hotkeyService } from './hotkey-service.js';
-import { ScreenSnipper } from '../components/screen-snipper.js';
-import { RecordingDock } from '../components/recording-dock.js';
-import { toast } from '../components/toast.js';
-import { changeTracker } from './change-tracker.js';
-import { tauriBridge } from './tauri-bridge.js';
+import { alitkenService } from '../alitken-service.js';
+import { hotkeyService } from '../hotkey-service.js';
+import { ScreenSnipper } from '../../components/capture/screen-snipper.js';
+import { RecordingDock } from '../../components/capture/recording-dock.js';
+import { toast } from '../../components/toast.js';
+import { changeTracker } from '../change-tracker.js';
+import { tauriBridge } from '../tauri-bridge.js';
 import { screenshotSaver } from './screenshot-saver.js';
 
 export class CaptureManager {

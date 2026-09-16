@@ -54,33 +54,33 @@ The project contains **70+ modular files** cleanly organized across distinct lay
 ```
 src/
 ├── components/          # UI Component Modules (< 300 lines each)
+│   ├── capture/                # Screen snipper & recording dock
+│   ├── settings/               # Settings modal & capture section
+│   ├── text/                   # Floating text typography sub-toolbar
 │   ├── adjustments-panel.js    # Sliders & preset chips
 │   ├── confirm-modal.js        # Unsaved changes dialog
 │   ├── context-menu.js         # Right-click obsidian glass menu
 │   ├── delete-modal.js         # Recycle Bin & delete dialog
+│   ├── heart-sprouter.js       # Like / easter egg particles
 │   ├── loading-indicator.js    # Circular stroke-free spinner
 │   ├── metadata-drawer.js      # EXIF & camera telemetry drawer
-│   ├── recording-dock.js       # Screen recording floating dock & controls
-│   ├── screen-snipper.js       # Interactive screen capture crosshair & snip overlay
-│   ├── settings-capture-section.js # Capture & recording settings panel
-│   ├── settings-modal.js       # In-app settings & updater overlay
 │   ├── shortcuts-modal.js      # Keyboard shortcuts cheatsheet
 │   ├── titlebar.js             # Frameless titlebar & window actions
 │   ├── toast.js                # Single-toast notification pill
 │   └── toolbar.js              # Floating control dock & tool triggers
 ├── core/                # Canvas & Image Math Engines (< 300 lines each)
-│   ├── canvas-events.js        # Pan/zoom mouse & drag events
-│   ├── canvas-helpers.js       # Coordinate transforms & math
-│   ├── canvas-viewer.js        # 60fps pan/zoom canvas engine & fit logic
+│   ├── canvas/                 # Canvas viewer engine, events & helpers
+│   ├── text/                   # Typography lifecycle, snapping & rendering
 │   ├── crop-snapping.js        # Laser magnetic alignment guides
 │   ├── cropper.js              # Precision crop box & sandwich contrast
 │   ├── drawing-tool.js         # Freehand pen, highlighter, cursor ring
 │   ├── filters.js              # Real-time color adjustments processor
 │   └── metadata.js             # Client EXIF parser & telemetry formatter
 ├── services/            # Background, Platform & State Services (< 300 lines each)
+│   ├── capture/                # Screen capture, recorder & screenshot saver
 │   ├── alitken-service.js      # External editor tandem workflow integration
+│   ├── autostart-service.js    # Windows autostart management
 │   ├── canvas-tools-manager.js # Tool mutual exclusivity & interaction lockout
-│   ├── capture-manager.js      # Capture/record coordinator & auto-save flow
 │   ├── change-tracker.js       # Unsaved edits state tracker
 │   ├── file-assoc-service.js   # Windows shell associations & deep-link
 │   ├── file-loader.js          # Image loader, drag & drop, clipboard ingest
@@ -88,9 +88,6 @@ src/
 │   ├── idle-controller.js      # Picasa-style idle mouse fade controller
 │   ├── image-prefetch-cache.js # 5-slot directional prefetch cache (140MB bound)
 │   ├── image-saver.js          # File export & clipboard image writer
-│   ├── screen-capture-service.js # Tauri desktop capture IPC bridge
-│   ├── screen-recorder-service.js# Video recording & media recorder service
-│   ├── screenshot-saver.js     # Timestamped auto-save & directory management
 │   ├── shortcuts.js            # Main viewer keyboard shortcut registry
 │   ├── standby-service.js      # System tray standby & memory trimming
 │   ├── tauri-bridge.js         # Tauri v2 window, args, and fs IPC wrapper
@@ -99,9 +96,9 @@ src/
 │   └── window-mode-manager.js  # Mode 1 regular vs Mode 2 fullscreen coordinator
 ├── styles/              # Stroke-Free Modular Stylesheets (< 300 lines each)
 │   ├── base.css, glass.css, main.css, tokens.css
-│   └── components/     # confirm-modal, context-menu, crop, draw, loading, modes,
-│                       # panels, recording, settings-assoc, settings-capture,
-│                       # settings, shortcuts, snipper, startpage, titlebar, toast, toolbar, vibrancy
+│   └── components/     # capture/, settings/, text/, confirm-modal, context-menu,
+│                       # crop, draw, loading, modes, panels, shortcuts,
+│                       # startpage, titlebar, toast, toolbar, vibrancy
 ├── app.js               # Main viewer bootstrap coordinator (≤ 350 lines)
 └── settings-app.js      # Standalone settings window coordinator (≤ 350 lines)
 src-tauri/src/

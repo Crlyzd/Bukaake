@@ -4,9 +4,9 @@
  */
 
 import { invoke } from '@tauri-apps/api/core';
-import { tauriBridge } from '../services/tauri-bridge.js';
-import { hotkeyService } from '../services/hotkey-service.js';
-import { alitkenService } from '../services/alitken-service.js';
+import { tauriBridge } from '../../services/tauri-bridge.js';
+import { hotkeyService } from '../../services/hotkey-service.js';
+import { alitkenService } from '../../services/alitken-service.js';
 
 export function renderHotkeyBadge(container, combo) {
   if (!container) return;

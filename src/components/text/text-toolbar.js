@@ -3,7 +3,7 @@
  * Coordinates font, size, styles (B/I/U/S), Canva-style Shadow & Background popovers (< 260 lines).
  */
 
-import { TEXT_SIZE_MIN, TEXT_SIZE_MAX, sliderRatioToTextSize, textSizeToSliderRatio, stepTextSize } from '../core/text-renderer.js';
+import { TEXT_SIZE_MIN, TEXT_SIZE_MAX, sliderRatioToTextSize, textSizeToSliderRatio, stepTextSize } from '../../core/text/text-renderer.js';
 
 export class TextToolbar {
   constructor(textTool, options = {}) {
