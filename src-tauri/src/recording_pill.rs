@@ -15,7 +15,7 @@ struct SavedWindowGeometry {
 static SAVED_GEOMETRY: Mutex<Option<SavedWindowGeometry>> = Mutex::new(None);
 
 #[tauri::command]
-pub fn enter_recording_pill_mode(app: tauri::AppHandle) -> Result<(), String> {
+pub fn enter_recording_pill_mode(app: tauri::AppHandle, width: Option<f64>) -> Result<(), String> {
     use tauri::Manager;
     let win = app.get_webview_window("main").ok_or("Main window not found")?;
 
@@ -59,11 +59,13 @@ pub fn enter_recording_pill_mode(app: tauri::AppHandle) -> Result<(), String> {
         };
     }
 
+    let target_w = width.unwrap_or(200.0).max(120.0);
+
     if let Ok(Some(monitor)) = win.current_monitor() {
         let monitor_pos = monitor.position();
         let screen_size = monitor.size();
         let scale = monitor.scale_factor();
-        let w = (196.0 * scale) as u32;
+        let w = (target_w * scale) as u32;
         let h = (36.0 * scale) as u32;
         let x = monitor_pos.x + screen_size.width as i32 - w as i32 - (24.0 * scale) as i32;
         let y = monitor_pos.y + (50.0 * scale) as i32;
@@ -71,7 +73,7 @@ pub fn enter_recording_pill_mode(app: tauri::AppHandle) -> Result<(), String> {
         let _ = win.set_size(Size::Physical(PhysicalSize { width: w, height: h }));
         let _ = win.set_position(Position::Physical(PhysicalPosition { x, y }));
     } else {
-        let _ = win.set_size(Size::Logical(tauri::LogicalSize { width: 196.0, height: 36.0 }));
+        let _ = win.set_size(Size::Logical(tauri::LogicalSize { width: target_w, height: 36.0 }));
     }
 
     let _ = win.set_always_on_top(true);

@@ -35,6 +35,9 @@ export class RecordingDock {
         <button class="recording-btn" id="btnRecPause" title="Pause Recording">
           <i class="ri-pause-line"></i>
         </button>
+        <button class="recording-btn" id="btnRecMic" title="Mute Microphone">
+          <i class="ri-mic-line"></i>
+        </button>
         <button class="recording-btn stop" id="btnRecStop" title="Stop & Save Recording">
           <i class="ri-stop-fill"></i>
           <span>Done</span>
@@ -47,16 +50,18 @@ export class RecordingDock {
 
     this.timerEl = this.dock.querySelector('#recordingTimer');
     this.btnPause = this.dock.querySelector('#btnRecPause');
+    this.btnMic = this.dock.querySelector('#btnRecMic');
     this.btnStop = this.dock.querySelector('#btnRecStop');
     this.btnCancel = this.dock.querySelector('#btnRecCancel');
     this.dotEl = this.dock.querySelector('.recording-pulse-dot');
+    this.isMicMuted = false;
 
     this.container.appendChild(this.dock);
     this.bindEvents();
   }
 
   bindEvents() {
-    [this.btnPause, this.btnStop, this.btnCancel].forEach((btn) => {
+    [this.btnPause, this.btnMic, this.btnStop, this.btnCancel].forEach((btn) => {
       btn?.addEventListener('mousedown', (e) => e.stopPropagation());
     });
     this.btnPause?.addEventListener('click', (e) => {
@@ -68,6 +73,12 @@ export class RecordingDock {
         this.setPaused(true);
         this.onPause?.();
       }
+    });
+
+    this.btnMic?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      this.setMicMuted(!this.isMicMuted);
+      this.onToggleMic?.(this.isMicMuted);
     });
 
     this.btnStop?.addEventListener('click', (e) => {
@@ -88,8 +99,16 @@ export class RecordingDock {
     this.onResume = options.onResume || null;
     this.onStop = options.onStop || null;
     this.onCancel = options.onCancel || null;
+    this.onToggleMic = options.onToggleMic || null;
 
     this.setPaused(false);
+    this.setMicMuted(false);
+    if (options.hasMic) {
+      this.btnMic?.classList.remove('hidden');
+    } else {
+      this.btnMic?.classList.add('hidden');
+    }
+
     this.updateTimer('00:00');
     this.dock.classList.remove('hidden');
     this.dock.classList.add('dock-enter');
@@ -115,8 +134,23 @@ export class RecordingDock {
     }
   }
 
+  setMicMuted(muted) {
+    this.isMicMuted = muted;
+    if (!this.btnMic) return;
+    if (muted) {
+      this.btnMic.classList.add('muted');
+      this.btnMic.innerHTML = '<i class="ri-mic-off-line"></i>';
+      this.btnMic.title = 'Unmute Microphone';
+    } else {
+      this.btnMic.classList.remove('muted');
+      this.btnMic.innerHTML = '<i class="ri-mic-line"></i>';
+      this.btnMic.title = 'Mute Microphone';
+    }
+  }
+
   hide() {
     this.dock.classList.add('hidden');
     this.isPaused = false;
+    this.isMicMuted = false;
   }
 }

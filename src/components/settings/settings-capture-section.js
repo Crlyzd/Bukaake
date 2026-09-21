@@ -217,6 +217,30 @@ export function bindCaptureSettings() {
     });
   }
 
+  const chipSysAudio = document.getElementById('chipRecordSysAudio');
+  const chipMic = document.getElementById('chipRecordMic');
+
+  const updateAudioChips = () => {
+    const isSysOn = localStorage.getItem('bukaake-record-sys-audio') !== 'false';
+    const isMicOn = localStorage.getItem('bukaake-record-mic') === 'true';
+    chipSysAudio?.classList.toggle('active', isSysOn);
+    chipMic?.classList.toggle('active', isMicOn);
+  };
+
+  chipSysAudio?.addEventListener('click', () => {
+    const current = localStorage.getItem('bukaake-record-sys-audio') !== 'false';
+    localStorage.setItem('bukaake-record-sys-audio', current ? 'false' : 'true');
+    updateAudioChips();
+  });
+
+  chipMic?.addEventListener('click', () => {
+    const current = localStorage.getItem('bukaake-record-mic') === 'true';
+    localStorage.setItem('bukaake-record-mic', current ? 'false' : 'true');
+    updateAudioChips();
+  });
+
+  updateAudioChips();
+
   // 3. Alitken Tandem
   const inputAlitken = document.getElementById('inputAlitkenPath');
   const btnBrowseAlitken = document.getElementById('btnBrowseAlitken');

@@ -244,3 +244,48 @@ html[data-theme="light"] .dropdown-item.active {
 .dropdown-item.active i.check {
   opacity: 1;
 }
+
+/* Audio Source Inline Chip Group (Suggestion B) */
+.audio-chips-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  margin-top: 4px;
+}
+
+.audio-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-muted);
+  background: var(--glass-btn-bg);
+  border: none !important;
+  outline: none !important;
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  user-select: none;
+}
+
+.audio-chip:hover {
+  background: var(--glass-btn-hover);
+  color: var(--text-main);
+}
+
+.audio-chip.active {
+  background: var(--action-bg);
+  color: var(--action-text);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+
+.audio-chip i {
+  font-size: 14px;
+  font-weight: normal !important;
+  font-style: normal;
+  font-synthesis: none !important;
+  -webkit-font-smoothing: antialiased;
+}

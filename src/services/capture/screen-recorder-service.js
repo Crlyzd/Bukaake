@@ -3,8 +3,9 @@
  * Hardware-accelerated display capture with low-RAM stream-to-disk chunking (< 190 lines)
  */
 
-import { invoke } from '@tauri-apps/api/core';
+import { invoke, Channel } from '@tauri-apps/api/core';
 import { toast } from '../../components/toast.js';
+import { AudioStreamReceiver } from './audio-stream-receiver.js';
 
 export const QUALITY_PRESETS = {
   high: { fps: 60, bitrate: 6_000_000, label: '60 FPS • High (6 Mbps)' },
@@ -23,6 +24,7 @@ export class ScreenRecorderService {
     this.timerInterval = null;
     this.elapsedSeconds = 0;
     this.tempFilePath = null;
+    this.audioReceiver = new AudioStreamReceiver();
 
     this.onStateChange = null;
     this.onTimerTick = null;
@@ -49,6 +51,30 @@ export class ScreenRecorderService {
       this.mediaStream = stream;
       let recordStream = stream;
 
+      const recordSys = localStorage.getItem('bukaake-record-sys-audio') !== 'false';
+      const recordMic = localStorage.getItem('bukaake-record-mic') === 'true';
+      let audioTrack = null;
+
+      if (recordSys || recordMic) {
+        try {
+          await this.audioReceiver.start();
+          audioTrack = this.audioReceiver.getAudioTrack();
+
+          const audioChannel = new Channel();
+          audioChannel.onmessage = (bytes) => {
+            this.audioReceiver.feedPcmChunk(bytes);
+          };
+
+          await invoke('start_audio_capture', {
+            channel: audioChannel,
+            recordSys,
+            recordMic,
+          });
+        } catch (audioErr) {
+          console.warn('[ScreenRecorder] WASAPI audio capture failed:', audioErr);
+        }
+      }
+
       if (cropRegion && cropRegion.width > 20 && cropRegion.height > 20) {
         const video = document.createElement('video');
         video.srcObject = stream;
@@ -63,10 +89,6 @@ export class ScreenRecorderService {
           });
         }
 
-        // cropRegion.x/y/width/height are in physical screen pixels (from screen-snipper.js).
-        // video.videoWidth matches the physical screen capture resolution.
-        // cropRegion.screenWidth is the GDI physical resolution at capture time.
-        // Apply a correction only if the browser captured at a different resolution.
         const refW = cropRegion.screenWidth || video.videoWidth || 1;
         const vW = video.videoWidth || refW;
         const vH = video.videoHeight || (cropRegion.screenHeight || 1);
@@ -95,8 +117,12 @@ export class ScreenRecorderService {
         }, frameInterval);
 
         const canvasStream = canvas.captureStream(quality.fps);
-        stream.getAudioTracks().forEach((track) => canvasStream.addTrack(track));
+        if (audioTrack) {
+          canvasStream.addTrack(audioTrack);
+        }
         recordStream = canvasStream;
+      } else if (audioTrack) {
+        recordStream = new MediaStream([...stream.getVideoTracks(), audioTrack]);
       }
 
       const mimeType = MediaRecorder.isTypeSupported('video/webm;codecs=vp9')
@@ -109,6 +135,7 @@ export class ScreenRecorderService {
       this.mediaRecorder = new MediaRecorder(recordStream, {
         mimeType,
         videoBitsPerSecond: quality.bitrate,
+        audioBitsPerSecond: 256_000,
       });
 
       this.mediaRecorder.ondataavailable = async (e) => {
@@ -251,7 +278,16 @@ export class ScreenRecorderService {
     this.mediaRecorder = null;
     this.state = 'idle';
     this.tempFilePath = null;
+
+    invoke('stop_audio_capture').catch(() => {});
+    this.audioReceiver?.stop();
+
     this.onStateChange?.(this.state);
+  }
+
+  async setMicMuted(muted) {
+    this.audioReceiver?.setGain(muted ? 0.0 : 1.0);
+    await invoke('set_recording_mic_muted', { muted }).catch(() => {});
   }
 }
 

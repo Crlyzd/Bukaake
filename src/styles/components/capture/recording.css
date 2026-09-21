@@ -63,6 +63,11 @@
 .recording-btn.cancel { padding: 5px 8px; color: rgba(255, 255, 255, 0.6); }
 .recording-btn.cancel:hover { color: #fff; }
 
+.recording-btn#btnRecMic.muted {
+  color: #ef4444 !important;
+  background: rgba(239, 68, 68, 0.18) !important;
+}
+
 /* In-Window Pill Mode (Main Window Resized to 240x38 compact square widget) */
 body.mode-recording-pill {
   width: 100vw !important; height: 100vh !important;
@@ -102,9 +107,10 @@ body.mode-recording-pill .recording-dock {
   margin: 0 !important; width: 100% !important; height: 100% !important;
   box-sizing: border-box !important;
   border-radius: 8px !important;
-  padding: 3px 6px !important;
+  padding: 3px 8px !important;
   gap: 5px !important;
   box-shadow: none !important;
+  justify-content: center !important;
 }
 
 body.mode-recording-pill .recording-indicator {

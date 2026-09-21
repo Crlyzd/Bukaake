@@ -175,7 +175,12 @@ export class CaptureManager {
     if (!started) return;
 
     document.body.classList.add('mode-recording-pill');
+    const recordMic = localStorage.getItem('bukaake-record-mic') === 'true';
     this.recordingDock.show({
+      hasMic: recordMic,
+      onToggleMic: (muted) => {
+        screenRecorderService.setMicMuted(muted);
+      },
       onPause: () => {
         screenRecorderService.pauseRecording();
         if (tauriBridge.isTauri()) {
@@ -193,7 +198,8 @@ export class CaptureManager {
     });
 
     if (tauriBridge.isTauri()) {
-      await invoke('enter_recording_pill_mode').catch(() => {});
+      const pillWidth = recordMic ? 212.0 : 186.0;
+      await invoke('enter_recording_pill_mode', { width: pillWidth }).catch(() => {});
       // cropRegion.x/y/width/height are already physical screen pixels
       if (cropRegion && cropRegion.width > 20 && cropRegion.height > 20) {
         const BW = 5;

@@ -9,6 +9,7 @@ pub mod exif_reader;
 pub mod heif_reader;
 pub mod pro_decoder;
 pub mod raw_reader;
+pub mod audio_capture;
 pub mod capture_commands;
 pub mod hotkeys;
 pub mod recording_pill;
@@ -21,6 +22,9 @@ pub mod window_commands;
 pub mod wic_decoder;
 mod image_loader;
 mod updater;
+use audio_capture::{
+    set_recording_audio_volumes, set_recording_mic_muted, start_audio_capture, stop_audio_capture,
+};
 use capture_commands::{
     append_recording_chunk, capture_screen, discard_recording, finalize_recording,
     get_default_videos_dir, init_recording_stream, launch_alitken,
@@ -164,6 +168,7 @@ fn main() {
             enter_recording_pill_mode, exit_recording_pill_mode,
             show_recording_border, hide_recording_border, set_recording_border_paused,
             save_screenshot_to_dir,
+            start_audio_capture, stop_audio_capture, set_recording_mic_muted, set_recording_audio_volumes,
             process_memory::trim_memory_working_set
         ])
         .run(tauri::generate_context!())
