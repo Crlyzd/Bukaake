@@ -255,7 +255,8 @@ export class CaptureManager {
         finalPath = `${dest}/${defaultName}`;
       }
 
-      const savedPath = await invoke('finalize_recording', { tempPath: result.tempPath, destPath: finalPath });
+      const durationMs = result.durationMs || (result.durationSecs ? result.durationSecs * 1000 : null);
+      const savedPath = await invoke('finalize_recording', { tempPath: result.tempPath, destPath: finalPath, durationMs });
       this.showRecordingSavedToast(savedPath, result.durationSecs);
       if (alitkenService.isAutoOpenEnabled()) alitkenService.launch(savedPath);
     } catch (err) {

@@ -198,14 +198,15 @@ export class ScreenRecorderService {
 
     return new Promise((resolve) => {
       this.mediaRecorder.onstop = async () => {
-        this.stopTimer();
-        const recordedSeconds = this.elapsedSeconds;
+        const durationMs = Math.max(0, Date.now() - this.startTime - this.pausedDuration);
+        const recordedSeconds = Math.max(this.elapsedSeconds, Math.floor(durationMs / 1000));
         const tempPath = this.tempFilePath;
         this.cleanup();
 
         resolve({
           tempPath,
           durationSecs: recordedSeconds,
+          durationMs,
         });
       };
 

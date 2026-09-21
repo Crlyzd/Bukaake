@@ -56,7 +56,11 @@ pub fn append_recording_chunk(temp_path: String, chunk: Vec<u8>) -> Result<(), S
 }
 
 #[tauri::command]
-pub fn finalize_recording(temp_path: String, dest_path: String) -> Result<String, String> {
+pub fn finalize_recording(
+    temp_path: String,
+    dest_path: String,
+    duration_ms: Option<f64>,
+) -> Result<String, String> {
     crate::process_memory::set_recording_memory_lockout(false);
     let temp = Path::new(&temp_path);
     let dest = Path::new(&dest_path);
@@ -65,7 +69,9 @@ pub fn finalize_recording(temp_path: String, dest_path: String) -> Result<String
         let _ = fs::create_dir_all(parent);
     }
 
-    if let Err(_) = fs::rename(temp, dest) {
+    if let Some(ms) = duration_ms {
+        let _ = crate::ebml_patcher::patch_webm_duration(temp, dest, ms);
+    } else if let Err(_) = fs::rename(temp, dest) {
         fs::copy(temp, dest).map_err(|e| format!("Failed to copy recording: {}", e))?;
         let _ = fs::remove_file(temp);
     }

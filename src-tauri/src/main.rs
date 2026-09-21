@@ -17,6 +17,7 @@ pub mod recording_border;
 pub mod screen_capture;
 pub mod standby;
 pub mod process_memory;
+pub mod ebml_patcher;
 pub mod window_commands;
 #[cfg(target_os = "windows")]
 pub mod wic_decoder;
