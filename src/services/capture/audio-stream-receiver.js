@@ -82,25 +82,14 @@ export class AudioStreamReceiver {
       rightChannel[i] = rightSample / 32768.0;
     }
 
-    // Micro-smooth edge samples to eliminate buffer boundary click/scratch artifacts
-    const fadeLen = Math.min(16, Math.floor(numSamples / 4));
-    for (let j = 0; j < fadeLen; j++) {
-      const ramp = j / fadeLen;
-      leftChannel[j] *= ramp;
-      rightChannel[j] *= ramp;
-      const endJ = numSamples - 1 - j;
-      leftChannel[endJ] *= ramp;
-      rightChannel[endJ] *= ramp;
-    }
-
     const source = this.audioCtx.createBufferSource();
     source.buffer = audioBuffer;
     source.connect(this.gainNode);
 
-    // Schedule playback seamlessly with a small cushion to avoid buffer underruns
+    // Schedule continuous playback with a small cushion to avoid buffer underruns
     const now = this.audioCtx.currentTime;
-    if (this.nextPlayTime < now) {
-      this.nextPlayTime = now + 0.025;
+    if (this.nextPlayTime < now || this.nextPlayTime > now + 0.35) {
+      this.nextPlayTime = now + 0.020;
     }
 
     source.start(this.nextPlayTime);

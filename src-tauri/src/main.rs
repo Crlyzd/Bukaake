@@ -9,6 +9,7 @@ pub mod exif_reader;
 pub mod heif_reader;
 pub mod pro_decoder;
 pub mod raw_reader;
+pub mod audio_mixer;
 pub mod audio_capture;
 pub mod capture_commands;
 pub mod hotkeys;

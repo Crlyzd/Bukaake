@@ -1,7 +1,7 @@
 /**
  * Bukaake Native WASAPI Audio Capture Engine
  * Un-sandboxed system loopback + mic capture, master volume compensation,
- * soft-knee peak limiter, and low-latency PCM streaming (< 250 lines)
+ * adaptive dual-queue clock sync, and low-latency PCM streaming (< 250 lines)
  */
 
 use cpal::traits::{DeviceTrait, HostTrait, StreamTrait};
@@ -10,6 +10,8 @@ use std::sync::{Arc, Mutex};
 use std::thread;
 use std::time::Duration;
 use tauri::ipc::Channel;
+
+use crate::audio_mixer::{mix_and_quantize_stereo, ResamplingQueue};
 
 static IS_MIC_MUTED: AtomicBool = AtomicBool::new(false);
 static SYS_VOLUME: AtomicU32 = AtomicU32::new(100); // 100% 1:1 bit-exact
@@ -27,17 +29,6 @@ struct ActiveStreams {
 }
 
 static ACTIVE_SESSION: Mutex<Option<ActiveStreams>> = Mutex::new(None);
-
-#[inline(always)]
-fn transparent_limit(s: f32) -> f32 {
-    if s.abs() <= 0.92 {
-        s // Bit-exact pristine pass-through without harmonic distortion
-    } else if s > 0.0 {
-        0.92 + (s - 0.92).tanh() * 0.079
-    } else {
-        -0.92 + (s + 0.92).tanh() * 0.079
-    }
-}
 
 pub fn set_mic_muted(muted: bool) {
     IS_MIC_MUTED.store(muted, Ordering::Relaxed);
@@ -65,7 +56,8 @@ pub fn start_capture(
     stop_capture();
 
     let host = cpal::default_host();
-    let ring_buffer = Arc::new(Mutex::new(Vec::<f32>::with_capacity(9600)));
+    let sys_queue = Arc::new(Mutex::new(ResamplingQueue::new(48000)));
+    let mic_queue = Arc::new(Mutex::new(ResamplingQueue::new(48000)));
 
     let mut sys_stream = None;
     if record_sys {
@@ -73,21 +65,22 @@ pub fn start_capture(
             if let Ok(config) = device.default_output_config() {
                 let sample_format = config.sample_format();
                 let channels = config.channels() as usize;
-                let rb = Arc::clone(&ring_buffer);
+                let sample_rate = config.sample_rate().0;
 
+                {
+                    let mut q = sys_queue.lock().unwrap();
+                    q.set_sample_rate(sample_rate);
+                }
+
+                let q = Arc::clone(&sys_queue);
                 let err_fn = |err| eprintln!("[AudioCapture] System loopback error: {}", err);
 
                 let stream_res = match sample_format {
                     cpal::SampleFormat::F32 => device.build_input_stream(
                         &config.into(),
                         move |data: &[f32], _| {
-                            let sys_gain = SYS_VOLUME.load(Ordering::Relaxed) as f32 / 100.0;
-                            let mut lock = rb.lock().unwrap();
-                            for frame in data.chunks(channels) {
-                                let l = frame.get(0).copied().unwrap_or(0.0) * sys_gain;
-                                let r = frame.get(1).copied().unwrap_or(l) * sys_gain;
-                                lock.push(l);
-                                lock.push(r);
+                            if let Ok(mut lock) = q.lock() {
+                                lock.push_f32_interleaved(data, channels);
                             }
                         },
                         err_fn,
@@ -96,13 +89,8 @@ pub fn start_capture(
                     cpal::SampleFormat::I16 => device.build_input_stream(
                         &config.into(),
                         move |data: &[i16], _| {
-                            let sys_gain = SYS_VOLUME.load(Ordering::Relaxed) as f32 / 100.0;
-                            let mut lock = rb.lock().unwrap();
-                            for frame in data.chunks(channels) {
-                                let l = (frame.get(0).copied().unwrap_or(0) as f32 / 32768.0) * sys_gain;
-                                let r = (frame.get(1).copied().unwrap_or(0) as f32 / 32768.0) * sys_gain;
-                                lock.push(l);
-                                lock.push(r);
+                            if let Ok(mut lock) = q.lock() {
+                                lock.push_i16_interleaved(data, channels);
                             }
                         },
                         err_fn,
@@ -125,8 +113,14 @@ pub fn start_capture(
             if let Ok(config) = device.default_input_config() {
                 let sample_format = config.sample_format();
                 let channels = config.channels() as usize;
-                let rb = Arc::clone(&ring_buffer);
+                let sample_rate = config.sample_rate().0;
 
+                {
+                    let mut q = mic_queue.lock().unwrap();
+                    q.set_sample_rate(sample_rate);
+                }
+
+                let q = Arc::clone(&mic_queue);
                 let err_fn = |err| eprintln!("[AudioCapture] Mic capture error: {}", err);
 
                 let stream_res = match sample_format {
@@ -136,12 +130,8 @@ pub fn start_capture(
                             if IS_MIC_MUTED.load(Ordering::Relaxed) {
                                 return;
                             }
-                            let mic_gain = MIC_VOLUME.load(Ordering::Relaxed) as f32 / 100.0;
-                            let mut lock = rb.lock().unwrap();
-                            for frame in data.chunks(channels) {
-                                let sample = frame.get(0).copied().unwrap_or(0.0) * mic_gain;
-                                lock.push(sample);
-                                lock.push(sample); // mono to stereo
+                            if let Ok(mut lock) = q.lock() {
+                                lock.push_f32_interleaved(data, channels);
                             }
                         },
                         err_fn,
@@ -153,12 +143,8 @@ pub fn start_capture(
                             if IS_MIC_MUTED.load(Ordering::Relaxed) {
                                 return;
                             }
-                            let mic_gain = MIC_VOLUME.load(Ordering::Relaxed) as f32 / 100.0;
-                            let mut lock = rb.lock().unwrap();
-                            for frame in data.chunks(channels) {
-                                let sample = (frame.get(0).copied().unwrap_or(0) as f32 / 32768.0) * mic_gain;
-                                lock.push(sample);
-                                lock.push(sample);
+                            if let Ok(mut lock) = q.lock() {
+                                lock.push_i16_interleaved(data, channels);
                             }
                         },
                         err_fn,
@@ -183,30 +169,76 @@ pub fn start_capture(
         });
     }
 
-    // Flush ring buffer to Tauri IPC Channel in 50ms intervals (~4800 bytes per tick)
-    let rb_flush = Arc::clone(&ring_buffer);
+    // Dynamic adaptive drain: empties available hardware frames on every tick for zero backlog lag
+    let q_sys_flush = Arc::clone(&sys_queue);
+    let q_mic_flush = Arc::clone(&mic_queue);
+
     thread::spawn(move || {
+        const TARGET_RATE: u32 = 48000;
+        const TICK_MS: u64 = 25; // Responsive 25ms tick
+
         while IS_CAPTURING.load(Ordering::Relaxed) {
-            thread::sleep(Duration::from_millis(40));
-            let samples: Vec<f32> = {
-                let mut lock = rb_flush.lock().unwrap();
-                if lock.is_empty() {
-                    continue;
+            thread::sleep(Duration::from_millis(TICK_MS));
+
+            let sys_frames = if record_sys {
+                if let Ok(mut q_sys) = q_sys_flush.lock() {
+                    let rate = q_sys.sample_rate();
+                    if rate == TARGET_RATE {
+                        q_sys.drain_all_stereo()
+                    } else {
+                        let avail = q_sys.available_frames();
+                        let count = (avail as f64 * TARGET_RATE as f64 / rate as f64) as usize;
+                        q_sys.read_resampled_stereo(count, TARGET_RATE)
+                    }
+                } else {
+                    Vec::new()
                 }
-                lock.drain(..).collect()
+            } else {
+                Vec::new()
             };
 
-            if samples.is_empty() {
+            let target_len = sys_frames.len();
+
+            let mic_frames = if record_mic {
+                if let Ok(mut q_mic) = q_mic_flush.lock() {
+                    if target_len > 0 {
+                        // Synchronize to desktop master clock
+                        q_mic.read_resampled_stereo(target_len, TARGET_RATE)
+                    } else {
+                        // Mic standalone master clock
+                        let avail = q_mic.available_frames();
+                        let rate = q_mic.sample_rate();
+                        let count = (avail as f64 * TARGET_RATE as f64 / rate as f64) as usize;
+                        q_mic.read_resampled_stereo(count, TARGET_RATE)
+                    }
+                } else {
+                    Vec::new()
+                }
+            } else {
+                Vec::new()
+            };
+
+            let sys_frames = if sys_frames.is_empty() && !mic_frames.is_empty() {
+                vec![(0.0, 0.0); mic_frames.len()]
+            } else {
+                sys_frames
+            };
+
+            if sys_frames.is_empty() && mic_frames.is_empty() {
                 continue;
             }
 
-            // Convert to 16-bit PCM with transparent peak limiting
-            let mut pcm_bytes = Vec::with_capacity(samples.len() * 2);
-            for s in samples {
-                let limited = transparent_limit(s);
-                let i16_sample = (limited * 32767.0).clamp(-32768.0, 32767.0) as i16;
-                pcm_bytes.extend_from_slice(&i16_sample.to_le_bytes());
-            }
+            let sys_gain = SYS_VOLUME.load(Ordering::Relaxed) as f32 / 100.0;
+            let mic_gain = MIC_VOLUME.load(Ordering::Relaxed) as f32 / 100.0;
+            let is_mic_muted = IS_MIC_MUTED.load(Ordering::Relaxed);
+
+            let pcm_bytes = mix_and_quantize_stereo(
+                &sys_frames,
+                &mic_frames,
+                sys_gain,
+                mic_gain,
+                is_mic_muted,
+            );
 
             if channel.send(pcm_bytes).is_err() {
                 break;
