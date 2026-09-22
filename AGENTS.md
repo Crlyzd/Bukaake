@@ -49,7 +49,7 @@ All agents working on this repository **MUST** strictly enforce these five non-n
 
 ## 2. Directory Structure & Codebase Map
 
-The project contains **70+ modular files** cleanly organized across distinct layers:
+The project contains **100+ modular files** cleanly organized across distinct layers:
 
 ```
 src/
@@ -77,7 +77,7 @@ src/
 │   ├── filters.js              # Real-time color adjustments processor
 │   └── metadata.js             # Client EXIF parser & telemetry formatter
 ├── services/            # Background, Platform & State Services (< 300 lines each)
-│   ├── capture/                # Screen capture, recorder & screenshot saver
+│   ├── capture/                # Screen capture, recorder, audio & screenshot saver
 │   ├── alitken-service.js      # External editor tandem workflow integration
 │   ├── autostart-service.js    # Windows autostart management
 │   ├── canvas-tools-manager.js # Tool mutual exclusivity & interaction lockout
@@ -103,14 +103,20 @@ src/
 └── settings-app.js      # Standalone settings window coordinator (≤ 350 lines)
 src-tauri/src/
 ├── main.rs              # App entry-point, plugins & lifecycle (≤ 350 lines)
+├── audio_capture.rs     # Native Windows WASAPI loopback & microphone audio capture
+├── audio_mixer.rs       # Dual-source FIFO resampling queue, clock sync & peak limiter
+├── autostart.rs         # Native Windows HKCU autostart registry management
 ├── capture_commands.rs  # Screen capture, snip & recording IPC commands
 ├── clipboard.rs         # Win32 clipboard engine (CF_HDROP / CF_DIB)
+├── ebml_patcher.rs      # Zero-dependency EBML WebM duration & seek header patcher
 ├── exif_reader.rs       # Native EXIF extraction via kamadak-exif
 ├── file_assoc.rs        # HKCU shell registration & silent startup auto-heal
 ├── file_ops.rs          # Win32 Recycle Bin deletion (SHFileOperationW)
 ├── heif_reader.rs       # HEIC/HEIF container parsing & preview extraction
+├── hotkeys.rs           # Native global shortcut listener
 ├── image_loader.rs      # Native image decoding & 49 format traversal
 ├── pro_decoder.rs       # VFX & texture decoders (HDR, EXR, DDS, TGA, QOI)
+├── process_memory.rs    # Working set telemetry & memory footprint tracking
 ├── raw_reader.rs        # 4-tier LibRaw camera RAW pipeline & full sensor unpack
 ├── recording_border.rs  # Stroke-free desktop capture region border overlay
 ├── recording_pill.rs    # Floating desktop recording pill controller
@@ -131,13 +137,15 @@ src-tauri/src/
   - Multi-monitor awareness via native Windows monitor bounds enumeration.
   - Capture modes: Full Screen, Active Monitor, Custom Region.
   - Auto-Save & Clipboard: Automatically copies captured snips to clipboard (`CF_DIB`) and writes timestamped PNGs to the user's Pictures/Screenshots directory via `screenshot-saver.js`.
-- **Screen Recording (`recording-dock.js`, `screen-recorder-service.js`, `recording_border.rs`, `recording_pill.rs`)**:
+- **Screen Recording & Native Audio Engine (`recording-dock.js`, `screen-recorder-service.js`, `audio-stream-receiver.js`, `audio_capture.rs`, `audio_mixer.rs`, `ebml_patcher.rs`, `recording_border.rs`, `recording_pill.rs`)**:
   - Stroke-free frosted recording dock with live timer, pause/resume, and stop/discard buttons.
   - Native overlay border around recorded region (`recording_border.rs`) with zero window chrome.
   - Low-RAM stream-to-disk chunking exporting directly to WebM (VP9) with automatic toast notification and optional external editor launch.
+  - **WASAPI Audio Capture & Dual-Source Mixing (`audio_capture.rs`, `audio_mixer.rs`)**: Captures synchronized system loopback audio and microphone input via independent FIFO queues (`ResamplingQueue`). Features phase-tracked linear resampling for arbitrary mic rates (e.g. 16kHz Bluetooth TWS to 48kHz stereo), dynamic 25ms system-clock frame draining to eliminate audio drift and lag, and a transparent soft-knee peak limiter preventing clipping distortion.
+  - **Zero-Dependency EBML WebM Duration Patcher (`ebml_patcher.rs`)**: Injects container-level Duration tags (`0x4489`) directly into the WebM Segment Info during recording finalization, enabling smooth seekbar scrubbing in Windows Media Player and web players without bundled FFmpeg binaries.
 - **Alitken Tandem Workflow (`alitken-service.js`)**:
   - Deep-link bridge allowing one-click transfer of active images to Alitken for advanced editing and seamless auto-reload in Bukaake upon save.
-- **Unified Hotkeys (`hotkey-service.js`)**:
+- **Unified Hotkeys (`hotkey-service.js`, `hotkeys.rs`)**:
   - Coordinates global Windows shortcuts and in-app triggers for instant capture without input conflicts.
 
 ### Camera RAW & VFX Subsystem

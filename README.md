@@ -51,7 +51,7 @@ Most photo viewers on Windows today are slow to launch, cluttered with heavy too
 - 🖱️ **Smooth Navigation**: Zoom like butter with your mouse wheel right into the fine details, click-and-drag to pan, and flip effortlessly through folders with your arrow keys.
 - ✍️ **Vector Typography & Markup**: Add scalable text overlays with 8-point handles, dynamic shadows, rounded fills, pen, and highlighter without external editors.
 - 🗑️ **Stress-Free & Safe**: Send bad photos straight to your **Windows Recycle Bin** with `Delete`—easily restore them if you ever change your mind!
-- 📸 **Built-in Snip & Record**: Take instant screenshots of any monitor or region, or record video clips right from the app with zero extra tools.
+- 📸 **Built-in Snip & Record**: Take instant screenshots of any monitor or region, or record video clips with crisp audio right from the app.
 
 <br />
 
@@ -66,7 +66,7 @@ Most photo viewers on Windows today are slow to launch, cluttered with heavy too
 | 📷 **49+ Formats & Camera RAW** | Native iPhone HEIC/HEIF (100% free), 24+ RAW camera formats, and 3D VFX textures. |
 | ✍️ **Vector Typography & Crop** | Vector text engine with 8-point handles, dynamic shadows, laser-guided crop, pen & highlighter. |
 | 📸 **Integrated Screen Snipper** | Multi-monitor crosshair capture with instant clipboard copy and auto-saved PNGs. |
-| 🎥 **Desktop Screen Recording** | Floating frosted control dock streaming lightweight WebM (VP9) video to disk. |
+| 🎥 **Desktop Screen Recording** | Floating frosted control dock streaming crisp video with synchronized audio. |
 | 🗑️ **Safe Recycle Bin Deletion** | Win32 Recycle Bin integration (`Delete` to trash, `Shift+Delete` to shred). |
 | 🎨 **Stroke-Free Frosted Glass** | Dual theme engine: Deep Obsidian Dark Mode & Frosted Slate Light Mode. |
 
@@ -124,7 +124,8 @@ Capture and share anything on your screen without launching heavy third-party so
 #### 🎥 Desktop Screen Recorder
 - **Floating Glass Dock**: Stroke-free pill bar with live elapsed timer, pause/resume, and discard buttons.
 - **Stroke-Free Region Border**: Visual highlight box showing exactly what area is being captured.
-- **Low-RAM Streaming**: Streams chunks directly to disk in 1-second intervals, exporting lightweight WebM (VP9) videos without memory spikes.
+- **Synchronized Audio Capture**: Records crystal-clear system audio and microphone sound with zero lag or flutter.
+- **Seekable & Lightweight**: Streams lightweight WebM (VP9) video directly to disk with full seekbar scrubbing support and zero memory spikes.
 
 </td>
 </tr>
