@@ -28,6 +28,7 @@ pub struct ScreenCapturePayload {
     pub was_visible: bool,
     pub was_fullscreen: bool,
     pub was_minimized: bool,
+    pub scale_factor: f64,
 }
 
 #[cfg(target_os = "windows")]
@@ -149,6 +150,7 @@ pub fn capture_desktop() -> Result<ScreenCapturePayload, String> {
             was_visible: true,
             was_fullscreen: false,
             was_minimized: false,
+            scale_factor: 1.0,
         })
     }
 }

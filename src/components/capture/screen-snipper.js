@@ -35,15 +35,12 @@ export class ScreenSnipper {
         <div class="snipper-dock-divider"></div>
         <button class="snipper-pill-btn cancel" id="btnSnipperClose" title="Close (Esc)"><i class="ri-close-line"></i></button>
       </div>
-      <div class="snipper-selection-box hidden">
-        <div class="snipper-dim-tag">0 × 0</div>
-      </div>
+      <div class="snipper-selection-box hidden"><div class="snipper-dim-tag">0 × 0</div></div>
       <div class="snipper-action-dock glass-panel hidden">
         <button class="snipper-btn confirm" id="btnSnipConfirm" title="Open in Bukaake (Enter)"><i class="ri-check-line"></i> <span id="snipConfirmLabel">Open</span></button>
         <button class="snipper-btn" id="btnSnipCopy" title="Copy to Clipboard (Ctrl+C)"><i class="ri-file-copy-line"></i> Copy</button>
         <button class="snipper-btn cancel" id="btnSnipCancel" title="Cancel (Esc)"><i class="ri-close-line"></i></button>
-      </div>
-    `;
+      </div>`;
 
     this.bgImg = this.overlay.querySelector('.snipper-bg-img');
     this.modeDock = this.overlay.querySelector('.snipper-mode-dock');
@@ -59,6 +56,16 @@ export class ScreenSnipper {
     this.overlay.addEventListener('mousedown', (e) => this.onMouseDown(e));
     window.addEventListener('mousemove', (e) => this.onMouseMove(e));
     window.addEventListener('mouseup', () => this.onMouseUp());
+    window.addEventListener('resize', () => {
+      if (!this.isActive) return;
+      if (this.currentMode === 'fullscreen') {
+        const physW = Math.round(window.innerWidth * this.screenDpr);
+        const physH = Math.round(window.innerHeight * this.screenDpr);
+        this.currentRect = { x: 0, y: 0, width: physW, height: physH, cssX: 0, cssY: 0, cssWidth: window.innerWidth, cssHeight: window.innerHeight };
+        Object.assign(this.box.style, { left: '0px', top: '0px', width: `${window.innerWidth}px`, height: `${window.innerHeight}px` });
+        this.dimTag.textContent = `${window.innerWidth} × ${window.innerHeight} • Click anywhere to capture`;
+      }
+    });
 
     this.overlay.querySelector('#btnSnipConfirm')?.addEventListener('click', (e) => { e.stopPropagation(); this.confirmSnip(false); });
     this.overlay.querySelector('#btnSnipCopy')?.addEventListener('click', (e) => { e.stopPropagation(); this.confirmSnip(true); });
@@ -84,37 +91,24 @@ export class ScreenSnipper {
     });
   }
 
-  get isActive() {
-    return this.overlay && !this.overlay.classList.contains('hidden');
-  }
+  get isActive() { return this.overlay && !this.overlay.classList.contains('hidden'); }
 
   setType(type) {
     this.currentType = type;
     this.modeDock.querySelector('#btnTypeScreenshot')?.classList.toggle('active', type === 'screenshot');
     this.modeDock.querySelector('#btnTypeRecord')?.classList.toggle('active', type === 'record');
-
+    const isRec = type === 'record';
     const confirmLabel = this.actionDock.querySelector('#snipConfirmLabel');
     const confirmIcon = this.actionDock.querySelector('#btnSnipConfirm i');
-    const btnCopy = this.actionDock.querySelector('#btnSnipCopy');
-
-    if (type === 'record') {
-      if (confirmLabel) confirmLabel.textContent = 'Record';
-      if (confirmIcon) confirmIcon.className = 'ri-video-on-line';
-      btnCopy?.classList.add('hidden');
-    } else {
-      if (confirmLabel) confirmLabel.textContent = 'Open';
-      if (confirmIcon) confirmIcon.className = 'ri-check-line';
-      btnCopy?.classList.remove('hidden');
-    }
+    if (confirmLabel) confirmLabel.textContent = isRec ? 'Record' : 'Open';
+    if (confirmIcon) confirmIcon.className = isRec ? 'ri-video-on-line' : 'ri-check-line';
+    this.actionDock.querySelector('#btnSnipCopy')?.classList.toggle('hidden', isRec);
     localStorage.setItem('bukaake-capture-type', type);
   }
 
   setMode(mode) {
     this.currentMode = mode;
-    this.modeDock.querySelectorAll('.snipper-region-modes .snipper-pill-btn').forEach((btn) => {
-      btn.classList.remove('active');
-    });
-
+    this.modeDock.querySelectorAll('.snipper-region-modes .snipper-pill-btn').forEach((btn) => btn.classList.remove('active'));
     this.actionDock.classList.add('hidden');
     if (mode === 'fullscreen') {
       this.modeDock.querySelector('#btnModeFullscreen')?.classList.add('active');
@@ -138,10 +132,11 @@ export class ScreenSnipper {
     this.onCancel = onCancel;
     this.currentRect = null;
 
-    // Physical-to-CSS scale: GDI width (physical px) / WebView CSS width
-    this.screenDpr = (options.screenWidth && window.innerWidth)
-      ? (options.screenWidth / window.innerWidth)
-      : (window.devicePixelRatio || 1);
+    // Physical-to-CSS scale: authoritative scale factor from Rust, devicePixelRatio, or viewport ratio
+    // Guard against stale startup viewport (e.g. 680x480 hidden window)
+    const isStale = !window.innerWidth || window.innerWidth <= 680;
+    const fallbackRatio = (!isStale && options.screenWidth) ? (options.screenWidth / window.innerWidth) : null;
+    this.screenDpr = options.scaleFactor || window.devicePixelRatio || fallbackRatio || 1;
 
     // Pre-compute CSS-space window rects for hit-testing on the overlay
     this.detectedWindows = (options.windows || []).map((w) => ({

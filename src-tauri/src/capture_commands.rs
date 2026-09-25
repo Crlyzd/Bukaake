@@ -174,11 +174,15 @@ pub fn prepare_screen_snip(app: tauri::AppHandle) -> Result<ScreenCapturePayload
     let mut was_visible = false;
     let mut was_minimized = false;
     let mut was_fullscreen = false;
+    let mut scale_factor = 1.0;
 
     if let Some(win) = app.get_webview_window("main") {
         was_visible = win.is_visible().unwrap_or(false);
         was_minimized = win.is_minimized().unwrap_or(false);
         was_fullscreen = win.is_fullscreen().unwrap_or(false);
+        if let Ok(Some(monitor)) = win.current_monitor() {
+            scale_factor = monitor.scale_factor();
+        }
 
         if was_visible {
             let _ = win.hide();
@@ -192,6 +196,7 @@ pub fn prepare_screen_snip(app: tauri::AppHandle) -> Result<ScreenCapturePayload
     payload.was_visible = was_visible;
     payload.was_minimized = was_minimized;
     payload.was_fullscreen = was_fullscreen;
+    payload.scale_factor = scale_factor;
 
     if let Some(win) = app.get_webview_window("main") {
         let _ = win.set_maximizable(true);

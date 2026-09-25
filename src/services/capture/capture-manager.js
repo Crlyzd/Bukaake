@@ -97,6 +97,7 @@ export class CaptureManager {
     options.windows = payload.windows || [];
     options.screenWidth = payload.width;
     options.screenHeight = payload.height;
+    options.scaleFactor = payload.scale_factor || window.devicePixelRatio || 1;
     const capturePhysW = payload.width;
     const capturePhysH = payload.height;
 
@@ -178,20 +179,14 @@ export class CaptureManager {
     const recordMic = localStorage.getItem('bukaake-record-mic') === 'true';
     this.recordingDock.show({
       hasMic: recordMic,
-      onToggleMic: (muted) => {
-        screenRecorderService.setMicMuted(muted);
-      },
+      onToggleMic: (muted) => screenRecorderService.setMicMuted(muted),
       onPause: () => {
         screenRecorderService.pauseRecording();
-        if (tauriBridge.isTauri()) {
-          invoke('set_recording_border_paused', { paused: true }).catch(() => {});
-        }
+        if (tauriBridge.isTauri()) invoke('set_recording_border_paused', { paused: true }).catch(() => {});
       },
       onResume: () => {
         screenRecorderService.resumeRecording();
-        if (tauriBridge.isTauri()) {
-          invoke('set_recording_border_paused', { paused: false }).catch(() => {});
-        }
+        if (tauriBridge.isTauri()) invoke('set_recording_border_paused', { paused: false }).catch(() => {});
       },
       onStop: () => this.stopRecording(),
       onCancel: () => this.cancelRecording(),
