@@ -48,10 +48,27 @@ pub fn stop_capture() {
     }
 }
 
+pub fn start_audio_feed<F>(record_sys: bool, record_mic: bool, on_pcm: F) -> Result<(), String>
+where
+    F: Fn(Vec<u8>) + Send + 'static,
+{
+    start_capture_internal(record_sys, record_mic, Box::new(on_pcm))
+}
+
 pub fn start_capture(
     channel: Channel<Vec<u8>>,
     record_sys: bool,
     record_mic: bool,
+) -> Result<(), String> {
+    start_audio_feed(record_sys, record_mic, move |bytes| {
+        let _ = channel.send(bytes);
+    })
+}
+
+fn start_capture_internal(
+    record_sys: bool,
+    record_mic: bool,
+    on_pcm: Box<dyn Fn(Vec<u8>) + Send + 'static>,
 ) -> Result<(), String> {
     stop_capture();
 
@@ -240,9 +257,7 @@ pub fn start_capture(
                 is_mic_muted,
             );
 
-            if channel.send(pcm_bytes).is_err() {
-                break;
-            }
+            on_pcm(pcm_bytes);
         }
     });
 

@@ -193,7 +193,7 @@ export class SnipperApp {
     }
 
     try {
-      const defaultName = `Recording_${new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19)}.webm`;
+      const defaultName = `Recording_${new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19)}.mp4`;
       const askPrompt = localStorage.getItem('bukaake-video-prompt-save') === 'true';
       const customDir = localStorage.getItem('bukaake-video-save-dir');
       const defaultDir = customDir || (await invoke('get_default_videos_dir'));
@@ -202,7 +202,7 @@ export class SnipperApp {
       if (askPrompt) {
         finalPath = await invoke('prompt_save_recording', { defaultName, defaultDir });
         if (!finalPath) {
-          await invoke('discard_recording', { tempPath: result.tempPath });
+          await invoke('discard_native_recording', { tempPath: result.tempPath });
           await invoke('exit_recording_pill_mode', { openMain: false }).catch(() => {});
           await emit('bukaake://show-toast', { message: 'Recording discarded', type: 'info' });
           return;

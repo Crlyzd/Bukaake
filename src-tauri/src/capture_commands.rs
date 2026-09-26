@@ -31,79 +31,109 @@ pub fn get_default_videos_dir() -> Result<String, String> {
 }
 
 #[tauri::command]
-pub fn init_recording_stream(temp_filename: String) -> Result<String, String> {
-    crate::process_memory::set_recording_memory_lockout(true);
+pub fn start_native_recording(
+    region: Option<crate::native_recorder::CaptureRegion>,
+    fps: Option<u32>,
+    bitrate: Option<u32>,
+    record_sys: Option<bool>,
+    record_mic: Option<bool>,
+) -> Result<String, String> {
     let temp_dir = std::env::temp_dir().join("Bukaake").join("captures");
-    fs::create_dir_all(&temp_dir).map_err(|e| e.to_string())?;
-
-    let file_path = temp_dir.join(&temp_filename);
-    let _ = fs::File::create(&file_path).map_err(|e| e.to_string())?;
-
-    Ok(file_path.to_string_lossy().to_string())
+    let _ = fs::create_dir_all(&temp_dir);
+    let ms = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .map(|d| d.as_millis())
+        .unwrap_or(0);
+    let temp_file = temp_dir.join(format!("rec_{}.mp4", ms));
+    crate::native_recorder::start_native_recording(
+        temp_file,
+        region,
+        fps.unwrap_or(60),
+        bitrate.unwrap_or(6_000_000),
+        record_sys.unwrap_or(true),
+        record_mic.unwrap_or(false),
+    )
 }
 
 #[tauri::command]
-pub fn append_recording_chunk(temp_path: String, chunk: Vec<u8>) -> Result<(), String> {
-    let mut file = OpenOptions::new()
-        .create(true)
-        .append(true)
-        .open(&temp_path)
-        .map_err(|e| e.to_string())?;
+pub fn pause_native_recording() -> Result<(), String> {
+    crate::native_recorder::pause_native_recording()
+}
 
-    file.write_all(&chunk).map_err(|e| e.to_string())?;
-    file.flush().map_err(|e| e.to_string())?;
+#[tauri::command]
+pub fn resume_native_recording() -> Result<(), String> {
+    crate::native_recorder::resume_native_recording()
+}
+
+#[tauri::command]
+pub fn stop_native_recording() -> Result<crate::native_recorder::NativeRecordingResult, String> {
+    crate::native_recorder::stop_native_recording()
+}
+
+#[tauri::command]
+pub fn discard_native_recording(temp_path: Option<String>) -> Result<(), String> {
+    let _ = crate::native_recorder::discard_native_recording();
+    if let Some(tp) = temp_path {
+        let p = Path::new(&tp);
+        if p.exists() {
+            let _ = fs::remove_file(p);
+        }
+    }
+    crate::process_memory::trim_process_tree();
     Ok(())
 }
 
 #[tauri::command]
-pub fn finalize_recording(
-    temp_path: String,
-    dest_path: String,
-    duration_ms: Option<f64>,
-) -> Result<String, String> {
+pub fn init_recording_stream(temp_filename: String) -> Result<String, String> {
+    let p = std::env::temp_dir().join("Bukaake").join("captures").join(temp_filename);
+    if let Some(parent) = p.parent() { let _ = fs::create_dir_all(parent); }
+    let _ = fs::File::create(&p).map_err(|e| e.to_string())?;
+    Ok(p.to_string_lossy().to_string())
+}
+
+#[tauri::command]
+pub fn append_recording_chunk(temp_path: String, chunk: Vec<u8>) -> Result<(), String> {
+    let mut file = OpenOptions::new().create(true).append(true).open(&temp_path).map_err(|e| e.to_string())?;
+    file.write_all(&chunk).map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+pub fn finalize_recording(temp_path: String, dest_path: String, duration_ms: Option<f64>) -> Result<String, String> {
     crate::process_memory::set_recording_memory_lockout(false);
     let temp = Path::new(&temp_path);
     let dest = Path::new(&dest_path);
+    if let Some(parent) = dest.parent() { let _ = fs::create_dir_all(parent); }
 
-    if let Some(parent) = dest.parent() {
-        let _ = fs::create_dir_all(parent);
-    }
-
-    if let Some(ms) = duration_ms {
-        let _ = crate::ebml_patcher::patch_webm_duration(temp, dest, ms);
+    if temp_path.ends_with(".webm") {
+        if let Some(ms) = duration_ms {
+            let _ = crate::ebml_patcher::patch_webm_duration(temp, dest, ms);
+        } else if let Err(_) = fs::rename(temp, dest) {
+            fs::copy(temp, dest).map_err(|e| format!("Failed to copy recording: {}", e))?;
+            let _ = fs::remove_file(temp);
+        }
     } else if let Err(_) = fs::rename(temp, dest) {
         fs::copy(temp, dest).map_err(|e| format!("Failed to copy recording: {}", e))?;
         let _ = fs::remove_file(temp);
     }
-
     crate::process_memory::trim_process_tree();
     Ok(dest.to_string_lossy().to_string())
 }
 
 #[tauri::command]
 pub fn discard_recording(temp_path: String) -> Result<(), String> {
-    crate::process_memory::set_recording_memory_lockout(false);
-    let path = Path::new(&temp_path);
-    if path.exists() {
-        let _ = fs::remove_file(path);
-    }
-    crate::process_memory::trim_process_tree();
-    Ok(())
+    discard_native_recording(Some(temp_path))
 }
 
 #[tauri::command]
 pub fn prompt_save_recording(default_name: String, default_dir: Option<String>) -> Result<Option<String>, String> {
     let mut dialog = rfd::FileDialog::new()
         .set_file_name(&default_name)
+        .add_filter("MP4 Video", &["mp4"])
         .add_filter("WebM Video", &["webm"]);
-
     if let Some(dir) = default_dir {
         let p = PathBuf::from(dir);
-        if p.is_dir() {
-            dialog = dialog.set_directory(p);
-        }
+        if p.is_dir() { dialog = dialog.set_directory(p); }
     }
-
     Ok(dialog.save_file().map(|p| p.to_string_lossy().to_string()))
 }
 
@@ -180,13 +210,9 @@ pub fn prepare_screen_snip(app: tauri::AppHandle) -> Result<ScreenCapturePayload
     payload.scale_factor = scale_factor;
 
     if let Some(snipper) = app.get_webview_window("snipper") {
-        let _ = snipper.unminimize();
-        let _ = snipper.set_always_on_top(true);
-        let _ = snipper.set_fullscreen(true);
-        let _ = snipper.show();
-        let _ = snipper.set_focus();
+        let _ = snipper.unminimize(); let _ = snipper.set_always_on_top(true);
+        let _ = snipper.set_fullscreen(true); let _ = snipper.show(); let _ = snipper.set_focus();
     }
-
     Ok(payload)
 }
 
@@ -194,11 +220,8 @@ pub fn prepare_screen_snip(app: tauri::AppHandle) -> Result<ScreenCapturePayload
 pub fn show_screen_snip(app: tauri::AppHandle) -> Result<(), String> {
     use tauri::Manager;
     if let Some(s) = app.get_webview_window("snipper") {
-        let _ = s.unminimize();
-        let _ = s.set_always_on_top(true);
-        let _ = s.set_fullscreen(true);
-        let _ = s.show();
-        let _ = s.set_focus();
+        let _ = s.unminimize(); let _ = s.set_always_on_top(true);
+        let _ = s.set_fullscreen(true); let _ = s.show(); let _ = s.set_focus();
     }
     Ok(())
 }

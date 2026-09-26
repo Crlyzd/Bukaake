@@ -1,11 +1,10 @@
 /**
  * Bukaake Screen Recorder Service
- * Hardware-accelerated display capture with low-RAM stream-to-disk chunking (< 190 lines)
+ * High-performance coordinator for native GPU-accelerated screen & audio capture (< 160 lines)
  */
 
-import { invoke, Channel } from '@tauri-apps/api/core';
+import { invoke } from '@tauri-apps/api/core';
 import { toast } from '../../components/toast.js';
-import { AudioStreamReceiver } from './audio-stream-receiver.js';
 
 export const QUALITY_PRESETS = {
   high: { fps: 60, bitrate: 6_000_000, label: '60 FPS • High (6 Mbps)' },
@@ -15,8 +14,6 @@ export const QUALITY_PRESETS = {
 
 export class ScreenRecorderService {
   constructor() {
-    this.mediaStream = null;
-    this.mediaRecorder = null;
     this.state = 'idle'; // idle | recording | paused
     this.startTime = 0;
     this.pausedDuration = 0;
@@ -24,7 +21,6 @@ export class ScreenRecorderService {
     this.timerInterval = null;
     this.elapsedSeconds = 0;
     this.tempFilePath = null;
-    this.audioReceiver = new AudioStreamReceiver();
 
     this.onStateChange = null;
     this.onTimerTick = null;
@@ -39,126 +35,28 @@ export class ScreenRecorderService {
     if (this.state !== 'idle') return false;
     const quality = QUALITY_PRESETS[presetKey || this.getQualitySetting()] || QUALITY_PRESETS.high;
 
-    try {
-      const stream = await navigator.mediaDevices.getDisplayMedia({
-        video: {
-          displaySurface: 'monitor',
-          frameRate: { ideal: quality.fps, max: quality.fps },
-        },
-        audio: false,
-      });
+    const recordSys = localStorage.getItem('bukaake-record-sys-audio') !== 'false';
+    const recordMic = localStorage.getItem('bukaake-record-mic') === 'true';
 
-      this.mediaStream = stream;
-      let recordStream = stream;
-
-      const recordSys = localStorage.getItem('bukaake-record-sys-audio') !== 'false';
-      const recordMic = localStorage.getItem('bukaake-record-mic') === 'true';
-      let audioTrack = null;
-
-      if (recordSys || recordMic) {
-        try {
-          await this.audioReceiver.start();
-          audioTrack = this.audioReceiver.getAudioTrack();
-
-          const audioChannel = new Channel();
-          audioChannel.onmessage = (bytes) => {
-            this.audioReceiver.feedPcmChunk(bytes);
-          };
-
-          await invoke('start_audio_capture', {
-            channel: audioChannel,
-            recordSys,
-            recordMic,
-          });
-        } catch (audioErr) {
-          console.warn('[ScreenRecorder] WASAPI audio capture failed:', audioErr);
-        }
-      }
-
-      if (cropRegion && cropRegion.width > 20 && cropRegion.height > 20) {
-        const video = document.createElement('video');
-        video.srcObject = stream;
-        video.muted = true;
-        video.playsInline = true;
-        await video.play().catch(() => {});
-
-        if (!video.videoWidth) {
-          await new Promise((resolve) => {
-            video.onloadedmetadata = () => resolve();
-            setTimeout(resolve, 200);
-          });
-        }
-
-        const refW = cropRegion.screenWidth || video.videoWidth || 1;
-        const vW = video.videoWidth || refW;
-        const vH = video.videoHeight || (cropRegion.screenHeight || 1);
-        const scaleX = vW / refW;
-        const scaleY = vH / (cropRegion.screenHeight || refW);
-
-        const sX = Math.max(0, Math.min(vW - 1, Math.round(cropRegion.x * scaleX)));
-        const sY = Math.max(0, Math.min(vH - 1, Math.round(cropRegion.y * scaleY)));
-        const sW = Math.max(1, Math.min(vW - sX, Math.round(cropRegion.width * scaleX)));
-        const sH = Math.max(1, Math.min(vH - sY, Math.round(cropRegion.height * scaleY)));
-
-        const canvas = document.createElement('canvas');
-        canvas.width = sW;
-        canvas.height = sH;
-        const ctx = canvas.getContext('2d', { alpha: false });
-        ctx.imageSmoothingEnabled = false;
-
-        this.cropCanvas = canvas;
-        this.cropVideo = video;
-
-        const frameInterval = Math.max(16, Math.floor(1000 / quality.fps));
-        this.cropInterval = setInterval(() => {
-          if (this.state === 'recording' || this.state === 'paused') {
-            ctx.drawImage(video, sX, sY, sW, sH, 0, 0, sW, sH);
-          }
-        }, frameInterval);
-
-        const canvasStream = canvas.captureStream(quality.fps);
-        if (audioTrack) {
-          canvasStream.addTrack(audioTrack);
-        }
-        recordStream = canvasStream;
-      } else if (audioTrack) {
-        recordStream = new MediaStream([...stream.getVideoTracks(), audioTrack]);
-      }
-
-      const mimeType = MediaRecorder.isTypeSupported('video/webm;codecs=vp9')
-        ? 'video/webm;codecs=vp9'
-        : 'video/webm';
-
-      const tempFilename = `rec_${Date.now()}.part`;
-      this.tempFilePath = await invoke('init_recording_stream', { tempFilename });
-
-      this.mediaRecorder = new MediaRecorder(recordStream, {
-        mimeType,
-        videoBitsPerSecond: quality.bitrate,
-        audioBitsPerSecond: 256_000,
-      });
-
-      this.mediaRecorder.ondataavailable = async (e) => {
-        if (e.data && e.data.size > 0 && this.tempFilePath) {
-          try {
-            const buf = await e.data.arrayBuffer();
-            const bytes = Array.from(new Uint8Array(buf));
-            await invoke('append_recording_chunk', {
-              tempPath: this.tempFilePath,
-              chunk: bytes,
-            });
-          } catch (err) {
-            console.error('[ScreenRecorder] Failed to stream chunk to disk:', err);
-          }
-        }
+    let regionPayload = null;
+    if (cropRegion && cropRegion.width > 20 && cropRegion.height > 20) {
+      regionPayload = {
+        x: Math.max(0, Math.round(cropRegion.x)),
+        y: Math.max(0, Math.round(cropRegion.y)),
+        width: Math.max(2, Math.round(cropRegion.width)),
+        height: Math.max(2, Math.round(cropRegion.height)),
       };
+    }
 
-      // Auto-stop if user clicks native browser "Stop sharing" button
-      stream.getVideoTracks()[0].addEventListener('ended', () => {
-        if (this.state !== 'idle') this.stopRecording();
+    try {
+      this.tempFilePath = await invoke('start_native_recording', {
+        region: regionPayload,
+        fps: quality.fps,
+        bitrate: quality.bitrate,
+        recordSys,
+        recordMic,
       });
 
-      this.mediaRecorder.start(1000); // 1-second chunks for low RAM usage
       this.state = 'recording';
       this.startTime = Date.now();
       this.pausedDuration = 0;
@@ -168,66 +66,69 @@ export class ScreenRecorderService {
       this.onStateChange?.(this.state);
       return true;
     } catch (err) {
-      if (err.name !== 'NotAllowedError') {
-        console.error('[ScreenRecorder] Stream capture error:', err);
-        toast.show('Could not start screen recording: ' + err.message, 'error');
-      }
+      console.error('[ScreenRecorder] Native recording start failed:', err);
+      toast.show('Could not start screen recording: ' + err, 'error');
       this.cleanup();
       return false;
     }
   }
 
-  pauseRecording() {
-    if (this.state !== 'recording' || !this.mediaRecorder) return;
-    this.mediaRecorder.pause();
-    this.state = 'paused';
-    this.pauseStartTime = Date.now();
-    this.onStateChange?.(this.state);
+  async pauseRecording() {
+    if (this.state !== 'recording') return;
+    try {
+      await invoke('pause_native_recording');
+      this.state = 'paused';
+      this.pauseStartTime = Date.now();
+      this.onStateChange?.(this.state);
+    } catch (err) {
+      console.warn('[ScreenRecorder] Pause failed:', err);
+    }
   }
 
-  resumeRecording() {
-    if (this.state !== 'paused' || !this.mediaRecorder) return;
-    this.mediaRecorder.resume();
-    this.state = 'recording';
-    this.pausedDuration += Date.now() - this.pauseStartTime;
-    this.onStateChange?.(this.state);
+  async resumeRecording() {
+    if (this.state !== 'paused') return;
+    try {
+      await invoke('resume_native_recording');
+      this.state = 'recording';
+      this.pausedDuration += Date.now() - this.pauseStartTime;
+      this.onStateChange?.(this.state);
+    } catch (err) {
+      console.warn('[ScreenRecorder] Resume failed:', err);
+    }
   }
 
   async stopRecording() {
-    if (this.state === 'idle' || !this.mediaRecorder) return null;
+    if (this.state === 'idle') return null;
+    this.stopTimer();
 
-    return new Promise((resolve) => {
-      this.mediaRecorder.onstop = async () => {
-        const durationMs = Math.max(0, Date.now() - this.startTime - this.pausedDuration);
-        const recordedSeconds = Math.max(this.elapsedSeconds, Math.floor(durationMs / 1000));
-        const tempPath = this.tempFilePath;
-        this.cleanup();
+    try {
+      const res = await invoke('stop_native_recording');
+      const durationSecs = res?.duration_secs ?? Math.max(this.elapsedSeconds, Math.floor((Date.now() - this.startTime) / 1000));
+      const durationMs = res?.duration_ms ?? durationSecs * 1000;
+      const tempPath = res?.temp_path || this.tempFilePath;
 
-        resolve({
-          tempPath,
-          durationSecs: recordedSeconds,
-          durationMs,
-        });
+      this.cleanup();
+      return {
+        tempPath,
+        durationSecs,
+        durationMs,
       };
-
-      try {
-        this.mediaRecorder.stop();
-      } catch (_) {
-        this.cleanup();
-        resolve(null);
-      }
-    });
+    } catch (err) {
+      console.error('[ScreenRecorder] Native recording stop failed:', err);
+      this.cleanup();
+      return null;
+    }
   }
 
   async cancelRecording() {
     if (this.state === 'idle') return;
     this.stopTimer();
-    if (this.tempFilePath) {
-      try {
-        await invoke('discard_recording', { tempPath: this.tempFilePath });
-      } catch (_) {}
-    }
+    const tempPath = this.tempFilePath;
     this.cleanup();
+
+    try {
+      await invoke('discard_native_recording', { tempPath });
+    } catch (_) {}
     toast.show('Recording discarded', 'info');
   }
 
@@ -257,37 +158,12 @@ export class ScreenRecorderService {
 
   cleanup() {
     this.stopTimer();
-    if (this.cropInterval) {
-      clearInterval(this.cropInterval);
-      this.cropInterval = null;
-    }
-    if (this.cropAnimFrame) {
-      cancelAnimationFrame(this.cropAnimFrame);
-      this.cropAnimFrame = null;
-    }
-    if (this.cropVideo) {
-      this.cropVideo.pause();
-      this.cropVideo.srcObject = null;
-      this.cropVideo = null;
-    }
-    this.cropCanvas = null;
-
-    if (this.mediaStream) {
-      this.mediaStream.getTracks().forEach((track) => track.stop());
-      this.mediaStream = null;
-    }
-    this.mediaRecorder = null;
     this.state = 'idle';
     this.tempFilePath = null;
-
-    invoke('stop_audio_capture').catch(() => {});
-    this.audioReceiver?.stop();
-
     this.onStateChange?.(this.state);
   }
 
   async setMicMuted(muted) {
-    this.audioReceiver?.setGain(muted ? 0.0 : 1.0);
     await invoke('set_recording_mic_muted', { muted }).catch(() => {});
   }
 }

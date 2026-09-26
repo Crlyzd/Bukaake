@@ -22,6 +22,14 @@ pub mod ebml_patcher;
 pub mod window_commands;
 #[cfg(target_os = "windows")]
 pub mod wic_decoder;
+#[cfg(target_os = "windows")]
+pub mod d3d_device;
+#[cfg(target_os = "windows")]
+pub mod wgc_capture;
+#[cfg(target_os = "windows")]
+pub mod wmf_writer;
+#[cfg(target_os = "windows")]
+pub mod native_recorder;
 mod image_loader;
 mod updater;
 use audio_capture::{
@@ -33,6 +41,8 @@ use capture_commands::{
     prompt_select_executable, prompt_select_folder, prompt_save_recording,
     prepare_screen_snip, show_screen_snip, finish_screen_snip,
     save_screenshot_to_dir,
+    start_native_recording, pause_native_recording, resume_native_recording,
+    stop_native_recording, discard_native_recording,
 };
 use hotkeys::{handle_global_shortcut, setup_hotkeys, update_global_shortcuts};
 use recording_pill::{enter_recording_pill_mode, exit_recording_pill_mode};
@@ -170,6 +180,8 @@ fn main() {
             set_standby_enabled, is_standby_enabled,
             capture_screen, get_default_videos_dir, init_recording_stream,
             append_recording_chunk, finalize_recording, discard_recording,
+            start_native_recording, pause_native_recording, resume_native_recording,
+            stop_native_recording, discard_native_recording,
             prompt_save_recording, prompt_select_folder, prompt_select_executable,
             launch_alitken, prepare_screen_snip, show_screen_snip, finish_screen_snip, update_global_shortcuts,
             enter_recording_pill_mode, exit_recording_pill_mode,
