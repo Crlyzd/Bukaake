@@ -168,57 +168,37 @@ pub fn launch_alitken(video_path: String, custom_exe: Option<String>) -> Result<
 #[tauri::command]
 pub fn prepare_screen_snip(app: tauri::AppHandle) -> Result<ScreenCapturePayload, String> {
     use tauri::Manager;
-    #[cfg(target_os = "windows")]
-    use window_vibrancy::clear_acrylic;
 
-    let mut was_visible = false;
-    let mut was_minimized = false;
-    let mut was_fullscreen = false;
     let mut scale_factor = 1.0;
-
     if let Some(win) = app.get_webview_window("main") {
-        was_minimized = win.is_minimized().unwrap_or(false);
-        was_visible = win.is_visible().unwrap_or(false) && !was_minimized;
-        was_fullscreen = win.is_fullscreen().unwrap_or(false);
-        if let Ok(Some(monitor)) = win.current_monitor() {
-            scale_factor = monitor.scale_factor();
+        if let Ok(Some(m)) = win.current_monitor() {
+            scale_factor = m.scale_factor();
         }
-
-        if was_visible {
-            let _ = win.hide();
-            std::thread::sleep(std::time::Duration::from_millis(280));
-        } else if was_minimized {
-            let _ = win.hide();
-        }
-        #[cfg(target_os = "windows")]
-        let _ = clear_acrylic(&win);
     }
 
     let mut payload = screen_capture::capture_desktop()?;
-    payload.was_visible = was_visible;
-    payload.was_minimized = was_minimized;
-    payload.was_fullscreen = was_fullscreen;
     payload.scale_factor = scale_factor;
 
-    if let Some(win) = app.get_webview_window("main") {
-        let _ = win.unminimize();
-        let _ = win.set_maximizable(true);
-        let _ = win.set_always_on_top(true);
-        let _ = win.set_fullscreen(true);
+    if let Some(snipper) = app.get_webview_window("snipper") {
+        let _ = snipper.unminimize();
+        let _ = snipper.set_always_on_top(true);
+        let _ = snipper.set_fullscreen(true);
+        let _ = snipper.show();
+        let _ = snipper.set_focus();
     }
+
     Ok(payload)
 }
 
 #[tauri::command]
 pub fn show_screen_snip(app: tauri::AppHandle) -> Result<(), String> {
     use tauri::Manager;
-    if let Some(win) = app.get_webview_window("main") {
-        let _ = win.unminimize();
-        let _ = win.set_maximizable(true);
-        let _ = win.set_always_on_top(true);
-        let _ = win.set_fullscreen(true);
-        let _ = win.show();
-        let _ = win.set_focus();
+    if let Some(s) = app.get_webview_window("snipper") {
+        let _ = s.unminimize();
+        let _ = s.set_always_on_top(true);
+        let _ = s.set_fullscreen(true);
+        let _ = s.show();
+        let _ = s.set_focus();
     }
     Ok(())
 }
@@ -226,29 +206,42 @@ pub fn show_screen_snip(app: tauri::AppHandle) -> Result<(), String> {
 #[tauri::command]
 pub fn finish_screen_snip(
     app: tauri::AppHandle,
-    was_fullscreen: bool,
-    was_minimized: bool,
-    was_hidden: bool,
+    open_main: Option<bool>,
+    was_fullscreen: Option<bool>,
+    was_minimized: Option<bool>,
+    was_hidden: Option<bool>,
 ) -> Result<(), String> {
     use tauri::Manager;
-    if let Some(win) = app.get_webview_window("main") {
-        let _ = win.set_always_on_top(false);
-        if was_hidden {
-            let _ = win.hide();
-            let _ = win.set_fullscreen(false);
-            let _ = win.set_maximizable(false);
-        } else if was_minimized {
-            let _ = win.set_fullscreen(false);
-            let _ = win.minimize();
-        } else {
-            if !was_fullscreen {
+    let _ = (was_fullscreen, was_minimized, was_hidden);
+    if let Some(snipper) = app.get_webview_window("snipper") {
+        let _ = snipper.set_always_on_top(false);
+        let _ = snipper.hide();
+    }
+
+    if open_main.unwrap_or(false) {
+        if let Some(win) = app.get_webview_window("main") {
+            let is_visible = win.is_visible().unwrap_or(false);
+            if !is_visible {
                 let _ = win.set_fullscreen(false);
+                let _ = win.set_size(tauri::Size::Logical(tauri::LogicalSize { width: 680.0, height: 480.0 }));
+                #[cfg(target_os = "windows")]
+                {
+                    let tint = Some((16, 19, 28, 248));
+                    let _ = window_vibrancy::apply_acrylic(&win, tint);
+                }
             }
             let _ = win.unminimize();
             let _ = win.show();
             let _ = win.set_focus();
+            #[cfg(target_os = "windows")]
+            if let Ok(hwnd) = win.hwnd() {
+                use windows::Win32::UI::WindowsAndMessaging::{BringWindowToTop, SetForegroundWindow};
+                unsafe {
+                    let _ = BringWindowToTop(windows::Win32::Foundation::HWND(hwnd.0));
+                    let _ = SetForegroundWindow(windows::Win32::Foundation::HWND(hwnd.0));
+                }
+            }
         }
-        let _ = win.set_maximizable(was_fullscreen);
     }
     Ok(())
 }

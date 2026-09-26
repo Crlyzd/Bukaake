@@ -147,6 +147,11 @@ fn main() {
                 if let tauri::WindowEvent::CloseRequested { .. } = event {
                     let _ = window.app_handle().emit("settings-modal-state", false);
                 }
+            } else if window.label() == "snipper" {
+                if let tauri::WindowEvent::CloseRequested { api, .. } = event {
+                    api.prevent_close();
+                    let _ = window.hide();
+                }
             }
         })
         .invoke_handler(tauri::generate_handler![

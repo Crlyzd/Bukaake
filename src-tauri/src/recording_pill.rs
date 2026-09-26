@@ -1,62 +1,39 @@
 /**
  * Bukaake Native Recording Pill Mode Coordinator
- * Handles resizing to compact 320x56 dock, acrylic clearance, and geometry restoration (< 115 lines)
+ * Handles resizing overlay/dock to compact floating widget and acrylic-free transparency (< 110 lines)
  */
 
-use std::sync::Mutex;
 use tauri::{PhysicalPosition, PhysicalSize, Position, Size};
-
-struct SavedWindowGeometry {
-    position: PhysicalPosition<i32>,
-    size: PhysicalSize<u32>,
-    is_maximized: bool,
-}
-
-static SAVED_GEOMETRY: Mutex<Option<SavedWindowGeometry>> = Mutex::new(None);
 
 #[tauri::command]
 pub fn enter_recording_pill_mode(app: tauri::AppHandle, width: Option<f64>) -> Result<(), String> {
     use tauri::Manager;
-    let win = app.get_webview_window("main").ok_or("Main window not found")?;
+    let win = app.get_webview_window("snipper")
+        .or_else(|| app.get_webview_window("main"))
+        .ok_or("Recording overlay window not found")?;
 
-    let is_maximized = win.is_maximized().unwrap_or(false);
-    let position = win.outer_position().unwrap_or(PhysicalPosition { x: 100, y: 100 });
-    let size = win.outer_size().unwrap_or(PhysicalSize { width: 800, height: 600 });
-
-    if let Ok(mut lock) = SAVED_GEOMETRY.lock() {
-        *lock = Some(SavedWindowGeometry {
-            position,
-            size,
-            is_maximized,
-        });
-    }
-
-    if is_maximized {
-        let _ = win.unmaximize();
-    }
-
-    // Force release of tauri.conf.json minWidth/minHeight (680x480)
+    let _ = win.hide();
+    let _ = win.set_fullscreen(false);
     let _ = win.set_min_size(Some(Size::Logical(tauri::LogicalSize { width: 0.0, height: 0.0 })));
-
-    // Clear acrylic blur to allow 100% crystal-clear transparency around the floating pill
-    #[cfg(target_os = "windows")]
-    let _ = window_vibrancy::clear_acrylic(&win);
     let _ = win.set_shadow(false);
 
     #[cfg(target_os = "windows")]
-    if let Ok(hwnd) = win.hwnd() {
-        use windows::Win32::Graphics::Dwm::{DwmSetWindowAttribute, DWMWA_WINDOW_CORNER_PREFERENCE, DWMWCP_ROUND};
-        use windows::Win32::UI::WindowsAndMessaging::{SetWindowDisplayAffinity, WDA_EXCLUDEFROMCAPTURE};
-        let preference = DWMWCP_ROUND.0;
-        let _ = unsafe {
-            let _ = SetWindowDisplayAffinity(windows::Win32::Foundation::HWND(hwnd.0), WDA_EXCLUDEFROMCAPTURE);
-            DwmSetWindowAttribute(
-                windows::Win32::Foundation::HWND(hwnd.0),
-                DWMWA_WINDOW_CORNER_PREFERENCE,
-                &preference as *const _ as *const _,
-                std::mem::size_of::<u32>() as u32,
-            )
-        };
+    {
+        let _ = window_vibrancy::clear_acrylic(&win);
+        if let Ok(hwnd) = win.hwnd() {
+            use windows::Win32::Graphics::Dwm::{DwmSetWindowAttribute, DWMWA_WINDOW_CORNER_PREFERENCE, DWMWCP_ROUND};
+            use windows::Win32::UI::WindowsAndMessaging::{SetWindowDisplayAffinity, WDA_EXCLUDEFROMCAPTURE};
+            let preference = DWMWCP_ROUND.0;
+            let _ = unsafe {
+                let _ = SetWindowDisplayAffinity(windows::Win32::Foundation::HWND(hwnd.0), WDA_EXCLUDEFROMCAPTURE);
+                DwmSetWindowAttribute(
+                    windows::Win32::Foundation::HWND(hwnd.0),
+                    DWMWA_WINDOW_CORNER_PREFERENCE,
+                    &preference as *const _ as *const _,
+                    std::mem::size_of::<u32>() as u32,
+                )
+            };
+        }
     }
 
     let target_w = width.unwrap_or(200.0).max(120.0);
@@ -83,56 +60,54 @@ pub fn enter_recording_pill_mode(app: tauri::AppHandle, width: Option<f64>) -> R
 }
 
 #[tauri::command]
-pub fn exit_recording_pill_mode(app: tauri::AppHandle) -> Result<(), String> {
+pub fn exit_recording_pill_mode(app: tauri::AppHandle, open_main: Option<bool>) -> Result<(), String> {
     use tauri::Manager;
-    let win = app.get_webview_window("main").ok_or("Main window not found")?;
+    if let Some(snipper) = app.get_webview_window("snipper") {
+        let _ = snipper.set_always_on_top(false);
+        let _ = snipper.hide();
+        let _ = snipper.set_fullscreen(true);
 
-    let _ = win.set_always_on_top(false);
-    let _ = win.set_shadow(true);
-
-    #[cfg(target_os = "windows")]
-    if let Ok(hwnd) = win.hwnd() {
-        use windows::Win32::Graphics::Dwm::{DwmSetWindowAttribute, DWMWA_WINDOW_CORNER_PREFERENCE, DWMWCP_DEFAULT};
-        use windows::Win32::UI::WindowsAndMessaging::{SetWindowDisplayAffinity, WDA_NONE};
-        let preference = DWMWCP_DEFAULT.0;
-        let _ = unsafe {
-            let _ = SetWindowDisplayAffinity(windows::Win32::Foundation::HWND(hwnd.0), WDA_NONE);
-            DwmSetWindowAttribute(
-                windows::Win32::Foundation::HWND(hwnd.0),
-                DWMWA_WINDOW_CORNER_PREFERENCE,
-                &preference as *const _ as *const _,
-                std::mem::size_of::<u32>() as u32,
-            )
-        };
-    }
-
-    let mut saved_state = None;
-    if let Ok(mut lock) = SAVED_GEOMETRY.lock() {
-        saved_state = lock.take();
-    }
-
-    if let Some(saved) = saved_state {
-        let _ = win.set_size(Size::Physical(saved.size));
-        let _ = win.set_position(Position::Physical(saved.position));
-        if saved.is_maximized {
-            let _ = win.maximize();
+        #[cfg(target_os = "windows")]
+        if let Ok(hwnd) = snipper.hwnd() {
+            use windows::Win32::Graphics::Dwm::{DwmSetWindowAttribute, DWMWA_WINDOW_CORNER_PREFERENCE, DWMWCP_DEFAULT};
+            use windows::Win32::UI::WindowsAndMessaging::{SetWindowDisplayAffinity, WDA_NONE};
+            let preference = DWMWCP_DEFAULT.0;
+            let _ = unsafe {
+                let _ = SetWindowDisplayAffinity(windows::Win32::Foundation::HWND(hwnd.0), WDA_NONE);
+                DwmSetWindowAttribute(
+                    windows::Win32::Foundation::HWND(hwnd.0),
+                    DWMWA_WINDOW_CORNER_PREFERENCE,
+                    &preference as *const _ as *const _,
+                    std::mem::size_of::<u32>() as u32,
+                )
+            };
         }
-    } else {
-        let _ = win.set_size(Size::Logical(tauri::LogicalSize { width: 800.0, height: 600.0 }));
-        let _ = win.center();
     }
 
-    // Restore standard minimum window dimensions
-    let _ = win.set_min_size(Some(Size::Logical(tauri::LogicalSize { width: 680.0, height: 480.0 })));
-
-    // Reapply native acrylic blur for Regular App Mode (Mode 1)
-    #[cfg(target_os = "windows")]
-    {
-        let tint = Some((16, 19, 28, 248));
-        let _ = window_vibrancy::apply_acrylic(&win, tint);
+    if open_main.unwrap_or(true) {
+        if let Some(win) = app.get_webview_window("main") {
+            let is_visible = win.is_visible().unwrap_or(false);
+            if !is_visible {
+                let _ = win.set_fullscreen(false);
+                let _ = win.set_size(tauri::Size::Logical(tauri::LogicalSize { width: 680.0, height: 480.0 }));
+                #[cfg(target_os = "windows")]
+                {
+                    let tint = Some((16, 19, 28, 248));
+                    let _ = window_vibrancy::apply_acrylic(&win, tint);
+                }
+            }
+            let _ = win.unminimize();
+            let _ = win.show();
+            let _ = win.set_focus();
+            #[cfg(target_os = "windows")]
+            if let Ok(hwnd) = win.hwnd() {
+                use windows::Win32::UI::WindowsAndMessaging::{BringWindowToTop, SetForegroundWindow};
+                unsafe {
+                    let _ = BringWindowToTop(windows::Win32::Foundation::HWND(hwnd.0));
+                    let _ = SetForegroundWindow(windows::Win32::Foundation::HWND(hwnd.0));
+                }
+            }
+        }
     }
-
-    let _ = win.show();
-    let _ = win.set_focus();
     Ok(())
 }

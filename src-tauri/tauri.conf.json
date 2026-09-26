@@ -43,6 +43,17 @@
         "shadow": true,
         "visible": false,
         "center": true
+      },
+      {
+        "label": "snipper",
+        "title": "Bukaake Snipper",
+        "url": "snipper.html",
+        "fullscreen": true,
+        "transparent": true,
+        "decorations": false,
+        "alwaysOnTop": true,
+        "visible": false,
+        "shadow": false
       }
     ],
     "withGlobalTauri": true,

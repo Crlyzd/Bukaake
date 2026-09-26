@@ -2,7 +2,7 @@
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "default",
   "description": "Default capabilities for Bukaake Desktop Viewer",
-  "windows": ["main", "settings"],
+  "windows": ["main", "settings", "snipper"],
   "permissions": [
     "core:default",
     "core:window:default",

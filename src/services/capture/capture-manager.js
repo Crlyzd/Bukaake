@@ -1,29 +1,23 @@
 /**
  * Bukaake Capture & Screen Recording Subsystem Coordinator
- * Connects screenshot, snipper, recording dock, Alitken, and hotkeys (< 240 lines)
+ * Coordinates screenshot triggers, image loading, and video saved toast banners (< 180 lines)
  */
 
 import { invoke } from '@tauri-apps/api/core';
-import { listen } from '@tauri-apps/api/event';
+import { listen, emit } from '@tauri-apps/api/event';
 import { screenCaptureService } from './screen-capture-service.js';
 import { screenRecorderService } from './screen-recorder-service.js';
 import { alitkenService } from '../alitken-service.js';
 import { hotkeyService } from '../hotkey-service.js';
-import { ScreenSnipper } from '../../components/capture/screen-snipper.js';
-import { RecordingDock } from '../../components/capture/recording-dock.js';
 import { toast } from '../../components/toast.js';
 import { changeTracker } from '../change-tracker.js';
 import { tauriBridge } from '../tauri-bridge.js';
-import { screenshotSaver } from './screenshot-saver.js';
 
 export class CaptureManager {
   constructor(options = {}) {
     this.viewer = options.viewer || null;
     this.fileLoader = options.fileLoader || null;
     this.toolbar = options.toolbar || null;
-
-    this.snipper = new ScreenSnipper();
-    this.recordingDock = new RecordingDock();
 
     this.init();
   }
@@ -32,14 +26,41 @@ export class CaptureManager {
     document.getElementById('btnTitlebarCapture')?.addEventListener('click', () => this.captureSnip());
 
     if (tauriBridge.isTauri()) {
-      listen('bukaake://trigger-snip', () => this.captureSnip());
-      listen('bukaake://trigger-record', () => this.toggleRecord());
+      listen('bukaake://load-captured-image', async (event) => {
+        const { dataUrl, filename, savedPath } = event.payload || {};
+        if (savedPath && tauriBridge.isTauri()) {
+          try {
+            const ctx = await tauriBridge.readImageContext(savedPath);
+            if (ctx && this.fileLoader) {
+              this.fileLoader.loadFromTauriContext(ctx);
+              changeTracker.reset();
+              toast.show('Snippet saved & loaded into Bukaake', 'info');
+              return;
+            }
+          } catch (e) {
+            console.warn('[CaptureManager] readImageContext error:', e);
+          }
+        }
+        if (dataUrl && filename) {
+          this.loadCapturedImage(dataUrl, filename);
+          toast.show(savedPath ? 'Snippet saved & loaded into Bukaake' : 'Snippet loaded', 'info');
+        }
+      });
+
+      listen('bukaake://recording-finished', (event) => {
+        const { savedPath, durationSecs } = event.payload || {};
+        if (savedPath) {
+          this.showRecordingSavedToast(savedPath, durationSecs);
+        }
+      });
+
+      listen('bukaake://show-toast', (event) => {
+        const { message, type } = event.payload || {};
+        if (message) toast.show(message, type || 'info');
+      });
+
       hotkeyService.applyToBackend();
     }
-
-    screenRecorderService.onTimerTick = (timeStr) => {
-      this.recordingDock.updateTimer(timeStr);
-    };
 
     window.addEventListener('keydown', (e) => {
       if (['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName)) return;
@@ -55,96 +76,15 @@ export class CaptureManager {
   }
 
   async captureSnip(options = {}) {
-    if (this.snipper.isActive || document.body.classList.contains('mode-capturing')) return;
-    document.body.classList.add('mode-capturing');
-    const isFs = await tauriBridge.isFullscreen();
-    const isMax = await tauriBridge.isMaximized();
-
-    let payload = null;
     if (tauriBridge.isTauri()) {
-      payload = await invoke('prepare_screen_snip').catch((err) => {
-        console.warn('[CaptureManager] prepare_screen_snip fallback:', err);
-        return null;
-      });
-    }
-
-    if (!payload) payload = await screenCaptureService.captureDesktop();
-    if (!payload) {
-      document.body.classList.remove('mode-capturing');
-      return;
-    }
-
-    const hasImage = Boolean(this.viewer?.img);
-    const wasVisible = payload.was_visible ?? true;
-    const wasMinimized = payload.was_minimized ?? false;
-    const wasFullscreen = payload.was_fullscreen ?? (isFs || isMax);
-
-    const finishSnip = async ({ shouldHide = false, restoreFs = wasFullscreen, restoreMinimized = false } = {}) => {
-      document.body.classList.remove('mode-capturing');
-      if (tauriBridge.isTauri()) {
-        await invoke('finish_screen_snip', {
-          wasFullscreen: restoreFs,
-          wasMinimized: restoreMinimized,
-          wasHidden: shouldHide,
-        }).catch(() => {});
-        if (!shouldHide && !restoreFs) {
-          const isDark = !document.body.classList.contains('light-theme');
-          await tauriBridge.setWindowVibrancy(isDark, false).catch(() => {});
-        }
+      try {
+        await emit('bukaake://trigger-snipper-window', options);
+      } catch (err) {
+        console.warn('[CaptureManager] trigger-snipper error:', err);
       }
-    };
-
-    options.windows = payload.windows || [];
-    options.screenWidth = payload.width;
-    options.screenHeight = payload.height;
-    options.scaleFactor = payload.scale_factor || window.devicePixelRatio || 1;
-    const capturePhysW = payload.width;
-    const capturePhysH = payload.height;
-
-    if (tauriBridge.isTauri()) {
-      await invoke('show_screen_snip').catch(() => {});
+    } else {
+      toast.show('Snipping requires desktop app mode', 'warning');
     }
-
-    await this.snipper.startSnip(
-      payload.data_url,
-      async ({ rect, dataUrl, sourceImg, copyOnly, isRecord }) => {
-        if (isRecord) {
-          document.body.classList.remove('mode-capturing');
-          const isFull = (rect.mode === 'fullscreen' || (rect.isFullscreen && !rect.isWindow));
-          const cropRect = isFull ? null : { ...rect, screenWidth: capturePhysW, screenHeight: capturePhysH };
-          await this.startRecording(cropRect);
-          return;
-        }
-
-        try {
-          const croppedUrl = await screenCaptureService.cropCapturedRegion(dataUrl, rect, sourceImg);
-          const filename = screenshotSaver.generateFilename();
-          const savedPath = await screenshotSaver.saveToDisk(croppedUrl, filename);
-          await screenCaptureService.copyToClipboard(croppedUrl);
-
-          if (!copyOnly) {
-            await finishSnip({ shouldHide: false, restoreFs: wasFullscreen, restoreMinimized: false });
-            this.loadCapturedImage(croppedUrl, filename);
-            toast.show(savedPath ? 'Snippet saved & loaded into Bukaake' : 'Snippet loaded', 'info');
-          } else {
-            const shouldHide = !wasVisible || !hasImage;
-            await finishSnip({ shouldHide, restoreFs: wasFullscreen, restoreMinimized: shouldHide ? false : wasMinimized });
-            if (!shouldHide) {
-              toast.show(savedPath ? 'Snippet saved & copied to clipboard' : 'Snippet copied to clipboard', 'info');
-            }
-          }
-        } catch (err) {
-          console.error('[CaptureManager] Snip processing failed:', err);
-          await finishSnip({ shouldHide: !wasVisible || !hasImage, restoreMinimized: wasMinimized });
-          toast.show('Snip failed: ' + err.message, 'error');
-        }
-      },
-      async () => {
-        const shouldHide = !wasVisible || !hasImage;
-        await finishSnip({ shouldHide, restoreFs: wasFullscreen, restoreMinimized: shouldHide ? false : wasMinimized });
-      },
-      options
-    );
   }
 
   loadCapturedImage(dataUrl, filename) {
@@ -163,101 +103,8 @@ export class CaptureManager {
   }
 
   async toggleRecord() {
-    if (screenRecorderService.state === 'recording' || screenRecorderService.state === 'paused') {
-      await this.stopRecording();
-    } else {
-      const defaultMode = localStorage.getItem('bukaake-capture-mode') || 'region';
-      this.captureSnip({ type: 'record', mode: defaultMode });
-    }
-  }
-
-  async startRecording(cropRegion = null) {
-    const started = await screenRecorderService.startRecording(null, cropRegion);
-    if (!started) return;
-
-    document.body.classList.add('mode-recording-pill');
-    const recordMic = localStorage.getItem('bukaake-record-mic') === 'true';
-    this.recordingDock.show({
-      hasMic: recordMic,
-      onToggleMic: (muted) => screenRecorderService.setMicMuted(muted),
-      onPause: () => {
-        screenRecorderService.pauseRecording();
-        if (tauriBridge.isTauri()) invoke('set_recording_border_paused', { paused: true }).catch(() => {});
-      },
-      onResume: () => {
-        screenRecorderService.resumeRecording();
-        if (tauriBridge.isTauri()) invoke('set_recording_border_paused', { paused: false }).catch(() => {});
-      },
-      onStop: () => this.stopRecording(),
-      onCancel: () => this.cancelRecording(),
-    });
-
-    if (tauriBridge.isTauri()) {
-      const pillWidth = recordMic ? 212.0 : 186.0;
-      await invoke('enter_recording_pill_mode', { width: pillWidth }).catch(() => {});
-      // cropRegion.x/y/width/height are already physical screen pixels
-      if (cropRegion && cropRegion.width > 20 && cropRegion.height > 20) {
-        const BW = 5;
-        await invoke('show_recording_border', {
-          x: cropRegion.x - BW,
-          y: cropRegion.y - BW,
-          width: cropRegion.width + (BW * 2),
-          height: cropRegion.height + (BW * 2),
-        }).catch(() => {});
-      }
-    }
-    toast.show(cropRegion ? 'Recording selected region...' : 'Recording full screen...', 'info');
-  }
-
-  async cancelRecording() {
-    this.recordingDock.hide();
-    document.body.classList.remove('mode-recording-pill');
-    if (tauriBridge.isTauri()) {
-      invoke('hide_recording_border').catch(() => {});
-      await invoke('exit_recording_pill_mode').catch(() => {});
-    }
-    await screenRecorderService.cancelRecording();
-    toast.show('Recording discarded', 'info');
-  }
-
-  async stopRecording() {
-    this.recordingDock.hide();
-    document.body.classList.remove('mode-recording-pill');
-    if (tauriBridge.isTauri()) {
-      invoke('hide_recording_border').catch(() => {});
-      await invoke('exit_recording_pill_mode').catch(() => {});
-    }
-
-    const result = await screenRecorderService.stopRecording();
-    if (!result || !result.tempPath) return;
-
-    try {
-      const defaultName = `Recording_${new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19)}.webm`;
-      const askPrompt = localStorage.getItem('bukaake-video-prompt-save') === 'true';
-      const customDir = localStorage.getItem('bukaake-video-save-dir');
-      const defaultDir = customDir || (await invoke('get_default_videos_dir'));
-
-      let finalPath = null;
-      if (askPrompt) {
-        finalPath = await invoke('prompt_save_recording', { defaultName, defaultDir });
-        if (!finalPath) {
-          await invoke('discard_recording', { tempPath: result.tempPath });
-          toast.show('Recording discarded', 'info');
-          return;
-        }
-      } else {
-        const dest = defaultDir.replace(/[\\/]$/, '');
-        finalPath = `${dest}/${defaultName}`;
-      }
-
-      const durationMs = result.durationMs || (result.durationSecs ? result.durationSecs * 1000 : null);
-      const savedPath = await invoke('finalize_recording', { tempPath: result.tempPath, destPath: finalPath, durationMs });
-      this.showRecordingSavedToast(savedPath, result.durationSecs);
-      if (alitkenService.isAutoOpenEnabled()) alitkenService.launch(savedPath);
-    } catch (err) {
-      console.error('[CaptureManager] Save recording failed:', err);
-      toast.show('Failed to save recording: ' + err, 'error');
-    }
+    const defaultMode = localStorage.getItem('bukaake-capture-mode') || 'region';
+    this.captureSnip({ type: 'record', mode: defaultMode });
   }
 
   showRecordingSavedToast(savedPath, durationSecs) {
