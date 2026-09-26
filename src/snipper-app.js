@@ -173,6 +173,7 @@ export class SnipperApp {
   async cancelRecording() {
     this.isSnipActive = false;
     this.recordingDock.hide();
+    this.snipper.hide();
     document.body.classList.remove('mode-recording-pill');
     invoke('hide_recording_border').catch(() => {});
     await invoke('exit_recording_pill_mode', { openMain: false }).catch(() => {});
@@ -183,6 +184,7 @@ export class SnipperApp {
   async stopRecording() {
     this.isSnipActive = false;
     this.recordingDock.hide();
+    this.snipper.hide();
     document.body.classList.remove('mode-recording-pill');
     invoke('hide_recording_border').catch(() => {});
 

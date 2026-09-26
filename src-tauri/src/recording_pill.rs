@@ -64,8 +64,6 @@ pub fn exit_recording_pill_mode(app: tauri::AppHandle, open_main: Option<bool>) 
     use tauri::Manager;
     if let Some(snipper) = app.get_webview_window("snipper") {
         let _ = snipper.set_always_on_top(false);
-        let _ = snipper.hide();
-        let _ = snipper.set_fullscreen(true);
 
         #[cfg(target_os = "windows")]
         if let Ok(hwnd) = snipper.hwnd() {
@@ -82,6 +80,8 @@ pub fn exit_recording_pill_mode(app: tauri::AppHandle, open_main: Option<bool>) 
                 )
             };
         }
+
+        let _ = snipper.hide();
     }
 
     if open_main.unwrap_or(true) {

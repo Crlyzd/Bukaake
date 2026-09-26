@@ -20,6 +20,14 @@
       background: transparent !important;
       user-select: none;
     }
+    body.snipper-window {
+      pointer-events: none;
+    }
+    body.snipper-window .screen-snipper-overlay:not(.hidden),
+    body.snipper-window .recording-dock:not(.hidden),
+    body.snipper-window .toast-container {
+      pointer-events: auto;
+    }
   </style>
 </head>
 <body class="snipper-window dark">
