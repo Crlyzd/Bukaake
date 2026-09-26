@@ -79,12 +79,12 @@ export class CaptureManager {
     const wasMinimized = payload.was_minimized ?? false;
     const wasFullscreen = payload.was_fullscreen ?? (isFs || isMax);
 
-    const finishSnip = async ({ shouldHide = false, restoreFs = wasFullscreen } = {}) => {
+    const finishSnip = async ({ shouldHide = false, restoreFs = wasFullscreen, restoreMinimized = false } = {}) => {
       document.body.classList.remove('mode-capturing');
       if (tauriBridge.isTauri()) {
         await invoke('finish_screen_snip', {
           wasFullscreen: restoreFs,
-          wasMinimized: shouldHide ? false : wasMinimized,
+          wasMinimized: restoreMinimized,
           wasHidden: shouldHide,
         }).catch(() => {});
         if (!shouldHide && !restoreFs) {
@@ -100,6 +100,10 @@ export class CaptureManager {
     options.scaleFactor = payload.scale_factor || window.devicePixelRatio || 1;
     const capturePhysW = payload.width;
     const capturePhysH = payload.height;
+
+    if (tauriBridge.isTauri()) {
+      await invoke('show_screen_snip').catch(() => {});
+    }
 
     await this.snipper.startSnip(
       payload.data_url,
@@ -119,44 +123,40 @@ export class CaptureManager {
           await screenCaptureService.copyToClipboard(croppedUrl);
 
           if (!copyOnly) {
-            await finishSnip({ shouldHide: false, restoreFs: wasFullscreen });
+            await finishSnip({ shouldHide: false, restoreFs: wasFullscreen, restoreMinimized: false });
             this.loadCapturedImage(croppedUrl, filename);
             toast.show(savedPath ? 'Snippet saved & loaded into Bukaake' : 'Snippet loaded', 'info');
           } else {
             const shouldHide = !wasVisible || !hasImage;
-            await finishSnip({ shouldHide, restoreFs: wasFullscreen });
+            await finishSnip({ shouldHide, restoreFs: wasFullscreen, restoreMinimized: shouldHide ? false : wasMinimized });
             if (!shouldHide) {
               toast.show(savedPath ? 'Snippet saved & copied to clipboard' : 'Snippet copied to clipboard', 'info');
             }
           }
         } catch (err) {
           console.error('[CaptureManager] Snip processing failed:', err);
-          await finishSnip({ shouldHide: !wasVisible || !hasImage });
+          await finishSnip({ shouldHide: !wasVisible || !hasImage, restoreMinimized: wasMinimized });
           toast.show('Snip failed: ' + err.message, 'error');
         }
       },
       async () => {
         const shouldHide = !wasVisible || !hasImage;
-        await finishSnip({ shouldHide, restoreFs: wasFullscreen });
+        await finishSnip({ shouldHide, restoreFs: wasFullscreen, restoreMinimized: shouldHide ? false : wasMinimized });
       },
       options
     );
-
-    if (tauriBridge.isTauri()) {
-      await invoke('show_screen_snip').catch(() => {});
-    }
   }
 
   loadCapturedImage(dataUrl, filename) {
     const file = screenCaptureService.dataUrlToFile(dataUrl, filename);
     if (this.fileLoader) {
       this.fileLoader.loadWebFiles([file]);
-      changeTracker.markDraw(true);
+      changeTracker.reset();
     } else if (this.viewer) {
       const img = new Image();
       img.onload = () => {
         this.viewer.loadImage(img);
-        changeTracker.markDraw(true);
+        changeTracker.reset();
       };
       img.src = dataUrl;
     }

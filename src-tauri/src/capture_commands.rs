@@ -177,8 +177,8 @@ pub fn prepare_screen_snip(app: tauri::AppHandle) -> Result<ScreenCapturePayload
     let mut scale_factor = 1.0;
 
     if let Some(win) = app.get_webview_window("main") {
-        was_visible = win.is_visible().unwrap_or(false);
         was_minimized = win.is_minimized().unwrap_or(false);
+        was_visible = win.is_visible().unwrap_or(false) && !was_minimized;
         was_fullscreen = win.is_fullscreen().unwrap_or(false);
         if let Ok(Some(monitor)) = win.current_monitor() {
             scale_factor = monitor.scale_factor();
@@ -187,6 +187,8 @@ pub fn prepare_screen_snip(app: tauri::AppHandle) -> Result<ScreenCapturePayload
         if was_visible {
             let _ = win.hide();
             std::thread::sleep(std::time::Duration::from_millis(280));
+        } else if was_minimized {
+            let _ = win.hide();
         }
         #[cfg(target_os = "windows")]
         let _ = clear_acrylic(&win);
@@ -199,6 +201,7 @@ pub fn prepare_screen_snip(app: tauri::AppHandle) -> Result<ScreenCapturePayload
     payload.scale_factor = scale_factor;
 
     if let Some(win) = app.get_webview_window("main") {
+        let _ = win.unminimize();
         let _ = win.set_maximizable(true);
         let _ = win.set_always_on_top(true);
         let _ = win.set_fullscreen(true);
@@ -210,6 +213,10 @@ pub fn prepare_screen_snip(app: tauri::AppHandle) -> Result<ScreenCapturePayload
 pub fn show_screen_snip(app: tauri::AppHandle) -> Result<(), String> {
     use tauri::Manager;
     if let Some(win) = app.get_webview_window("main") {
+        let _ = win.unminimize();
+        let _ = win.set_maximizable(true);
+        let _ = win.set_always_on_top(true);
+        let _ = win.set_fullscreen(true);
         let _ = win.show();
         let _ = win.set_focus();
     }
@@ -233,8 +240,13 @@ pub fn finish_screen_snip(
         } else if was_minimized {
             let _ = win.set_fullscreen(false);
             let _ = win.minimize();
-        } else if !was_fullscreen {
-            let _ = win.set_fullscreen(false);
+        } else {
+            if !was_fullscreen {
+                let _ = win.set_fullscreen(false);
+            }
+            let _ = win.unminimize();
+            let _ = win.show();
+            let _ = win.set_focus();
         }
         let _ = win.set_maximizable(was_fullscreen);
     }
