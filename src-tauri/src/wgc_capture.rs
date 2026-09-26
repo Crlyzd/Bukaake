@@ -119,6 +119,7 @@ impl WgcCaptureSession {
         // 5. Initialize & Start Capture Session
         let session = frame_pool.CreateCaptureSession(&item)?;
         let _ = session.SetIsCursorCaptureEnabled(enable_cursor);
+        let _ = session.SetIsBorderRequired(false);
         session.StartCapture()?;
 
         Ok(Self {
