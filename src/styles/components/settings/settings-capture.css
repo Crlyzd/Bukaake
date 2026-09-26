@@ -70,7 +70,7 @@ html[data-theme="light"] .path-field {
 
 .hotkey-chip:hover,
 .hotkey-btn:hover {
-  background: var(--glass-btn-hover);
+  background: var(--glass-btn-hover-bg);
   transform: translateY(-1px);
 }
 
@@ -150,7 +150,7 @@ html[data-theme="light"] .key-token {
 
 .glass-dropdown-trigger:hover,
 .dropdown-btn:hover {
-  background: var(--glass-btn-hover);
+  background: var(--glass-btn-hover-bg);
   transform: translateY(-1px);
 }
 
@@ -219,7 +219,7 @@ html[data-theme="light"] .dropdown-menu {
 
 .glass-dropdown-item:hover,
 .dropdown-item:hover {
-  background: var(--glass-btn-hover);
+  background: var(--glass-btn-hover-bg);
   color: var(--text-main);
 }
 
@@ -272,7 +272,7 @@ html[data-theme="light"] .dropdown-item.active {
 }
 
 .audio-chip:hover {
-  background: var(--glass-btn-hover);
+  background: var(--glass-btn-hover-bg);
   color: var(--text-main);
 }
 

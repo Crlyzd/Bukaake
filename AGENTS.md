@@ -21,7 +21,7 @@ All agents working on this repository **MUST** strictly enforce these five non-n
 - **Deep Obsidian Dark Mode**: True deep obsidian dark (`rgba(6, 7, 10, 0.92)`), never washed-out blue or gray.
 - **Zero Pure Black in Light Mode Policy**: **Never use pure black (`#000000`, `#0a0a0a`, `#111111`, raw `rgba(0,0,0,...)`) in Light Mode**. Dark accents, active chips, slider thumbs, and primary text in Light Mode MUST use refined obsidian slate (`#242938` / `#2a3142`, alphas anchored to `rgba(26, 32, 44, ...)`). Panel dividers use ultra-subtle slate tint `rgba(26, 32, 44, 0.08)`.
 - **Canvas Display States**: (1) Pure Crystal Transparency (desktop wallpaper / acrylic shows through) or (2) Deep Obsidian Slate Checkerboard (inline vector SVG pattern `#161922` / `#252a38`).
-- **Native Acrylic Tint Coordination**: Rust backend applies Windows Acrylic in coordination with the theme: `Some((16, 19, 28, 248))` for dark, `Some((245, 247, 250, 140))` for light.
+- **Native Acrylic Tint Coordination**: Rust backend applies Windows Acrylic in coordination with the theme: `Some((16, 19, 28, 175))` for dark, `Some((245, 247, 250, 105))` for light.
 
 ### Pillar 3: GitHub Releases Auto-Updater & Native Self-Updating
 - **Updater Architecture (`updater-service.js`, `updater.rs`)**: Queries GitHub Releases API with semver checks and x64/arm64 asset detection.

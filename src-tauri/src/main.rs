@@ -32,6 +32,7 @@ pub mod wmf_writer;
 pub mod native_recorder;
 mod image_loader;
 mod updater;
+mod window_subclass;
 use audio_capture::{
     set_recording_audio_volumes, set_recording_mic_muted, start_audio_capture, stop_audio_capture,
 };
@@ -114,7 +115,7 @@ fn main() {
             {
                 let _ = auto_heal_or_sync_path();
                 let _ = auto_heal_autostart_path();
-                let tint = Some((16, 19, 28, 248));
+                let tint = Some((16, 19, 28, 175));
                 if let Some(icon) = app.default_window_icon() {
                     for name in ["main", "settings"] {
                         if let Some(w) = app.get_webview_window(name) { let _ = w.set_icon(icon.clone()); }
@@ -137,6 +138,7 @@ fn main() {
                 if let Some(w) = app.get_webview_window("settings") {
                     let _ = w.set_shadow(true);
                     let _ = window_vibrancy::apply_acrylic(&w, tint);
+                    window_subclass::suppress_edge_resize(&w);
                 }
             }
             setup_hotkeys(app);

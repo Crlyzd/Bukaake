@@ -20,14 +20,16 @@
   border: none !important;
   outline: none !important;
   cursor: pointer;
-  transition: all var(--transition-fast);
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  transition: transform var(--transition-fast), background var(--transition-fast), box-shadow var(--transition-fast);
   text-align: left;
   user-select: none;
 }
 
-.theme-card-btn:hover {
-  background: var(--glass-btn-hover);
-  transform: translateY(-1px);
+.theme-card-btn:hover:not(.active-theme) {
+  background: var(--glass-btn-hover-bg);
+  transform: translateY(-1px) translateZ(0);
 }
 
 .theme-card-icon-box {
@@ -72,6 +74,12 @@ html[data-theme="light"] .theme-card-icon-box {
 .theme-card-btn.active-theme {
   background: var(--galactic-glow-bg) !important;
   box-shadow: var(--galactic-glow-shadow) !important;
+}
+
+.theme-card-btn.active-theme:hover {
+  background: var(--galactic-glow-bg) !important;
+  box-shadow: var(--galactic-glow-card-shadow) !important;
+  transform: translateY(-1px) translateZ(0);
 }
 
 .theme-card-btn.active-theme .theme-card-icon-box {

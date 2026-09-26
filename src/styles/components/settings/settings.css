@@ -246,7 +246,7 @@ html[data-theme="light"] .inset-panel {
 }
 
 .btn-glass:hover {
-  background: var(--glass-btn-hover);
+  background: var(--glass-btn-hover-bg);
   transform: translateY(-1px);
 }
 

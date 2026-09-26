@@ -98,7 +98,7 @@
 }
 
 .snipper-btn:hover {
-  background: var(--glass-btn-hover);
+  background: var(--glass-btn-hover-bg);
   transform: translateY(-1px);
 }
 

@@ -67,7 +67,7 @@ html[data-theme="light"] .settings-assoc-chip.matched {
 }
 
 .settings-assoc-location:hover {
-  background: var(--glass-btn-hover);
+  background: var(--glass-btn-hover-bg);
   color: var(--text-main);
 }
 

@@ -196,7 +196,7 @@ pub fn set_window_vibrancy(app_handle: tauri::AppHandle, is_dark: bool, is_viewe
     #[cfg(target_os = "windows")]
     {
         use window_vibrancy::{apply_acrylic, clear_acrylic};
-        let tint = if is_dark { Some((16, 19, 28, 248)) } else { Some((245, 247, 250, 140)) };
+        let tint = if is_dark { Some((16, 19, 28, 175)) } else { Some((245, 247, 250, 105)) };
         if let Some(w) = app_handle.get_webview_window("main") {
             if is_viewer.unwrap_or(false) { let _ = clear_acrylic(&w); } else { let _ = apply_acrylic(&w, tint); }
         }

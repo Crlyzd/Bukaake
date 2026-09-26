@@ -27,7 +27,7 @@
   --glass-border: transparent;
   --glass-border-bright: transparent;
   --glass-shadow: 0 6px 18px rgba(0, 0, 0, 0.16), 0 20px 48px rgba(0, 0, 0, 0.22);
-  --glass-panel-bg: rgba(16, 19, 28, calc(0.72 + var(--window-opacity, 0.35) * 0.28));
+  --glass-panel-bg: rgba(16, 19, 28, calc(0.42 + var(--window-opacity, 0.35) * 0.28));
 
   /* Frosted Glass Island & Card Tokens */
   --glass-card-bg: rgba(255, 255, 255, 0.07);
@@ -86,7 +86,7 @@ body.light-theme {
   --glass-border: transparent;
   --glass-border-bright: transparent;
   --glass-shadow: 0 4px 14px rgba(26, 32, 44, 0.04), 0 18px 40px rgba(26, 32, 44, 0.07);
-  --glass-panel-bg: rgba(245, 247, 250, calc(0.72 + var(--window-opacity, 0.35) * 0.28));
+  --glass-panel-bg: rgba(245, 247, 250, calc(0.45 + var(--window-opacity, 0.35) * 0.28));
 
   /* Frosted Glass Island & Card Tokens */
   --glass-card-bg: rgba(255, 255, 255, 0.85);
