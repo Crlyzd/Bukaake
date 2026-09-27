@@ -66,7 +66,7 @@ Most photo viewers on Windows today are slow to launch, cluttered with heavy too
 | 📷 **49+ Formats & Camera RAW** | Native iPhone HEIC/HEIF (100% free), 24+ RAW camera formats, and 3D VFX textures. |
 | ✍️ **Vector Typography & Crop** | Vector text engine with 8-point handles, dynamic shadows, laser-guided crop, pen & highlighter. |
 | 📸 **Integrated Screen Snipper** | Multi-monitor crosshair capture with instant clipboard copy and auto-saved PNGs. |
-| 🎥 **Desktop Screen Recording** | Floating frosted control dock streaming crisp video with synchronized audio. |
+| 🎥 **Hardware GPU Screen Recording** | Direct3D 11 & WGC zero-copy VRAM capture (<2% CPU) streaming hardware H.264/AAC MP4. |
 | 🗑️ **Safe Recycle Bin Deletion** | Win32 Recycle Bin integration (`Delete` to trash, `Shift+Delete` to shred). |
 | 🎨 **Stroke-Free Frosted Glass** | Dual theme engine: Deep Obsidian Dark Mode & Frosted Slate Light Mode. |
 
@@ -121,11 +121,12 @@ Capture and share anything on your screen without launching heavy third-party so
 </td>
 <td width="50%" valign="top">
 
-#### 🎥 Desktop Screen Recorder
-- **Floating Glass Dock**: Stroke-free pill bar with live elapsed timer, pause/resume, and discard buttons.
-- **Stroke-Free Region Border**: Visual highlight box showing exactly what area is being captured.
-- **Synchronized Audio Capture**: Records crystal-clear system audio and microphone sound with zero lag or flutter.
-- **Seekable & Lightweight**: Streams lightweight WebM (VP9) video directly to disk with full seekbar scrubbing support and zero memory spikes.
+#### 🎥 Hardware GPU Screen Recorder
+- **Zero-Copy VRAM Pipeline**: Desktop frames capture directly into Direct3D 11 GPU textures via `Windows.Graphics.Capture` with sub-2% CPU overhead and zero RAM round-trips.
+- **Hardware H.264 & AAC MP4**: Streams hardware-accelerated `.mp4` video directly through Windows Media Foundation `IMFSinkWriter` with instant finalization.
+- **Sample-Accurate Audio**: Mixes WASAPI system loopback and microphone inputs at 48kHz stereo with a contiguous sample-accurate clock—zero drift or lag.
+- **Dedicated Overlay Window**: Isolated transparent window (`snipper.html`) hosts crosshairs, selection bounds, and recording pills with zero desktop redraw flash.
+- **Clean Borderless Capture**: Windows 11 default yellow capture border is completely suppressed.
 
 </td>
 </tr>
@@ -171,6 +172,7 @@ Designed from the ground up for modern Windows aesthetics:
 ### ⚡ 6. Native Windows Performance & Portability
 - **Sub-10ms Launch via Tray Standby**: Keeps Bukaake pre-warmed in your notification tray. Double-clicking any image opens instantaneously.
 - **Windows 11 DWM 1px Border Elimination**: Seamless frameless geometry achieved by preserving native `WS_THICKFRAME`, retaining rounded corners, drop shadows, and acrylic transparency without white outline artifacts or window resize flash.
+- **Win32 Subclassing & Smooth Maximize**: Subclasses `WM_NCHITTEST` and `SC_SIZE` to prevent edge-click jump on dialogs, and intercepts titlebar double-clicks (`WM_NCLBUTTONDBLCLK` / `SC_MAXIMIZE`) to smoothly transition into Mode 2 transparent fullscreen without DWM maximize flash.
 - **Automatic Memory Trimming**: Uses Win32 working-set trimming to shrink idle background memory down to ~8–15 MB RAM.
 - **Multi-Monitor Position Memory**: Restores to your preferred monitor and window coordinates without annoying screen-jumping.
 - **1-Click Shell Association**: Make Bukaake your default photo viewer for 49 formats under `HKCU` without annoying UAC permission prompts.
@@ -195,6 +197,7 @@ Designed from the ground up for modern Windows aesthetics:
 | Key | Action |
 | :--- | :--- |
 | `Left` / `Right` | Previous / Next photo |
+| `Up` / `Down` | Zoom In / Zoom Out (Picasa-style) |
 | `Mouse Wheel` | Zoom anchored to cursor |
 | `Middle Click` | Pan image canvas |
 | `F` | Fit image to window |
@@ -223,6 +226,7 @@ Designed from the ground up for modern Windows aesthetics:
 
 | Key | Action |
 | :--- | :--- |
+| `?` | Keyboard shortcuts cheat sheet |
 | `Delete` | Move to Recycle Bin (safe) |
 | `Shift + Del` | Permanently delete |
 | `Ctrl + C` | Copy image to clipboard |

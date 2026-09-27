@@ -38,7 +38,7 @@ All agents working on this repository **MUST** strictly enforce these five non-n
   - **Elevated Floating Toolbar**: Control dock elevated to `bottom: 80px !important;` to avoid colliding with the Windows taskbar, with a 140px bottom mouse-hover threshold.
   - **Checkerboard Disabled in Mode 2**: Canvas checkerboard toggle is disabled/dimmed to preserve desktop immersion.
 - **Picasa Idle Mouse Fade**: 2.5s of stationary mouse fades all UI chrome to `opacity: 0` (`pointer-events: none`); mouse movement restores controls immediately.
-- **Navigation & Ergonomics**: Smooth mouse wheel zoom anchored to cursor; `Left`/`Right` arrow keys for directory navigation; quick keys `F` (fit), `1` (1:1), `,`/`.` (rotate), `Esc` (exit/close), `C` (crop), `D` (draw), `E` (filters), `I` (EXIF info), `Q` (full RAW decode), `Delete` (Recycle Bin), `Shift+Delete` (permanent delete), `Ctrl+V` (paste image).
+- **Navigation & Ergonomics**: Smooth mouse wheel zoom anchored to cursor; `Up`/`Down` arrow keys for intuitive centered/anchored zoom in and zoom out (matching Picasa navigation alongside mouse wheel); `Left`/`Right` arrow keys for directory navigation; quick keys `F` (fit), `1` (1:1), `,`/`.` (rotate), `Esc` (exit/close), `C` (crop), `D` (draw), `E` (filters), `I` (EXIF info), `Q` (full RAW decode), `Delete` (Recycle Bin), `Shift+Delete` (permanent delete), `Ctrl+V` (paste image).
 
 ### Pillar 5: Strict Modularity Architecture (< 300 Lines per File)
 - **Hard Rule**: No source file (`.js`, `.css`, `.rs`) may exceed **300 lines of code**. Files approaching this limit must be proactively split into focused modules.
@@ -100,7 +100,8 @@ src/
 │                       # crop, draw, loading, modes, panels, shortcuts,
 │                       # startpage, titlebar, toast, toolbar, vibrancy
 ├── app.js               # Main viewer bootstrap coordinator (≤ 350 lines)
-└── settings-app.js      # Standalone settings window coordinator (≤ 350 lines)
+├── settings-app.js      # Standalone settings window coordinator (≤ 350 lines)
+└── snipper-app.js       # Dedicated overlay window coordinator (≤ 300 lines)
 src-tauri/src/
 ├── main.rs              # App entry-point, plugins & lifecycle (≤ 350 lines)
 ├── audio_capture.rs     # Native Windows WASAPI loopback & microphone audio capture
@@ -148,6 +149,10 @@ src-tauri/src/
   - **Sample-Accurate WASAPI Audio Sync (`audio_capture.rs`, `audio_mixer.rs`, `native_recorder.rs`)**: Captures synchronized system loopback audio and microphone input via independent FIFO queues (`ResamplingQueue`). Mixed 48kHz stereo PCM is piped directly into the native recorder with contiguous, sample-accurate timestamp calculation eliminating drift and micro-stutters.
   - Stroke-free frosted recording dock with live timer, pause/resume, and stop/discard buttons.
   - Native overlay border around recorded region (`recording_border.rs`) with zero window chrome. Automatic toast notification and optional external editor launch upon finalization.
+- **Dedicated Transparent Overlay Window (`snipper.html`, `snipper-app.js`, `tauri.conf.json`)**:
+  - Decouples all capture crosshairs, selection bounds, and floating recording pills into an isolated transparent secondary window (`snipper`).
+  - Eliminates main window hide/restore cycles, DWM DirectComposition redraw flash, and Acrylic recreation flicker.
+  - Zero residue: ensures crosshair overlays and post-recording blur backdrops cleanly unmount without intercepting desktop mouse clicks or resurfacing on subsequent triggers.
 - **Alitken Tandem Workflow (`alitken-service.js`)**:
   - Deep-link bridge allowing one-click transfer of active images to Alitken for advanced editing and seamless auto-reload in Bukaake upon save.
 - **Unified Hotkeys (`hotkey-service.js`, `hotkeys.rs`)**:
@@ -179,6 +184,7 @@ src-tauri/src/
   - **Zero Hardcoded Centering Invariant**: Never invoke `win.center()` on window close, hide, or tray wake. Always preserve user window position and multi-monitor coordinates.
   - **Clean Standby Hide Invariant**: In `enter_standby`, only invoke `win.hide()`. Never apply `set_size` or repositioning during hide, as Win32/Tauri renders moves before completing the hide, causing an unsightly screen jump/flash glitch.
   - **Startup Window Size Lock & WS_THICKFRAME Invariant**: Startup dimensions locked to 680×480. **Never call `set_resizable(false)` natively on Windows**. In Windows 11 DWM, stripping `WS_THICKFRAME` forces DWM to draw an active 1px white border around frameless windows and removes rounded corners/shadows. Window size locking on startup is enforced via DOM handle suppression (`body:not(.image-loaded) .resize-handle { display: none !important; }`), while fixed dialogs (Settings) use native Win32 `WM_NCHITTEST` subclassing (`window_subclass.rs`) to remap edge hit-tests to `HTCLIENT` and block `SC_SIZE` modal loops, keeping `resizable: true` (`WS_THICKFRAME`) active so borders remain completely eliminated and corners stay rounded without resize flicker.
+  - **Win32 Titlebar Maximize Interception Invariant**: The main window subclasses `WM_NCLBUTTONDBLCLK` and `SC_MAXIMIZE` in `window_subclass.rs` to intercept titlebar double-clicks and DWM maximize requests, routing them smoothly via the `bukaake-toggle-mode` event directly into Mode 2 transparent fullscreen without DWM maximize flash or Acrylic recreation flicker.
   - **Empty State Aspect Isolation**: In `window-mode-manager.js`, `resizeAndCenter` is strictly guarded by `if (this.viewer?.img && this.lastAspectSize)`. `handleEmptyState()` must always clear `this.windowModeManager.lastAspectSize = null`.
 - **Shell File Association (`file_assoc.rs`, `file-assoc-service.js`)**:
   - Registers ProgID and capabilities for 49 formats under `HKCU` (zero UAC prompts).
