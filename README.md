@@ -197,12 +197,12 @@ Designed from the ground up for modern Windows aesthetics:
 | Key | Action |
 | :--- | :--- |
 | `Left` / `Right` | Previous / Next photo |
-| `Up` / `Down` | Zoom In / Zoom Out (Picasa-style) |
+| `Up` / `Down` | Zoom In / Zoom Out (Picasa) |
 | `Mouse Wheel` | Zoom anchored to cursor |
 | `Middle Click` | Pan image canvas |
 | `F` | Fit image to window |
 | `1` | 100% actual size (1:1) |
-| `,` / `.` | Rotate 90° Left / Right |
+| `,` / `.` (or `L`/`R`) | Rotate 90° Left / Right |
 | `B` | Toggle background checkerboard |
 | `P` | Toggle pixel art crisp mode |
 
@@ -215,11 +215,12 @@ Designed from the ground up for modern Windows aesthetics:
 | `D` | Toggle Pen & Highlighter |
 | `C` | Toggle Precision Crop |
 | `E` | Toggle Color Adjustments |
+| `H` / `V` | Flip Horizontal / Vertical |
 | `Q` | Full Sensor RAW Develop |
 | `I` | Toggle EXIF Info Drawer |
 | **`Enter`** | **Apply & commit active tool** |
 | `Ctrl + Z` | Undo action / stroke |
-| `Ctrl + Y` | Redo action / stroke |
+| `Ctrl + Y` / `Ctrl+Shift+Z` | Redo action / stroke |
 
 </td>
 <td valign="top">
@@ -227,18 +228,34 @@ Designed from the ground up for modern Windows aesthetics:
 | Key | Action |
 | :--- | :--- |
 | `?` | Keyboard shortcuts cheat sheet |
-| `Delete` | Move to Recycle Bin (safe) |
-| `Shift + Del` | Permanently delete |
+| `Ctrl + O` | Open image file |
+| `Ctrl + S` | Save / Export active image |
 | `Ctrl + C` | Copy image to clipboard |
 | `Ctrl + V` | Paste image from clipboard |
-| `Ctrl + S` | Save active changes |
-| `Ctrl + Shift + S` | Save As new image file |
-| `Ctrl + ,` | Open Settings window |
-| `Esc` | Cancel tool / Close window |
+| `Alt+Shift+S` / `PrtScn` | Capture / Record Screen |
+| `Delete` | Move to Recycle Bin (safe) |
+| `Shift + Del` | Permanently delete |
+| `F11` / `Enter` | Toggle Fullscreen Mode |
+| `Esc` | Cancel tool / Close / Standby |
 
 </td>
 </tr>
 </table>
+
+<br />
+
+---
+
+## 💻 System Requirements
+
+| Component | Minimum Requirement | Recommended |
+| :--- | :--- | :--- |
+| **Operating System** | Windows 10 (64-bit, Version 19041+) | Windows 11 (64-bit, Version 22H2 or newer) |
+| **Processor (CPU)** | Intel Core i3 / AMD Ryzen 3 / ARM64 | Intel Core i5 / AMD Ryzen 5 / Snapdragon X Elite |
+| **Graphics (GPU)** | DirectX 11 capable GPU (Direct3D 11 & WGC) | Dedicated GPU or modern integrated graphics |
+| **System Memory (RAM)** | 512 MB (~8–15 MB background standby) | 2 GB+ (for high-resolution Camera RAW sequences) |
+| **Storage / Runtime** | ~10 MB free disk space | Single standalone portable `.exe` (~5 MB) |
+| **Dependencies** | None. Zero external codecs, DLLs, or runtimes required. |
 
 <br />
 
@@ -250,7 +267,7 @@ Designed from the ground up for modern Windows aesthetics:
    - For standard 64-bit PCs: `bukaake-vX.Y.Z-x64.exe`
    - For ARM devices (Surface Pro, Snapdragon X): `bukaake-vX.Y.Z-arm64.exe`
 2. **Run the file directly.** No installer, no registry bloat, no administrative privileges required.
-3. Press **`Ctrl + ,`** to open Settings and click **Register Associations** to set Bukaake as your default viewer.
+3. Click the **Settings** (gear icon) in the toolbar and select **Register Associations** to set Bukaake as your default viewer.
 
 <br />
 
