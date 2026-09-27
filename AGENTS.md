@@ -188,6 +188,12 @@ src-tauri/src/
 
 ## 4. Development & Build Rules
 
+### Agent Output Protocol
+
+**ALL planning, analysis, behaviour descriptions, and architectural decisions MUST be written
+directly into the active task artifact file. NEVER deliver plan content as inline chat text only.
+Chat responses may only contain a 1-3 sentence pointer to the artifact plus any open questions.**
+
 ### Fast Validation Commands
 - `npm run dev` — Launch Vite dev server on port 3000.
 - `npm run tauri:dev` — Launch Tauri v2 desktop app in development mode.
