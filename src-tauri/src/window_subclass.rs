@@ -59,3 +59,74 @@ unsafe extern "system" fn suppress_edge_resize_subclass_proc(
         _ => DefSubclassProc(hwnd, msg, wparam, lparam),
     }
 }
+
+#[cfg(target_os = "windows")]
+pub fn suppress_titlebar_maximize(window: &tauri::WebviewWindow) {
+    use tauri::Manager;
+    use windows::Win32::Foundation::HWND;
+    use windows::Win32::UI::Shell::SetWindowSubclass;
+
+    if let Ok(hwnd) = window.hwnd() {
+        let app_handle = window.app_handle().clone();
+        let boxed_handle = Box::into_raw(Box::new(app_handle)) as usize;
+        unsafe {
+            let win32_hwnd = HWND(hwnd.0);
+            let _ = SetWindowSubclass(
+                win32_hwnd,
+                Some(titlebar_maximize_subclass_proc),
+                1002,
+                boxed_handle,
+            );
+        }
+    }
+}
+
+#[cfg(not(target_os = "windows"))]
+pub fn suppress_titlebar_maximize(_window: &tauri::WebviewWindow) {}
+
+#[cfg(target_os = "windows")]
+unsafe extern "system" fn titlebar_maximize_subclass_proc(
+    hwnd: windows::Win32::Foundation::HWND,
+    msg: u32,
+    wparam: windows::Win32::Foundation::WPARAM,
+    lparam: windows::Win32::Foundation::LPARAM,
+    _uid_subclass: usize,
+    ref_data: usize,
+) -> windows::Win32::Foundation::LRESULT {
+    use windows::Win32::Foundation::LRESULT;
+    use windows::Win32::UI::Shell::DefSubclassProc;
+    use windows::Win32::UI::WindowsAndMessaging::{
+        HTCAPTION, SC_MAXIMIZE, WM_NCLBUTTONDBLCLK, WM_NCDESTROY, WM_SYSCOMMAND,
+    };
+    use tauri::Emitter;
+
+    match msg {
+        WM_NCLBUTTONDBLCLK => {
+            if wparam.0 as u32 == HTCAPTION {
+                if ref_data != 0 {
+                    let app = &*(ref_data as *const tauri::AppHandle);
+                    let _ = app.emit("bukaake-toggle-mode", ());
+                }
+                return LRESULT(0);
+            }
+            DefSubclassProc(hwnd, msg, wparam, lparam)
+        }
+        WM_SYSCOMMAND => {
+            if (wparam.0 as u32 & 0xFFF0) == SC_MAXIMIZE {
+                if ref_data != 0 {
+                    let app = &*(ref_data as *const tauri::AppHandle);
+                    let _ = app.emit("bukaake-toggle-mode", ());
+                }
+                return LRESULT(0);
+            }
+            DefSubclassProc(hwnd, msg, wparam, lparam)
+        }
+        WM_NCDESTROY => {
+            if ref_data != 0 {
+                let _ = Box::from_raw(ref_data as *mut tauri::AppHandle);
+            }
+            DefSubclassProc(hwnd, msg, wparam, lparam)
+        }
+        _ => DefSubclassProc(hwnd, msg, wparam, lparam),
+    }
+}

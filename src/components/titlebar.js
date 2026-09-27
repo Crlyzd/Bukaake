@@ -50,9 +50,24 @@ export class Titlebar {
       await tauriBridge.minimizeWindow();
     });
 
-    this.btnMax?.addEventListener('click', async () => {
+    this.btnMax?.addEventListener('pointerdown', () => {
+      this.btnMax.blur();
+      this.btnMax.removeAttribute('title');
+    });
+
+    this.btnMax?.addEventListener('click', async (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      this.btnMax.blur();
+      this.btnMax.removeAttribute('title');
       if (!this.hasImage) return;
       await this.handleToggleMaximize();
+    });
+
+    this.btnMax?.addEventListener('pointerleave', () => {
+      if (!document.body.classList.contains('mode-viewer')) {
+        this.updateMaxButtonTitle();
+      }
     });
 
     this.btnClose?.addEventListener('click', async () => {
@@ -147,10 +162,19 @@ export class Titlebar {
       if (icon) {
         icon.className = isExpanded ? 'ri-checkbox-multiple-blank-line' : 'ri-checkbox-blank-line';
       }
-      this.btnMax.title = !this.hasImage
-        ? 'Fullscreen Viewer (Load an image first)'
-        : (isExpanded ? 'Restore Window' : 'Fullscreen Viewer (F11)');
+      if (!isExpanded && !document.body.classList.contains('mode-viewer')) {
+        this.updateMaxButtonTitle();
+      } else {
+        this.btnMax.removeAttribute('title');
+      }
     }
+  }
+
+  updateMaxButtonTitle() {
+    if (!this.btnMax) return;
+    this.btnMax.title = !this.hasImage
+      ? 'Fullscreen Viewer (Load an image first)'
+      : 'Fullscreen Viewer (F11)';
   }
 
   setFileName(name) {
@@ -188,9 +212,11 @@ export class Titlebar {
     if (this.btnMax) {
       this.btnMax.disabled = !this.hasImage;
       this.btnMax.classList.toggle('disabled', !this.hasImage);
-      this.btnMax.title = this.hasImage
-        ? (document.body.classList.contains('window-maximized') ? 'Restore Window' : 'Fullscreen Viewer (F11)')
-        : 'Fullscreen Viewer (Load an image first)';
+      if (!document.body.classList.contains('mode-viewer')) {
+        this.updateMaxButtonTitle();
+      } else {
+        this.btnMax.removeAttribute('title');
+      }
     }
     tauriBridge.setMaximizable(this.hasImage);
   }

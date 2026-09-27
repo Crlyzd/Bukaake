@@ -186,8 +186,18 @@ body.image-loaded .app-titlebar:hover {
   justify-content: center;
   cursor: pointer;
   font-size: 13px;
+  user-select: none;
+  outline: none !important;
+  transform: translateZ(0);
   transition: background var(--transition-fast), color var(--transition-fast);
   -webkit-app-region: no-drag !important;
+}
+
+.win-btn:focus,
+.win-btn:focus-visible,
+.win-btn:active {
+  outline: none !important;
+  box-shadow: none !important;
 }
 
 .win-btn * {

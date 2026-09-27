@@ -127,6 +127,7 @@ fn main() {
                 });
                 if let Some(main_win) = app.get_webview_window("main") {
                     let _ = main_win.set_shadow(true);
+                    window_subclass::suppress_titlebar_maximize(&main_win);
                     if has_img {
                         let _ = main_win.set_fullscreen(true);
                         let _ = window_vibrancy::clear_acrylic(&main_win);

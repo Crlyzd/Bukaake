@@ -59,13 +59,11 @@ export class ShortcutsRegistry {
         e.preventDefault();
         this.actions.onNavigateBatch?.(1);
         break;
-      case '+':
-      case '=':
+      case 'ArrowUp':
         e.preventDefault();
         this.actions.onZoomIn?.();
         break;
-      case '-':
-      case '_':
+      case 'ArrowDown':
         e.preventDefault();
         this.actions.onZoomOut?.();
         break;

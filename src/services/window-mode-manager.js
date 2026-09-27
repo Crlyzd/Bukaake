@@ -23,6 +23,11 @@ export class WindowModeManager {
   init() {
     document.body.classList.add(MODE_REGULAR);
     this.bindWindowEvents();
+    if (tauriBridge.isTauri() && window.__TAURI__?.event?.listen) {
+      window.__TAURI__.event.listen('bukaake-toggle-mode', () => {
+        if (this.viewer?.img) this.toggleMode();
+      });
+    }
   }
 
   bindWindowEvents() {
@@ -117,6 +122,7 @@ export class WindowModeManager {
     if (newMode === MODE_VIEWER) {
       if (!this.viewer?.img) return;
       this.updateModeClasses(MODE_VIEWER);
+      await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
       await tauriBridge.setFullscreen(true);
     } else {
       this.updateModeClasses(MODE_REGULAR);
