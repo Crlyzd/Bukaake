@@ -208,11 +208,6 @@ pub fn prepare_screen_snip(app: tauri::AppHandle) -> Result<ScreenCapturePayload
 
     let mut payload = screen_capture::capture_desktop()?;
     payload.scale_factor = scale_factor;
-
-    if let Some(snipper) = app.get_webview_window("snipper") {
-        let _ = snipper.unminimize(); let _ = snipper.set_always_on_top(true);
-        let _ = snipper.set_fullscreen(true); let _ = snipper.show(); let _ = snipper.set_focus();
-    }
     Ok(payload)
 }
 
@@ -220,8 +215,14 @@ pub fn prepare_screen_snip(app: tauri::AppHandle) -> Result<ScreenCapturePayload
 pub fn show_screen_snip(app: tauri::AppHandle) -> Result<(), String> {
     use tauri::Manager;
     if let Some(s) = app.get_webview_window("snipper") {
-        let _ = s.unminimize(); let _ = s.set_always_on_top(true);
-        let _ = s.set_fullscreen(true); let _ = s.show(); let _ = s.set_focus();
+        if let Ok(Some(m)) = s.current_monitor() {
+            let _ = s.set_position(tauri::Position::Physical(*m.position()));
+            let _ = s.set_size(tauri::Size::Physical(*m.size()));
+        }
+        let _ = s.unminimize();
+        let _ = s.set_always_on_top(true);
+        let _ = s.show();
+        let _ = s.set_focus();
     }
     Ok(())
 }

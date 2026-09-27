@@ -3,7 +3,9 @@
  * Handles resizing overlay/dock to compact floating widget and acrylic-free transparency (< 110 lines)
  */
 
-use tauri::{PhysicalPosition, PhysicalSize, Position, Size};
+#[cfg(not(target_os = "windows"))]
+use tauri::{PhysicalPosition, PhysicalSize, Position};
+use tauri::Size;
 
 #[tauri::command]
 pub fn enter_recording_pill_mode(app: tauri::AppHandle, width: Option<f64>) -> Result<(), String> {
@@ -12,45 +14,61 @@ pub fn enter_recording_pill_mode(app: tauri::AppHandle, width: Option<f64>) -> R
         .or_else(|| app.get_webview_window("main"))
         .ok_or("Recording overlay window not found")?;
 
-    let _ = win.hide();
-    let _ = win.set_fullscreen(false);
     let _ = win.set_min_size(Some(Size::Logical(tauri::LogicalSize { width: 0.0, height: 0.0 })));
     let _ = win.set_shadow(false);
+
+    let target_w = width.unwrap_or(200.0).max(120.0);
+
+    let (x, y, w, h) = if let Ok(Some(monitor)) = win.current_monitor() {
+        let monitor_pos = monitor.position();
+        let screen_size = monitor.size();
+        let scale = monitor.scale_factor();
+        let w = (target_w * scale) as i32;
+        let h = (36.0 * scale) as i32;
+        let x = monitor_pos.x + screen_size.width as i32 - w - (24.0 * scale) as i32;
+        let y = monitor_pos.y + (50.0 * scale) as i32;
+        (x, y, w, h)
+    } else {
+        (100, 50, target_w as i32, 36)
+    };
 
     #[cfg(target_os = "windows")]
     {
         let _ = window_vibrancy::clear_acrylic(&win);
         if let Ok(hwnd) = win.hwnd() {
+            use windows::Win32::Foundation::HWND;
             use windows::Win32::Graphics::Dwm::{DwmSetWindowAttribute, DWMWA_WINDOW_CORNER_PREFERENCE, DWMWCP_ROUND};
-            use windows::Win32::UI::WindowsAndMessaging::{SetWindowDisplayAffinity, WDA_EXCLUDEFROMCAPTURE};
+            use windows::Win32::UI::WindowsAndMessaging::{
+                SetWindowDisplayAffinity, SetWindowPos, HWND_TOPMOST,
+                SWP_FRAMECHANGED, SWP_NOACTIVATE, SWP_SHOWWINDOW, WDA_EXCLUDEFROMCAPTURE,
+            };
             let preference = DWMWCP_ROUND.0;
-            let _ = unsafe {
-                let _ = SetWindowDisplayAffinity(windows::Win32::Foundation::HWND(hwnd.0), WDA_EXCLUDEFROMCAPTURE);
-                DwmSetWindowAttribute(
-                    windows::Win32::Foundation::HWND(hwnd.0),
+            unsafe {
+                let win_hwnd = HWND(hwnd.0);
+                let _ = SetWindowDisplayAffinity(win_hwnd, WDA_EXCLUDEFROMCAPTURE);
+                let _ = DwmSetWindowAttribute(
+                    win_hwnd,
                     DWMWA_WINDOW_CORNER_PREFERENCE,
                     &preference as *const _ as *const _,
                     std::mem::size_of::<u32>() as u32,
-                )
+                );
+                let _ = SetWindowPos(
+                    win_hwnd,
+                    HWND_TOPMOST,
+                    x,
+                    y,
+                    w,
+                    h,
+                    SWP_NOACTIVATE | SWP_FRAMECHANGED | SWP_SHOWWINDOW,
+                );
             };
         }
     }
 
-    let target_w = width.unwrap_or(200.0).max(120.0);
-
-    if let Ok(Some(monitor)) = win.current_monitor() {
-        let monitor_pos = monitor.position();
-        let screen_size = monitor.size();
-        let scale = monitor.scale_factor();
-        let w = (target_w * scale) as u32;
-        let h = (36.0 * scale) as u32;
-        let x = monitor_pos.x + screen_size.width as i32 - w as i32 - (24.0 * scale) as i32;
-        let y = monitor_pos.y + (50.0 * scale) as i32;
-
-        let _ = win.set_size(Size::Physical(PhysicalSize { width: w, height: h }));
+    #[cfg(not(target_os = "windows"))]
+    {
+        let _ = win.set_size(Size::Physical(PhysicalSize { width: w as u32, height: h as u32 }));
         let _ = win.set_position(Position::Physical(PhysicalPosition { x, y }));
-    } else {
-        let _ = win.set_size(Size::Logical(tauri::LogicalSize { width: target_w, height: 36.0 }));
     }
 
     let _ = win.set_always_on_top(true);

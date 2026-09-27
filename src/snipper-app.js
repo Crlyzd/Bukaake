@@ -122,6 +122,9 @@ export class SnipperApp {
       },
       options
     );
+
+    await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+    await invoke('show_screen_snip').catch(() => {});
   }
 
   async cancelSnip() {

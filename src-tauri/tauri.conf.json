@@ -48,7 +48,7 @@
         "label": "snipper",
         "title": "Bukaake Snipper",
         "url": "snipper.html",
-        "fullscreen": true,
+        "fullscreen": false,
         "transparent": true,
         "decorations": false,
         "alwaysOnTop": true,
