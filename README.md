@@ -66,7 +66,7 @@ Most photo viewers on Windows today are slow to launch, cluttered with heavy too
 | 📷 **49+ Formats & Camera RAW** | Native iPhone HEIC/HEIF (100% free), 24+ RAW camera formats, and 3D VFX textures. |
 | ✍️ **Vector Typography & Crop** | Vector text engine with 8-point handles, dynamic shadows, laser-guided crop, pen & highlighter. |
 | 📸 **Integrated Screen Snipper** | Multi-monitor crosshair capture with instant clipboard copy and auto-saved PNGs. |
-| 🎥 **Hardware GPU Screen Recording** | Direct3D 11 & WGC zero-copy VRAM capture (<2% CPU) streaming hardware H.264/AAC MP4. |
+| 🎥 **Hardware GPU Screen Recording** | Direct3D 11 & WGC zero-copy VRAM capture (<2% CPU) with 60 FPS / Space Saver modes & hardware H.264 MP4. |
 | 🗑️ **Safe Recycle Bin Deletion** | Win32 Recycle Bin integration (`Delete` to trash, `Shift+Delete` to shred). |
 | 🎨 **Stroke-Free Frosted Glass** | Dual theme engine: Deep Obsidian Dark Mode & Frosted Slate Light Mode. |
 
@@ -81,6 +81,7 @@ When you open any picture, Bukaake softly dims your surrounding desktop wallpape
 - **75% Viewport Ceiling**: Images comfortably fill up to 75% of your screen so your desktop remains visible.
 - **Elevated Control Dock**: Floating toolbars stay elevated safely above your Windows taskbar.
 - **Auto-Hiding Controls**: Move your mouse to bring up controls; stay idle for 2.5 seconds and all chrome fades smoothly to 0% opacity.
+- **Interactive Return-to-Start**: Hover over the titlebar app icon in Mode 1 to reveal a back arrow, cleanly closing the image and resetting/centering window bounds back to start.
 
 <p align="center">
   <img width="1280" alt="Transparent Immersion" src="https://github.com/user-attachments/assets/c29df440-32b0-49dd-b3d6-a25a9567b370" style="border-radius: 10px;" />
@@ -125,6 +126,7 @@ Capture and share anything on your screen without launching heavy third-party so
 - **Zero-Copy VRAM Pipeline**: Desktop frames capture directly into Direct3D 11 GPU textures via `Windows.Graphics.Capture` with sub-2% CPU overhead and zero RAM round-trips.
 - **Hardware H.264 & AAC MP4**: Streams hardware-accelerated `.mp4` video directly through Windows Media Foundation `IMFSinkWriter` with instant finalization.
 - **Sample-Accurate Audio**: Mixes WASAPI system loopback and microphone inputs at 48kHz stereo with a contiguous sample-accurate clock—zero drift or lag.
+- **Space Saver Mode & Sync Calibration**: Toggle ~75% storage savings with optimized 30 FPS profiles, or capture silky 60 FPS video. Calibrate audio sync with a ±200ms stepper in Settings.
 - **Dedicated Overlay Window**: Isolated transparent window (`snipper.html`) hosts crosshairs, selection bounds, and recording pills with zero desktop redraw flash.
 - **Clean Borderless Capture**: Windows 11 default yellow capture border is completely suppressed.
 

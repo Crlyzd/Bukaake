@@ -26,7 +26,7 @@ All agents working on this repository **MUST** strictly enforce these five non-n
 ### Pillar 3: GitHub Releases Auto-Updater & Native Self-Updating
 - **Updater Architecture (`updater-service.js`, `updater.rs`)**: Queries GitHub Releases API with semver checks and x64/arm64 asset detection.
 - **Native In-Place Updating**: Downloads binaries via `curl.exe` (with PowerShell fallback), emits live progress (`bukaake-update-progress`), replaces the running executable via `self-replace`, and cleanly restarts.
-- **Multi-Window Sync**: Synchronizes update state across main and settings windows via `localStorage` and Tauri events.
+- **Multi-Window Sync & Visual Telemetry**: Synchronizes update state across main and settings windows via `localStorage` and Tauri events. Settings "About" nav tab features a stroke-free ambient sky glow (`has-update`) and animated pulsating heartbeat indicator when a new version is detected.
 - **Mode 2 Fullscreen Exclusion**: In Fullscreen Mode (`body.mode-viewer`), launch update checks are completely disabled. In Mode 1, background checks delay by 1.5s post-startup.
 
 ### Pillar 4: Dual-Mode & Picasa-Style Transparent Viewing
@@ -55,7 +55,10 @@ The project contains **100+ modular files** cleanly organized across distinct la
 src/
 ├── components/          # UI Component Modules (< 300 lines each)
 │   ├── capture/                # Screen snipper & recording dock
-│   ├── settings/               # Settings modal & capture section
+│   ├── settings/               # Settings modal, capture & audio sections
+│   │   ├── settings-audio-section.js   # Audio sync stepper & input selection
+│   │   ├── settings-capture-section.js # Video presets & space saver mode
+│   │   └── settings-modal.js           # Modal coordinator & tab switching
 │   ├── text/                   # Floating text typography sub-toolbar
 │   ├── adjustments-panel.js    # Sliders & preset chips
 │   ├── confirm-modal.js        # Unsaved changes dialog
@@ -65,7 +68,7 @@ src/
 │   ├── loading-indicator.js    # Circular stroke-free spinner
 │   ├── metadata-drawer.js      # EXIF & camera telemetry drawer
 │   ├── shortcuts-modal.js      # Keyboard shortcuts cheatsheet
-│   ├── titlebar.js             # Frameless titlebar & window actions
+│   ├── titlebar.js             # Frameless titlebar, brand return button & actions
 │   ├── toast.js                # Single-toast notification pill
 │   └── toolbar.js              # Floating control dock & tool triggers
 ├── core/                # Canvas & Image Math Engines (< 300 lines each)
@@ -146,7 +149,14 @@ src-tauri/src/
 - **Native GPU Screen Recording & Hardware Encoding (`d3d_device.rs`, `wgc_capture.rs`, `wmf_writer.rs`, `native_recorder.rs`, `recording-dock.js`, `screen-recorder-service.js`, `audio_capture.rs`, `audio_mixer.rs`, `recording_border.rs`, `recording_pill.rs`)**:
   - **Zero-Copy VRAM Capture (`Windows.Graphics.Capture`, `wgc_capture.rs`, `d3d_device.rs`)**: Captures desktop frames directly into D3D11 GPU textures via `Direct3D11CaptureFramePool` (`B8G8R8A8UIntNormalized`). Zero CPU memory round-trips. Region capture uses fast GPU subresource blits (`CopySubresourceRegion`).
   - **Hardware H.264/AAC SinkWriter (`wmf_writer.rs`)**: Uses Windows Media Foundation `IMFSinkWriter` with DXGI surface buffer wrapping to encode hardware H.264 video (`MFVideoFormat_H264`) and AAC audio (`MFAudioFormat_AAC`) directly to native `.mp4` files. Delivers Snipping Tool parity (< 2% CPU overhead, solid 60 FPS).
-  - **Sample-Accurate WASAPI Audio Sync (`audio_capture.rs`, `audio_mixer.rs`, `native_recorder.rs`)**: Captures synchronized system loopback audio and microphone input via independent FIFO queues (`ResamplingQueue`). Mixed 48kHz stereo PCM is piped directly into the native recorder with contiguous, sample-accurate timestamp calculation eliminating drift and micro-stutters.
+  - **Sample-Accurate WASAPI Audio Sync & Desync Resolution (`audio_capture.rs`, `audio_mixer.rs`, `native_recorder.rs`)**:
+    - **Continuous Silence Synthesis**: Synthesizes 48kHz stereo zero-sample pairs `(0.0, 0.0)` during silent, uninitialized, or late-starting feeds, ensuring monotonic, contiguous audio PTS strictly matching video PTS.
+    - **Atomic Pause Compensation (`total_paused_nanos`)**: Subtracts accumulated pause duration atomically (`AtomicU64`) from video elapsed time (`effective_nanos = elapsed.saturating_sub(paused)`), matching the audio pause PTS timeline across pause/resume cycles.
+    - **Audio Sync Calibration Stepper**: Configurable manual offset (`-200ms` to `+200ms` in 10ms increments) persisted in `localStorage` (`bukaake-audio-sync-offset`) and passed through IPC (`syncOffsetMs`) into the native recorder PTS pipeline.
+  - **Space Saver Recording Mode & Dynamic Presets (`native_recorder.rs`, `screen-recorder-service.js`, `settings-capture-section.js`)**:
+    - Standard mode records at uniform 60 FPS (Balanced 6 Mbps, High 12 Mbps, Ultra 24 Mbps).
+    - Space Saver mode yields ~75% file size reduction via 30 FPS profiles at 25% target bitrates (Balanced 1.5 Mbps, High 3 Mbps, Ultra 6 Mbps) with native recorder clamp floor reduced to 500 Kbps.
+    - Dynamic dropdown labels adapt immediately to the toggle state in real time.
   - Stroke-free frosted recording dock with live timer, pause/resume, and stop/discard buttons.
   - Native overlay border around recorded region (`recording_border.rs`) with zero window chrome. Automatic toast notification and optional external editor launch upon finalization.
 - **Dedicated Transparent Overlay Window (`snipper.html`, `snipper-app.js`, `tauri.conf.json`)**:
@@ -185,6 +195,7 @@ src-tauri/src/
   - **Clean Standby Hide Invariant**: In `enter_standby`, only invoke `win.hide()`. Never apply `set_size` or repositioning during hide, as Win32/Tauri renders moves before completing the hide, causing an unsightly screen jump/flash glitch.
   - **Startup Window Size Lock & WS_THICKFRAME Invariant**: Startup dimensions locked to 680×480. **Never call `set_resizable(false)` natively on Windows**. In Windows 11 DWM, stripping `WS_THICKFRAME` forces DWM to draw an active 1px white border around frameless windows and removes rounded corners/shadows. Window size locking on startup is enforced via DOM handle suppression (`body:not(.image-loaded) .resize-handle { display: none !important; }`), while fixed dialogs (Settings) use native Win32 `WM_NCHITTEST` subclassing (`window_subclass.rs`) to remap edge hit-tests to `HTCLIENT` and block `SC_SIZE` modal loops, keeping `resizable: true` (`WS_THICKFRAME`) active so borders remain completely eliminated and corners stay rounded without resize flicker.
   - **Win32 Titlebar Maximize Interception Invariant**: The main window subclasses `WM_NCLBUTTONDBLCLK` and `SC_MAXIMIZE` in `window_subclass.rs` to intercept titlebar double-clicks and DWM maximize requests, routing them smoothly via the `bukaake-toggle-mode` event directly into Mode 2 transparent fullscreen without DWM maximize flash or Acrylic recreation flicker.
+  - **Return-to-Start Brand Button & Window Reset**: The titlebar app icon converts to an interactive back button (`ri-arrow-left-line`) with cross-fade on hover in Mode 1 when an image is loaded. Clicking checks `changeTracker.hasUnsavedChanges()` before triggering the confirmation dialog, clears the active image, and resets/centers the window dimensions back to the default 680×480 start state.
   - **Empty State Aspect Isolation**: In `window-mode-manager.js`, `resizeAndCenter` is strictly guarded by `if (this.viewer?.img && this.lastAspectSize)`. `handleEmptyState()` must always clear `this.windowModeManager.lastAspectSize = null`.
 - **Shell File Association (`file_assoc.rs`, `file-assoc-service.js`)**:
   - Registers ProgID and capabilities for 49 formats under `HKCU` (zero UAC prompts).
