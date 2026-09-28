@@ -48,24 +48,61 @@ body.image-loaded .app-titlebar:hover {
   overflow: hidden;
 }
 
+.app-brand-btn {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  background: transparent;
+  border: none !important;
+  outline: none !important;
+  padding: 2px 7px 2px 3px;
+  border-radius: var(--radius-pill);
+  pointer-events: none;
+  cursor: default;
+  color: inherit;
+  font: inherit;
+  user-select: none;
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+body.mode-regular.image-loaded .app-brand-btn { pointer-events: auto; cursor: pointer; }
+body.mode-viewer .app-brand-btn { display: none !important; }
+
+body.mode-regular.image-loaded .app-brand-btn:hover {
+  background: var(--glass-btn-hover-bg);
+}
+
 .app-logo {
+  position: relative;
   width: 20px;
   height: 20px;
-  background: transparent;
-  border: none;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
 }
 
-.app-logo img {
+.app-logo .logo-icon {
   width: 100%;
   height: 100%;
   object-fit: contain;
   pointer-events: none;
-  filter: none;
+  transition: opacity var(--transition-fast), transform var(--transition-fast);
 }
+
+.app-logo .back-icon {
+  position: absolute;
+  font-size: 15px;
+  line-height: 1;
+  color: var(--text-main);
+  opacity: 0;
+  transform: scale(0.65);
+  pointer-events: none;
+  transition: opacity var(--transition-fast), transform var(--transition-fast);
+}
+
+body.mode-regular.image-loaded .app-brand-btn:hover .logo-icon { opacity: 0; transform: scale(0.65); }
+body.mode-regular.image-loaded .app-brand-btn:hover .back-icon { opacity: 1; transform: scale(1); }
 
 .app-name {
   font-weight: 600;
@@ -151,9 +188,7 @@ body.image-loaded .app-titlebar:hover {
 }
 
 .titlebar-ghost-btn:focus,
-.titlebar-ghost-btn:focus-visible {
-  outline: none !important;
-}
+.titlebar-ghost-btn:focus-visible { outline: none !important; }
 
 .titlebar-ghost-btn:disabled {
   opacity: 0.28 !important;
@@ -195,10 +230,7 @@ body.image-loaded .app-titlebar:hover {
 
 .win-btn:focus,
 .win-btn:focus-visible,
-.win-btn:active {
-  outline: none !important;
-  box-shadow: none !important;
-}
+.win-btn:active { outline: none !important; box-shadow: none !important; }
 
 .win-btn * {
   pointer-events: none;
@@ -252,28 +284,11 @@ body.light-theme .titlebar-ghost-btn.has-update:hover i {
 }
 
 @keyframes pulse-icon-glow {
-  0%, 100% {
-    opacity: 0.85;
-    filter: drop-shadow(0 0 4px rgba(56, 189, 248, 0.6));
-    text-shadow: 0 0 8px rgba(56, 189, 248, 0.7), 0 0 16px rgba(56, 189, 248, 0.35);
-  }
-  50% {
-    opacity: 1;
-    filter: drop-shadow(0 0 8px rgba(56, 189, 248, 0.95));
-    text-shadow: 0 0 12px rgba(56, 189, 248, 0.95), 0 0 24px rgba(56, 189, 248, 0.6);
-  }
+  0%, 100% { opacity: 0.85; filter: drop-shadow(0 0 4px rgba(56, 189, 248, 0.6)); text-shadow: 0 0 8px rgba(56, 189, 248, 0.7), 0 0 16px rgba(56, 189, 248, 0.35); }
+  50% { opacity: 1; filter: drop-shadow(0 0 8px rgba(56, 189, 248, 0.95)); text-shadow: 0 0 12px rgba(56, 189, 248, 0.95), 0 0 24px rgba(56, 189, 248, 0.6); }
 }
 
 @keyframes pulse-icon-glow-light {
-  0%, 100% {
-    opacity: 0.88;
-    filter: drop-shadow(0 0 3px rgba(2, 132, 199, 0.45));
-    text-shadow: 0 0 6px rgba(2, 132, 199, 0.5), 0 0 12px rgba(2, 132, 199, 0.25);
-  }
-  50% {
-    opacity: 1;
-    filter: drop-shadow(0 0 7px rgba(2, 132, 199, 0.8));
-    text-shadow: 0 0 10px rgba(2, 132, 199, 0.8), 0 0 18px rgba(2, 132, 199, 0.4);
-  }
+  0%, 100% { opacity: 0.88; filter: drop-shadow(0 0 3px rgba(2, 132, 199, 0.45)); text-shadow: 0 0 6px rgba(2, 132, 199, 0.5), 0 0 12px rgba(2, 132, 199, 0.25); }
+  50% { opacity: 1; filter: drop-shadow(0 0 7px rgba(2, 132, 199, 0.8)); text-shadow: 0 0 10px rgba(2, 132, 199, 0.8), 0 0 18px rgba(2, 132, 199, 0.4); }
 }
-

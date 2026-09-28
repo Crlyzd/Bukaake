@@ -19,6 +19,7 @@ export class Titlebar {
     this.btnTheme = document.getElementById('btnThemeToggle');
     this.btnInfo = document.getElementById('btnToggleInfo');
     this.btnSettings = document.getElementById('btnSettings');
+    this.appBrandBtn = document.getElementById('appBrandBtn') || document.getElementById('appLogo');
 
     this.onOpenFile = options.onOpenFile || null;
     this.onPasteClipboard = options.onPasteClipboard || null;
@@ -27,6 +28,7 @@ export class Titlebar {
     this.onToggleHelp = options.onToggleHelp || null;
     this.onToggleMode = options.onToggleMode || null;
     this.onClose = options.onClose || null;
+    this.onCloseImage = options.onCloseImage || null;
     this.hasImage = false;
 
     this.init();
@@ -136,6 +138,12 @@ export class Titlebar {
     document.getElementById('btnHelp')?.addEventListener('click', () => {
       this.onToggleHelp?.();
     });
+
+    this.appBrandBtn?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (!this.hasImage || !document.body.classList.contains('mode-regular')) return;
+      this.onCloseImage?.();
+    });
   }
 
   async handleToggleMaximize() {
@@ -217,6 +225,9 @@ export class Titlebar {
       } else {
         this.btnMax.removeAttribute('title');
       }
+    }
+    if (this.appBrandBtn) {
+      this.appBrandBtn.title = this.hasImage ? 'Close image & return to start' : 'Bukaake';
     }
     tauriBridge.setMaximizable(this.hasImage);
   }

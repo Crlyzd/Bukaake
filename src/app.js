@@ -68,6 +68,7 @@ class BukaakeApp {
       onToggleSettings: async () => { if (!(await tauriBridge.openSettingsWindow())) this.settingsModal.toggle(); },
       onToggleHelp: () => this.shortcutsModal.toggle(), onToggleMode: () => this.windowModeManager?.toggleMode(),
       onClose: () => this.confirmModal.promptIfDirty(() => this.enterStandby(), () => this.saveImage()),
+      onCloseImage: () => this.confirmModal.promptIfDirty(() => this.handleEmptyState(), () => this.saveImage()),
     });
 
     this.toolbar = new Toolbar({
@@ -300,6 +301,7 @@ class BukaakeApp {
     this.titlebar.setFileName(''); this.titlebar.setHasImage(false);
     this.toolbar.updateCounter(0, -1); this.idleController?.refreshState();
     this.toolbar.setRawFile(false);
+    tauriBridge.resizeAndCenter(680, 480);
   }
 
   handleNavigateBatch(delta) {

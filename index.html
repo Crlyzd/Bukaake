@@ -40,10 +40,13 @@
   <!-- Windows Frameless Glass Draggable Titlebar -->
   <header class="app-titlebar" id="appTitlebar">
     <div class="titlebar-left">
-      <div class="app-logo">
-        <img src="/icon-frameless.png" alt="Bukaake" />
-      </div>
-      <span class="app-name">Bukaake</span>
+      <button class="app-brand-btn" id="appBrandBtn" type="button" aria-label="Return to Start Page">
+        <div class="app-logo" id="appLogo">
+          <img class="logo-icon" src="/icon-frameless.png" alt="Bukaake" />
+          <i class="ri-arrow-left-line back-icon" aria-hidden="true"></i>
+        </div>
+        <span class="app-name">Bukaake</span>
+      </button>
       <span class="app-version">v0.8.1</span>
       <span class="titlebar-sep hidden" id="titlebarSep">/</span>
       <span class="titlebar-filename hidden" id="fileNameBadge"></span>
@@ -121,8 +124,8 @@
             <span class="pro-cap-pill" title="Camera EXIF Telemetry (I)">
               <i class="ri-information-line"></i> EXIF <kbd>I</kbd>
             </span>
-            <span class="pro-cap-pill" title="Picasa Immersion Fit (F)">
-              <i class="ri-aspect-ratio-line"></i> Fit <kbd>F</kbd>
+            <span class="pro-cap-pill" title="Typography & Text Annotations (T)">
+              <i class="ri-text"></i> Text <kbd>T</kbd>
             </span>
           </div>
         </div>
