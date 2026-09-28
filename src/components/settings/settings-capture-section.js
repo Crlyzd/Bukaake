@@ -137,21 +137,51 @@ export function bindCaptureSettings() {
   const btnTrigger = document.getElementById('btnVideoQualityTrigger');
   const lblQuality = document.getElementById('lblVideoQuality');
   const menuQuality = document.getElementById('menuVideoQuality');
+  const toggleSpaceSaver = document.getElementById('toggleSpaceSaver');
 
   const QUALITY_LABELS = {
+    balanced: '60 FPS • Balanced (3 Mbps)',
     high: '60 FPS • High (6 Mbps)',
-    balanced: '30 FPS • Balanced (3 Mbps)',
     ultra: '60 FPS • Ultra (12 Mbps)',
+  };
+
+  const SPACE_SAVER_LABELS = {
+    balanced: '30 FPS • Balanced (750 Kbps)',
+    high: '30 FPS • High (1.5 Mbps)',
+    ultra: '30 FPS • Ultra (3 Mbps)',
+  };
+
+  const getActiveLabels = () => {
+    const isSpaceSaver = localStorage.getItem('bukaake-space-saver') === 'true';
+    return isSpaceSaver ? SPACE_SAVER_LABELS : QUALITY_LABELS;
+  };
+
+  const refreshQualityLabels = () => {
+    const labels = getActiveLabels();
+    const currentKey = localStorage.getItem('bukaake-video-quality') || 'high';
+    if (lblQuality) lblQuality.textContent = labels[currentKey] || labels.high;
+    menuQuality?.querySelectorAll('.glass-dropdown-item').forEach((item) => {
+      const span = item.querySelector('span');
+      if (span && labels[item.dataset.value]) {
+        span.textContent = labels[item.dataset.value];
+      }
+      item.classList.toggle('active', item.dataset.value === currentKey);
+    });
   };
 
   const setQuality = (val) => {
     const key = QUALITY_LABELS[val] ? val : 'high';
     localStorage.setItem('bukaake-video-quality', key);
-    if (lblQuality) lblQuality.textContent = QUALITY_LABELS[key];
-    menuQuality?.querySelectorAll('.glass-dropdown-item').forEach((item) => {
-      item.classList.toggle('active', item.dataset.value === key);
-    });
+    refreshQualityLabels();
   };
+
+  if (toggleSpaceSaver) {
+    toggleSpaceSaver.checked = localStorage.getItem('bukaake-space-saver') === 'true';
+    toggleSpaceSaver.addEventListener('change', () => {
+      localStorage.setItem('bukaake-space-saver', toggleSpaceSaver.checked ? 'true' : 'false');
+      refreshQualityLabels();
+    });
+  }
 
   const savedQuality = localStorage.getItem('bukaake-video-quality') || 'high';
   setQuality(savedQuality);

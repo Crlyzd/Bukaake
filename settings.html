@@ -180,7 +180,7 @@
               </button>
               <div class="dropdown-menu glass-dropdown-menu hidden" id="menuVideoQuality">
                 <button type="button" class="dropdown-item glass-dropdown-item" data-value="balanced">
-                  <span>30 FPS • Balanced (3 Mbps)</span>
+                  <span>60 FPS • Balanced (3 Mbps)</span>
                   <i class="ri-check-line check item-check"></i>
                 </button>
                 <button type="button" class="dropdown-item glass-dropdown-item active" data-value="high">
@@ -193,6 +193,18 @@
                 </button>
               </div>
             </div>
+          </div>
+
+          <!-- Space Saver Mode Toggle -->
+          <div class="row-item">
+            <div class="row-meta">
+              <span class="row-title">Space Saver Mode</span>
+              <span class="row-desc">Reduces recording file size by ~75% using 30 FPS and high-efficiency bitrates</span>
+            </div>
+            <label class="settings-toggle-switch toggle" title="Enable Space Saver Mode for recordings">
+              <input type="checkbox" id="toggleSpaceSaver" />
+              <span class="settings-toggle-slider toggle-slider"></span>
+            </label>
           </div>
 
           <!-- Prompt Save Toggle -->

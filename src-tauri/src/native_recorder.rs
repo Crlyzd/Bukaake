@@ -75,7 +75,7 @@ pub fn start_native_recording(
 
     // Initial dummy session probe or default dimensions
     let target_fps = fps.clamp(15, 120);
-    let target_bitrate = bitrate.clamp(1_000_000, 50_000_000);
+    let target_bitrate = bitrate.clamp(500_000, 50_000_000);
     let include_audio = record_sys || record_mic;
 
     let is_paused = Arc::new(AtomicBool::new(false));

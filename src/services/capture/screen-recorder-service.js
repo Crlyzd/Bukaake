@@ -7,9 +7,15 @@ import { invoke } from '@tauri-apps/api/core';
 import { toast } from '../../components/toast.js';
 
 export const QUALITY_PRESETS = {
+  balanced: { fps: 60, bitrate: 3_000_000, label: '60 FPS • Balanced (3 Mbps)' },
   high: { fps: 60, bitrate: 6_000_000, label: '60 FPS • High (6 Mbps)' },
-  balanced: { fps: 30, bitrate: 3_000_000, label: '30 FPS • Balanced (3 Mbps)' },
   ultra: { fps: 60, bitrate: 12_000_000, label: '60 FPS • Ultra (12 Mbps)' },
+};
+
+export const SPACE_SAVER_PRESETS = {
+  balanced: { fps: 30, bitrate: 750_000, label: '30 FPS • Balanced (750 Kbps)' },
+  high: { fps: 30, bitrate: 1_500_000, label: '30 FPS • High (1.5 Mbps)' },
+  ultra: { fps: 30, bitrate: 3_000_000, label: '30 FPS • Ultra (3 Mbps)' },
 };
 
 export class ScreenRecorderService {
@@ -26,14 +32,24 @@ export class ScreenRecorderService {
     this.onTimerTick = null;
   }
 
+  isSpaceSaverActive() {
+    return localStorage.getItem('bukaake-space-saver') === 'true';
+  }
+
   getQualitySetting() {
     const saved = localStorage.getItem('bukaake-video-quality');
     return QUALITY_PRESETS[saved] ? saved : 'high';
   }
 
+  getEffectiveQuality(presetKey = null) {
+    const key = presetKey || this.getQualitySetting();
+    const presets = this.isSpaceSaverActive() ? SPACE_SAVER_PRESETS : QUALITY_PRESETS;
+    return presets[key] || presets.high;
+  }
+
   async startRecording(presetKey = null, cropRegion = null) {
     if (this.state !== 'idle') return false;
-    const quality = QUALITY_PRESETS[presetKey || this.getQualitySetting()] || QUALITY_PRESETS.high;
+    const quality = this.getEffectiveQuality(presetKey);
 
     const recordSys = localStorage.getItem('bukaake-record-sys-audio') !== 'false';
     const recordMic = localStorage.getItem('bukaake-record-mic') === 'true';
