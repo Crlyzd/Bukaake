@@ -229,14 +229,14 @@
           <div class="row-item" id="rowAudioSync">
             <div class="row-meta">
               <span class="row-title">Audio Sync Offset</span>
-              <span class="row-desc">Shift audio timing (-200ms to +200ms)</span>
+              <span class="row-desc">Shift audio timing (−200ms to +200ms)</span>
             </div>
-            <div class="audio-chips-group" style="align-items: center; gap: 6px;">
-              <button type="button" class="audio-chip" id="btnAudioSyncDec" title="Shift 10ms earlier" style="padding: 5px 10px; font-size: 13px;">
+            <div class="stepper-pill" id="wrapAudioSyncStepper">
+              <button type="button" class="stepper-btn" id="btnAudioSyncDec" title="Shift 10ms earlier (−10ms, hold to repeat)">
                 <i class="ri-subtract-line"></i>
               </button>
-              <span id="lblAudioSyncVal" style="font-family: 'JetBrains Mono', monospace; font-size: 12px; min-width: 58px; text-align: center; color: var(--text-main);">0 ms</span>
-              <button type="button" class="audio-chip" id="btnAudioSyncInc" title="Shift 10ms later" style="padding: 5px 10px; font-size: 13px;">
+              <span class="stepper-val" id="lblAudioSyncVal" title="Click to reset to 0 ms">0 ms</span>
+              <button type="button" class="stepper-btn" id="btnAudioSyncInc" title="Shift 10ms later (+10ms, hold to repeat)">
                 <i class="ri-add-line"></i>
               </button>
             </div>

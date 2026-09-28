@@ -7,6 +7,7 @@ import { invoke } from '@tauri-apps/api/core';
 import { tauriBridge } from '../../services/tauri-bridge.js';
 import { hotkeyService } from '../../services/hotkey-service.js';
 import { alitkenService } from '../../services/alitken-service.js';
+import { bindAudioSettings } from './settings-audio-section.js';
 
 export function renderHotkeyBadge(container, combo) {
   if (!container) return;
@@ -54,10 +55,14 @@ export function bindCaptureSettings() {
       return;
     }
 
-    const mods = [];
-    if (e.ctrlKey || e.metaKey) mods.push('Ctrl');
-    if (e.altKey) mods.push('Alt');
-    if (e.shiftKey) mods.push('Shift');
+    const getMods = (evt) => {
+      const m = [];
+      if (evt.ctrlKey || evt.metaKey) m.push('Ctrl');
+      if (evt.altKey) m.push('Alt');
+      if (evt.shiftKey) m.push('Shift');
+      return m;
+    };
+    const mods = getMods(e);
 
     if (['Control', 'Alt', 'Shift', 'Meta'].includes(e.key)) {
       if (lblCapture) {
@@ -217,56 +222,8 @@ export function bindCaptureSettings() {
     });
   }
 
-  const chipSysAudio = document.getElementById('chipRecordSysAudio');
-  const chipMic = document.getElementById('chipRecordMic');
-
-  const updateAudioChips = () => {
-    const isSysOn = localStorage.getItem('bukaake-record-sys-audio') !== 'false';
-    const isMicOn = localStorage.getItem('bukaake-record-mic') === 'true';
-    chipSysAudio?.classList.toggle('active', isSysOn);
-    chipMic?.classList.toggle('active', isMicOn);
-  };
-
-  chipSysAudio?.addEventListener('click', () => {
-    const current = localStorage.getItem('bukaake-record-sys-audio') !== 'false';
-    localStorage.setItem('bukaake-record-sys-audio', current ? 'false' : 'true');
-    updateAudioChips();
-  });
-
-  chipMic?.addEventListener('click', () => {
-    const current = localStorage.getItem('bukaake-record-mic') === 'true';
-    localStorage.setItem('bukaake-record-mic', current ? 'false' : 'true');
-    updateAudioChips();
-  });
-
-  updateAudioChips();
-
-  // Audio Sync Offset Stepper (-200ms to +200ms)
-  const btnSyncDec = document.getElementById('btnAudioSyncDec');
-  const btnSyncInc = document.getElementById('btnAudioSyncInc');
-  const lblSyncVal = document.getElementById('lblAudioSyncVal');
-
-  const updateSyncDisplay = (val) => {
-    if (lblSyncVal) {
-      lblSyncVal.textContent = (val > 0 ? `+${val}` : `${val}`) + ' ms';
-    }
-  };
-
-  let currentSync = parseInt(localStorage.getItem('bukaake-audio-sync-offset') || '0', 10);
-  if (!Number.isFinite(currentSync)) currentSync = 0;
-  updateSyncDisplay(currentSync);
-
-  btnSyncDec?.addEventListener('click', () => {
-    currentSync = Math.max(-200, currentSync - 10);
-    localStorage.setItem('bukaake-audio-sync-offset', String(currentSync));
-    updateSyncDisplay(currentSync);
-  });
-
-  btnSyncInc?.addEventListener('click', () => {
-    currentSync = Math.min(200, currentSync + 10);
-    localStorage.setItem('bukaake-audio-sync-offset', String(currentSync));
-    updateSyncDisplay(currentSync);
-  });
+  // 4. Audio Recording & Sync Offset Section
+  bindAudioSettings();
 
   // 3. Alitken Tandem
   const inputAlitken = document.getElementById('inputAlitkenPath');

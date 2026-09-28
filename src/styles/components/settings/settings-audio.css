@@ -1,0 +1,138 @@
+/* ==========================================================================
+   Bukaake Settings Audio & Sync Stepper Styles
+   Stroke-free frosted glass styling for Audio Sources & Sync Stepper (< 200 lines)
+   ========================================================================== */
+
+/* Audio Source Inline Chip Group */
+.audio-chips-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  margin-top: 4px;
+}
+
+.audio-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-muted);
+  background: var(--glass-btn-bg);
+  border: none !important;
+  outline: none !important;
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  user-select: none;
+}
+
+.audio-chip:hover {
+  background: var(--glass-btn-hover-bg);
+  color: var(--text-main);
+}
+
+.audio-chip.active {
+  background: var(--action-bg);
+  color: var(--action-text);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+
+.audio-chip i {
+  font-size: 14px;
+  font-weight: normal !important;
+  font-style: normal;
+  font-synthesis: none !important;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ==========================================================================
+   Audio Sync Offset Segmented Stepper Pill (Pillars 1 & 2)
+   ========================================================================== */
+.stepper-pill {
+  display: inline-flex;
+  align-items: center;
+  background: var(--glass-btn-bg);
+  border-radius: var(--radius-pill);
+  padding: 3px;
+  gap: 2px;
+  box-sizing: border-box;
+  flex-shrink: 0;
+  transition: background var(--transition-fast);
+  box-shadow: var(--glass-card-shadow);
+}
+
+.stepper-pill:hover {
+  background: var(--glass-btn-hover-bg);
+}
+
+.stepper-btn {
+  width: 26px;
+  height: 26px;
+  border-radius: var(--radius-pill);
+  border: none !important;
+  outline: none !important;
+  background: transparent;
+  color: var(--text-muted);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+  font-size: 13px;
+  transition: all var(--transition-fast);
+  user-select: none;
+}
+
+.stepper-btn:hover {
+  background: rgba(255, 255, 255, 0.16);
+  color: var(--text-main);
+  transform: scale(1.08);
+}
+
+.stepper-btn:active {
+  transform: scale(0.92);
+}
+
+html[data-theme="light"] .stepper-btn:hover,
+body.light-theme .stepper-btn:hover {
+  background: rgba(26, 32, 44, 0.10);
+  color: var(--text-main);
+}
+
+.stepper-val {
+  min-width: 58px;
+  height: 26px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--text-muted);
+  letter-spacing: -0.2px;
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  padding: 0 4px;
+  user-select: none;
+  transition: all var(--transition-fast);
+}
+
+.stepper-val:hover {
+  color: var(--text-main);
+  background: rgba(255, 255, 255, 0.10);
+}
+
+html[data-theme="light"] .stepper-val:hover,
+body.light-theme .stepper-val:hover {
+  background: rgba(26, 32, 44, 0.08);
+  color: var(--text-main);
+}
+
+.stepper-val.has-offset {
+  color: var(--text-main);
+  font-weight: 700;
+}
+
