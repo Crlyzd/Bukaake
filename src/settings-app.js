@@ -29,6 +29,7 @@ class SettingsApp {
     this.btnCardDark = document.getElementById('btnCardDark');
     this.btnCardLight = document.getElementById('btnCardLight');
     this.toggleCheckerboard = document.getElementById('toggleCheckerboard');
+    this.navAbout = document.querySelector('.nav-item[data-tab="about"]');
 
     this.init();
   }
@@ -165,6 +166,10 @@ class SettingsApp {
       const isUpdating = Boolean(state.isUpdating);
       const isChecking = Boolean(state.isChecking);
       this.updateBanner?.classList.toggle('has-update', Boolean(state.hasUpdate));
+      if (this.navAbout) {
+        this.navAbout.classList.toggle('has-update', Boolean(state.hasUpdate));
+        this.navAbout.title = state.hasUpdate ? 'About (Update Available!)' : 'About';
+      }
 
       if (this.updateProgressTrack) {
         this.updateProgressTrack.classList.toggle('hidden', !isUpdating);

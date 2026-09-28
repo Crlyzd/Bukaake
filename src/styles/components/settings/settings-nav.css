@@ -74,3 +74,129 @@ html[data-theme="light"] .nav-item.active {
   color: #242938;
   box-shadow: 0 2px 6px rgba(26, 32, 44, 0.08);
 }
+
+/* Ambient Glowing "About" Tab for Update Available (Pillars 1 & 2 Compliant — Zero Dot) */
+.nav-item[data-tab="about"].has-update {
+  color: #38bdf8;
+  background: rgba(56, 189, 248, 0.08);
+  box-shadow: 0 0 12px rgba(56, 189, 248, 0.22);
+}
+
+.nav-item[data-tab="about"].has-update i {
+  color: #ef4444;
+  text-shadow: 0 0 10px rgba(239, 68, 68, 0.85), 0 0 20px rgba(239, 68, 68, 0.45);
+  filter: drop-shadow(0 0 6px rgba(239, 68, 68, 0.8));
+  animation: pulse-tab-heart-red 1.8s ease-in-out infinite;
+}
+
+.nav-item[data-tab="about"].has-update:hover {
+  background: rgba(56, 189, 248, 0.16);
+  color: #f0f9ff;
+  box-shadow: 0 0 16px rgba(56, 189, 248, 0.35);
+}
+
+.nav-item[data-tab="about"].has-update:hover i {
+  color: #f87171;
+  text-shadow: 0 0 14px rgba(248, 113, 113, 0.95), 0 0 26px rgba(239, 68, 68, 0.6);
+  filter: drop-shadow(0 0 8px rgba(248, 113, 113, 0.95));
+}
+
+.nav-item[data-tab="about"].has-update.active {
+  background: rgba(56, 189, 248, 0.22);
+  color: #ffffff;
+  box-shadow: 0 2px 14px rgba(56, 189, 248, 0.4);
+}
+
+html[data-theme="light"] .nav-item[data-tab="about"].has-update {
+  color: #0284c7;
+  background: rgba(2, 132, 199, 0.08);
+  box-shadow: 0 0 10px rgba(2, 132, 199, 0.16);
+}
+
+html[data-theme="light"] .nav-item[data-tab="about"].has-update i {
+  color: #dc2626;
+  text-shadow: 0 0 8px rgba(220, 38, 38, 0.65), 0 0 16px rgba(220, 38, 38, 0.35);
+  filter: drop-shadow(0 0 5px rgba(220, 38, 38, 0.6));
+  animation: pulse-tab-heart-red-light 1.8s ease-in-out infinite;
+}
+
+html[data-theme="light"] .nav-item[data-tab="about"].has-update:hover {
+  background: rgba(2, 132, 199, 0.14);
+  color: #0369a1;
+  box-shadow: 0 0 14px rgba(2, 132, 199, 0.26);
+}
+
+html[data-theme="light"] .nav-item[data-tab="about"].has-update:hover i {
+  color: #b91c1c;
+  text-shadow: 0 0 10px rgba(185, 28, 28, 0.75), 0 0 20px rgba(220, 38, 38, 0.45);
+  filter: drop-shadow(0 0 7px rgba(185, 28, 28, 0.7));
+}
+
+html[data-theme="light"] .nav-item[data-tab="about"].has-update.active {
+  background: #ffffff;
+  color: #0284c7;
+  box-shadow: 0 2px 8px rgba(2, 132, 199, 0.25);
+}
+
+@keyframes pulse-tab-heart-red {
+  0%, 100% {
+    transform: translateY(-1px) scale(1);
+    color: #ef4444;
+    filter: drop-shadow(0 0 4px rgba(239, 68, 68, 0.65));
+    text-shadow: 0 0 8px rgba(239, 68, 68, 0.7), 0 0 16px rgba(239, 68, 68, 0.35);
+  }
+  14% {
+    transform: translateY(-1px) scale(1.24);
+    color: #f87171;
+    filter: drop-shadow(0 0 8px rgba(248, 113, 113, 0.95));
+    text-shadow: 0 0 12px rgba(239, 68, 68, 0.95), 0 0 24px rgba(239, 68, 68, 0.6);
+  }
+  28% {
+    transform: translateY(-1px) scale(1.06);
+    color: #ef4444;
+    filter: drop-shadow(0 0 5px rgba(239, 68, 68, 0.75));
+  }
+  42% {
+    transform: translateY(-1px) scale(1.28);
+    color: #f87171;
+    filter: drop-shadow(0 0 9px rgba(248, 113, 113, 1));
+    text-shadow: 0 0 14px rgba(239, 68, 68, 1), 0 0 26px rgba(239, 68, 68, 0.7);
+  }
+  70% {
+    transform: translateY(-1px) scale(1);
+    color: #ef4444;
+    filter: drop-shadow(0 0 4px rgba(239, 68, 68, 0.65));
+  }
+}
+
+@keyframes pulse-tab-heart-red-light {
+  0%, 100% {
+    transform: translateY(-1px) scale(1);
+    color: #dc2626;
+    filter: drop-shadow(0 0 3px rgba(220, 38, 38, 0.55));
+    text-shadow: 0 0 6px rgba(220, 38, 38, 0.55), 0 0 12px rgba(220, 38, 38, 0.25);
+  }
+  14% {
+    transform: translateY(-1px) scale(1.24);
+    color: #ef4444;
+    filter: drop-shadow(0 0 7px rgba(239, 68, 68, 0.85));
+    text-shadow: 0 0 10px rgba(220, 38, 38, 0.85), 0 0 18px rgba(220, 38, 38, 0.45);
+  }
+  28% {
+    transform: translateY(-1px) scale(1.06);
+    color: #dc2626;
+    filter: drop-shadow(0 0 4px rgba(220, 38, 38, 0.6));
+  }
+  42% {
+    transform: translateY(-1px) scale(1.28);
+    color: #ef4444;
+    filter: drop-shadow(0 0 8px rgba(239, 68, 68, 0.95));
+    text-shadow: 0 0 12px rgba(220, 38, 38, 0.95), 0 0 22px rgba(220, 38, 38, 0.55);
+  }
+  70% {
+    transform: translateY(-1px) scale(1);
+    color: #dc2626;
+    filter: drop-shadow(0 0 3px rgba(220, 38, 38, 0.55));
+  }
+}
+
