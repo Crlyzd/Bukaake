@@ -48,6 +48,9 @@ export class ScreenRecorderService {
       };
     }
 
+    const savedOffset = parseInt(localStorage.getItem('bukaake-audio-sync-offset') || '0', 10);
+    const syncOffsetMs = Number.isFinite(savedOffset) ? savedOffset : 0;
+
     try {
       this.tempFilePath = await invoke('start_native_recording', {
         region: regionPayload,
@@ -55,6 +58,7 @@ export class ScreenRecorderService {
         bitrate: quality.bitrate,
         recordSys,
         recordMic,
+        syncOffsetMs,
       });
 
       this.state = 'recording';

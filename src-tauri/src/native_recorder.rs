@@ -4,7 +4,7 @@
  */
 
 use std::path::{Path, PathBuf};
-use std::sync::atomic::{AtomicBool, AtomicI64, Ordering};
+use std::sync::atomic::{AtomicBool, AtomicI64, AtomicU64, Ordering};
 use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant};
 use serde::{Deserialize, Serialize};
@@ -37,6 +37,7 @@ struct RecorderState {
     start_time: Instant,
     pause_start: Option<Instant>,
     total_paused: Duration,
+    total_paused_nanos: Arc<AtomicU64>,
     is_paused: Arc<AtomicBool>,
     is_running: Arc<AtomicBool>,
     _last_video_pts: Arc<AtomicI64>,
@@ -64,6 +65,7 @@ pub fn start_native_recording(
     bitrate: u32,
     record_sys: bool,
     record_mic: bool,
+    sync_offset_ms: Option<i32>,
 ) -> Result<String, String> {
     stop_native_recording().ok();
 
@@ -78,6 +80,7 @@ pub fn start_native_recording(
 
     let is_paused = Arc::new(AtomicBool::new(false));
     let is_running = Arc::new(AtomicBool::new(true));
+    let total_paused_nanos = Arc::new(AtomicU64::new(0));
     let last_video_pts = Arc::new(AtomicI64::new(0));
     let last_audio_pts = Arc::new(AtomicI64::new(0));
 
@@ -123,6 +126,7 @@ pub fn start_native_recording(
     let paused_frame = Arc::clone(&is_paused);
     let running_frame = Arc::clone(&is_running);
     let last_pts_frame = Arc::clone(&last_video_pts);
+    let paused_nanos_frame = Arc::clone(&total_paused_nanos);
     let start_instant = Instant::now();
     // Allow small 2ms leeway so we don't drop target-rate frames due to minor timer jitter
     let min_frame_interval_100ns = (10_000_000 / target_fps as i64) - 20_000;
@@ -133,8 +137,10 @@ pub fn start_native_recording(
             return;
         }
 
-        let elapsed = start_instant.elapsed();
-        let pts = (elapsed.as_nanos() / 100) as i64;
+        let elapsed = start_instant.elapsed().as_nanos();
+        let paused = paused_nanos_frame.load(Ordering::Relaxed) as u128;
+        let effective_nanos = elapsed.saturating_sub(paused);
+        let pts = (effective_nanos / 100) as i64;
         let prev = last_pts_frame.load(Ordering::Relaxed);
 
         // Throttle incoming frames to requested target_fps (e.g. 30 FPS or 60 FPS on 144Hz monitors)
@@ -169,6 +175,7 @@ pub fn start_native_recording(
         let paused_audio = Arc::clone(&is_paused);
         let running_audio = Arc::clone(&is_running);
         let last_audio_pts_clone = Arc::clone(&last_audio_pts);
+        let sync_offset_100ns = sync_offset_ms.unwrap_or(0) as i64 * 10_000;
 
         crate::audio_capture::start_audio_feed(record_sys, record_mic, move |pcm_chunk| {
             if !running_audio.load(Ordering::Relaxed) || paused_audio.load(Ordering::Relaxed) || pcm_chunk.is_empty() {
@@ -176,7 +183,8 @@ pub fn start_native_recording(
             }
             // 48,000 samples/sec * 4 bytes/sample = 192,000 bytes/sec
             let chunk_dur_100ns = (pcm_chunk.len() as i64 * 10_000_000) / 192_000;
-            let pts = last_audio_pts_clone.fetch_add(chunk_dur_100ns, Ordering::Relaxed);
+            let raw_pts = last_audio_pts_clone.fetch_add(chunk_dur_100ns, Ordering::Relaxed);
+            let pts = (raw_pts + sync_offset_100ns).max(0);
 
             let _ = writer_audio.write_audio_pcm(&pcm_chunk, pts);
         })
@@ -191,6 +199,7 @@ pub fn start_native_recording(
         start_time: start_instant,
         pause_start: None,
         total_paused: Duration::ZERO,
+        total_paused_nanos,
         is_paused,
         is_running,
         _last_video_pts: last_video_pts,
@@ -224,7 +233,9 @@ pub fn resume_native_recording() -> Result<(), String> {
             if state.is_paused.load(Ordering::Relaxed) {
                 state.is_paused.store(false, Ordering::SeqCst);
                 if let Some(pause_time) = state.pause_start.take() {
-                    state.total_paused += pause_time.elapsed();
+                    let dur = pause_time.elapsed();
+                    state.total_paused += dur;
+                    state.total_paused_nanos.fetch_add(dur.as_nanos() as u64, Ordering::SeqCst);
                 }
             }
             return Ok(());

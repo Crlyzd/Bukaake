@@ -1,7 +1,7 @@
 /**
  * Bukaake Native WASAPI Audio Capture Engine
  * Un-sandboxed system loopback + mic capture, master volume compensation,
- * adaptive dual-queue clock sync, and low-latency PCM streaming (< 250 lines)
+ * continuous 48kHz silence synthesis, and low-latency PCM streaming (< 260 lines)
  */
 
 use cpal::traits::{DeviceTrait, HostTrait, StreamTrait};
@@ -65,6 +65,61 @@ pub fn start_capture(
     })
 }
 
+fn init_stream(
+    device: cpal::Device,
+    config: cpal::SupportedStreamConfig,
+    queue: Arc<Mutex<ResamplingQueue>>,
+    is_mic: bool,
+) -> Option<SendStream> {
+    let sample_format = config.sample_format();
+    let channels = config.channels() as usize;
+    let sample_rate = config.sample_rate().0;
+
+    if let Ok(mut q) = queue.lock() {
+        q.set_sample_rate(sample_rate);
+    }
+
+    let q_clone = Arc::clone(&queue);
+    let err_fn = move |err| eprintln!("[AudioCapture] Stream error: {err}");
+
+    let stream_res = match sample_format {
+        cpal::SampleFormat::F32 => device.build_input_stream(
+            &config.into(),
+            move |data: &[f32], _| {
+                if is_mic && IS_MIC_MUTED.load(Ordering::Relaxed) {
+                    return;
+                }
+                if let Ok(mut lock) = q_clone.lock() {
+                    lock.push_f32_interleaved(data, channels);
+                }
+            },
+            err_fn,
+            None,
+        ),
+        cpal::SampleFormat::I16 => device.build_input_stream(
+            &config.into(),
+            move |data: &[i16], _| {
+                if is_mic && IS_MIC_MUTED.load(Ordering::Relaxed) {
+                    return;
+                }
+                if let Ok(mut lock) = q_clone.lock() {
+                    lock.push_i16_interleaved(data, channels);
+                }
+            },
+            err_fn,
+            None,
+        ),
+        _ => Err(cpal::BuildStreamError::DeviceNotAvailable),
+    };
+
+    if let Ok(stream) = stream_res {
+        let _ = stream.play();
+        Some(SendStream(stream))
+    } else {
+        None
+    }
+}
+
 fn start_capture_internal(
     record_sys: bool,
     record_mic: bool,
@@ -80,46 +135,7 @@ fn start_capture_internal(
     if record_sys {
         if let Some(device) = host.default_output_device() {
             if let Ok(config) = device.default_output_config() {
-                let sample_format = config.sample_format();
-                let channels = config.channels() as usize;
-                let sample_rate = config.sample_rate().0;
-
-                {
-                    let mut q = sys_queue.lock().unwrap();
-                    q.set_sample_rate(sample_rate);
-                }
-
-                let q = Arc::clone(&sys_queue);
-                let err_fn = |err| eprintln!("[AudioCapture] System loopback error: {}", err);
-
-                let stream_res = match sample_format {
-                    cpal::SampleFormat::F32 => device.build_input_stream(
-                        &config.into(),
-                        move |data: &[f32], _| {
-                            if let Ok(mut lock) = q.lock() {
-                                lock.push_f32_interleaved(data, channels);
-                            }
-                        },
-                        err_fn,
-                        None,
-                    ),
-                    cpal::SampleFormat::I16 => device.build_input_stream(
-                        &config.into(),
-                        move |data: &[i16], _| {
-                            if let Ok(mut lock) = q.lock() {
-                                lock.push_i16_interleaved(data, channels);
-                            }
-                        },
-                        err_fn,
-                        None,
-                    ),
-                    _ => Err(cpal::BuildStreamError::DeviceNotAvailable),
-                };
-
-                if let Ok(stream) = stream_res {
-                    let _ = stream.play();
-                    sys_stream = Some(SendStream(stream));
-                }
+                sys_stream = init_stream(device, config, Arc::clone(&sys_queue), false);
             }
         }
     }
@@ -128,52 +144,7 @@ fn start_capture_internal(
     if record_mic {
         if let Some(device) = host.default_input_device() {
             if let Ok(config) = device.default_input_config() {
-                let sample_format = config.sample_format();
-                let channels = config.channels() as usize;
-                let sample_rate = config.sample_rate().0;
-
-                {
-                    let mut q = mic_queue.lock().unwrap();
-                    q.set_sample_rate(sample_rate);
-                }
-
-                let q = Arc::clone(&mic_queue);
-                let err_fn = |err| eprintln!("[AudioCapture] Mic capture error: {}", err);
-
-                let stream_res = match sample_format {
-                    cpal::SampleFormat::F32 => device.build_input_stream(
-                        &config.into(),
-                        move |data: &[f32], _| {
-                            if IS_MIC_MUTED.load(Ordering::Relaxed) {
-                                return;
-                            }
-                            if let Ok(mut lock) = q.lock() {
-                                lock.push_f32_interleaved(data, channels);
-                            }
-                        },
-                        err_fn,
-                        None,
-                    ),
-                    cpal::SampleFormat::I16 => device.build_input_stream(
-                        &config.into(),
-                        move |data: &[i16], _| {
-                            if IS_MIC_MUTED.load(Ordering::Relaxed) {
-                                return;
-                            }
-                            if let Ok(mut lock) = q.lock() {
-                                lock.push_i16_interleaved(data, channels);
-                            }
-                        },
-                        err_fn,
-                        None,
-                    ),
-                    _ => Err(cpal::BuildStreamError::DeviceNotAvailable),
-                };
-
-                if let Ok(stream) = stream_res {
-                    let _ = stream.play();
-                    mic_stream = Some(SendStream(stream));
-                }
+                mic_stream = init_stream(device, config, Arc::clone(&mic_queue), true);
             }
         }
     }
@@ -186,13 +157,13 @@ fn start_capture_internal(
         });
     }
 
-    // Dynamic adaptive drain: empties available hardware frames on every tick for zero backlog lag
     let q_sys_flush = Arc::clone(&sys_queue);
     let q_mic_flush = Arc::clone(&mic_queue);
 
     thread::spawn(move || {
         const TARGET_RATE: u32 = 48000;
         const TICK_MS: u64 = 25; // Responsive 25ms tick
+        let expected_frames = ((TARGET_RATE as u64 * TICK_MS) / 1000) as usize; // 1200 frames
 
         while IS_CAPTURING.load(Ordering::Relaxed) {
             thread::sleep(Duration::from_millis(TICK_MS));
@@ -214,22 +185,39 @@ fn start_capture_internal(
                 Vec::new()
             };
 
-            let target_len = sys_frames.len();
+            // Continuous stream guarantee: if loopback endpoint is silent, synthesize silence frames
+            let sys_frames = if sys_frames.is_empty() {
+                if record_sys {
+                    vec![(0.0, 0.0); expected_frames]
+                } else {
+                    Vec::new()
+                }
+            } else {
+                sys_frames
+            };
+
+            let target_len = if !sys_frames.is_empty() {
+                sys_frames.len()
+            } else {
+                expected_frames
+            };
 
             let mic_frames = if record_mic {
                 if let Ok(mut q_mic) = q_mic_flush.lock() {
-                    if target_len > 0 {
-                        // Synchronize to desktop master clock
-                        q_mic.read_resampled_stereo(target_len, TARGET_RATE)
-                    } else {
-                        // Mic standalone master clock
-                        let avail = q_mic.available_frames();
-                        let rate = q_mic.sample_rate();
-                        let count = (avail as f64 * TARGET_RATE as f64 / rate as f64) as usize;
+                    let avail = q_mic.available_frames();
+                    let rate = q_mic.sample_rate();
+                    if avail > 0 {
+                        let count = if target_len > 0 {
+                            target_len
+                        } else {
+                            (avail as f64 * TARGET_RATE as f64 / rate as f64) as usize
+                        };
                         q_mic.read_resampled_stereo(count, TARGET_RATE)
+                    } else {
+                        vec![(0.0, 0.0); target_len]
                     }
                 } else {
-                    Vec::new()
+                    vec![(0.0, 0.0); target_len]
                 }
             } else {
                 Vec::new()

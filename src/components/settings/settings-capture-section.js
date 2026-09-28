@@ -241,6 +241,33 @@ export function bindCaptureSettings() {
 
   updateAudioChips();
 
+  // Audio Sync Offset Stepper (-200ms to +200ms)
+  const btnSyncDec = document.getElementById('btnAudioSyncDec');
+  const btnSyncInc = document.getElementById('btnAudioSyncInc');
+  const lblSyncVal = document.getElementById('lblAudioSyncVal');
+
+  const updateSyncDisplay = (val) => {
+    if (lblSyncVal) {
+      lblSyncVal.textContent = (val > 0 ? `+${val}` : `${val}`) + ' ms';
+    }
+  };
+
+  let currentSync = parseInt(localStorage.getItem('bukaake-audio-sync-offset') || '0', 10);
+  if (!Number.isFinite(currentSync)) currentSync = 0;
+  updateSyncDisplay(currentSync);
+
+  btnSyncDec?.addEventListener('click', () => {
+    currentSync = Math.max(-200, currentSync - 10);
+    localStorage.setItem('bukaake-audio-sync-offset', String(currentSync));
+    updateSyncDisplay(currentSync);
+  });
+
+  btnSyncInc?.addEventListener('click', () => {
+    currentSync = Math.min(200, currentSync + 10);
+    localStorage.setItem('bukaake-audio-sync-offset', String(currentSync));
+    updateSyncDisplay(currentSync);
+  });
+
   // 3. Alitken Tandem
   const inputAlitken = document.getElementById('inputAlitkenPath');
   const btnBrowseAlitken = document.getElementById('btnBrowseAlitken');

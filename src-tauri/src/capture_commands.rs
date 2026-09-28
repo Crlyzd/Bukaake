@@ -37,13 +37,11 @@ pub fn start_native_recording(
     bitrate: Option<u32>,
     record_sys: Option<bool>,
     record_mic: Option<bool>,
+    sync_offset_ms: Option<i32>,
 ) -> Result<String, String> {
     let temp_dir = std::env::temp_dir().join("Bukaake").join("captures");
     let _ = fs::create_dir_all(&temp_dir);
-    let ms = std::time::SystemTime::now()
-        .duration_since(std::time::UNIX_EPOCH)
-        .map(|d| d.as_millis())
-        .unwrap_or(0);
+    let ms = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|d| d.as_millis()).unwrap_or(0);
     let temp_file = temp_dir.join(format!("rec_{}.mp4", ms));
     crate::native_recorder::start_native_recording(
         temp_file,
@@ -52,6 +50,7 @@ pub fn start_native_recording(
         bitrate.unwrap_or(6_000_000),
         record_sys.unwrap_or(true),
         record_mic.unwrap_or(false),
+        sync_offset_ms,
     )
 }
 
