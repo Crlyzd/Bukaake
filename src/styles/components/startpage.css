@@ -215,5 +215,3 @@ body:not(.image-loaded) .resize-handle {
   pointer-events: none !important;
   cursor: default !important;
 }
-
-
