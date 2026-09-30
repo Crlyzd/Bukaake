@@ -7,11 +7,6 @@ use std::fs;
 use std::path::PathBuf;
 use std::process::Command;
 
-#[cfg(target_os = "windows")]
-use std::os::windows::process::CommandExt;
-
-#[cfg(target_os = "windows")]
-const CREATE_NO_WINDOW: u32 = 0x08000000;
 
 #[tauri::command]
 pub fn launch_cathet(text: String, custom_exe: Option<String>) -> Result<(), String> {
@@ -65,8 +60,6 @@ pub fn launch_cathet(text: String, custom_exe: Option<String>) -> Result<(), Str
     let mut cmd = Command::new(exe_path);
     cmd.arg(&temp_file);
 
-    #[cfg(target_os = "windows")]
-    cmd.creation_flags(CREATE_NO_WINDOW);
 
     cmd.spawn().map_err(|e| format!("Failed to launch Cathet: {}", e))?;
 
