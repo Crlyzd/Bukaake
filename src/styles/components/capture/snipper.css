@@ -133,6 +133,25 @@
   filter: brightness(1.1);
 }
 
+.snipper-btn.confirm.record {
+  background: #ef4444;
+  color: #ffffff;
+  box-shadow: 0 4px 14px rgba(239, 68, 68, 0.45);
+}
+
+.snipper-btn.confirm.record:hover {
+  background: #dc2626;
+  box-shadow: 0 6px 18px rgba(239, 68, 68, 0.6);
+  transform: translateY(-1px);
+}
+
+body.light-theme .snipper-btn.confirm.record,
+html[data-theme="light"] .snipper-btn.confirm.record {
+  background: #ef4444;
+  color: #ffffff;
+  box-shadow: 0 4px 14px rgba(239, 68, 68, 0.35);
+}
+
 .snipper-btn.cancel {
   padding: 6px 9px;
   color: var(--text-dim);
