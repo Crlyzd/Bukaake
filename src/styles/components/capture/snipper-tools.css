@@ -1,0 +1,118 @@
+/* ==========================================================================
+   Bukaake Screen Snipper Tools Styles
+   Animated glowing rainbow region for OCR & frosted glass color loupe (< 130 lines)
+   ========================================================================== */
+
+@keyframes rainbowBorder {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes rainbowPulse {
+  0%, 100% {
+    box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.52), 0 0 20px rgba(255, 0, 128, 0.75), 0 0 35px rgba(0, 200, 255, 0.65);
+  }
+  50% {
+    box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.52), 0 0 30px rgba(121, 40, 202, 0.85), 0 0 50px rgba(0, 223, 216, 0.75);
+  }
+}
+
+.snipper-selection-box.loading-ocr {
+  border: none !important;
+  animation: rainbowPulse 2s ease-in-out infinite !important;
+}
+
+.snipper-selection-box.loading-ocr::before {
+  content: '';
+  position: absolute;
+  inset: -2.5px;
+  border-radius: 5px;
+  padding: 2.5px;
+  background: linear-gradient(90deg, #ff007f, #7928ca, #0070f3, #00dfd8, #43e97b, #fa709a, #fee140, #ff007f);
+  background-size: 300% 300%;
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  animation: rainbowBorder 2s ease infinite;
+  pointer-events: none;
+}
+
+.snipper-color-loupe {
+  position: fixed;
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 100000;
+  overflow: hidden;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.65), 0 0 20px rgba(99, 102, 241, 0.35);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.snipper-loupe-canvas {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  display: block;
+}
+
+.snipper-loupe-reticle {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  box-sizing: border-box;
+  border: 1.5px solid #ffffff;
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.8), inset 0 0 4px rgba(0, 0, 0, 0.8);
+  border-radius: 2px;
+  pointer-events: none;
+}
+
+.snipper-color-info-card {
+  position: fixed;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+  background: rgba(14, 18, 27, 0.94);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.55);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-main);
+  pointer-events: none;
+  z-index: 100000;
+  white-space: nowrap;
+}
+
+.color-swatch-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  box-shadow: 0 0 6px rgba(0, 0, 0, 0.4);
+}
+
+.color-hex-text {
+  color: var(--text-main);
+  font-weight: 600;
+}
+
+.color-rgb-text {
+  color: var(--text-muted);
+  font-size: 10px;
+}
+
+body.light-theme .snipper-color-info-card,
+html[data-theme="light"] .snipper-color-info-card {
+  background: rgba(255, 255, 255, 0.95);
+  color: var(--text-main);
+  box-shadow: 0 8px 24px rgba(26, 32, 44, 0.15);
+}

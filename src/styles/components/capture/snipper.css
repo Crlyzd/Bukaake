@@ -33,6 +33,15 @@
   filter: brightness(0.75);
 }
 
+/* Full natural desktop brightness when Color Picker is active */
+.screen-snipper-overlay.mode-color-picker {
+  background: transparent !important;
+}
+
+.screen-snipper-overlay.mode-color-picker .snipper-bg-img {
+  filter: none !important;
+}
+
 .snipper-selection-box {
   position: absolute;
   box-sizing: border-box;
@@ -166,7 +175,8 @@ html[data-theme="light"] .snipper-mode-dock {
 }
 
 .snipper-type-toggle,
-.snipper-region-modes {
+.snipper-region-modes,
+.snipper-tools-group {
   display: flex;
   align-items: center;
   gap: 3px;
@@ -189,8 +199,8 @@ html[data-theme="light"] .snipper-dock-divider {
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  padding: 5px 10px;
-  font-size: 12px;
+  padding: 5px 9px;
+  font-size: 13px;
   font-weight: 500;
   color: var(--text-muted);
   background: transparent;
@@ -199,6 +209,11 @@ html[data-theme="light"] .snipper-dock-divider {
   border-radius: var(--radius-pill);
   cursor: pointer;
   transition: all var(--transition-fast);
+}
+
+.snipper-pill-btn i,
+.snipper-btn i {
+  font-weight: 400 !important;
 }
 
 .snipper-pill-btn:hover {
@@ -212,6 +227,10 @@ html[data-theme="light"] .snipper-dock-divider {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
+.snipper-pill-btn.active i {
+  font-weight: 400 !important;
+}
+
 .snipper-pill-btn.cancel {
   padding: 5px 8px;
   color: var(--text-dim);
@@ -220,5 +239,7 @@ html[data-theme="light"] .snipper-dock-divider {
 .snipper-pill-btn.cancel:hover {
   color: #ef4444;
 }
+
+
 
 

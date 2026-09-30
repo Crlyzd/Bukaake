@@ -33,6 +33,10 @@ pub mod native_recorder;
 mod image_loader;
 mod updater;
 mod window_subclass;
+pub mod ocr;
+pub mod cathet;
+use ocr::extract_text_from_image;
+use cathet::launch_cathet;
 use audio_capture::{
     set_recording_audio_volumes, set_recording_mic_muted, start_audio_capture, stop_audio_capture,
 };
@@ -193,6 +197,7 @@ fn main() {
             enter_recording_pill_mode, exit_recording_pill_mode,
             show_recording_border, hide_recording_border, set_recording_border_paused,
             save_screenshot_to_dir,
+            extract_text_from_image, launch_cathet,
             start_audio_capture, stop_audio_capture, set_recording_mic_muted, set_recording_audio_volumes,
             process_memory::trim_memory_working_set
         ])

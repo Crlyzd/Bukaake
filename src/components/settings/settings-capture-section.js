@@ -6,7 +6,7 @@
 import { invoke } from '@tauri-apps/api/core';
 import { tauriBridge } from '../../services/tauri-bridge.js';
 import { hotkeyService } from '../../services/hotkey-service.js';
-import { alitkenService } from '../../services/alitken-service.js';
+import { bindTandemSettings } from './settings-tandem-section.js';
 import { bindAudioSettings } from './settings-audio-section.js';
 
 export function renderHotkeyBadge(container, combo) {
@@ -255,24 +255,6 @@ export function bindCaptureSettings() {
   // 4. Audio Recording & Sync Offset Section
   bindAudioSettings();
 
-  // 3. Alitken Tandem
-  const inputAlitken = document.getElementById('inputAlitkenPath');
-  const btnBrowseAlitken = document.getElementById('btnBrowseAlitken');
-  const toggleAlitken = document.getElementById('toggleAlitkenAuto');
-
-  if (inputAlitken) {
-    inputAlitken.value = alitkenService.getCustomPath() || 'Auto-Detect (./AlitConverter.exe)';
-  }
-
-  btnBrowseAlitken?.addEventListener('click', async () => {
-    const path = await alitkenService.pickCustomExecutable();
-    if (path && inputAlitken) inputAlitken.value = path;
-  });
-
-  if (toggleAlitken) {
-    toggleAlitken.checked = alitkenService.isAutoOpenEnabled();
-    toggleAlitken.addEventListener('change', () => {
-      alitkenService.setAutoOpen(toggleAlitken.checked);
-    });
-  }
+  // 5. Tandem Companion Editors (Alitken & Cathet)
+  bindTandemSettings();
 }

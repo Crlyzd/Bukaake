@@ -283,6 +283,34 @@
               <span class="settings-toggle-slider toggle-slider"></span>
             </label>
           </div>
+
+          <!-- Cathet Tandem Row -->
+          <div class="row-item col-layout" id="cardCathet">
+            <div class="row-meta">
+              <span class="row-title">Cathet Glass Scratchpad</span>
+              <span class="row-desc">Seamless tandem markdown editor for extracted notes & text</span>
+            </div>
+            <div class="path-row">
+              <input type="text" class="path-field settings-path-input" id="inputCathetPath" placeholder="Auto-Detect (./Cathet.exe)" readonly />
+              <button class="btn btn-glass" id="btnBrowseCathet" title="Locate Cathet.exe">
+                <i class="ri-folder-open-line"></i> Browse
+              </button>
+              <a href="https://github.com/Crlyzd/Cathet" target="_blank" class="btn btn-glass btn-icon-only" id="btnCathetGithub" title="View Cathet on GitHub">
+                <i class="ri-github-line"></i>
+              </a>
+            </div>
+          </div>
+
+          <div class="row-item">
+            <div class="row-meta">
+              <span class="row-title">Auto-open in Cathet</span>
+              <span class="row-desc">Open extracted text directly in Cathet after OCR</span>
+            </div>
+            <label class="settings-toggle-switch toggle" title="Automatically open extracted text in Cathet after OCR">
+              <input type="checkbox" id="toggleCathetAuto" />
+              <span class="settings-toggle-slider toggle-slider"></span>
+            </label>
+          </div>
         </div>
 
         <!-- ==================== TAB 3: ABOUT ==================== -->

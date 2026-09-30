@@ -27,6 +27,7 @@
 @import './components/startpage.css';
 @import './components/loading.css';
 @import './components/capture/snipper.css';
+@import './components/capture/snipper-tools.css';
 @import './components/capture/recording.css';
 @import './components/text/text.css';
 @import './components/text/text-popovers.css';
