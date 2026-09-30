@@ -58,7 +58,7 @@ export class SnipperActionDock {
     this.btnConfirm.classList.toggle('record', isRec);
     this.btnConfirm.title = isRec ? 'Start Screen Recording (Enter)' : 'Open in Bukaake (Enter)';
     if (this.confirmLabel) this.confirmLabel.textContent = isRec ? 'Start Recording' : 'Open';
-    if (this.confirmIcon) this.confirmIcon.className = isRec ? 'ri-record-circle-line' : 'ri-check-line';
+    if (this.confirmIcon) this.confirmIcon.className = isRec ? 'ri-record-circle-fill' : 'ri-check-line';
     this.btnCopy?.classList.toggle('hidden', isRec);
     this.btnOcr?.classList.toggle('hidden', isRec);
   }

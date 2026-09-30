@@ -134,22 +134,42 @@
 }
 
 .snipper-btn.confirm.record {
-  background: #ef4444;
-  color: #ffffff;
-  box-shadow: 0 4px 14px rgba(239, 68, 68, 0.45);
+  background: rgba(239, 68, 68, 0.20);
+  color: #fca5a5;
+  box-shadow: 0 4px 18px rgba(239, 68, 68, 0.28);
+  font-weight: 600;
+}
+
+.snipper-btn.confirm.record i {
+  color: #ef4444;
+  font-size: 13px;
+  filter: drop-shadow(0 0 6px rgba(239, 68, 68, 0.7));
 }
 
 .snipper-btn.confirm.record:hover {
-  background: #dc2626;
-  box-shadow: 0 6px 18px rgba(239, 68, 68, 0.6);
+  background: rgba(239, 68, 68, 0.32);
+  color: #ffffff;
+  box-shadow: 0 6px 24px rgba(239, 68, 68, 0.45);
   transform: translateY(-1px);
+}
+
+.snipper-btn.confirm.record:hover i {
+  color: #ff6b6b;
+  filter: drop-shadow(0 0 8px rgba(239, 68, 68, 0.9));
 }
 
 body.light-theme .snipper-btn.confirm.record,
 html[data-theme="light"] .snipper-btn.confirm.record {
-  background: #ef4444;
-  color: #ffffff;
-  box-shadow: 0 4px 14px rgba(239, 68, 68, 0.35);
+  background: rgba(239, 68, 68, 0.14);
+  color: #b91c1c;
+  box-shadow: 0 4px 14px rgba(239, 68, 68, 0.18);
+}
+
+body.light-theme .snipper-btn.confirm.record:hover,
+html[data-theme="light"] .snipper-btn.confirm.record:hover {
+  background: rgba(239, 68, 68, 0.24);
+  color: #991b1b;
+  box-shadow: 0 6px 18px rgba(239, 68, 68, 0.28);
 }
 
 .snipper-btn.cancel {
