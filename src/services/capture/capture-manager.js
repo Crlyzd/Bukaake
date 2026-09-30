@@ -103,8 +103,7 @@ export class CaptureManager {
   }
 
   async toggleRecord() {
-    const defaultMode = localStorage.getItem('bukaake-capture-mode') || 'region';
-    this.captureSnip({ type: 'record', mode: defaultMode });
+    this.captureSnip({ type: 'record', mode: 'region' });
   }
 
   showRecordingSavedToast(savedPath, durationSecs) {

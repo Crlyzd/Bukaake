@@ -33,6 +33,14 @@
   filter: brightness(0.75);
 }
 
+/* Window & Fullscreen Modes restore original pointer */
+.screen-snipper-overlay.mode-window,
+.screen-snipper-overlay.mode-fullscreen,
+.screen-snipper-overlay.mode-window .snipper-selection-box,
+.screen-snipper-overlay.mode-fullscreen .snipper-selection-box {
+  cursor: default !important;
+}
+
 /* Full natural desktop brightness when Color Picker is active */
 .screen-snipper-overlay.mode-color-picker {
   background: transparent !important;
@@ -239,7 +247,3 @@ html[data-theme="light"] .snipper-dock-divider {
 .snipper-pill-btn.cancel:hover {
   color: #ef4444;
 }
-
-
-
-

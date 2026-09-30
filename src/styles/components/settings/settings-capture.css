@@ -235,3 +235,17 @@ html[data-theme="light"] .dropdown-item.active {
   opacity: 1;
 }
 
+/* Cutted / Dashed Horizontal Section Divider */
+.settings-divider-dashed {
+  width: 100%;
+  height: 0;
+  border: none;
+  border-top: 1px dashed rgba(255, 255, 255, 0.12);
+  margin: 14px 0 16px 0;
+}
+
+body.light-theme .settings-divider-dashed,
+html[data-theme="light"] .settings-divider-dashed {
+  border-top: 1px dashed rgba(26, 32, 44, 0.12);
+}
+

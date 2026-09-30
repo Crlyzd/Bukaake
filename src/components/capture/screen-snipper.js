@@ -76,13 +76,10 @@ export class ScreenSnipper {
     this.modeDock.addEventListener('click', (e) => e.stopPropagation());
     this.actionDock.addEventListener('mousedown', (e) => e.stopPropagation());
 
+    const modeMap = { btnModeRegion: 'region', btnModeWindow: 'window', btnModeFullscreen: 'fullscreen', btnModeOcr: 'ocr', btnModeColorPicker: 'color' };
+    Object.entries(modeMap).forEach(([id, m]) => this.modeDock.querySelector(`#${id}`)?.addEventListener('click', () => this.setMode(m)));
     this.modeDock.querySelector('#btnTypeScreenshot')?.addEventListener('click', () => this.setType('screenshot'));
     this.modeDock.querySelector('#btnTypeRecord')?.addEventListener('click', () => this.setType('record'));
-    this.modeDock.querySelector('#btnModeRegion')?.addEventListener('click', () => this.setMode('region'));
-    this.modeDock.querySelector('#btnModeWindow')?.addEventListener('click', () => this.setMode('window'));
-    this.modeDock.querySelector('#btnModeFullscreen')?.addEventListener('click', () => this.setMode('fullscreen'));
-    this.modeDock.querySelector('#btnModeOcr')?.addEventListener('click', () => this.setMode('ocr'));
-    this.modeDock.querySelector('#btnModeColorPicker')?.addEventListener('click', () => this.setMode('color'));
     this.modeDock.querySelector('#btnSnipperClose')?.addEventListener('click', () => this.cancelSnip());
     this.box.addEventListener('dblclick', (e) => { e.stopPropagation(); this.confirmSnip(false); });
 
@@ -126,6 +123,8 @@ export class ScreenSnipper {
     this.actionDock.classList.add('hidden');
     this.colorPicker.deactivate();
     this.overlay.classList.toggle('mode-color-picker', mode === 'color');
+    this.overlay.classList.toggle('mode-window', mode === 'window');
+    this.overlay.classList.toggle('mode-fullscreen', mode === 'fullscreen');
 
     if (mode === 'color') {
       this.modeDock.querySelector('#btnModeColorPicker')?.classList.add('active');
@@ -147,7 +146,6 @@ export class ScreenSnipper {
       this.box.classList.add('hidden');
       this.currentRect = null;
     }
-    localStorage.setItem('bukaake-capture-mode', mode);
   }
 
   async startSnip(captureDataUrl, onComplete, onCancel, options = {}) {
@@ -174,7 +172,7 @@ export class ScreenSnipper {
     this.overlay.classList.remove('hidden');
 
     const defaultType = options.type || localStorage.getItem('bukaake-capture-type') || 'screenshot';
-    const defaultMode = options.mode || localStorage.getItem('bukaake-capture-mode') || 'region';
+    const defaultMode = options.mode || 'region';
     this.setType(defaultType);
     this.setMode(defaultMode === 'color' ? 'region' : defaultMode);
   }
@@ -246,11 +244,8 @@ export class ScreenSnipper {
   }
 
   updateBox(cssX, cssY, cssW, cssH) {
-    this.currentRect = {
-      x: Math.round(cssX * this.screenDpr), y: Math.round(cssY * this.screenDpr),
-      width: Math.round(cssW * this.screenDpr), height: Math.round(cssH * this.screenDpr),
-      cssX, cssY, cssWidth: cssW, cssHeight: cssH,
-    };
+    const dpr = this.screenDpr;
+    this.currentRect = { x: Math.round(cssX * dpr), y: Math.round(cssY * dpr), width: Math.round(cssW * dpr), height: Math.round(cssH * dpr), cssX, cssY, cssWidth: cssW, cssHeight: cssH };
     Object.assign(this.box.style, { left: `${cssX}px`, top: `${cssY}px`, width: `${cssW}px`, height: `${cssH}px` });
     this.dimTag.textContent = `${Math.round(cssW)} × ${Math.round(cssH)}`;
     if (this.currentMode !== 'region' || this.isDragging) this.actionDock.classList.add('hidden');
@@ -278,18 +273,17 @@ export class ScreenSnipper {
   cancelSnip() { this.hide(); this.onCancel?.(); }
   hideVisuals() {
     this.colorPicker.deactivate();
-    this.overlay.classList.remove('mode-color-picker');
+    this.overlay.classList.remove('mode-color-picker', 'mode-window', 'mode-fullscreen');
     this.box.classList.remove('loading-ocr');
     this.overlay.classList.add('hidden');
     this.box.classList.add('hidden');
     this.actionDock.classList.add('hidden');
   }
   cleanup() {
-    this.colorPicker.deactivate();
-    this.overlay.classList.remove('mode-color-picker');
+    this.hideVisuals();
     this.bgImg.src = '';
     this.currentDataUrl = null;
     this.currentRect = null;
   }
-  hide() { this.hideVisuals(); this.cleanup(); }
+  hide() { this.cleanup(); }
 }
