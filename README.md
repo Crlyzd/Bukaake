@@ -113,10 +113,12 @@ Capture and share anything on your screen without launching heavy third-party so
 <tr>
 <td width="50%" valign="top">
 
-#### 📸 Precision Screen Snipper
+#### 📸 Precision Screen Snipper & OCR
 - **Capture Modes**: Snip your Full Screen, Active Display, or drag any Custom Region.
+- **Native Screen OCR**: Extract text from any on-screen region instantly using native hardware-accelerated `Windows.Media.Ocr`. Spatial geometry analysis preserves line wraps, stanza breaks, and paragraph indents.
+- **Loupe Color Eyedropper**: Zoom into details with a 9x9 magnified pixel grid to inspect and copy exact HEX and RGB color values in one click.
 - **Smart Alignment**: Live coordinate crosshairs and dimension badges.
-- **Direct Clipboard Delivery**: Automatically copies snips to your clipboard in `CF_DIB` format for instant pasting (`Ctrl+V`) into chats, documents, and other applications.
+- **Direct Clipboard Delivery**: Automatically copies snips or OCR text to your clipboard (`CF_DIB` / Unicode text) for instant pasting (`Ctrl+V`).
 - **Timestamped Auto-Save**: Clean PNG files automatically save to your `Pictures/Screenshots` folder.
 
 </td>
@@ -151,7 +153,7 @@ Quickly add text captions, mark up screenshots, or adjust composition with built
 - **Laser-Guided Crop (`C`)**: Standard aspect presets (1:1, 16:9, 9:16, 4:3, Freeform) featuring dynamic magnetic guides that snap directly to image centers and edges.
 - **Universal Enter-to-Commit**: Press **`Enter`** to immediately apply and commit changes across Text, Crop, and Drawing tools.
 - **Real-Time Color Filters (`E`)**: Adjust Brightness, Contrast, Saturation, Exposure, and Temperature on-the-fly with 60 FPS GPU-accelerated rendering.
-- **[Alitken](https://github.com/Crlyzd/Alitken-GUI) Tandem Integration**: One-click bridge to send images to [Alitken](https://github.com/Crlyzd/Alitken-GUI) for advanced editing and automatically reload your edits on save.
+- **[Alitken](https://github.com/Crlyzd/Alitken-GUI) & [Cathet](https://github.com/Crlyzd/Cathet) Companion Bridges**: One-click workflow to transfer photos to [Alitken](https://github.com/Crlyzd/Alitken-GUI) for advanced image editing, or hand off OCR extracted text directly into [Cathet](https://github.com/Crlyzd/Cathet) for instant editing.
 
 <p align="center">
   <img width="800" alt="Drawing and Crop Tools" src="https://github.com/user-attachments/assets/846ec474-a1e3-440e-9c35-ac00fe7116cb" style="border-radius: 10px;" />
