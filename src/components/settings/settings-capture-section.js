@@ -4,8 +4,8 @@
  */
 
 import { invoke } from '@tauri-apps/api/core';
-import { tauriBridge } from '../../services/tauri-bridge.js';
-import { hotkeyService } from '../../services/hotkey-service.js';
+import { tauriBridge } from '../../services/platform/tauri-bridge.js';
+import { hotkeyService } from '../../services/interaction/hotkey-service.js';
 import { bindTandemSettings } from './settings-tandem-section.js';
 import { bindAudioSettings } from './settings-audio-section.js';
 

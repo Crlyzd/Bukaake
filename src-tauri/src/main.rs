@@ -1,46 +1,17 @@
 // Prevents additional console window on Windows in release
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-mod autostart;
-mod clipboard;
-mod file_assoc;
-mod file_ops;
-pub mod exif_reader;
-pub mod heif_reader;
-pub mod pro_decoder;
-pub mod raw_reader;
-pub mod audio_mixer;
-pub mod audio_capture;
-pub mod capture_commands;
-pub mod hotkeys;
-pub mod recording_pill;
-pub mod recording_border;
-pub mod screen_capture;
-pub mod standby;
-pub mod process_memory;
-pub mod ebml_patcher;
-pub mod window_commands;
-#[cfg(target_os = "windows")]
-pub mod wic_decoder;
-#[cfg(target_os = "windows")]
-pub mod d3d_device;
-#[cfg(target_os = "windows")]
-pub mod wgc_capture;
-#[cfg(target_os = "windows")]
-pub mod wmf_writer;
-#[cfg(target_os = "windows")]
-pub mod native_recorder;
-mod image_loader;
-mod updater;
-mod window_subclass;
-pub mod ocr;
-pub mod cathet;
-use ocr::extract_text_from_image;
-use cathet::launch_cathet;
-use audio_capture::{
+pub mod capture;
+pub mod imaging;
+pub mod platform;
+pub mod integrations;
+
+use integrations::ocr::extract_text_from_image;
+use integrations::cathet::launch_cathet;
+use capture::audio_capture::{
     set_recording_audio_volumes, set_recording_mic_muted, start_audio_capture, stop_audio_capture,
 };
-use capture_commands::{
+use capture::capture_commands::{
     append_recording_chunk, capture_screen, discard_recording, finalize_recording,
     get_default_videos_dir, init_recording_stream, launch_alitken,
     prompt_select_executable, prompt_select_folder, prompt_save_recording,
@@ -49,22 +20,22 @@ use capture_commands::{
     start_native_recording, pause_native_recording, resume_native_recording,
     stop_native_recording, discard_native_recording,
 };
-use hotkeys::{handle_global_shortcut, setup_hotkeys, update_global_shortcuts};
-use recording_pill::{enter_recording_pill_mode, exit_recording_pill_mode};
-use recording_border::{show_recording_border, hide_recording_border, set_recording_border_paused};
-use autostart::{auto_heal_autostart_path, get_autostart_status, set_autostart_enabled};
-use clipboard::{read_clipboard, write_clipboard_image};
-use file_assoc::{
+use platform::hotkeys::{handle_global_shortcut, setup_hotkeys, update_global_shortcuts};
+use capture::recording_pill::{enter_recording_pill_mode, exit_recording_pill_mode};
+use capture::recording_border::{show_recording_border, hide_recording_border, set_recording_border_paused};
+use platform::autostart::{auto_heal_autostart_path, get_autostart_status, set_autostart_enabled};
+use platform::clipboard::{read_clipboard, write_clipboard_image};
+use platform::file_assoc::{
     auto_heal_or_sync_path, check_association_status, launch_default_apps_settings,
     register_file_associations, unregister_file_associations,
 };
-use file_ops::delete_file;
-use image_loader::{get_initial_image, read_image_context, read_image_file, read_raw_full_sensor};
-use standby::{enter_standby, is_standby_enabled, set_standby_enabled, show_main_window, StandbyManager};
-use tauri::{Emitter, Manager};
-use tauri_plugin_global_shortcut::ShortcutState;
-use updater::{cleanup_old_update_artifacts, download_and_install_update, get_system_arch};
-use window_commands::{
+use platform::file_ops::delete_file;
+use imaging::image_loader::{self, get_initial_image, read_image_context, read_image_file, read_raw_full_sensor};
+use platform::standby::{self, enter_standby, is_standby_enabled, set_standby_enabled, show_main_window, StandbyManager};
+use platform::process_memory;
+use platform::window_subclass;
+use platform::updater::{cleanup_old_update_artifacts, download_and_install_update, get_system_arch};
+use platform::window_commands::{
     get_cli_args, open_url, show_in_folder, close_window, exit_app,
     prompt_save_file, prompt_open_file, save_image_bytes,
     minimize_window, toggle_maximize_window, is_window_maximized, unmaximize_window,
@@ -72,6 +43,8 @@ use window_commands::{
     is_window_fullscreen, play_windows_ding, open_settings_window, hide_settings_window,
     set_window_vibrancy,
 };
+use tauri::{Emitter, Manager};
+use tauri_plugin_global_shortcut::ShortcutState;
 
 fn main() {
     process_memory::configure_low_memory_webview_env();

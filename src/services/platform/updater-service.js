@@ -4,7 +4,7 @@
  * manual checks, asset matching, in-place self-updating, and multi-window state synchronization (< 270 lines)
  */
 
-import { toast } from '../components/toast.js';
+import { toast } from '../../components/viewer/toast.js';
 
 export const APP_VERSION = typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : '0.8.1';
 

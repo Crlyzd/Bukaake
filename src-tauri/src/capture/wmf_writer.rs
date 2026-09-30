@@ -19,7 +19,7 @@ use windows::Win32::Media::MediaFoundation::{
     MF_SINK_WRITER_D3D_MANAGER, MFSTARTUP_NOSOCKET, MF_VERSION,
 };
 use std::path::Path;
-use crate::d3d_device::D3DContext;
+use crate::capture::d3d_device::D3DContext;
 
 #[inline]
 fn pack_u32_pair(high: u32, low: u32) -> u64 {

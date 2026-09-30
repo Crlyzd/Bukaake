@@ -4,13 +4,13 @@
  */
 
 import './styles/main.css';
-import { tauriBridge } from './services/tauri-bridge.js';
-import { toast } from './components/toast.js';
-import { updaterService, APP_VERSION, hydrateAppVersions } from './services/updater-service.js';
-import { fileAssocService } from './services/file-assoc-service.js';
-import { autostartService } from './services/autostart-service.js';
+import { tauriBridge } from './services/platform/tauri-bridge.js';
+import { toast } from './components/viewer/toast.js';
+import { updaterService, APP_VERSION, hydrateAppVersions } from './services/platform/updater-service.js';
+import { fileAssocService } from './services/platform/file-assoc-service.js';
+import { autostartService } from './services/platform/autostart-service.js';
 import { bindCaptureSettings } from './components/settings/settings-capture-section.js';
-import { initHeartSprouter } from './components/heart-sprouter.js';
+import { initHeartSprouter } from './components/viewer/heart-sprouter.js';
 
 class SettingsApp {
   constructor() {

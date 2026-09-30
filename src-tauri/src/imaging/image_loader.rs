@@ -1,13 +1,13 @@
-use crate::exif_reader::{self, ExifPayload};
-use crate::heif_reader;
-use crate::pro_decoder;
-use crate::raw_reader;
+use crate::imaging::exif_reader::{self, ExifPayload};
+use crate::imaging::heif_reader;
+use crate::imaging::pro_decoder;
+use crate::imaging::raw_reader;
 use base64::prelude::*;
 use serde::Serialize;
 use std::fs;
 use std::path::{Path, PathBuf};
 
-pub use crate::file_assoc::SUPPORTED_EXTENSIONS as SUPPORTED_EXTS;
+pub use crate::platform::file_assoc::SUPPORTED_EXTENSIONS as SUPPORTED_EXTS;
 
 #[derive(Debug, Serialize, Clone)]
 pub struct NeighborInfo {

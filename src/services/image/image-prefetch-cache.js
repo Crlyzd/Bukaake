@@ -4,7 +4,7 @@
  * Prevents RAM flooding on massive VFX/Pro formats (EXR, HDR, TIFF)
  */
 
-import { tauriBridge } from './tauri-bridge.js';
+import { tauriBridge } from '../platform/tauri-bridge.js';
 
 const MAX_PREFETCH_FILE_SIZE = 40 * 1024 * 1024; // 40 MB single-file prefetch limit
 const MAX_RAW_PREFETCH_FILE_SIZE = 150 * 1024 * 1024; // 150 MB for camera RAW files

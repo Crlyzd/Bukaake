@@ -17,7 +17,7 @@ pub fn is_heif_file(path: &Path) -> bool {
 /// 2. If WIC is unavailable or uninstalled, falls back to multi-core pure-Rust SIMD decoding (150ms - 250ms).
 pub fn decode_heif_image(path: &Path) -> Result<(String, (u32, u32)), String> {
     #[cfg(target_os = "windows")]
-    if let Ok(res) = crate::wic_decoder::decode_wic_image(path) {
+    if let Ok(res) = crate::imaging::wic_decoder::decode_wic_image(path) {
         return Ok(res);
     }
 

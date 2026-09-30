@@ -1,15 +1,15 @@
 /**
- * Bukaake Cathet Companion Tandem Service
- * Handles Cathet executable discovery, Settings persistence, and text handoff (< 90 lines)
+ * Bukaake Alitken Media Converter Tandem Service
+ * Handles Alitken executable discovery, Settings persistence, and video handoff (< 90 lines)
  */
 
 import { invoke } from '@tauri-apps/api/core';
-import { toast } from '../components/toast.js';
+import { toast } from '../../components/viewer/toast.js';
 
-export class CathetService {
+export class AlitkenService {
   constructor() {
-    this.STORAGE_KEY_PATH = 'bukaake-cathet-path';
-    this.STORAGE_KEY_AUTO = 'bukaake-cathet-auto-open';
+    this.STORAGE_KEY_PATH = 'bukaake-alitken-path';
+    this.STORAGE_KEY_AUTO = 'bukaake-alitken-auto-open';
   }
 
   getCustomPath() {
@@ -40,28 +40,28 @@ export class CathetService {
         return path;
       }
     } catch (err) {
-      console.warn('[Cathet] File picker cancelled or failed:', err);
+      console.warn('[Alitken] File picker cancelled or failed:', err);
     }
     return null;
   }
 
-  async launch(text) {
-    if (!text || !text.trim()) return false;
+  async launch(videoPath) {
+    if (!videoPath) return false;
     const customExe = this.getCustomPath() || null;
 
     try {
-      await invoke('launch_cathet', {
-        text,
+      await invoke('launch_alitken', {
+        videoPath,
         customExe,
       });
-      toast.show('Opened text in Cathet Scratchpad', 'info');
+      toast.show('Opened video in Alitken Media Converter', 'info');
       return true;
     } catch (err) {
-      console.error('[Cathet] Launch failed:', err);
-      toast.show(typeof err === 'string' ? err : (err?.message || 'Could not launch Cathet'), 'error');
+      console.error('[Alitken] Launch failed:', err);
+      toast.show(typeof err === 'string' ? err : (err?.message || 'Could not launch Alitken'), 'error');
       return false;
     }
   }
 }
 
-export const cathetService = new CathetService();
+export const alitkenService = new AlitkenService();

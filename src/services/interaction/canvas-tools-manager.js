@@ -4,7 +4,7 @@
  */
 
 import { changeTracker } from './change-tracker.js';
-import { toast } from '../components/toast.js';
+import { toast } from '../../components/viewer/toast.js';
 
 export class CanvasToolsManager {
   constructor({ viewer, cropper, drawingTool, textTool, toolbar, fileLoader, adjustmentsPanel }) {

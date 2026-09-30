@@ -12,7 +12,7 @@ use windows::Win32::Graphics::Gdi::{HMONITOR, MonitorFromPoint, MONITOR_DEFAULTT
 use windows::Win32::System::WinRT::Direct3D11::IDirect3DDxgiInterfaceAccess;
 use windows::Win32::System::WinRT::Graphics::Capture::IGraphicsCaptureItemInterop;
 use std::sync::Arc;
-use crate::d3d_device::D3DContext;
+use crate::capture::d3d_device::D3DContext;
 
 pub struct WgcFrame {
     pub texture: ID3D11Texture2D,

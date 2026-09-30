@@ -3,9 +3,9 @@
  * Manages draggable titlebar, window actions (Min, Max, Close), theme switcher, and inline breadcrumbs
  */
 
-import { tauriBridge } from '../services/tauri-bridge.js';
-import { themeManager } from '../services/theme-manager.js';
-import { updaterService, hydrateAppVersions } from '../services/updater-service.js';
+import { tauriBridge } from '../../services/platform/tauri-bridge.js';
+import { themeManager } from '../../services/platform/theme-manager.js';
+import { updaterService, hydrateAppVersions } from '../../services/platform/updater-service.js';
 
 export class Titlebar {
   constructor(options = {}) {

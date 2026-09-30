@@ -4,7 +4,7 @@
  * path auto-healing, and launching Windows Default Apps (< 100 lines)
  */
 
-import { toast } from '../components/toast.js';
+import { toast } from '../../components/viewer/toast.js';
 
 class FileAssocService {
   constructor() {

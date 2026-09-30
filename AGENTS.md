@@ -54,86 +54,70 @@ The project contains **100+ modular files** cleanly organized across distinct la
 ```
 src/
 ├── components/          # UI Component Modules (< 300 lines each)
-│   ├── capture/                # Screen snipper & recording dock
-│   ├── settings/               # Settings modal, capture & audio sections
-│   │   ├── settings-audio-section.js   # Audio sync stepper & input selection
-│   │   ├── settings-capture-section.js # Video presets & space saver mode
-│   │   └── settings-modal.js           # Modal coordinator & tab switching
-│   ├── text/                   # Floating text typography sub-toolbar
-│   ├── adjustments-panel.js    # Sliders & preset chips
-│   ├── confirm-modal.js        # Unsaved changes dialog
-│   ├── context-menu.js         # Right-click obsidian glass menu
-│   ├── delete-modal.js         # Recycle Bin & delete dialog
-│   ├── heart-sprouter.js       # Like / easter egg particles
-│   ├── loading-indicator.js    # Circular stroke-free spinner
-│   ├── metadata-drawer.js      # EXIF & camera telemetry drawer
-│   ├── shortcuts-modal.js      # Keyboard shortcuts cheatsheet
-│   ├── titlebar.js             # Frameless titlebar, brand return button & actions
-│   ├── toast.js                # Single-toast notification pill
-│   └── toolbar.js              # Floating control dock & tool triggers
+│   ├── viewer/                 # Main viewing chrome (titlebar, toolbar, context menu, toast)
+│   ├── modals/                 # Modals (confirm, delete, shortcuts)
+│   ├── capture/                # Screen snipper, recording dock, OCR & tools
+│   ├── settings/               # Settings window sections & modal
+│   └── text/                   # Floating text typography sub-toolbar
 ├── core/                # Canvas & Image Math Engines (< 300 lines each)
 │   ├── canvas/                 # Canvas viewer engine, events & helpers
-│   ├── text/                   # Typography lifecycle, snapping & rendering
-│   ├── crop-snapping.js        # Laser magnetic alignment guides
-│   ├── cropper.js              # Precision crop box & sandwich contrast
-│   ├── drawing-tool.js         # Freehand pen, highlighter, cursor ring
-│   ├── filters.js              # Real-time color adjustments processor
-│   └── metadata.js             # Client EXIF parser & telemetry formatter
-├── services/            # Background, Platform & State Services (< 300 lines each)
-│   ├── capture/                # Screen capture, recorder, audio & screenshot saver
-│   ├── alitken-service.js      # External editor tandem workflow integration
-│   ├── autostart-service.js    # Windows autostart management
-│   ├── canvas-tools-manager.js # Tool mutual exclusivity & interaction lockout
-│   ├── change-tracker.js       # Unsaved edits state tracker
-│   ├── file-assoc-service.js   # Windows shell associations & deep-link
-│   ├── file-loader.js          # Image loader, drag & drop, clipboard ingest
-│   ├── hotkey-service.js       # Unified global/local shortcut dispatcher
-│   ├── idle-controller.js      # Picasa-style idle mouse fade controller
-│   ├── image-prefetch-cache.js # 5-slot directional prefetch cache (140MB bound)
-│   ├── image-saver.js          # File export & clipboard image writer
-│   ├── shortcuts.js            # Main viewer keyboard shortcut registry
-│   ├── standby-service.js      # System tray standby & memory trimming
-│   ├── tauri-bridge.js         # Tauri v2 window, args, and fs IPC wrapper
-│   ├── theme-manager.js        # Dark/light switcher & acrylic coordination
-│   ├── updater-service.js      # GitHub Releases auto-updater service
-│   └── window-mode-manager.js  # Mode 1 regular vs Mode 2 fullscreen coordinator
+│   ├── crop/                   # Precision crop box & laser magnetic guides
+│   ├── draw/                   # Freehand pen, highlighter, cursor ring
+│   ├── filters/                # Real-time color adjustments processor
+│   ├── metadata/               # Client EXIF parser & telemetry formatter
+│   └── text/                   # Typography lifecycle, snapping & rendering
+├── services/            # Platform & Domain Services (< 300 lines each)
+│   ├── platform/               # Windows OS, autostart, file associations, tray & window mode
+│   ├── image/                  # Image loader, prefetch cache & file exporter
+│   ├── interaction/            # Hotkeys, shortcuts, idle controller & change tracker
+│   ├── capture/                # Screen capture, native recorder, audio & screenshot saver
+│   └── integrations/           # External companion integrations (Alitken, Cathet)
 ├── styles/              # Stroke-Free Modular Stylesheets (< 300 lines each)
 │   ├── base.css, glass.css, main.css, tokens.css
-│   └── components/     # capture/, settings/, text/, confirm-modal, context-menu,
-│                       # crop, draw, loading, modes, panels, shortcuts,
-│                       # startpage, titlebar, toast, toolbar, vibrancy
+│   └── components/     # viewer/, modals/, tools/, capture/, settings/, text/
 ├── app.js               # Main viewer bootstrap coordinator (≤ 350 lines)
 ├── settings-app.js      # Standalone settings window coordinator (≤ 350 lines)
 └── snipper-app.js       # Dedicated overlay window coordinator (≤ 300 lines)
 src-tauri/src/
-├── main.rs              # App entry-point, plugins & lifecycle (≤ 350 lines)
-├── audio_capture.rs     # Native Windows WASAPI loopback & microphone audio capture
-├── audio_mixer.rs       # Dual-source FIFO resampling queue, clock sync & peak limiter
-├── autostart.rs         # Native Windows HKCU autostart registry management
-├── capture_commands.rs  # Screen capture, snip & recording IPC commands
-├── clipboard.rs         # Win32 clipboard engine (CF_HDROP / CF_DIB)
-├── d3d_device.rs        # Direct3D 11 device, WinRT interop & GPU subresource cropping
-├── ebml_patcher.rs      # Zero-dependency EBML WebM duration & seek header patcher
-├── exif_reader.rs       # Native EXIF extraction via kamadak-exif
-├── file_assoc.rs        # HKCU shell registration & silent startup auto-heal
-├── file_ops.rs          # Win32 Recycle Bin deletion (SHFileOperationW)
-├── heif_reader.rs       # HEIC/HEIF container parsing & preview extraction
-├── hotkeys.rs           # Native global shortcut listener
-├── image_loader.rs      # Native image decoding & 49 format traversal
-├── native_recorder.rs   # GPU capture orchestrator, FPS throttling & audio PTS sync
-├── pro_decoder.rs       # VFX & texture decoders (HDR, EXR, DDS, TGA, QOI)
-├── process_memory.rs    # Working set telemetry & memory footprint tracking
-├── raw_reader.rs        # 4-tier LibRaw camera RAW pipeline & full sensor unpack
-├── recording_border.rs  # Stroke-free desktop capture region border overlay
-├── recording_pill.rs    # Floating desktop recording pill controller
-├── screen_capture.rs    # Native Windows desktop monitor & region capture
-├── standby.rs           # Tray lifecycle & working set memory trimming
-├── updater.rs           # In-place self-updater, progress & relaunch
-├── wgc_capture.rs       # Windows.Graphics.Capture D3D11 zero-copy frame pool session
-├── wic_decoder.rs       # Windows Imaging Component GPU-accelerated transcoding
-├── wmf_writer.rs        # Windows Media Foundation IMFSinkWriter hardware H.264/AAC MP4
-├── window_commands.rs   # Window vibrancy, dialogs, and window state IPC
-└── window_subclass.rs   # Win32 subclassing & native edge resize suppression
+├── main.rs              # App entry-point & master IPC dispatcher (≤ 350 lines)
+├── capture/             # Native Screen Capture & Hardware Recording Subsystem
+│   ├── mod.rs                  # Module exports & conditional declarations
+│   ├── audio_capture.rs        # WASAPI loopback & microphone audio capture
+│   ├── audio_mixer.rs          # FIFO resampling queue, clock sync & peak limiter
+│   ├── capture_commands.rs     # Screen snip & recording IPC commands
+│   ├── d3d_device.rs           # Direct3D 11 device & WinRT interop
+│   ├── ebml_patcher.rs         # WebM duration & seek header patcher
+│   ├── native_recorder.rs      # GPU capture orchestrator & audio PTS sync
+│   ├── recording_border.rs     # Stroke-free capture region border overlay
+│   ├── recording_pill.rs       # Floating desktop recording pill controller
+│   ├── screen_capture.rs       # Windows desktop monitor & region capture
+│   ├── wgc_capture.rs          # Windows.Graphics.Capture D3D11 frame pool
+│   └── wmf_writer.rs           # IMFSinkWriter hardware H.264/AAC MP4 writer
+├── imaging/             # Image Decoders & VFX Pipelines
+│   ├── mod.rs                  # Module exports
+│   ├── exif_reader.rs          # Native EXIF extraction via kamadak-exif
+│   ├── heif_reader.rs          # HEIC/HEIF container parsing & preview extraction
+│   ├── image_loader.rs         # Native image decoding & 49 format traversal
+│   ├── pro_decoder.rs          # VFX decoders (HDR, EXR, DDS, TGA, QOI)
+│   ├── raw_reader.rs           # 4-tier LibRaw camera RAW pipeline (< 300 lines)
+│   ├── raw_tests.rs            # Dedicated LibRaw sample test harness
+│   └── wic_decoder.rs          # Windows Imaging Component GPU transcoder
+├── platform/            # Native Windows Desktop Integration
+│   ├── mod.rs                  # Module exports
+│   ├── autostart.rs            # HKCU autostart registry management
+│   ├── clipboard.rs            # Win32 clipboard engine (CF_HDROP / CF_DIB)
+│   ├── file_assoc.rs           # HKCU shell registration & auto-heal
+│   ├── file_ops.rs             # Win32 Recycle Bin deletion (SHFileOperationW)
+│   ├── hotkeys.rs              # Win32 global shortcut listener
+│   ├── process_memory.rs       # Working set telemetry & memory trimming
+│   ├── standby.rs              # Tray lifecycle & working set memory trimming
+│   ├── updater.rs              # In-place self-updater, progress & relaunch
+│   ├── window_commands.rs      # Window vibrancy, dialogs, and window state IPC
+│   └── window_subclass.rs      # Win32 subclassing & native edge resize suppression
+└── integrations/        # External & Companion App Integrations
+    ├── mod.rs                  # Module exports
+    ├── cathet.rs               # Cathet companion bridge commands
+    └── ocr.rs                  # Native Windows.Media.Ocr text recognition
 ```
 
 ---

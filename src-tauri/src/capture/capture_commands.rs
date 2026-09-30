@@ -3,7 +3,10 @@
  * Handles GDI screen capture, low-RAM chunk streaming, folder picking, and Alitken launch (< 180 lines)
  */
 
-use crate::screen_capture::{self, ScreenCapturePayload};
+use crate::capture::screen_capture::{self, ScreenCapturePayload};
+use crate::capture::native_recorder;
+use crate::capture::ebml_patcher;
+use crate::platform::process_memory;
 use std::fs::{self, OpenOptions};
 use std::io::Write;
 use std::path::{Path, PathBuf};
@@ -32,7 +35,7 @@ pub fn get_default_videos_dir() -> Result<String, String> {
 
 #[tauri::command]
 pub fn start_native_recording(
-    region: Option<crate::native_recorder::CaptureRegion>,
+    region: Option<native_recorder::CaptureRegion>,
     fps: Option<u32>,
     bitrate: Option<u32>,
     record_sys: Option<bool>,
@@ -43,7 +46,7 @@ pub fn start_native_recording(
     let _ = fs::create_dir_all(&temp_dir);
     let ms = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|d| d.as_millis()).unwrap_or(0);
     let temp_file = temp_dir.join(format!("rec_{}.mp4", ms));
-    crate::native_recorder::start_native_recording(
+    native_recorder::start_native_recording(
         temp_file,
         region,
         fps.unwrap_or(60),
@@ -56,29 +59,29 @@ pub fn start_native_recording(
 
 #[tauri::command]
 pub fn pause_native_recording() -> Result<(), String> {
-    crate::native_recorder::pause_native_recording()
+    native_recorder::pause_native_recording()
 }
 
 #[tauri::command]
 pub fn resume_native_recording() -> Result<(), String> {
-    crate::native_recorder::resume_native_recording()
+    native_recorder::resume_native_recording()
 }
 
 #[tauri::command]
-pub fn stop_native_recording() -> Result<crate::native_recorder::NativeRecordingResult, String> {
-    crate::native_recorder::stop_native_recording()
+pub fn stop_native_recording() -> Result<native_recorder::NativeRecordingResult, String> {
+    native_recorder::stop_native_recording()
 }
 
 #[tauri::command]
 pub fn discard_native_recording(temp_path: Option<String>) -> Result<(), String> {
-    let _ = crate::native_recorder::discard_native_recording();
+    let _ = native_recorder::discard_native_recording();
     if let Some(tp) = temp_path {
         let p = Path::new(&tp);
         if p.exists() {
             let _ = fs::remove_file(p);
         }
     }
-    crate::process_memory::trim_process_tree();
+    process_memory::trim_process_tree();
     Ok(())
 }
 
@@ -98,14 +101,14 @@ pub fn append_recording_chunk(temp_path: String, chunk: Vec<u8>) -> Result<(), S
 
 #[tauri::command]
 pub fn finalize_recording(temp_path: String, dest_path: String, duration_ms: Option<f64>) -> Result<String, String> {
-    crate::process_memory::set_recording_memory_lockout(false);
+    process_memory::set_recording_memory_lockout(false);
     let temp = Path::new(&temp_path);
     let dest = Path::new(&dest_path);
     if let Some(parent) = dest.parent() { let _ = fs::create_dir_all(parent); }
 
     if temp_path.ends_with(".webm") {
         if let Some(ms) = duration_ms {
-            let _ = crate::ebml_patcher::patch_webm_duration(temp, dest, ms);
+            let _ = ebml_patcher::patch_webm_duration(temp, dest, ms);
         } else if let Err(_) = fs::rename(temp, dest) {
             fs::copy(temp, dest).map_err(|e| format!("Failed to copy recording: {}", e))?;
             let _ = fs::remove_file(temp);
@@ -114,7 +117,7 @@ pub fn finalize_recording(temp_path: String, dest_path: String, duration_ms: Opt
         fs::copy(temp, dest).map_err(|e| format!("Failed to copy recording: {}", e))?;
         let _ = fs::remove_file(temp);
     }
-    crate::process_memory::trim_process_tree();
+    process_memory::trim_process_tree();
     Ok(dest.to_string_lossy().to_string())
 }
 

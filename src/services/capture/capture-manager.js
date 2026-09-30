@@ -7,11 +7,11 @@ import { invoke } from '@tauri-apps/api/core';
 import { listen, emit } from '@tauri-apps/api/event';
 import { screenCaptureService } from './screen-capture-service.js';
 import { screenRecorderService } from './screen-recorder-service.js';
-import { alitkenService } from '../alitken-service.js';
-import { hotkeyService } from '../hotkey-service.js';
-import { toast } from '../../components/toast.js';
-import { changeTracker } from '../change-tracker.js';
-import { tauriBridge } from '../tauri-bridge.js';
+import { alitkenService } from '../integrations/alitken-service.js';
+import { hotkeyService } from '../interaction/hotkey-service.js';
+import { toast } from '../../components/viewer/toast.js';
+import { changeTracker } from '../interaction/change-tracker.js';
+import { tauriBridge } from '../platform/tauri-bridge.js';
 
 export class CaptureManager {
   constructor(options = {}) {

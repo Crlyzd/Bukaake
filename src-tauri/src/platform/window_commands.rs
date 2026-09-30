@@ -2,7 +2,7 @@
 /// All #[tauri::command] handlers for window control, native dialogs, and vibrancy.
 /// Extracted from main.rs to keep the app entry-point a pure lifecycle coordinator.
 
-use crate::standby::{self, StandbyManager};
+use crate::platform::standby::{self, StandbyManager};
 use tauri::{Emitter, Manager};
 
 #[cfg(target_os = "windows")]

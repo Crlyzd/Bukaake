@@ -3,7 +3,7 @@
  * Stroke-free glass right-click menu for image canvas & viewer actions
  */
 
-import { tauriBridge } from '../services/tauri-bridge.js';
+import { tauriBridge } from '../../services/platform/tauri-bridge.js';
 import { toast } from './toast.js';
 
 export class ContextMenu {

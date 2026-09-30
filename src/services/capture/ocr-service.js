@@ -5,8 +5,8 @@
 
 import { invoke } from '@tauri-apps/api/core';
 import { screenCaptureService } from './screen-capture-service.js';
-import { cathetService } from '../cathet-service.js';
-import { toast } from '../../components/toast.js';
+import { cathetService } from '../integrations/cathet-service.js';
+import { toast } from '../../components/viewer/toast.js';
 
 export class OcrService {
   async extractTextFromRegion(dataUrl, rect, sourceImg) {

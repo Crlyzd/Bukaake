@@ -10,8 +10,8 @@ import { RecordingDock } from './components/capture/recording-dock.js';
 import { screenCaptureService } from './services/capture/screen-capture-service.js';
 import { screenRecorderService } from './services/capture/screen-recorder-service.js';
 import { screenshotSaver } from './services/capture/screenshot-saver.js';
-import { alitkenService } from './services/alitken-service.js';
-import { toast } from './components/toast.js';
+import { alitkenService } from './services/integrations/alitken-service.js';
+import { toast } from './components/viewer/toast.js';
 
 export class SnipperApp {
   constructor() {

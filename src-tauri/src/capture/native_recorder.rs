@@ -11,9 +11,11 @@ use serde::{Deserialize, Serialize};
 use windows::Win32::Graphics::Direct3D11::{ID3D11Texture2D, D3D11_BIND_RENDER_TARGET, D3D11_BIND_SHADER_RESOURCE};
 use windows::Win32::Graphics::Dxgi::Common::DXGI_FORMAT_B8G8R8A8_UNORM;
 
-use crate::d3d_device::D3DContext;
-use crate::wgc_capture::WgcCaptureSession;
-use crate::wmf_writer::WmfWriter;
+use crate::capture::d3d_device::D3DContext;
+use crate::capture::wgc_capture::WgcCaptureSession;
+use crate::capture::wmf_writer::WmfWriter;
+use crate::capture::audio_capture;
+use crate::platform::process_memory;
 
 #[derive(Deserialize, Clone, Copy, Debug)]
 pub struct CaptureRegion {
@@ -69,7 +71,7 @@ pub fn start_native_recording(
 ) -> Result<String, String> {
     stop_native_recording().ok();
 
-    crate::process_memory::set_recording_memory_lockout(true);
+    process_memory::set_recording_memory_lockout(true);
 
     let d3d = Arc::new(D3DContext::new().map_err(|e| format!("D3D11 init failed: {}", e))?);
 
@@ -177,7 +179,7 @@ pub fn start_native_recording(
         let last_audio_pts_clone = Arc::clone(&last_audio_pts);
         let sync_offset_100ns = sync_offset_ms.unwrap_or(0) as i64 * 10_000;
 
-        crate::audio_capture::start_audio_feed(record_sys, record_mic, move |pcm_chunk| {
+        audio_capture::start_audio_feed(record_sys, record_mic, move |pcm_chunk| {
             if !running_audio.load(Ordering::Relaxed) || paused_audio.load(Ordering::Relaxed) || pcm_chunk.is_empty() {
                 return;
             }
@@ -245,8 +247,8 @@ pub fn resume_native_recording() -> Result<(), String> {
 }
 
 pub fn stop_native_recording() -> Result<NativeRecordingResult, String> {
-    crate::process_memory::set_recording_memory_lockout(false);
-    crate::audio_capture::stop_capture();
+    process_memory::set_recording_memory_lockout(false);
+    audio_capture::stop_capture();
 
     let state = {
         let mut lock = RECORDER_INSTANCE.lock().map_err(|e| e.to_string())?;
@@ -264,7 +266,7 @@ pub fn stop_native_recording() -> Result<NativeRecordingResult, String> {
         // Finalize MP4 file headers
         state.writer.finalize().map_err(|e| format!("SinkWriter finalize failed: {}", e))?;
 
-        crate::process_memory::trim_process_tree();
+        process_memory::trim_process_tree();
 
         Ok(NativeRecordingResult {
             temp_path: state.temp_path.to_string_lossy().to_string(),

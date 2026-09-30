@@ -3,8 +3,8 @@
  * Encapsulates companion editor workflows for Alitken (Video) and Cathet (Text) (< 90 lines)
  */
 
-import { alitkenService } from '../../services/alitken-service.js';
-import { cathetService } from '../../services/cathet-service.js';
+import { alitkenService } from '../../services/integrations/alitken-service.js';
+import { cathetService } from '../../services/integrations/cathet-service.js';
 
 export function bindTandemSettings() {
   // 1. Alitken Tandem (Video Converter & Splitter)

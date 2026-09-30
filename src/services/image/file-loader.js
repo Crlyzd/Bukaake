@@ -3,7 +3,7 @@
  * Handles Tauri local disk paths, directory sibling batching, File objects, drag-drop, and clipboard
  */
 
-import { tauriBridge } from './tauri-bridge.js';
+import { tauriBridge } from '../platform/tauri-bridge.js';
 import { ImagePrefetchCache } from './image-prefetch-cache.js';
 import { getCurrentWindow } from '@tauri-apps/api/window';
 import { getCurrentWebview } from '@tauri-apps/api/webview';

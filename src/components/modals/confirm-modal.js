@@ -3,7 +3,7 @@
  * Frosted stroke-free glass modal for confirming save, discard, or cancel (< 100 lines).
  */
 
-import { changeTracker } from '../services/change-tracker.js';
+import { changeTracker } from '../../services/interaction/change-tracker.js';
 
 export class ConfirmModal {
   constructor(containerId = 'confirmModalOverlay') {

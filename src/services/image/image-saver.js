@@ -3,9 +3,9 @@
  * Handles Tauri local disk save prompts, native file writes, and Web FileSystem access (< 70 lines)
  */
 
-import { tauriBridge } from './tauri-bridge.js';
-import { changeTracker } from './change-tracker.js';
-import { toast } from '../components/toast.js';
+import { tauriBridge } from '../platform/tauri-bridge.js';
+import { changeTracker } from '../interaction/change-tracker.js';
+import { toast } from '../../components/viewer/toast.js';
 
 function getEditTimestamp() {
   const d = new Date();

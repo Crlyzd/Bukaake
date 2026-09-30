@@ -3,7 +3,7 @@
  * Coordinates HKCU registry startup configuration and multi-window sync (< 100 lines)
  */
 
-import { toast } from '../components/toast.js';
+import { toast } from '../../components/viewer/toast.js';
 
 class AutostartService {
   constructor() {

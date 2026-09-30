@@ -4,7 +4,7 @@
  */
 
 import { invoke } from '@tauri-apps/api/core';
-import { toast } from '../../components/toast.js';
+import { toast } from '../../components/viewer/toast.js';
 
 export const QUALITY_PRESETS = {
   balanced: { fps: 60, bitrate: 3_000_000, label: '60 FPS • Balanced (3 Mbps)' },

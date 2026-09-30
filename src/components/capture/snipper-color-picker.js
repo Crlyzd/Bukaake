@@ -3,7 +3,7 @@
  * Frosted glass magnified loupe with 9x9 zoomed pixel grid, HEX/RGB display, and instant copy (< 190 lines)
  */
 
-import { toast } from '../toast.js';
+import { toast } from '../viewer/toast.js';
 
 export class SnipperColorPicker {
   constructor() {

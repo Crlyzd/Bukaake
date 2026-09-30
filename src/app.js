@@ -4,34 +4,34 @@
  */
 
 import { CanvasViewer } from './core/canvas/canvas-viewer.js';
-import { CropperTool } from './core/cropper.js';
-import { FilterEngine } from './core/filters.js';
-import { DrawingTool } from './core/drawing-tool.js';
+import { CropperTool } from './core/crop/cropper.js';
+import { FilterEngine } from './core/filters/filters.js';
+import { DrawingTool } from './core/draw/drawing-tool.js';
 import { TextTool } from './core/text/text-tool.js';
-import { MetadataInspector } from './core/metadata.js';
-import { tauriBridge } from './services/tauri-bridge.js';
-import { FileLoader } from './services/file-loader.js';
-import { IdleController } from './services/idle-controller.js';
-import { ShortcutsRegistry } from './services/shortcuts.js';
-import { changeTracker } from './services/change-tracker.js';
-import { WindowModeManager, MODE_REGULAR, MODE_VIEWER } from './services/window-mode-manager.js';
-import { Titlebar } from './components/titlebar.js';
-import { Toolbar } from './components/toolbar.js';
+import { MetadataInspector } from './core/metadata/metadata.js';
+import { tauriBridge } from './services/platform/tauri-bridge.js';
+import { FileLoader } from './services/image/file-loader.js';
+import { IdleController } from './services/interaction/idle-controller.js';
+import { ShortcutsRegistry } from './services/interaction/shortcuts.js';
+import { changeTracker } from './services/interaction/change-tracker.js';
+import { WindowModeManager, MODE_REGULAR, MODE_VIEWER } from './services/platform/window-mode-manager.js';
+import { Titlebar } from './components/viewer/titlebar.js';
+import { Toolbar } from './components/viewer/toolbar.js';
 import { TextToolbar } from './components/text/text-toolbar.js';
-import { AdjustmentsPanel } from './components/adjustments-panel.js';
-import { MetadataDrawer } from './components/metadata-drawer.js';
-import { ShortcutsModal } from './components/shortcuts-modal.js';
+import { AdjustmentsPanel } from './components/viewer/adjustments-panel.js';
+import { MetadataDrawer } from './components/viewer/metadata-drawer.js';
+import { ShortcutsModal } from './components/modals/shortcuts-modal.js';
 import { SettingsModal } from './components/settings/settings-modal.js';
-import { ConfirmModal } from './components/confirm-modal.js';
-import { DeleteModal } from './components/delete-modal.js';
-import { ContextMenu } from './components/context-menu.js';
-import { CanvasToolsManager } from './services/canvas-tools-manager.js';
-import { exportImage, copyProcessedImage } from './services/image-saver.js';
-import { toast } from './components/toast.js';
-import { loadingIndicator } from './components/loading-indicator.js';
-import { standbyService } from './services/standby-service.js';
+import { ConfirmModal } from './components/modals/confirm-modal.js';
+import { DeleteModal } from './components/modals/delete-modal.js';
+import { ContextMenu } from './components/viewer/context-menu.js';
+import { CanvasToolsManager } from './services/interaction/canvas-tools-manager.js';
+import { exportImage, copyProcessedImage } from './services/image/image-saver.js';
+import { toast } from './components/viewer/toast.js';
+import { loadingIndicator } from './components/viewer/loading-indicator.js';
+import { standbyService } from './services/platform/standby-service.js';
 import { CaptureManager } from './services/capture/capture-manager.js';
-import { themeManager } from './services/theme-manager.js';
+import { themeManager } from './services/platform/theme-manager.js';
 
 const RAW_EXTS = new Set(['arw', 'srf', 'sr2', 'cr2', 'cr3', 'nef', 'nrw', 'dng', 'raf', 'rw2', 'orf', 'pef', '3fr', 'mrw', 'srw', 'x3f', 'mos', 'mef', 'raw', 'kdc', 'dcr', 'rwl', 'iiq', 'erf']);
 

@@ -1,0 +1,10 @@
+pub mod autostart;
+pub mod clipboard;
+pub mod file_assoc;
+pub mod file_ops;
+pub mod hotkeys;
+pub mod process_memory;
+pub mod standby;
+pub mod updater;
+pub mod window_commands;
+pub mod window_subclass;

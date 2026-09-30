@@ -11,7 +11,7 @@ use std::thread;
 use std::time::Duration;
 use tauri::ipc::Channel;
 
-use crate::audio_mixer::{mix_and_quantize_stereo, ResamplingQueue};
+use crate::capture::audio_mixer::{mix_and_quantize_stereo, ResamplingQueue};
 
 static IS_MIC_MUTED: AtomicBool = AtomicBool::new(false);
 static SYS_VOLUME: AtomicU32 = AtomicU32::new(100); // 100% 1:1 bit-exact
