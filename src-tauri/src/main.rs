@@ -141,6 +141,9 @@ fn main() {
                     let _ = window_vibrancy::apply_acrylic(&w, tint);
                     window_subclass::suppress_edge_resize(&w);
                 }
+                if let Some(w) = app.get_webview_window("snipper") {
+                    window_subclass::suppress_edge_resize(&w);
+                }
             }
             setup_hotkeys(app);
             Ok(())
