@@ -246,22 +246,20 @@ export class TauriBridge {
 
   async readImageContext(path) {
     if (!this.isTauri()) return null;
-    try {
-      return await this.invoke('read_image_context', { path });
-    } catch (err) {
-      console.warn(`[TauriBridge] read_image_context failed for '${path}':`, err);
-      return null;
-    }
+    try { return await this.invoke('read_image_context', { path }); }
+    catch (err) { console.warn(`[TauriBridge] read_image_context failed for '${path}':`, err); return null; }
   }
 
   async readRawFullSensor(path) {
     if (!this.isTauri()) return null;
-    try {
-      return await this.invoke('read_raw_full_sensor', { path });
-    } catch (err) {
-      console.warn(`[TauriBridge] read_raw_full_sensor failed for '${path}':`, err);
-      throw err;
-    }
+    try { return await this.invoke('read_raw_full_sensor', { path }); }
+    catch (err) { console.warn(`[TauriBridge] read_raw_full_sensor failed for '${path}':`, err); throw err; }
+  }
+
+  async readRawFullSensorBinary(path) {
+    if (!this.isTauri() || !path) return null;
+    try { return await this.invoke('read_raw_full_sensor_binary', { path }); }
+    catch (err) { console.warn(`[TauriBridge] read_raw_full_sensor_binary failed for '${path}':`, err); throw err; }
   }
 
   async playWindowsDing() {
