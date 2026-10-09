@@ -101,7 +101,7 @@ New-Item -ItemType Directory -Path "$stagingRoot\bundles" -Force | Out-Null
 
 $manifestTemplate = Get-Content "packaging\msix\AppxManifest.template.xml" -Raw
 
-function Stage-And-PackArch {
+function Invoke-StageAndPackArch {
     param([string]$targetArch, [string]$binaryPath)
     if (-not (Test-Path $binaryPath)) {
         Write-Warning "[-] Binary for $targetArch not found at $binaryPath. Skipping."
@@ -124,7 +124,7 @@ function Stage-And-PackArch {
 
     $outMsix = "$stagingRoot\bundles\Bukaake_${appxVer}_${targetArch}.msix"
     Write-Host "  [+] Packing $targetArch MSIX: $outMsix" -ForegroundColor Yellow
-    & "$makeAppx" pack /d "$archStaging" /p "$outMsix" /o /nv
+    & "$makeAppx" pack /d "$archStaging" /p "$outMsix" /o /nv | Out-Null
     if ($LASTEXITCODE -ne 0) {
         Write-Error "[-] MakeAppx pack failed for $targetArch!"
         return $null
@@ -136,14 +136,14 @@ $packedPackages = @()
 if ($Arch -in @("all", "x64")) {
     $x64Bin = "release-builds\bukaake-v$semVer-x64.exe"
     if (-not (Test-Path $x64Bin)) { $x64Bin = "src-tauri\target\release\bukaake.exe" }
-    $p = Stage-And-PackArch -targetArch "x64" -binaryPath $x64Bin
+    $p = Invoke-StageAndPackArch -targetArch "x64" -binaryPath $x64Bin
     if ($p) { $packedPackages += $p }
 }
 
 if ($Arch -in @("all", "arm64")) {
     $armBin = "release-builds\bukaake-v$semVer-arm64.exe"
     if (-not (Test-Path $armBin)) { $armBin = "src-tauri\target\aarch64-pc-windows-msvc\release\bukaake.exe" }
-    $p = Stage-And-PackArch -targetArch "arm64" -binaryPath $armBin
+    $p = Invoke-StageAndPackArch -targetArch "arm64" -binaryPath $armBin
     if ($p) { $packedPackages += $p }
 }
 

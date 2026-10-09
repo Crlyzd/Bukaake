@@ -36,7 +36,7 @@ function Resize-SquareImage {
     Write-Host "  [+] Generated: $outPath ($size x $size)" -ForegroundColor Green
 }
 
-function Create-LetterboxedImage {
+function New-LetterboxedImage {
     param([int]$width, [int]$height, [int]$iconSize, [string]$outPath, [System.Drawing.Color]$bg)
     $dest = New-Object System.Drawing.Bitmap($width, $height)
     $g = [System.Drawing.Graphics]::FromImage($dest)
@@ -63,8 +63,8 @@ Resize-SquareImage -size 150 -outPath (Join-Path $OutputDir "Square150x150Logo.p
 
 # 2. Wide Tile & Splash Screen (Pillar 2 Obsidian Tint #06070a)
 $obsidian = [System.Drawing.Color]::FromArgb(6, 7, 10)
-Create-LetterboxedImage -width 310 -height 150 -iconSize 100 -outPath (Join-Path $OutputDir "Wide310x150Logo.png") -bg $obsidian
-Create-LetterboxedImage -width 620 -height 300 -iconSize 150 -outPath (Join-Path $OutputDir "SplashScreen.png") -bg $obsidian
+New-LetterboxedImage -width 310 -height 150 -iconSize 100 -outPath (Join-Path $OutputDir "Wide310x150Logo.png") -bg $obsidian
+New-LetterboxedImage -width 620 -height 300 -iconSize 150 -outPath (Join-Path $OutputDir "SplashScreen.png") -bg $obsidian
 
 $srcBitmap.Dispose()
 Write-Host "  [+] Store assets generation complete!`n" -ForegroundColor Green

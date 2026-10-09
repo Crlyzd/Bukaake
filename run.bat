@@ -14,8 +14,8 @@ echo    Bukaake — Transparent Desktop Viewer Control Center
 echo  ======================================================================
 
 :: Extract current version from package.json
-for /f "tokens=2 delims=:, " %%a in ('findstr /i "\"version\":" package.json') do (
-    set "CURRENT_VER=%%~a"
+for /f "delims=" %%a in ('node -p "require('./package.json').version" 2^>nul') do (
+    set "CURRENT_VER=%%a"
 )
 if "%CURRENT_VER%"=="" set "CURRENT_VER=1.0.0"
 
