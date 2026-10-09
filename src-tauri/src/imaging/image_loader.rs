@@ -9,12 +9,7 @@ use std::path::{Path, PathBuf};
 
 pub use crate::platform::file_assoc::SUPPORTED_EXTENSIONS as SUPPORTED_EXTS;
 
-#[derive(Debug, Serialize, Clone)]
-pub struct NeighborInfo {
-    pub path: String,
-    pub name: String,
-    pub size_bytes: u64,
-}
+pub use crate::imaging::neighbor_scanner::NeighborInfo;
 
 #[derive(Debug, Serialize)]
 pub struct InitialImagePayload {
@@ -73,22 +68,18 @@ pub fn get_mime_type(ext: &str) -> &'static str {
         "dds" => "image/vnd.ms-dds",
         "qoi" => "image/qoi",
         "arw" | "srf" | "sr2" => "image/x-sony-arw",
-        "cr2" => "image/x-canon-cr2",
-        "cr3" => "image/x-canon-cr3",
+        "cr2" | "cr3" => "image/x-canon-raw",
         "nef" | "nrw" => "image/x-nikon-nef",
         "dng" => "image/x-adobe-dng",
         "raf" => "image/x-fuji-raf",
-        "rw2" => "image/x-panasonic-rw2",
+        "rw2" | "raw" => "image/x-panasonic-raw",
         "orf" => "image/x-olympus-orf",
         "pef" => "image/x-pentax-pef",
         "mrw" => "image/x-minolta-mrw",
         "srw" => "image/x-samsung-srw",
         "x3f" => "image/x-sigma-x3f",
-        "mos" => "image/x-creo-mos",
-        "mef" => "image/x-mamiya-mef",
-        "raw" => "image/x-panasonic-raw",
-        "kdc" => "image/x-kodak-kdc",
-        "dcr" => "image/x-kodak-dcr",
+        "mos" | "mef" => "image/x-raw",
+        "kdc" | "dcr" => "image/x-kodak-raw",
         "rwl" => "image/x-leica-rwl",
         "iiq" => "image/x-phaseone-iiq",
         "erf" => "image/x-epson-erf",
@@ -98,21 +89,13 @@ pub fn get_mime_type(ext: &str) -> &'static str {
 
 pub fn file_to_data_url(path: &Path) -> Result<(String, Option<(u32, u32)>), String> {
     if raw_reader::is_raw_file(path) {
-        if let Ok((data_url, dims)) = raw_reader::decode_raw_image(path) {
-            return Ok((data_url, Some(dims)));
-        }
+        if let Ok((u, d)) = raw_reader::decode_raw_image(path) { return Ok((u, Some(d))); }
     }
-
     if heif_reader::is_heif_file(path) {
-        if let Ok((data_url, dims)) = heif_reader::decode_heif_image(path) {
-            return Ok((data_url, Some(dims)));
-        }
+        if let Ok((u, d)) = heif_reader::decode_heif_image(path) { return Ok((u, Some(d))); }
     }
-
     if pro_decoder::is_pro_file(path) {
-        if let Ok((data_url, dims)) = pro_decoder::decode_pro_image(path) {
-            return Ok((data_url, Some(dims)));
-        }
+        if let Ok((u, d)) = pro_decoder::decode_pro_image(path) { return Ok((u, Some(d))); }
     }
 
     let bytes = fs::read(path).map_err(|e| format!("Failed to read image file: {}", e))?;
@@ -159,55 +142,11 @@ fn gather_file_info(path: &Path) -> Result<ImageFileInfo, String> {
 }
 
 pub fn scan_directory_neighbors(target: &Path) -> (Vec<NeighborInfo>, usize) {
-    let parent = match target.parent() {
-        Some(p) => p,
-        None => return (Vec::new(), 0),
-    };
-
-    let mut entries = Vec::new();
-    if let Ok(read_dir) = fs::read_dir(parent) {
-        for entry in read_dir.flatten() {
-            let path = entry.path();
-            if is_image_file(&path) {
-                let name = path
-                    .file_name()
-                    .and_then(|n| n.to_str())
-                    .unwrap_or("")
-                    .to_string();
-                let size_bytes = entry.metadata().map(|m| m.len()).unwrap_or(0);
-                entries.push((path, name, size_bytes));
-            }
-        }
-    }
-
-    entries.sort_by(|a, b| a.1.to_lowercase().cmp(&b.1.to_lowercase()));
-    let target_norm = target.canonicalize().unwrap_or_else(|_| target.to_path_buf());
-    let mut current_index = 0;
-    let mut neighbors = Vec::with_capacity(entries.len());
-
-    for (idx, (p, name, size_bytes)) in entries.into_iter().enumerate() {
-        let p_norm = p.canonicalize().unwrap_or_else(|_| p.clone());
-        if p_norm == target_norm {
-            current_index = idx;
-        }
-        neighbors.push(NeighborInfo {
-            path: p.to_string_lossy().to_string(),
-            name,
-            size_bytes,
-        });
-    }
-
-    (neighbors, current_index)
+    crate::imaging::neighbor_scanner::scan_directory_neighbors(target, is_image_file)
 }
 
 pub fn find_cli_file_arg() -> Option<PathBuf> {
-    for arg in std::env::args().skip(1) {
-        if arg.starts_with("--") || arg.starts_with('-') {
-            continue;
-        }
-        return Some(PathBuf::from(&arg));
-    }
-    None
+    crate::imaging::neighbor_scanner::find_cli_file_arg()
 }
 
 fn build_initial_payload(path: &Path) -> Result<InitialImagePayload, String> {
@@ -259,70 +198,97 @@ pub fn get_initial_image() -> Result<Option<InitialImagePayload>, String> {
 }
 
 #[tauri::command]
-pub fn read_image_file(path: String) -> Result<ImagePayload, String> {
-    let p = PathBuf::from(&path);
-    if !is_image_file(&p) {
-        return Err(format!("Not a recognized image file: {}", path));
-    }
+pub async fn read_image_file(path: String) -> Result<ImagePayload, String> {
+    tauri::async_runtime::spawn_blocking(move || {
+        let p = PathBuf::from(&path);
+        if !is_image_file(&p) {
+            return Err(format!("Not a recognized image file: {}", path));
+        }
 
-    let file_name = p
-        .file_name()
-        .and_then(|n| n.to_str())
-        .unwrap_or("image")
-        .to_string();
-    let info = gather_file_info(&p)?;
+        let file_name = p
+            .file_name()
+            .and_then(|n| n.to_str())
+            .unwrap_or("image")
+            .to_string();
+        let info = gather_file_info(&p)?;
 
-    Ok(ImagePayload {
-        path,
-        file_name,
-        data_url: info.data_url,
-        size_bytes: info.size_bytes,
-        decoded_size_bytes: info.decoded_size_bytes,
-        dimensions: info.dimensions,
-        mime_type: info.mime_type,
-        last_modified: info.last_modified,
-        exif: info.exif,
+        Ok(ImagePayload {
+            path,
+            file_name,
+            data_url: info.data_url,
+            size_bytes: info.size_bytes,
+            decoded_size_bytes: info.decoded_size_bytes,
+            dimensions: info.dimensions,
+            mime_type: info.mime_type,
+            last_modified: info.last_modified,
+            exif: info.exif,
+        })
     })
+    .await
+    .map_err(|e| e.to_string())?
 }
 
 #[tauri::command]
-pub fn read_image_context(path: String) -> Result<InitialImagePayload, String> {
-    let p = PathBuf::from(&path);
-    if !is_image_file(&p) {
-        return Err(format!("Not a recognized image file: {}", path));
-    }
-    build_initial_payload(&p)
+pub async fn read_image_context(path: String) -> Result<InitialImagePayload, String> {
+    tauri::async_runtime::spawn_blocking(move || {
+        let p = PathBuf::from(&path);
+        if !is_image_file(&p) {
+            return Err(format!("Not a recognized image file: {}", path));
+        }
+        build_initial_payload(&p)
+    })
+    .await
+    .map_err(|e| e.to_string())?
 }
 
 /// Forces LibRaw full-sensor Bayer decode (Tier 2), skipping the embedded
 /// thumbnail fast path. Returns the same ImagePayload as read_image_file.
 #[tauri::command]
-pub fn read_raw_full_sensor(path: String) -> Result<ImagePayload, String> {
-    let p = PathBuf::from(&path);
-    if !raw_reader::is_raw_file(&p) {
-        return Err(format!("Not a RAW file: {}", path));
-    }
-    let file_name = p.file_name().and_then(|n| n.to_str()).unwrap_or("image").to_string();
-    let (data_url, dims) = raw_reader::decode_raw_full_sensor(&p)?;
-    let metadata = fs::metadata(&p).ok();
-    let size_bytes = metadata.as_ref().map(|m| m.len()).unwrap_or(0);
-    let decoded_size_bytes = (data_url.len() * 3 / 4) as u64;
-    let last_modified = metadata
-        .and_then(|m| m.modified().ok())
-        .and_then(|t| t.duration_since(std::time::UNIX_EPOCH).ok())
-        .map(|d| d.as_millis() as u64);
-    let ext = p.extension().and_then(|e| e.to_str()).unwrap_or("raw");
-    let exif = exif_reader::read_exif(&p);
-    Ok(ImagePayload {
-        path,
-        file_name,
-        data_url,
-        size_bytes,
-        decoded_size_bytes,
-        dimensions: Some(dims),
-        mime_type: get_mime_type(ext).to_string(),
-        last_modified,
-        exif,
+pub async fn read_raw_full_sensor(path: String) -> Result<ImagePayload, String> {
+    tauri::async_runtime::spawn_blocking(move || {
+        let p = PathBuf::from(&path);
+        if !raw_reader::is_raw_file(&p) {
+            return Err(format!("Not a RAW file: {}", path));
+        }
+        let file_name = p.file_name().and_then(|n| n.to_str()).unwrap_or("image").to_string();
+        let (data_url, dims) = raw_reader::decode_raw_full_sensor(&p)?;
+        let metadata = fs::metadata(&p).ok();
+        let size_bytes = metadata.as_ref().map(|m| m.len()).unwrap_or(0);
+        let decoded_size_bytes = (data_url.len() * 3 / 4) as u64;
+        let last_modified = metadata
+            .and_then(|m| m.modified().ok())
+            .and_then(|t| t.duration_since(std::time::UNIX_EPOCH).ok())
+            .map(|d| d.as_millis() as u64);
+        let ext = p.extension().and_then(|e| e.to_str()).unwrap_or("raw");
+        let exif = exif_reader::read_exif(&p);
+        Ok(ImagePayload {
+            path,
+            file_name,
+            data_url,
+            size_bytes,
+            decoded_size_bytes,
+            dimensions: Some(dims),
+            mime_type: get_mime_type(ext).to_string(),
+            last_modified,
+            exif,
+        })
     })
+    .await
+    .map_err(|e| e.to_string())?
+}
+
+/// Fast binary JPEG decode for full sensor RAW, bypassing Base64 encoding.
+#[tauri::command]
+pub async fn read_raw_full_sensor_binary(path: String) -> Result<tauri::ipc::Response, String> {
+    tauri::async_runtime::spawn_blocking(move || {
+        let p = PathBuf::from(&path);
+        if !raw_reader::is_raw_file(&p) {
+            return Err(format!("Not a RAW file: {}", path));
+        }
+        let (bytes, _) = raw_reader::decode_raw_full_sensor_bytes(&p)?;
+        Ok(tauri::ipc::Response::new(bytes))
+    })
+    .await
+    .map_err(|e| e.to_string())?
 }
 
