@@ -30,7 +30,10 @@ use platform::file_assoc::{
     register_file_associations, unregister_file_associations,
 };
 use platform::file_ops::delete_file;
-use imaging::image_loader::{self, get_initial_image, read_image_context, read_image_file, read_raw_full_sensor};
+use imaging::image_loader::{
+    self, get_initial_image, read_image_context, read_image_file, read_raw_full_sensor,
+    read_raw_full_sensor_binary,
+};
 use platform::standby::{self, enter_standby, is_standby_enabled, set_standby_enabled, show_main_window, StandbyManager};
 use platform::process_memory;
 use platform::window_subclass;
@@ -155,6 +158,7 @@ fn main() {
         })
         .invoke_handler(tauri::generate_handler![
             get_cli_args, get_initial_image, read_image_file, read_image_context, read_raw_full_sensor,
+            read_raw_full_sensor_binary,
             play_windows_ding, open_url, show_in_folder, close_window, exit_app,
             prompt_save_file, prompt_open_file, save_image_bytes, read_clipboard,
             write_clipboard_image, minimize_window, toggle_maximize_window,
