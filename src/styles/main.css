@@ -7,6 +7,7 @@
 @import './base.css';
 @import './glass.css';
 @import './components/viewer/titlebar.css';
+@import './components/viewer/titlebar-loader.css';
 @import './components/viewer/toolbar.css';
 @import './components/tools/crop.css';
 @import './components/viewer/panels.css';
