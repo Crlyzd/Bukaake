@@ -15,6 +15,7 @@ export class FileLoader {
     this.currentImage = null;
     this.currentMeta = null;
     this.prefetchCache = new ImagePrefetchCache();
+    this.loadSessionId = 0;
 
     this.onImageLoaded = null; this.onListChanged = null; this.onAllFilesCleared = null;
     this.onStatusMessage = null; this.onStatusWarning = null; this.onLoadingStart = null; this.onLoadingEnd = null;
@@ -28,6 +29,7 @@ export class FileLoader {
     this.currentImage = null;
     this.currentMeta = null;
     this.prefetchCache?.clear();
+    this.loadSessionId++;
     this.emitListChanged();
   }
 
@@ -129,6 +131,7 @@ export class FileLoader {
     this.currentIndex = index;
     this.emitListChanged();
 
+    const sessionId = ++this.loadSessionId;
     const item = this.items[index];
     if (item.type === 'tauri' && item.path) {
       const cached = this.prefetchCache.get(item.path);
@@ -139,14 +142,16 @@ export class FileLoader {
     if (item.type === 'tauri') {
       try {
         const payload = await tauriBridge.readImageFile(item.path);
+        if (sessionId !== this.loadSessionId) return;
         if (payload?.data_url) {
-          this.createImageFromUrl(payload.data_url, {
+          await this.createImageFromUrl(payload.data_url, {
             name: payload.file_name, path: payload.path, sizeBytes: payload.size_bytes,
             dimensions: payload.dimensions, mimeType: payload.mime_type,
             lastModified: payload.last_modified, exif: payload.exif,
-          });
+          }, sessionId);
         } else this.onLoadingEnd?.();
       } catch (_) {
+        if (sessionId !== this.loadSessionId) return;
         this.onLoadingEnd?.();
         this.onStatusMessage?.(`Failed to read ${item.name}`);
       }
@@ -215,20 +220,24 @@ export class FileLoader {
     this.prefetchCache.update(this.items, this.currentIndex);
   }
 
-  createImageFromUrl(url, meta) {
+  async createImageFromUrl(url, meta, sessionId = null) {
     const img = new Image();
-    img.onload = () => {
-      this.currentImage = img;
-      this.currentMeta = { ...meta, naturalWidth: img.naturalWidth || img.width, naturalHeight: img.naturalHeight || img.height };
-      this.onLoadingEnd?.();
-      this.onImageLoaded?.(img, this.currentMeta);
-      this.prefetchCache.update(this.items, this.currentIndex);
-    };
-    img.onerror = () => {
-      this.onLoadingEnd?.();
-      this.onStatusMessage?.(`Failed to display ${meta.name || 'image'}`);
-    };
     img.src = url;
+    try {
+      if (typeof img.decode === 'function') await img.decode();
+      else await new Promise((res, rej) => { img.onload = res; img.onerror = rej; });
+    } catch (_) {
+      if (sessionId && sessionId !== this.loadSessionId) return;
+      this.onLoadingEnd?.();
+      this.onStatusMessage?.(`Failed to display ${meta?.name || 'image'}`);
+      return;
+    }
+    if (sessionId && sessionId !== this.loadSessionId) return;
+    this.currentImage = img;
+    this.currentMeta = { ...meta, naturalWidth: img.naturalWidth || img.width, naturalHeight: img.naturalHeight || img.height };
+    this.onLoadingEnd?.();
+    this.onImageLoaded?.(img, this.currentMeta);
+    this.prefetchCache.update(this.items, this.currentIndex);
   }
 
   async loadFromClipboard() {
