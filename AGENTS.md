@@ -209,14 +209,21 @@ src-tauri/src/
 
 ## 4. Development & Build Rules
 
-### Agent Output Protocol
+### Agent Output Protocol & Workspace Hygiene
 
-**ALL planning, analysis, behaviour descriptions, and architectural decisions MUST be written
-directly into the active task artifact file. NEVER deliver plan content as inline chat text only.
-Chat responses may only contain a 1-3 sentence pointer to the artifact plus any open questions.**
+- **Artifact Isolation Protocol**: **ALL planning, analysis, release note drafts, behaviour descriptions, and architectural decisions MUST be written directly into the active task artifact file** in the designated IDE artifact directory (`<appDataDir>\brain\<conversation-id>`). Chat responses may only contain a 1-3 sentence pointer to the artifact plus any open questions.
+- **Zero Artifact Littering Policy**: **Agents must NEVER litter the project workspace with temporary artifacts, drafts, scratch notes, or release note markdown files** (e.g. `RELEASE_NOTES_*.md`, plan docs). The project repository must remain strictly clean and contain only production codebase files, official repository docs (`README.md`, `AGENTS.md`), and build assets.
 
-### Release Notes Invariant (Zero-Repetition Policy)
+### Release Notes Invariant: Hyped Milestone Format & Zero-Repetition
 
+Whenever drafted, release notes **MUST ALWAYS** follow this mandatory standard:
+- **Hyped & Celebratory Tone**: Release notes must be high-energy, exciting, and proud—celebrating Bukaake's mission of reviving Google Picasa's distraction-free desktop immersion with modern stroke-free frosted glass and Rust/Tauri v2 warp-speed performance.
+- **Electrifying Structure**:
+  - **Milestone Manifesto**: Grand opening proclamation with celebratory emojis (`🚀 Bukaake vX.Y.Z — THE ... RELEASE! 🎉`).
+  - **High-Impact Superpower Headings**: Bold, catchy feature titles prioritizing user excitement before deep technical explanations (e.g., *🖼️ Native Desktop Wallpaper Engine — Your Art on Your Desktop in 1 Click!*).
+  - **Technical Depth & Mastery**: Back the excitement with exact architectural details (Win32 APIs, zero-copy VRAM blits, zero-Base64 binary streaming, memory clamps, non-blocking thread offloading).
+  - **Curated Commit Table**: Cleanly structured commit log (`Commit`, `Scope`, `Description`).
+  - **Download & Portal CTA**: Clear call-to-action with links to the official website and GitHub Releases portable download (~5MB single executable).
 - **Zero-Repetition Policy**: When composing release notes for any release (e.g. v1.0.0), agents **MUST NEVER** repeat features, architectural highlights, or bug fixes that were already documented in prior version release notes (e.g. v0.9.0, v0.8.1, v0.8.0, etc.).
 - **Commit Range Isolation**: Release notes must strictly document novel changes introduced between the previous release tag (`v(N-1)`) and the target release (`vN`).
 - **Pre-Release Audit Requirement**: Agents must cross-reference prior GitHub Releases or git tag history before writing release documentation to ensure all entries are strictly novel.
