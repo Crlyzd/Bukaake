@@ -56,13 +56,13 @@
 
 .version-tag {
   font-family: 'JetBrains Mono', monospace;
-  font-size: 10px;
-  font-weight: 500;
-  color: var(--text-dim);
-  background: var(--glass-btn-bg);
-  padding: 2px 7px;
+  font-size: 10.5px;
+  font-weight: 600;
+  color: var(--text-main);
+  background: var(--glass-btn-hover-bg);
+  padding: 2.5px 8px;
   border-radius: var(--radius-pill);
-  letter-spacing: 0;
+  letter-spacing: 0.2px;
   line-height: 1.2;
   display: inline-flex;
   align-items: center;

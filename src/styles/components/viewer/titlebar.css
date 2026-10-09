@@ -114,10 +114,9 @@ body.mode-regular.image-loaded .app-brand-btn:hover .back-icon { opacity: 1; tra
 
 .app-version {
   font-family: 'JetBrains Mono', monospace;
-  font-size: 10px;
+  font-size: 10.5px;
   font-weight: 500;
-  color: var(--text-dim);
-  opacity: 0.75;
+  color: var(--text-muted);
   line-height: 1;
   margin-left: 2px;
   margin-right: 4px;
