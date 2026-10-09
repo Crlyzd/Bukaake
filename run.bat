@@ -28,12 +28,13 @@ echo    [3] Build Fast x64 App (Fastest Compile, Larger Size -^> release-builds/
 echo    [4] Build Production x64 App (Smallest Size -^> release-builds/)
 echo    [5] Build Production ARM64 App (Smallest Size -^> release-builds/)
 echo    [6] Build Both Architectures (x64 + ARM64 -^> release-builds/)
-echo    [7] Bump Version (Patch, Minor, Major, or Custom)
-echo    [8] Quick Run: Latest Compiled Release Executable
-echo    [9] Clean Build Artifacts ^& Locks
-echo    [10] Exit
+echo    [7] Package Microsoft Store Bundle (MSIX x64 + ARM64 -^> release-builds/)
+echo    [8] Bump Version (Patch, Minor, Major, or Custom)
+echo    [9] Quick Run: Latest Compiled Release Executable
+echo    [10] Clean Build Artifacts ^& Locks
+echo    [11] Exit
 echo.
-set /p CHOICE="  Select an option [1-10]: "
+set /p CHOICE="  Select an option [1-11]: "
 
 if "%CHOICE%"=="1" goto DEV_TAURI
 if "%CHOICE%"=="2" goto DEV_WEB
@@ -41,10 +42,11 @@ if "%CHOICE%"=="3" goto BUILD_FAST_X64
 if "%CHOICE%"=="4" goto BUILD_X64
 if "%CHOICE%"=="5" goto BUILD_ARM64
 if "%CHOICE%"=="6" goto BUILD_BOTH
-if "%CHOICE%"=="7" goto BUMP_VER
-if "%CHOICE%"=="8" goto RUN_RELEASE
-if "%CHOICE%"=="9" goto CLEAN_CACHE
-if "%CHOICE%"=="10" goto EXIT_APP
+if "%CHOICE%"=="7" goto PACKAGE_STORE
+if "%CHOICE%"=="8" goto BUMP_VER
+if "%CHOICE%"=="9" goto RUN_RELEASE
+if "%CHOICE%"=="10" goto CLEAN_CACHE
+if "%CHOICE%"=="11" goto EXIT_APP
 goto MENU
 
 :STOP_LOCKS
@@ -226,6 +228,15 @@ echo    [+] Successfully compiled: %OUT_FILE%
 echo    [+] File Size: %SIZE_MB% MB (%SIZE_KB% KB)
 echo.
 exit /b 0
+
+:PACKAGE_STORE
+echo.
+echo  ======================================================================
+echo    Running Microsoft Store MSIX Packaging Pipeline
+echo  ======================================================================
+powershell -ExecutionPolicy Bypass -File "scripts\package-msix.ps1"
+pause
+goto MENU
 
 :BUMP_VER
 echo.
