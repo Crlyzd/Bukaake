@@ -65,48 +65,39 @@ impl Drop for MemImageGuard {
     }
 }
 
-fn transcode_bitmap_to_jpeg(pi: &LibRawProcessedImage) -> Option<(String, (u32, u32))> {
+fn transcode_bitmap_to_jpeg_bytes(pi: &LibRawProcessedImage) -> Option<(Vec<u8>, (u32, u32))> {
     let w = pi.width as u32;
     let h = pi.height as u32;
     if w == 0 || h == 0 || pi.colors != 3 {
         return None;
     }
-
     let raw_bytes = unsafe {
         std::slice::from_raw_parts(pi.data.as_ptr(), pi.data_size as usize)
     };
-
     let rgb_vec: Vec<u8> = if pi.bits == 8 {
         raw_bytes.to_vec()
     } else if pi.bits == 16 {
         raw_bytes
             .chunks_exact(2)
-            .map(|chunk| {
-                let val = u16::from_ne_bytes([chunk[0], chunk[1]]);
-                (val >> 8) as u8
-            })
+            .map(|chunk| (u16::from_ne_bytes([chunk[0], chunk[1]]) >> 8) as u8)
             .collect()
     } else {
         return None;
     };
-
     let img_buf = image::RgbImage::from_raw(w, h, rgb_vec)?;
     let mut buf = std::io::Cursor::new(Vec::new());
     let mut enc = image::codecs::jpeg::JpegEncoder::new_with_quality(&mut buf, 92);
     enc.encode_image(&img_buf).ok()?;
-
-    let b64 = BASE64_STANDARD.encode(buf.into_inner());
-    Some((format!("data:image/jpeg;base64,{}", b64), (w, h)))
+    Some((buf.into_inner(), (w, h)))
 }
 
-fn extract_processed_image(pi: &LibRawProcessedImage) -> Option<(String, (u32, u32))> {
+fn extract_processed_bytes(pi: &LibRawProcessedImage) -> Option<(Vec<u8>, (u32, u32))> {
     if pi.image_type == 1 {
-        // LIBRAW_IMAGE_JPEG
         let data_slice = unsafe {
             std::slice::from_raw_parts(pi.data.as_ptr(), pi.data_size as usize)
         };
         let (mut w, mut h) = (pi.width as u32, pi.height as u32);
-        if w == 0 || h == 0 {
+        if (w == 0 || h == 0) && data_slice.len() > 4 {
             if let Ok(reader) = image::ImageReader::new(std::io::Cursor::new(data_slice)).with_guessed_format() {
                 if let Ok(dims) = reader.into_dimensions() {
                     w = dims.0;
@@ -114,72 +105,67 @@ fn extract_processed_image(pi: &LibRawProcessedImage) -> Option<(String, (u32, u
                 }
             }
         }
-        let b64 = BASE64_STANDARD.encode(data_slice);
-        Some((format!("data:image/jpeg;base64,{}", b64), (w, h)))
+        Some((data_slice.to_vec(), (w, h)))
     } else if pi.image_type == 2 {
-        // LIBRAW_IMAGE_BITMAP
-        transcode_bitmap_to_jpeg(pi)
+        transcode_bitmap_to_jpeg_bytes(pi)
     } else {
         None
     }
 }
 
-fn find_embedded_jpeg_stream(path: &Path) -> Option<(String, (u32, u32))> {
+fn extract_processed_image(pi: &LibRawProcessedImage) -> Option<(String, (u32, u32))> {
+    let (bytes, dims) = extract_processed_bytes(pi)?;
+    let b64 = BASE64_STANDARD.encode(&bytes);
+    Some((format!("data:image/jpeg;base64,{}", b64), dims))
+}
+
+fn find_embedded_jpeg_stream_bytes(path: &Path) -> Option<(Vec<u8>, (u32, u32))> {
     let bytes = std::fs::read(path).ok()?;
-    if bytes.len() < 1024 {
-        return None;
-    }
-
-    let mut best_start = 0;
-    let mut best_len = 0;
-    let mut i = 0;
-    let len = bytes.len();
-
+    if bytes.len() < 1024 { return None; }
+    let (mut best_start, mut best_len, mut i, len) = (0, 0, 0, bytes.len());
     while i + 3 < len {
         if bytes[i] == 0xFF && bytes[i + 1] == 0xD8 && bytes[i + 2] == 0xFF {
             let start = i;
             i += 3;
             while i + 1 < len {
                 if bytes[i] == 0xFF && bytes[i + 1] == 0xD9 {
-                    let end = i + 2;
-                    let cur_len = end - start;
-                    if cur_len > best_len {
-                        best_start = start;
-                        best_len = cur_len;
-                    }
-                    i = end;
+                    let cur_len = i + 2 - start;
+                    if cur_len > best_len { best_start = start; best_len = cur_len; }
+                    i += 1;
                     break;
                 }
                 i += 1;
             }
-        } else {
-            i += 1;
-        }
+        } else { i += 1; }
     }
-
     if best_len >= 16 * 1024 {
         let slice = &bytes[best_start..best_start + best_len];
         let (mut w, mut h) = (0, 0);
         if let Ok(reader) = image::ImageReader::new(std::io::Cursor::new(slice)).with_guessed_format() {
-            if let Ok(dims) = reader.into_dimensions() {
-                w = dims.0;
-                h = dims.1;
-            }
+            if let Ok(dims) = reader.into_dimensions() { w = dims.0; h = dims.1; }
         }
-        let b64 = BASE64_STANDARD.encode(slice);
-        Some((format!("data:image/jpeg;base64,{}", b64), (w, h)))
-    } else {
-        None
-    }
+        Some((slice.to_vec(), (w, h)))
+    } else { None }
 }
 
-fn try_image_crate_fallback(path: &Path) -> Option<(String, (u32, u32))> {
+fn find_embedded_jpeg_stream(path: &Path) -> Option<(String, (u32, u32))> {
+    let (bytes, dims) = find_embedded_jpeg_stream_bytes(path)?;
+    let b64 = BASE64_STANDARD.encode(&bytes);
+    Some((format!("data:image/jpeg;base64,{}", b64), dims))
+}
+
+fn try_image_crate_fallback_bytes(path: &Path) -> Option<(Vec<u8>, (u32, u32))> {
     let img = image::open(path).ok()?;
     let dims = (img.width(), img.height());
     let mut buf = std::io::Cursor::new(Vec::new());
     let mut enc = image::codecs::jpeg::JpegEncoder::new_with_quality(&mut buf, 92);
     enc.encode_image(&img.to_rgb8()).ok()?;
-    let b64 = BASE64_STANDARD.encode(buf.into_inner());
+    Some((buf.into_inner(), dims))
+}
+
+fn try_image_crate_fallback(path: &Path) -> Option<(String, (u32, u32))> {
+    let (bytes, dims) = try_image_crate_fallback_bytes(path)?;
+    let b64 = BASE64_STANDARD.encode(&bytes);
     Some((format!("data:image/jpeg;base64,{}", b64), dims))
 }
 
@@ -259,7 +245,7 @@ pub fn decode_raw_image(path: &Path) -> Result<(String, (u32, u32)), String> {
 /// Forces Tier 2 full sensor unpack + Bayer demosaicing, skipping the embedded
 /// thumbnail (Tier 1). Falls through to Tier 3 byte-stream scanner and Tier 4
 /// image-crate fallback if LibRaw sensor decode fails.
-pub fn decode_raw_full_sensor(path: &Path) -> Result<(String, (u32, u32)), String> {
+pub fn decode_raw_full_sensor_bytes(path: &Path) -> Result<(Vec<u8>, (u32, u32)), String> {
     let lr = unsafe { libraw_init(0) };
     if !lr.is_null() {
         let guard = LibRawGuard(lr);
@@ -282,16 +268,22 @@ pub fn decode_raw_full_sensor(path: &Path) -> Result<(String, (u32, u32)), Strin
             let pi = unsafe { libraw_dcraw_make_mem_image(guard.0, &mut errc) };
             if !pi.is_null() {
                 let g = MemImageGuard(pi);
-                if let Some(res) = extract_processed_image(unsafe { &*g.0 }) {
+                if let Some(res) = extract_processed_bytes(unsafe { &*g.0 }) {
                     return Ok(res);
                 }
             }
         }
     }
     // Tier 3 → Tier 4 fallbacks
-    find_embedded_jpeg_stream(path)
-        .or_else(|| try_image_crate_fallback(path))
+    find_embedded_jpeg_stream_bytes(path)
+        .or_else(|| try_image_crate_fallback_bytes(path))
         .ok_or_else(|| "Full sensor decode failed for this RAW file".to_string())
+}
+
+pub fn decode_raw_full_sensor(path: &Path) -> Result<(String, (u32, u32)), String> {
+    let (bytes, dims) = decode_raw_full_sensor_bytes(path)?;
+    let b64 = BASE64_STANDARD.encode(&bytes);
+    Ok((format!("data:image/jpeg;base64,{}", b64), dims))
 }
 
 #[cfg(test)]
