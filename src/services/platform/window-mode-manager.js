@@ -16,6 +16,7 @@ export class WindowModeManager {
     this.currentMode = MODE_REGULAR;
     this.onModeChange = options.onModeChange || null;
     this.lastAspectSize = null;
+    this.isPendingPathLoad = false;
 
     this.init();
   }
@@ -40,7 +41,7 @@ export class WindowModeManager {
       const isFs = await tauriBridge.isFullscreen();
       const isMax = await tauriBridge.isMaximized();
       const hasImage = Boolean(this.viewer?.img);
-      if (!hasImage && (isFs || isMax)) {
+      if (!hasImage && !this.isPendingPathLoad && (isFs || isMax)) {
         await tauriBridge.setFullscreen(false);
         await tauriBridge.unmaximize();
         if (this.currentMode !== MODE_REGULAR) {
@@ -118,9 +119,9 @@ export class WindowModeManager {
     this.onModeChange?.(mode);
   }
 
-  async setMode(newMode) {
+  async setMode(newMode, force = false) {
     if (newMode === MODE_VIEWER) {
-      if (!this.viewer?.img) return;
+      if (!this.viewer?.img && !force) return;
       this.updateModeClasses(MODE_VIEWER);
       await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
       await tauriBridge.setFullscreen(true);

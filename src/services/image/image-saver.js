@@ -98,3 +98,38 @@ export function copyProcessedImage(viewer, filters) {
     }
   }, 'image/png');
 }
+
+export async function setAsWallpaper(viewer, filters, fileLoader, isCropActive, isDrawActive, isTextActive) {
+  if (!viewer?.img) { toast.show('No image loaded to set as wallpaper'); return false; }
+  if (isCropActive) { toast.show('Please apply or cancel crop first'); return false; }
+  if (isDrawActive) { toast.show('Please apply or cancel drawing first'); return false; }
+  if (isTextActive) { toast.show('Please apply or cancel text first'); return false; }
+
+  if (!tauriBridge.isTauri()) {
+    toast.show('Wallpaper setting is only available on desktop');
+    return false;
+  }
+
+  try {
+    const isDirty = changeTracker.hasUnsavedChanges();
+    const filePath = fileLoader?.currentMeta?.path;
+    const ext = (filePath?.split('.').pop() || '').toLowerCase();
+    const isStandard = ['jpg', 'jpeg', 'png', 'bmp'].includes(ext);
+
+    if (isDirty || !isStandard || !filePath) {
+      const off = viewer.getProcessedCanvas(null, filters.getFilterCssString());
+      if (!off) return false;
+      const dataUrl = off.toDataURL('image/png');
+      await tauriBridge.invoke('set_wallpaper', { base64Data: dataUrl });
+    } else {
+      await tauriBridge.invoke('set_wallpaper', { path: filePath });
+    }
+
+    toast.show('Desktop wallpaper updated', 'ri-landscape-line');
+    return true;
+  } catch (err) {
+    console.warn('[ImageSaver] setAsWallpaper failed:', err);
+    toast.warn('Failed to set desktop wallpaper');
+    return false;
+  }
+}

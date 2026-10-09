@@ -26,7 +26,7 @@ import { ConfirmModal } from './components/modals/confirm-modal.js';
 import { DeleteModal } from './components/modals/delete-modal.js';
 import { ContextMenu } from './components/viewer/context-menu.js';
 import { CanvasToolsManager } from './services/interaction/canvas-tools-manager.js';
-import { exportImage, copyProcessedImage } from './services/image/image-saver.js';
+import { exportImage, copyProcessedImage, setAsWallpaper } from './services/image/image-saver.js';
 import { toast } from './components/viewer/toast.js';
 import { loadingIndicator } from './components/viewer/loading-indicator.js';
 import { standbyService } from './services/platform/standby-service.js';
@@ -41,14 +41,12 @@ class BukaakeApp {
     this.viewportEl = document.getElementById('viewportContainer');
     this.dropZoneEl = document.getElementById('dropZone');
     this.fileInput = document.getElementById('fileInput');
-
     this.viewer = new CanvasViewer(this.canvasEl, this.viewportEl);
     this.filters = new FilterEngine(this.viewer, { onModified: (d) => changeTracker.markColor(d) });
     this.cropper = new CropperTool(document.getElementById('cropOverlayContainer'), document.getElementById('cropBox'), document.getElementById('cropDimensionsTag'), this.viewer);
     this.drawingTool = new DrawingTool(document.getElementById('drawCanvas'), this.viewer, { onModified: (d) => changeTracker.markDraw(d) });
     this.textTool = new TextTool(document.getElementById('textCanvas'), this.viewer, { onModified: (d) => changeTracker.markText(d) });
     this.metadataInspector = new MetadataInspector(document.getElementById('metadataBody'));
-
     this.fileLoader = new FileLoader();
     this.confirmModal = new ConfirmModal();
     this.deleteModal = new DeleteModal();
@@ -56,8 +54,7 @@ class BukaakeApp {
   }
 
   initComponents() {
-    this.settingsModal = new SettingsModal();
-    this.shortcutsModal = new ShortcutsModal();
+    this.settingsModal = new SettingsModal(); this.shortcutsModal = new ShortcutsModal();
     this.captureManager = new CaptureManager({ viewer: this.viewer, fileLoader: this.fileLoader, toolbar: this.toolbar });
     this.metadataDrawer = new MetadataDrawer({ metadataInspector: this.metadataInspector });
     this.adjustmentsPanel = new AdjustmentsPanel({ filters: this.filters, onClose: () => this.toolbar.setAdjustmentsActive(false) });
@@ -106,9 +103,12 @@ class BukaakeApp {
       getFilePath: () => this.fileLoader.currentMeta?.path || null,
       hasImage: () => Boolean(this.viewer.img),
       isEditing: () => this.toolsManager.isEditing(),
+      isCropActive: () => Boolean(this.cropper?.active),
+      isModified: () => changeTracker.hasUnsavedChanges(),
       isRaw: () => document.body.classList.contains('is-raw'),
       actions: {
         onCopyImage: () => this.copyImage(), onSaveImage: () => this.saveImage(),
+        onSetWallpaper: () => setAsWallpaper(this.viewer, this.filters, this.fileLoader, this.cropper?.active, this.drawingTool?.active, this.textTool?.active),
         onRotateRight: () => this.handleRotate(90), onFlipH: () => this.handleFlip('h'),
         onFitScreen: () => this.viewer.fitToScreen(), onCrop: () => this.toolsManager.toggleCrop(true),
         onToggleMetadata: () => { if (this.viewer.img) this.metadataDrawer.toggle(); },
@@ -193,8 +193,8 @@ class BukaakeApp {
         if (this.deleteModal.isOpen()) return this.deleteModal.hide();
         if (this.confirmModal.isOpen()) return this.confirmModal.hide();
         if (this.textTool?.active) return this.toolsManager.toggleText(false);
-        if (this.drawingTool.active) return this.toolsManager.toggleDraw(false);
-        if (this.cropper.active) return this.toolsManager.toggleCrop(false);
+        if (this.drawingTool?.active) return this.toolsManager.toggleDraw(false);
+        if (this.cropper?.active) return this.toolsManager.toggleCrop(false);
         if (this.adjustmentsPanel.isOpen()) return this.toolsManager.closeAdjustments();
         for (const m of [this.metadataDrawer, this.settingsModal, this.shortcutsModal]) if (m.isOpen()) return m.hide();
         this.confirmModal.promptIfDirty(() => this.enterStandby(), () => this.saveImage());
@@ -212,12 +212,17 @@ class BukaakeApp {
     await standbyService.init({
       onOpenPath: async (p) => {
         this.dropZoneEl.style.display = 'none';
-        await this.windowModeManager.setMode(MODE_VIEWER);
+        this.windowModeManager.isPendingPathLoad = true;
+        await this.windowModeManager.setMode(MODE_VIEWER, true);
         const name = p.split(/[/\\]/).pop() || 'image';
         loadingIndicator.show(`Loading ${name}...`);
-        const ctx = await tauriBridge.readImageContext(p);
-        if (ctx) this.fileLoader.loadFromTauriContext(ctx);
-        else { loadingIndicator.hide(); toast.warn(`Unsupported file format: ${name}`); }
+        try {
+          const ctx = await tauriBridge.readImageContext(p);
+          if (ctx) this.fileLoader.loadFromTauriContext(ctx);
+          else { loadingIndicator.hide(); toast.warn(`Unsupported file format: ${name}`); }
+        } finally {
+          this.windowModeManager.isPendingPathLoad = false;
+        }
       },
       onOpenSettings: async () => { if (!(await tauriBridge.openSettingsWindow())) this.settingsModal.toggle(); },
       onWakeFromStandby: () => this.wakeFromStandby(),
@@ -226,11 +231,13 @@ class BukaakeApp {
     try {
       const initial = await tauriBridge.getInitialImage();
       if (initial?.target_path) {
-        await this.windowModeManager.setMode(MODE_VIEWER);
+        this.windowModeManager.isPendingPathLoad = true;
+        await this.windowModeManager.setMode(MODE_VIEWER, true);
         loadingIndicator.show(`Loading ${initial.file_name}...`);
         document.body.classList.add('image-loaded');
         this.dropZoneEl.style.display = 'none';
         this.fileLoader.loadFromTauriContext(initial);
+        this.windowModeManager.isPendingPathLoad = false;
       } else {
         if (initial?.error) toast.warn(initial.error);
         await tauriBridge.resizeAndCenter(680, 480);
@@ -253,6 +260,7 @@ class BukaakeApp {
   }
 
   copyImage() { copyProcessedImage(this.viewer, this.filters); }
+  async saveImage() { return await exportImage(this.viewer, this.filters, this.fileLoader, this.cropper.active, this.drawingTool.active, this.textTool?.active); }
 
   async openFile() {
     if (!tauriBridge.isTauri()) return this.fileInput?.click();
@@ -261,10 +269,6 @@ class BukaakeApp {
     const payload = await tauriBridge.readImageContext(p);
     if (payload) this.fileLoader.loadFromTauriContext(payload);
     else toast.warn(`Unsupported file format: ${p.split(/[/\\]/).pop()}`);
-  }
-
-  async saveImage() {
-    return await exportImage(this.viewer, this.filters, this.fileLoader, this.cropper.active, this.drawingTool.active, this.textTool?.active);
   }
 
   async handleLoadFullRaw() {
@@ -335,15 +339,8 @@ class BukaakeApp {
     });
   }
 
-  enterStandby() {
-    standbyService.enterStandby({ viewer: this.viewer, fileLoader: this.fileLoader, onHidden: () => this.handleEmptyState() });
-  }
-
-  async wakeFromStandby() {
-    this.handleEmptyState(); await this.windowModeManager.setMode(MODE_REGULAR);
-  }
+  enterStandby() { standbyService.enterStandby({ viewer: this.viewer, fileLoader: this.fileLoader, onHidden: () => this.handleEmptyState() }); }
+  async wakeFromStandby() { this.handleEmptyState(); await this.windowModeManager.setMode(MODE_REGULAR); }
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-  window.app = new BukaakeApp();
-});
+document.addEventListener('DOMContentLoaded', () => { window.app = new BukaakeApp(); });

@@ -35,6 +35,7 @@ use platform::standby::{self, enter_standby, is_standby_enabled, set_standby_ena
 use platform::process_memory;
 use platform::window_subclass;
 use platform::updater::{cleanup_old_update_artifacts, download_and_install_update, get_system_arch};
+use platform::wallpaper::set_wallpaper;
 use platform::window_commands::{
     get_cli_args, open_url, show_in_folder, close_window, exit_app,
     prompt_save_file, prompt_open_file, save_image_bytes,
@@ -69,10 +70,15 @@ fn main() {
                     if p.is_file() && image_loader::is_image_file(p) { target_file = Some(arg); break; }
                 }
                 if let Some(path) = target_file {
-                    // File association path: switch to fullscreen viewer and load image
+                    // File association path: unminimize if iconic, switch to fullscreen viewer, and load image
+                    if win.is_minimized().unwrap_or(false) {
+                        let _ = win.unminimize();
+                    }
+                    let _ = win.show();
                     let _ = win.set_fullscreen(true);
                     #[cfg(target_os = "windows")]
                     let _ = window_vibrancy::clear_acrylic(&win);
+                    let _ = win.set_focus();
                     let _ = win.emit("bukaake://open-path", path);
                 } else {
                     // Bare exe/shortcut re-launch: restore to Mode 1 and signal JS to reset UI
@@ -80,9 +86,9 @@ fn main() {
                     let _ = win.unminimize();
                     let _ = win.set_maximizable(false);
                     let _ = win.emit("bukaake://wake-from-standby", ());
+                    let _ = win.show();
+                    let _ = win.set_focus();
                 }
-                let _ = win.show();
-                let _ = win.set_focus();
             }
         }))
         .setup(|app| {
@@ -172,6 +178,7 @@ fn main() {
             save_screenshot_to_dir,
             extract_text_from_image, launch_cathet,
             start_audio_capture, stop_audio_capture, set_recording_mic_muted, set_recording_audio_volumes,
+            set_wallpaper,
             process_memory::trim_memory_working_set
         ])
         .run(tauri::generate_context!())

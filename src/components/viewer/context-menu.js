@@ -6,6 +6,8 @@
 import { tauriBridge } from '../../services/platform/tauri-bridge.js';
 import { toast } from './toast.js';
 
+const WINDOWS_WALLPAPER_EXTS = new Set(['jpg', 'jpeg', 'png', 'bmp', 'jfif', 'dib']);
+
 export class ContextMenu {
   constructor(options = {}) {
     this.container = options.container || document.getElementById('viewportContainer');
@@ -13,6 +15,7 @@ export class ContextMenu {
     this.hasImage = options.hasImage || (() => false);
     this.isCropActive = options.isCropActive || (() => false);
     this.isEditing = options.isEditing || (() => false);
+    this.isModified = options.isModified || (() => false);
     this.isRaw = options.isRaw || (() => false);
     this.actions = options.actions || {};
 
@@ -106,6 +109,9 @@ export class ContextMenu {
   renderMenu() {
     const filePath = this.getFilePath();
     const canOpenFileLocation = Boolean(filePath);
+    const ext = filePath ? filePath.split('.').pop()?.toLowerCase() : null;
+    const isNativeWallpaper = Boolean(ext && WINDOWS_WALLPAPER_EXTS.has(ext));
+    const canSetWallpaper = isNativeWallpaper || this.isModified();
 
     const items = [
       {
@@ -140,6 +146,13 @@ export class ContextMenu {
           }
           this.actions.onSaveImage?.();
         },
+      },
+      {
+        id: 'set-wallpaper',
+        label: 'Set as Desktop Wallpaper',
+        icon: 'ri-landscape-line',
+        disabled: !this.hasImage() || this.isCropActive() || !canSetWallpaper,
+        action: () => this.actions.onSetWallpaper?.(),
       },
       { type: 'divider' },
       {

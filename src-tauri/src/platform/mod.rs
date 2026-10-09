@@ -8,3 +8,4 @@ pub mod standby;
 pub mod updater;
 pub mod window_commands;
 pub mod window_subclass;
+pub mod wallpaper;
