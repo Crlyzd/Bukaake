@@ -32,6 +32,7 @@ import { loadingIndicator } from './components/viewer/loading-indicator.js';
 import { standbyService } from './services/platform/standby-service.js';
 import { CaptureManager } from './services/capture/capture-manager.js';
 import { themeManager } from './services/platform/theme-manager.js';
+import { RawLoadController } from './services/image/raw-load-controller.js';
 
 const RAW_EXTS = new Set(['arw', 'srf', 'sr2', 'cr2', 'cr3', 'nef', 'nrw', 'dng', 'raf', 'rw2', 'orf', 'pef', '3fr', 'mrw', 'srw', 'x3f', 'mos', 'mef', 'raw', 'kdc', 'dcr', 'rwl', 'iiq', 'erf']);
 
@@ -96,6 +97,11 @@ class BukaakeApp {
     this.toolsManager = new CanvasToolsManager({
       viewer: this.viewer, cropper: this.cropper, drawingTool: this.drawingTool, textTool: this.textTool,
       toolbar: this.toolbar, fileLoader: this.fileLoader, adjustmentsPanel: this.adjustmentsPanel,
+    });
+
+    this.rawLoadController = new RawLoadController({
+      viewer: this.viewer, toolbar: this.toolbar, toast,
+      onLoaded: () => this.updateStatusBadges(),
     });
 
     this.contextMenu = new ContextMenu({
@@ -271,27 +277,12 @@ class BukaakeApp {
     else toast.warn(`Unsupported file format: ${p.split(/[/\\]/).pop()}`);
   }
 
-  async handleLoadFullRaw() {
-    const path = this.fileLoader.currentMeta?.path;
-    if (!path || !document.body.classList.contains('is-raw')) return toast.show('No RAW file is currently loaded');
-    if (this.toolsManager?.isEditing()) return toast.show('Please finish or cancel active edits before reloading');
-    this.toolbar.setRawDecoding(true);
-    toast.show('Loading full sensor decode…');
-    try {
-      const payload = await tauriBridge.readRawFullSensor(path);
-      if (payload?.data_url) {
-        const img = new Image();
-        img.onload = () => { this.viewer.setImage(img); this.updateStatusBadges(); toast.show('Full sensor decode loaded'); };
-        img.src = payload.data_url;
-      }
-    } catch (err) {
-      toast.warn(`Full sensor decode failed: ${err}`);
-    } finally {
-      this.toolbar.setRawDecoding(false);
-    }
+  handleLoadFullRaw() {
+    this.rawLoadController.loadFullRaw(this.fileLoader.currentMeta, this.toolsManager?.isEditing());
   }
 
   handleEmptyState() {
+    this.rawLoadController.cancel();
     if (this.windowModeManager) { this.windowModeManager.lastAspectSize = null; this.windowModeManager.updateModeClasses(MODE_REGULAR); }
     this.fileLoader?.clearItems();
     document.body.classList.remove('image-loaded');
@@ -310,6 +301,7 @@ class BukaakeApp {
 
   handleNavigateBatch(delta) {
     if (this.toolsManager?.isEditing()) return toast.show('Please apply or cancel edits before navigating');
+    this.rawLoadController.cancel();
     this.confirmModal.promptIfDirty(() => this.fileLoader.navigateBatch(delta), () => this.saveImage());
   }
 
