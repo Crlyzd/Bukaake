@@ -18,17 +18,9 @@
   </p>
 
   <p>
-    <a href="https://apps.microsoft.com/detail/9N964R72X9JS">
-      <img src="https://img.shields.io/badge/%F0%9F%8F%AA_Get_it_from-Microsoft_Store-0078d4?style=for-the-badge&logo=microsoft&logoColor=white" alt="Get it from Microsoft Store" />
-    </a>
-    &nbsp;
-    <a href="https://github.com/Crlyzd/Bukaake/releases/latest">
-      <img src="https://img.shields.io/badge/%E2%AC%87%EF%B8%8F_Download_Latest-Windows_x64-00e5ff?style=for-the-badge&logoColor=black" alt="Download Latest x64" />
-    </a>
-    &nbsp;
-    <a href="https://github.com/Crlyzd/Bukaake/releases/latest">
-      <img src="https://img.shields.io/badge/%E2%AC%87%EF%B8%8F_Download_ARM64-Surface_%2F_Snapdragon-2d3436?style=for-the-badge&logoColor=white" alt="Download Latest ARM64" />
-    </a>
+    <a href="https://apps.microsoft.com/detail/9N964R72X9JS"><img src="https://img.shields.io/badge/%F0%9F%8F%AA_Get_it_from-Microsoft_Store-0078d4?style=for-the-badge&logo=microsoft&logoColor=white" alt="Get it from Microsoft Store" /></a>
+    <a href="https://github.com/Crlyzd/Bukaake/releases/latest"><img src="https://img.shields.io/badge/%E2%AC%87%EF%B8%8F_Download_Latest-Windows_x64-00e5ff?style=for-the-badge&logoColor=black" alt="Download Latest x64" /></a>
+    <a href="https://github.com/Crlyzd/Bukaake/releases/latest"><img src="https://img.shields.io/badge/%E2%AC%87%EF%B8%8F_Download_ARM64-Surface_%2F_Snapdragon-2d3436?style=for-the-badge&logoColor=white" alt="Download Latest ARM64" /></a>
   </p>
 
   <br />
@@ -336,13 +328,8 @@ Bukaake is designed and developed with ❤️ by **[Kaleksanan Bagus](https://ka
 If you love using Bukaake and want to support independent, high-performance desktop software:
 
 <p>
-  <a href="https://saweria.co/curlyzed" target="_blank">
-    <img src="https://img.shields.io/badge/%E2%98%95_Saweria-Support_on_Saweria-fa8231?style=for-the-badge&logoColor=white" alt="Support on Saweria" />
-  </a>
-  &nbsp;
-  <a href="https://paypal.me/BagusMassani" target="_blank">
-    <img src="https://img.shields.io/badge/%F0%9F%92%B3_PayPal-Donate_via_PayPal-003087?style=for-the-badge&logo=paypal&logoColor=white" alt="Donate with PayPal" />
-  </a>
+  <a href="https://saweria.co/curlyzed" target="_blank"><img src="https://img.shields.io/badge/%E2%98%95_Saweria-Support_on_Saweria-fa8231?style=for-the-badge&logoColor=white" alt="Support on Saweria" /></a>
+  <a href="https://paypal.me/BagusMassani" target="_blank"><img src="https://img.shields.io/badge/%F0%9F%92%B3_PayPal-Donate_via_PayPal-003087?style=for-the-badge&logo=paypal&logoColor=white" alt="Donate with PayPal" /></a>
 </p>
 
 - 🌐 **Official Website**: [bukaake.kaleksananbagus.com](https://bukaake.kaleksananbagus.com)
@@ -354,7 +341,36 @@ If you love using Bukaake and want to support independent, high-performance desk
 
 ---
 
+## 🙏 Acknowledgements & Open-Source Credits
+
+Bukaake is built on top of an incredible ecosystem of open-source projects, high-performance libraries, and Windows platform technologies:
+
+### ⚡ Core Engine & Runtime
+- **[Tauri v2](https://github.com/tauri-apps/tauri)** — Next-generation, memory-efficient desktop application framework.
+- **[windows-rs](https://github.com/microsoft/windows-rs)** — Native Microsoft Win32 and WinRT bindings for Direct3D 11, WGC, OCR, and Media Foundation.
+- **[window-vibrancy](https://github.com/tauri-apps/window-vibrancy)** — Native Windows Acrylic composition effects.
+- **[self-replace](https://github.com/mitsuhiko/self-replace)** — Safe in-place binary executable replacement for self-updating.
+- **[rfd](https://github.com/PolyMeilex/rfd)** — Native Rusty file dialogs.
+
+### 📷 Imaging & Media Pipelines
+- **[LibRaw](https://www.libraw.org/)** — Industry-standard camera RAW unpacking and Bayer demosaicing engine.
+- **[image-rs](https://github.com/image-rs/image)** — Fast native image format encoding and decoding.
+- **[heif-oxide](https://github.com/oxipng/heif-oxide)** — Pure Rust ISO/IEC 23008-12 ISOBMFF container parser for HEIC/HEIF photos.
+- **[kamadak-exif](https://github.com/kamadak-exif/exif-rs)** — Comprehensive camera metadata and EXIF extraction.
+- **[cpal](https://github.com/RustAudio/cpal)** — Cross-platform audio library powering WASAPI loopback and microphone capture.
+- **[arboard](https://github.com/1Password/arboard)** — Native Win32 clipboard integration (`CF_DIB` / `CF_HDROP`).
+
+### 🎨 Typography & Design System
+- **[Inter](https://rsms.me/inter/)** by Rasmus Andersson — Modern, crisp user interface typography.
+- **[JetBrains Mono](https://www.jetbrains.com/lp/mono/)** by JetBrains — High-contrast monospace font for camera specs and EXIF telemetry.
+- **[Remix Icon](https://remixicon.com/)** by Remix Design — Minimalist, neutral monochrome SVG iconography.
+
+<br />
+
+---
+
 ## 📄 License
 
 Bukaake is open-source software licensed under the **[GPL-3.0 License](LICENSE)**.  
 Distributed without warranty in the hope of bringing back fluid, beautiful, and distraction-free viewing to the Windows desktop.
+
