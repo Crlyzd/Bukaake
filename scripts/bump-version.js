@@ -31,13 +31,17 @@ const currentVer = pkg.version || '0.4.2';
 const arg = (process.argv[2] || 'patch').toLowerCase().trim();
 
 function getSupportedFormatCount() {
-  const fileAssocPath = path.join(rootDir, 'src-tauri', 'src', 'file_assoc.rs');
-  if (!fs.existsSync(fileAssocPath)) return 37;
+  const possiblePaths = [
+    path.join(rootDir, 'src-tauri', 'src', 'platform', 'file_assoc.rs'),
+    path.join(rootDir, 'src-tauri', 'src', 'file_assoc.rs'),
+  ];
+  const fileAssocPath = possiblePaths.find((p) => fs.existsSync(p));
+  if (!fileAssocPath) return 49;
   const content = fs.readFileSync(fileAssocPath, 'utf8');
   const match = content.match(/SUPPORTED_EXTENSIONS:\s*&\[&str\]\s*=\s*&\[([\s\S]*?)\];/);
-  if (!match) return 37;
+  if (!match) return 49;
   const exts = match[1].match(/"([^"]+)"/g);
-  return exts ? exts.length : 37;
+  return exts ? exts.length : 49;
 }
 
 function syncFormatCounts(formatCount) {
@@ -127,8 +131,12 @@ if (fs.existsSync(indexHtmlPath)) {
   fs.writeFileSync(indexHtmlPath, html, 'utf8');
 }
 
-const updaterServicePath = path.join(rootDir, 'src', 'services', 'updater-service.js');
-if (fs.existsSync(updaterServicePath)) {
+const possibleUpdaterPaths = [
+  path.join(rootDir, 'src', 'services', 'platform', 'updater-service.js'),
+  path.join(rootDir, 'src', 'services', 'updater-service.js'),
+];
+const updaterServicePath = possibleUpdaterPaths.find((p) => fs.existsSync(p));
+if (updaterServicePath) {
   let code = fs.readFileSync(updaterServicePath, 'utf8');
   code = code.replace(/export const APP_VERSION = typeof __APP_VERSION__ !== 'undefined' \? __APP_VERSION__ : '[^']+';/, `export const APP_VERSION = typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : '${newVer}';`);
   fs.writeFileSync(updaterServicePath, code, 'utf8');
@@ -141,6 +149,6 @@ console.log(`    Updated: package.json (Single Source of Truth)`);
 console.log(`    Updated: package-lock.json`);
 console.log(`    Updated: src-tauri/Cargo.toml`);
 console.log(`    Updated: settings.html & index.html (Static fallbacks)`);
-console.log(`    Updated: src/services/updater-service.js (Fallback constant)`);
+console.log(`    Updated: src/services/platform/updater-service.js (Fallback constant)`);
 console.log(`    Synchronized: Format count (${formatCount}) across documentation`);
 console.log(`    Note: All HTML, JS, and Tauri configs inherit dynamically!\n`);
