@@ -54,7 +54,7 @@ The project contains **100+ modular files** cleanly organized across distinct la
 ```
 src/
 ├── components/          # UI Component Modules (< 300 lines each)
-│   ├── viewer/                 # Main viewing chrome (titlebar, toolbar, context menu, toast)
+│   ├── viewer/                 # Main viewing chrome (titlebar, titlebar-loader, toolbar, context menu, toast)
 │   ├── modals/                 # Modals (confirm, delete, shortcuts)
 │   ├── capture/                # Screen snipper, recording dock, OCR & tools
 │   ├── settings/               # Settings window sections & modal
@@ -68,13 +68,13 @@ src/
 │   └── text/                   # Typography lifecycle, snapping & rendering
 ├── services/            # Platform & Domain Services (< 300 lines each)
 │   ├── platform/               # Windows OS, autostart, file associations, tray & window mode
-│   ├── image/                  # Image loader, prefetch cache & file exporter
+│   ├── image/                  # Image loader, prefetch cache, RAW load controller & file exporter
 │   ├── interaction/            # Hotkeys, shortcuts, idle controller & change tracker
 │   ├── capture/                # Screen capture, native recorder, audio & screenshot saver
 │   └── integrations/           # External companion integrations (Alitken, Cathet)
 ├── styles/              # Stroke-Free Modular Stylesheets (< 300 lines each)
 │   ├── base.css, glass.css, main.css, tokens.css
-│   └── components/     # viewer/, modals/, tools/, capture/, settings/, text/
+│   └── components/     # viewer/ (including titlebar-loader.css), modals/, tools/, capture/, settings/, text/
 ├── app.js               # Main viewer bootstrap coordinator (≤ 350 lines)
 ├── settings-app.js      # Standalone settings window coordinator (≤ 350 lines)
 └── snipper-app.js       # Dedicated overlay window coordinator (≤ 300 lines)
@@ -98,6 +98,7 @@ src-tauri/src/
 │   ├── exif_reader.rs          # Native EXIF extraction via kamadak-exif
 │   ├── heif_reader.rs          # HEIC/HEIF container parsing & preview extraction
 │   ├── image_loader.rs         # Native image decoding & 49 format traversal
+│   ├── neighbor_scanner.rs     # Directory neighbor traversal & CLI argument scanner (< 100 lines)
 │   ├── pro_decoder.rs          # VFX decoders (HDR, EXR, DDS, TGA, QOI)
 │   ├── raw_reader.rs           # 4-tier LibRaw camera RAW pipeline (< 300 lines)
 │   ├── raw_tests.rs            # Dedicated LibRaw sample test harness
@@ -112,6 +113,7 @@ src-tauri/src/
 │   ├── process_memory.rs       # Working set telemetry & memory trimming
 │   ├── standby.rs              # Tray lifecycle & working set memory trimming
 │   ├── updater.rs              # In-place self-updater, progress & relaunch
+│   ├── wallpaper.rs            # Win32 desktop wallpaper engine & cache transcode (< 110 lines)
 │   ├── window_commands.rs      # Window vibrancy, dialogs, and window state IPC
 │   └── window_subclass.rs      # Win32 subclassing & native edge resize suppression
 └── integrations/        # External & Companion App Integrations
@@ -158,6 +160,14 @@ src-tauri/src/
   - **4-Tier Pipeline**: Tier 1 (Instant embedded JPEG preview ~15ms), Tier 2 (Full sensor unpack & demosaicing via `Q`), Tier 3 (Byte-stream scanner for legacy GPR/X3F), Tier 4 (Pure Rust linear DNG fallback).
   - Memory Bounds: 150 MB per-file ceiling and 140 MB total prefetch pool (`image-prefetch-cache.js`) prevent RAM spikes on large RAW sequences.
   - Supported Formats: 24+ camera RAW formats (.cr2, .cr3, .nef, .arw, .raf, .dng, etc.) and VFX textures (.hdr, .exr, .dds, .tga, .qoi).
+- **High-Throughput Binary IPC & Non-Blocking Async Decoding (`read_raw_full_sensor_binary`, `raw-load-controller.js`)**:
+  - **Zero-Base64 Binary IPC**: `read_raw_full_sensor_binary` delivers raw JPEG bytes directly via `tauri::ipc::Response::new(bytes)`, skipping Base64 encoding and string allocation overhead across the Tauri IPC bridge.
+  - **Off-Thread Rust Execution (`spawn_blocking`)**: Heavy disk I/O, directory context scans, and LibRaw processing execute asynchronously on dedicated blocking threads (`spawn_blocking`), preventing UI hitches or Tauri async runtime executor stalls.
+  - **Off-Thread Browser Rasterization**: Uses `img.decode()` off the main thread prior to rendering, delivering silky smooth transitions.
+  - **Session Token Cancellation (`loadSessionId`)**: Monotonic session IDs discard slower or stale decodes when users navigate rapidly via Arrow keys or mouse wheel, immediately revoking Object URLs to prevent memory leaks.
+- **Titlebar Ambient Glowing Loading Beam (`titlebar-loader.js`, `titlebar-loader.css`)**:
+  - Dual-theme continuous dual-train laser animation across titlebar bottom (`Mode 1`) or monitor top edge (`Mode 2`) indicates background RAW decoding without layout shifts.
+  - Smooth emerald flash (`#34d399`) upon completion before cross-fading away; titlebar stays pinned and steady during background decodes.
 
 ### Precision Crop, Drawing & Editing Exclusivity
 - **Precision Crop (`cropper.js`, `crop-snapping.js`, `crop.css`)**:
@@ -173,6 +183,16 @@ src-tauri/src/
 ### Platform Integration, Standby & File Associations
 - **Native Recycle Bin (`file_ops.rs`, `delete-modal.js`)**: Win32 `SHFileOperationW` (`FO_DELETE` + `FOF_ALLOWUNDO`) for safe Recycle Bin deletion with automatic navigation to neighbor images.
 - **Native OS Clipboard (`clipboard.rs`)**: Uses Windows APIs (`CF_HDROP` / `CF_DIB`) eliminating WebView2 permission popups. Supports dual `base64Data`/`base64` parameters for snipped region clipboard delivery.
+- **Native Desktop Wallpaper Subsystem (`wallpaper.rs`, `image-saver.js`, `context-menu.js`)**:
+  - Direct Win32 wallpaper setting via `SystemParametersInfoW` (`SPI_SETDESKWALLPAPER`, `SPIF_UPDATEINIFILE | SPIF_SENDCHANGE`).
+  - Automatically renders edited canvas / non-native formats (WebP, AVIF, TIFF, RAW) to `%APPDATA%\Bukaake\bukaake_wallpaper.png` cache before applying, preventing Windows grey desktop background glitches.
+  - Context menu item enabled for native formats or modified images.
+- **Explorer Single-Instance Launch Placement & Fullscreen Protection**:
+  - Single-instance launch unminimizes window placement (`unminimize()`) before entering fullscreen when opened from Windows Explorer.
+  - `isPendingPathLoad` guard in `window-mode-manager.js` suppresses race-condition fullscreen teardown during image path IPC transfer.
+- **Official Resources Portal & Contrast Calibration**:
+  - Settings About tab and main settings modal feature direct links to the official website ([bukaake.kaleksananbagus.com](https://bukaake.kaleksananbagus.com)) and GitHub repository.
+  - Elevated contrast for version tag chips in dark mode (`--text-main` over `--glass-btn-hover-bg`).
 - **Tray Standby & Memory Trim (`standby.rs`, `standby-service.js`)**:
   - Persistent background tray daemon; trims working set memory via `K32EmptyWorkingSet` down to ~8-15 MB RAM. Left-click on tray immediately restores window cleanly into Mode 1.
   - **Zero Hardcoded Centering Invariant**: Never invoke `win.center()` on window close, hide, or tray wake. Always preserve user window position and multi-monitor coordinates.
@@ -194,6 +214,12 @@ src-tauri/src/
 **ALL planning, analysis, behaviour descriptions, and architectural decisions MUST be written
 directly into the active task artifact file. NEVER deliver plan content as inline chat text only.
 Chat responses may only contain a 1-3 sentence pointer to the artifact plus any open questions.**
+
+### Release Notes Invariant (Zero-Repetition Policy)
+
+- **Zero-Repetition Policy**: When composing release notes for any release (e.g. v1.0.0), agents **MUST NEVER** repeat features, architectural highlights, or bug fixes that were already documented in prior version release notes (e.g. v0.9.0, v0.8.1, v0.8.0, etc.).
+- **Commit Range Isolation**: Release notes must strictly document novel changes introduced between the previous release tag (`v(N-1)`) and the target release (`vN`).
+- **Pre-Release Audit Requirement**: Agents must cross-reference prior GitHub Releases or git tag history before writing release documentation to ensure all entries are strictly novel.
 
 ### Fast Validation Commands
 - `npm run dev` — Launch Vite dev server on port 3000.
