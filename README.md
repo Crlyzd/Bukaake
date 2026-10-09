@@ -9,6 +9,7 @@
 
   <p>
     <a href="https://github.com/Crlyzd/Bukaake/releases/latest"><img src="https://img.shields.io/github/v/release/Crlyzd/Bukaake?color=00e5ff&label=Release&style=flat-square" alt="Latest Release" /></a>
+    <a href="https://bukaake.kaleksananbagus.com"><img src="https://img.shields.io/badge/Website-bukaake.kaleksananbagus.com-00e5ff?style=flat-square&logo=googlechrome&logoColor=white" alt="Official Website" /></a>
     <a href="https://github.com/Crlyzd/Bukaake/releases"><img src="https://img.shields.io/badge/Platform-Windows%2010%20%2F%2011-0078d4?style=flat-square&logo=windows&logoColor=white" alt="Platform" /></a>
     <a href="https://github.com/Crlyzd/Bukaake/releases"><img src="https://img.shields.io/badge/Architecture-x64%20%7C%20ARM64-6c5ce7?style=flat-square" alt="Architecture" /></a>
     <a href="https://github.com/Crlyzd/Bukaake/releases"><img src="https://img.shields.io/badge/Edition-Single%20Portable%20Exe%20(~5MB)-00b894?style=flat-square" alt="Edition" /></a>
@@ -62,6 +63,7 @@ Most photo viewers on Windows today are slow to launch, cluttered with heavy too
 | Superpower | Why It Matters |
 | :--- | :--- |
 | 🪟 **Desktop-Immersive Transparency** | Translucent dimmed background lets your desktop show through without heavy borders. |
+| 🖼️ **Native Desktop Wallpaper** | One-click Win32 wallpaper setting with automatic PNG caching and format transcoding. |
 | ⚡ **Sub-10ms Launch & Standby** | Instant tray daemon with automatic memory trimming down to ~8–15 MB RAM. |
 | 📷 **49+ Formats & Camera RAW** | Native iPhone HEIC/HEIF (100% free), 24+ RAW camera formats, and 3D VFX textures. |
 | ✍️ **Vector Typography & Crop** | Vector text engine with 8-point handles, dynamic shadows, laser-guided crop, pen & highlighter. |
@@ -82,6 +84,7 @@ When you open any picture, Bukaake softly dims your surrounding desktop wallpape
 - **Elevated Control Dock**: Floating toolbars stay elevated safely above your Windows taskbar.
 - **Auto-Hiding Controls**: Move your mouse to bring up controls; stay idle for 2.5 seconds and all chrome fades smoothly to 0% opacity.
 - **Interactive Return-to-Start**: Hover over the titlebar app icon in Mode 1 to reveal a back arrow, cleanly closing the image and resetting/centering window bounds back to start.
+- **1-Click Desktop Wallpaper**: Set any photo, cropped composition, or edited canvas directly as your Windows desktop wallpaper via native Win32 APIs, with automatic PNG caching for non-standard formats to prevent grey desktop glitches.
 
 <p align="center">
   <img width="1280" alt="Transparent Immersion" src="https://github.com/user-attachments/assets/c29df440-32b0-49dd-b3d6-a25a9567b370" style="border-radius: 10px;" />
@@ -100,7 +103,7 @@ Bukaake natively opens **49 image formats** with zero external dependencies, cod
 ```
 
 - **Instant Embedded Previews**: Camera RAW files open instantly (~15ms) from high-speed embedded previews.
-- **Full Sensor RAW Develop (`Q`)**: Press **`Q`** or click the sensor icon to unpack full uncompressed sensor Bayer data with unclipped dynamic range.
+- **Full Sensor RAW Develop (`Q`)**: Press **`Q`** or click the sensor icon to unpack full uncompressed sensor Bayer data with unclipped dynamic range. Powered by a **zero-base64 binary streaming pipeline** and **off-thread browser rasterization (`img.decode()`)** with a dual-theme **ambient glowing loading beam** across the titlebar.
 - **EXIF Telemetry Drawer (`I`)**: Press **`I`** anytime to inspect detailed camera telemetry: camera body, lens model, focal length, aperture ($f$-stop), shutter speed, ISO, and GPS location.
 - **5-Slot Predictive Prefetch**: Photos in your current folder pre-load silently in the background for zero-latency arrow navigation.
 
@@ -328,7 +331,8 @@ If you love using Bukaake and want to support independent, high-performance desk
   </a>
 </p>
 
-- 🌐 **Personal Website**: [kaleksananbagus.com](https://kaleksananbagus.com)
+- 🌐 **Official Website**: [bukaake.kaleksananbagus.com](https://bukaake.kaleksananbagus.com)
+- 🌐 **Creator Portfolio**: [kaleksananbagus.com](https://kaleksananbagus.com)
 - 🎨 **Companion Editor**: [Crlyzd/Alitken-GUI](https://github.com/Crlyzd/Alitken-GUI)
 - 🐛 **Report a Bug or Suggest a Feature**: [Feedback Form](https://docs.google.com/forms/d/e/1FAIpQLSciTFA6rWYPq98UwqOvJgLnqGh5P71Vcz5d2GPVdne9Tz34WA/viewform) or open an [Issue](https://github.com/Crlyzd/Bukaake/issues).
 
