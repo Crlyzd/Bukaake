@@ -12,11 +12,16 @@
     <a href="https://bukaake.kaleksananbagus.com"><img src="https://img.shields.io/badge/Website-bukaake.kaleksananbagus.com-00e5ff?style=flat-square&logo=googlechrome&logoColor=white" alt="Official Website" /></a>
     <a href="https://github.com/Crlyzd/Bukaake/releases"><img src="https://img.shields.io/badge/Platform-Windows%2010%20%2F%2011-0078d4?style=flat-square&logo=windows&logoColor=white" alt="Platform" /></a>
     <a href="https://github.com/Crlyzd/Bukaake/releases"><img src="https://img.shields.io/badge/Architecture-x64%20%7C%20ARM64-6c5ce7?style=flat-square" alt="Architecture" /></a>
+    <a href="https://apps.microsoft.com/detail/9N964R72X9JS"><img src="https://img.shields.io/badge/Microsoft%20Store-MSIX%20Package-0078d4?style=flat-square&logo=microsoft&logoColor=white" alt="Microsoft Store" /></a>
     <a href="https://github.com/Crlyzd/Bukaake/releases"><img src="https://img.shields.io/badge/Edition-Single%20Portable%20Exe%20(~5MB)-00b894?style=flat-square" alt="Edition" /></a>
     <a href="LICENSE"><img src="https://img.shields.io/badge/License-GPL--3.0-0984e3?style=flat-square" alt="License" /></a>
   </p>
 
   <p>
+    <a href="https://apps.microsoft.com/detail/9N964R72X9JS">
+      <img src="https://img.shields.io/badge/%F0%9F%8F%AA_Get_it_from-Microsoft_Store-0078d4?style=for-the-badge&logo=microsoft&logoColor=white" alt="Get it from Microsoft Store" />
+    </a>
+    &nbsp;
     <a href="https://github.com/Crlyzd/Bukaake/releases/latest">
       <img src="https://img.shields.io/badge/%E2%AC%87%EF%B8%8F_Download_Latest-Windows_x64-00e5ff?style=for-the-badge&logoColor=black" alt="Download Latest x64" />
     </a>
@@ -69,6 +74,7 @@ Most photo viewers on Windows today are slow to launch, cluttered with heavy too
 | ✍️ **Vector Typography & Crop** | Vector text engine with 8-point handles, dynamic shadows, laser-guided crop, pen & highlighter. |
 | 📸 **Integrated Screen Snipper** | Multi-monitor crosshair capture with instant clipboard copy and auto-saved PNGs. |
 | 🎥 **Hardware GPU Screen Recording** | Direct3D 11 & WGC zero-copy VRAM capture (<2% CPU) with 60 FPS / Space Saver modes & hardware H.264 MP4. |
+| 🏪 **Microsoft Store & Portable** | Distribute as a zero-install ~5MB portable executable or install via Microsoft Store Desktop Bridge MSIX. |
 | 🗑️ **Safe Recycle Bin Deletion** | Win32 Recycle Bin integration (`Delete` to trash, `Shift+Delete` to shred). |
 | 🎨 **Stroke-Free Frosted Glass** | Dual theme engine: Deep Obsidian Dark Mode & Frosted Slate Light Mode. |
 
@@ -184,6 +190,7 @@ Designed from the ground up for modern Windows aesthetics:
 - **Multi-Monitor Position Memory**: Restores to your preferred monitor and window coordinates without annoying screen-jumping.
 - **1-Click Shell Association**: Make Bukaake your default photo viewer for 49 formats under `HKCU` without annoying UAC permission prompts.
 - **True Portability**: A single standalone executable. Move `bukaake.exe` to a USB drive or secondary SSD—file associations self-heal automatically on launch.
+- **Microsoft Store & Desktop Bridge (MSIX)**: Native runtime channel detection via Win32 `GetCurrentPackageFamilyNameW`, declarative file associations, automatic Store background updates, and zero registry modifications.
 - **Built-In Self-Updater**: Background GitHub Releases checks with in-place executable updates via `self-replace`.
 
 <br />
@@ -270,6 +277,10 @@ Designed from the ground up for modern Windows aesthetics:
 
 ## 🚀 Quick Start
 
+### 🏪 Option A: Microsoft Store (MSIX)
+Install directly from the **[Microsoft Store](https://apps.microsoft.com/detail/9N964R72X9JS)** *(Listing ID: `9N964R72X9JS`)* for seamless automatic background updates, sandboxed reliability, and declarative Windows default app handling.
+
+### ⚡ Option B: Standalone Portable Binary (~5 MB)
 1. Download the latest binary from the **[Releases Page](https://github.com/Crlyzd/Bukaake/releases/latest)**:
    - For standard 64-bit PCs: `bukaake-vX.Y.Z-x64.exe`
    - For ARM devices (Surface Pro, Snapdragon X): `bukaake-vX.Y.Z-arm64.exe`
@@ -308,6 +319,9 @@ npm run tauri:dev
 - `npm run build` — Production bundle validation for frontend assets.
 - `cargo check --manifest-path src-tauri/Cargo.toml` — Fast backend type-check.
 - `npm run bump` — Atomically synchronize versions across `package.json`, `Cargo.toml`, and `tauri.conf.json`.
+- `.\run.ps1` (Option `[7]`) — Interactive Microsoft Store MSIX packaging and multi-architecture bundling.
+- `powershell scripts/package-msix.ps1` — Automated MSIX Desktop Bridge staging, manifest templating, and bundle packaging.
+- `powershell scripts/generate-store-assets.ps1` — Synthesize high-DPI Windows Store visual assets from `icon.png`.
 
 </details>
 
