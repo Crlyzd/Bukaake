@@ -5,6 +5,7 @@ node_modules/
 dist/
 dist-ssr/
 release-builds/
+staging/
 test-samples/
 
 # Rust / Tauri build artifacts

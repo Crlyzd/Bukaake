@@ -38,6 +38,7 @@ use platform::standby::{self, enter_standby, is_standby_enabled, set_standby_ena
 use platform::process_memory;
 use platform::window_subclass;
 use platform::updater::{cleanup_old_update_artifacts, download_and_install_update, get_system_arch};
+use platform::package_info::get_distribution_channel;
 use platform::wallpaper::set_wallpaper;
 use platform::window_commands::{
     get_cli_args, open_url, show_in_folder, close_window, exit_app,
@@ -183,6 +184,7 @@ fn main() {
             extract_text_from_image, launch_cathet,
             start_audio_capture, stop_audio_capture, set_recording_mic_muted, set_recording_audio_volumes,
             set_wallpaper,
+            get_distribution_channel,
             process_memory::trim_memory_working_set
         ])
         .run(tauri::generate_context!())

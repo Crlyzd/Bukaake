@@ -143,13 +143,14 @@ while ($true) {
     Write-Host "    [4] Build Production x64 App (Smallest Size -> release-builds/)" -ForegroundColor Green
     Write-Host "    [5] Build Production ARM64 App (Smallest Size -> release-builds/)" -ForegroundColor Green
     Write-Host "    [6] Build Both Architectures (x64 + ARM64 -> release-builds/)" -ForegroundColor BrightGreen
-    Write-Host "    [7] Bump Version (Patch / Minor / Major / Custom)" -ForegroundColor Magenta
-    Write-Host "    [8] Quick Run: Latest Compiled Release Executable" -ForegroundColor Cyan
-    Write-Host "    [9] Clean Build Artifacts & Locks" -ForegroundColor Gray
-    Write-Host "    [10] Exit" -ForegroundColor DarkGray
+    Write-Host "    [7] Package Microsoft Store Bundle (MSIX x64 + ARM64 -> release-builds/)" -ForegroundColor Cyan
+    Write-Host "    [8] Bump Version (Patch / Minor / Major / Custom)" -ForegroundColor Magenta
+    Write-Host "    [9] Quick Run: Latest Compiled Release Executable" -ForegroundColor Cyan
+    Write-Host "    [10] Clean Build Artifacts & Locks" -ForegroundColor Gray
+    Write-Host "    [11] Exit" -ForegroundColor DarkGray
     Write-Host ""
 
-    $choice = Read-Host "  Select an option [1-10]"
+    $choice = Read-Host "  Select an option [1-11]"
 
     switch ($choice) {
         "1" {
@@ -194,6 +195,11 @@ while ($true) {
             Read-Host "  Press Enter to return to menu..."
         }
         "7" {
+            Write-Host "`n  [+] Running Microsoft Store MSIX Packaging Pipeline..." -ForegroundColor Cyan
+            powershell -ExecutionPolicy Bypass -File "scripts\package-msix.ps1"
+            Read-Host "`n  Press Enter to return to menu..."
+        }
+        "8" {
             Write-Host "`n  ======================================================================" -ForegroundColor Cyan
             Write-Host "    Bukaake Version Manager  (Current: v$currentVer)" -ForegroundColor BrightWhite
             Write-Host "  ======================================================================" -ForegroundColor Cyan
@@ -216,7 +222,7 @@ while ($true) {
                 }
             }
         }
-        "8" {
+        "9" {
             $targetExe = $null
             $releaseExe = Get-ChildItem -Path "release-builds\*.exe" -ErrorAction SilentlyContinue |
                 Sort-Object LastWriteTime -Descending |
@@ -239,7 +245,7 @@ while ($true) {
                 Read-Host "  Press Enter to return to menu..."
             }
         }
-        "9" {
+        "10" {
             Write-Host "`n  [+] Cleaning build artifacts and locks..." -ForegroundColor Yellow
             Stop-Locks
             cmd /c "cargo clean --manifest-path src-tauri/Cargo.toml"
@@ -247,7 +253,7 @@ while ($true) {
             Write-Host "  [+] Clean complete!`n" -ForegroundColor Green
             Read-Host "  Press Enter to return to menu..."
         }
-        "10" {
+        "11" {
             exit 0
         }
     }

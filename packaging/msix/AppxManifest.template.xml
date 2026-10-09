@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Package
+  xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
+  xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
+  xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities"
+  IgnorableNamespaces="uap rescap">
+
+  <Identity
+    Name="{{PACKAGE_NAME}}"
+    Publisher="{{PUBLISHER_ID}}"
+    Version="{{VERSION}}"
+    ProcessorArchitecture="{{ARCH}}" />
+
+  <Properties>
+    <DisplayName>Bukaake</DisplayName>
+    <PublisherDisplayName>{{PUBLISHER_DISPLAY_NAME}}</PublisherDisplayName>
+    <Logo>Assets\StoreLogo.png</Logo>
+    <Description>Bukaake — Fast, immersive glass image viewer reviving Google Picasa Photo Viewer for modern Windows.</Description>
+  </Properties>
+
+  <Dependencies>
+    <TargetDeviceFamily Name="Windows.Desktop" MinVersion="10.0.17763.0" MaxVersionTested="10.0.26100.0" />
+  </Dependencies>
+
+  <Resources>
+    <Resource Language="en-US" />
+  </Resources>
+
+  <Applications>
+    <Application Id="Bukaake" Executable="bukaake.exe" EntryPoint="Windows.FullTrustApplication">
+      <uap:VisualElements
+        DisplayName="Bukaake"
+        Description="Bukaake Image Viewer"
+        BackgroundColor="transparent"
+        Square150x150Logo="Assets\Square150x150Logo.png"
+        Square44x44Logo="Assets\Square44x44Logo.png">
+        <uap:DefaultTile Wide310x150Logo="Assets\Wide310x150Logo.png" ShortName="Bukaake" />
+        <uap:SplashScreen Image="Assets\SplashScreen.png" BackgroundColor="#06070a" />
+      </uap:VisualElements>
+      <Extensions>
+        <uap:Extension Category="windows.fileTypeAssociation">
+          <uap:FileTypeAssociation Name="bukaake.image">
+            <uap:DisplayName>Bukaake Image</uap:DisplayName>
+            <uap:Logo>Assets\Square44x44Logo.png</uap:Logo>
+            <uap:SupportedFileTypes>
+              <uap:FileType>.png</uap:FileType>
+              <uap:FileType>.jpg</uap:FileType>
+              <uap:FileType>.jpeg</uap:FileType>
+              <uap:FileType>.webp</uap:FileType>
+              <uap:FileType>.gif</uap:FileType>
+              <uap:FileType>.bmp</uap:FileType>
+              <uap:FileType>.ico</uap:FileType>
+              <uap:FileType>.tiff</uap:FileType>
+              <uap:FileType>.tif</uap:FileType>
+              <uap:FileType>.svg</uap:FileType>
+              <uap:FileType>.avif</uap:FileType>
+              <uap:FileType>.heic</uap:FileType>
+              <uap:FileType>.heif</uap:FileType>
+              <uap:FileType>.hif</uap:FileType>
+              <uap:FileType>.heifs</uap:FileType>
+              <uap:FileType>.heics</uap:FileType>
+              <uap:FileType>.arw</uap:FileType>
+              <uap:FileType>.srf</uap:FileType>
+              <uap:FileType>.sr2</uap:FileType>
+              <uap:FileType>.cr2</uap:FileType>
+              <uap:FileType>.cr3</uap:FileType>
+              <uap:FileType>.nef</uap:FileType>
+              <uap:FileType>.nrw</uap:FileType>
+              <uap:FileType>.dng</uap:FileType>
+              <uap:FileType>.raf</uap:FileType>
+              <uap:FileType>.rw2</uap:FileType>
+              <uap:FileType>.orf</uap:FileType>
+              <uap:FileType>.pef</uap:FileType>
+              <uap:FileType>.3fr</uap:FileType>
+              <uap:FileType>.mrw</uap:FileType>
+              <uap:FileType>.srw</uap:FileType>
+              <uap:FileType>.x3f</uap:FileType>
+              <uap:FileType>.mos</uap:FileType>
+              <uap:FileType>.mef</uap:FileType>
+              <uap:FileType>.raw</uap:FileType>
+              <uap:FileType>.kdc</uap:FileType>
+              <uap:FileType>.dcr</uap:FileType>
+              <uap:FileType>.rwl</uap:FileType>
+              <uap:FileType>.iiq</uap:FileType>
+              <uap:FileType>.erf</uap:FileType>
+              <uap:FileType>.hdr</uap:FileType>
+              <uap:FileType>.exr</uap:FileType>
+              <uap:FileType>.tga</uap:FileType>
+              <uap:FileType>.dds</uap:FileType>
+              <uap:FileType>.qoi</uap:FileType>
+              <uap:FileType>.ppm</uap:FileType>
+              <uap:FileType>.pgm</uap:FileType>
+              <uap:FileType>.pbm</uap:FileType>
+              <uap:FileType>.pnm</uap:FileType>
+            </uap:SupportedFileTypes>
+          </uap:FileTypeAssociation>
+        </uap:Extension>
+      </Extensions>
+    </Application>
+  </Applications>
+
+  <Capabilities>
+    <rescap:Capability Name="runFullTrust" />
+  </Capabilities>
+</Package>

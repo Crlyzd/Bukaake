@@ -37,6 +37,9 @@ pub fn get_registered_exe_path() -> Option<String> {
 }
 
 pub fn auto_heal_or_sync_path() -> Result<bool, String> {
+    if crate::platform::package_info::is_packaged_app() {
+        return Ok(false);
+    }
     let current_path = get_current_exe_path()?;
     if let Some(registered_path) = get_registered_exe_path() {
         if !registered_path.eq_ignore_ascii_case(&current_path) {
@@ -70,6 +73,15 @@ fn update_paths_only(exe_path: &str) -> Result<(), String> {
 #[tauri::command]
 pub fn check_association_status() -> Result<AssocStatus, String> {
     let current_path = get_current_exe_path()?;
+    if crate::platform::package_info::is_packaged_app() {
+        return Ok(AssocStatus {
+            is_registered: true,
+            is_path_matched: true,
+            registered_path: Some(current_path.clone()),
+            current_path,
+            format_count: SUPPORTED_EXTENSIONS.len(),
+        });
+    }
     let hkcu = RegKey::predef(HKEY_CURRENT_USER);
     let reg_apps = hkcu.open_subkey("Software\\RegisteredApplications").ok();
     let is_registered = reg_apps
@@ -92,6 +104,10 @@ pub fn check_association_status() -> Result<AssocStatus, String> {
 
 #[tauri::command]
 pub fn register_file_associations() -> Result<AssocStatus, String> {
+    if crate::platform::package_info::is_packaged_app() {
+        let _ = launch_default_apps_settings();
+        return check_association_status();
+    }
     let exe_path = get_current_exe_path()?;
     let hkcu = RegKey::predef(HKEY_CURRENT_USER);
     let open_cmd = format!("\"{}\" \"%1\"", exe_path);
@@ -146,6 +162,10 @@ pub fn register_file_associations() -> Result<AssocStatus, String> {
 
 #[tauri::command]
 pub fn unregister_file_associations() -> Result<AssocStatus, String> {
+    if crate::platform::package_info::is_packaged_app() {
+        let _ = launch_default_apps_settings();
+        return check_association_status();
+    }
     let hkcu = RegKey::predef(HKEY_CURRENT_USER);
     let _ = hkcu.delete_subkey_all("Software\\Classes\\Bukaake.ImageViewer");
     let _ = hkcu.delete_subkey_all("Software\\Bukaake");

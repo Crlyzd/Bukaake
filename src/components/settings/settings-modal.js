@@ -63,19 +63,24 @@ export class SettingsModal {
       }
 
       if (this.btnCheckUpdate) {
-        this.btnCheckUpdate.disabled = isChecking || isUpdating;
-        if (isUpdating) {
-          if (state.updateStatus === 'installing') {
-            this.btnCheckUpdate.innerHTML = '<i class="ri-restart-line ri-spin"></i> Restarting...';
-          } else {
-            this.btnCheckUpdate.innerHTML = `<i class="ri-loader-4-line ri-spin"></i> Downloading (${state.updatePercent || 0}%)...`;
-          }
-        } else if (isChecking) {
-          this.btnCheckUpdate.innerHTML = '<i class="ri-loader-4-line ri-spin"></i> Checking...';
-        } else if (state.hasUpdate) {
-          this.btnCheckUpdate.innerHTML = `<i class="ri-download-cloud-line"></i> Install v${state.version || APP_VERSION}`;
+        if (updaterService.isStore || state.isStore) {
+          this.btnCheckUpdate.innerHTML = '<i class="ri-store-2-line"></i> Store Page';
+          this.btnCheckUpdate.disabled = false;
         } else {
-          this.btnCheckUpdate.innerHTML = '<i class="ri-restart-line"></i> Check';
+          this.btnCheckUpdate.disabled = isChecking || isUpdating;
+          if (isUpdating) {
+            if (state.updateStatus === 'installing') {
+              this.btnCheckUpdate.innerHTML = '<i class="ri-restart-line ri-spin"></i> Restarting...';
+            } else {
+              this.btnCheckUpdate.innerHTML = `<i class="ri-loader-4-line ri-spin"></i> Downloading (${state.updatePercent || 0}%)...`;
+            }
+          } else if (isChecking) {
+            this.btnCheckUpdate.innerHTML = '<i class="ri-loader-4-line ri-spin"></i> Checking...';
+          } else if (state.hasUpdate) {
+            this.btnCheckUpdate.innerHTML = `<i class="ri-download-cloud-line"></i> Install v${state.version || APP_VERSION}`;
+          } else {
+            this.btnCheckUpdate.innerHTML = '<i class="ri-restart-line"></i> Check';
+          }
         }
       }
 
@@ -151,6 +156,13 @@ export class SettingsModal {
   }
 
   async handleCheckUpdate() {
+    if (updaterService.isStore || updaterService.state.isStore) {
+      const url = 'ms-windows-store://pdp/?productid=9N964R72X9JS';
+      if (window.__TAURI__?.core?.invoke) {
+        window.__TAURI__.core.invoke('open_url', { url }).catch(() => {});
+      }
+      return;
+    }
     if (updaterService.state.hasUpdate) {
       updaterService.installUpdate();
     } else {

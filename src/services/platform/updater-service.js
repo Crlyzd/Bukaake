@@ -24,8 +24,23 @@ class UpdaterService {
     this.subscribers = new Set();
     this.currentVersion = APP_VERSION;
     this.repoEndpoint = 'https://api.github.com/repos/Crlyzd/Bukaake/releases/latest';
+    this.isStore = false;
     this.state = this.loadInitialState();
     this.bindStorageSync();
+    this.initChannel();
+  }
+
+  async initChannel() {
+    if (!window.__TAURI__?.core?.invoke) return;
+    try {
+      const info = await window.__TAURI__.core.invoke('get_distribution_channel');
+      if (info?.is_packaged || info?.channel === 'store') {
+        this.isStore = true;
+        this.state.isStore = true;
+        this.broadcast();
+        if (typeof window !== 'undefined' && window.hydrateAppVersions) window.hydrateAppVersions();
+      }
+    } catch (_) {}
   }
 
   loadInitialState() {
@@ -37,13 +52,13 @@ class UpdaterService {
           localStorage.removeItem(this.storageKey);
           localStorage.removeItem('bukaake_update_available');
         } else {
-          return { ...parsed, isChecking: false, isUpdating: false, updatePercent: 0, updateStatus: 'idle' };
+          return { ...parsed, isChecking: false, isUpdating: false, updatePercent: 0, updateStatus: 'idle', isStore: false };
         }
       }
     } catch (_) {}
     return {
       hasUpdate: false, version: this.currentVersion, releaseUrl: '', assetUrl: '',
-      isChecking: false, isUpdating: false, updatePercent: 0, updateStatus: 'idle', lastChecked: 0,
+      isChecking: false, isUpdating: false, updatePercent: 0, updateStatus: 'idle', lastChecked: 0, isStore: false,
     };
   }
 
@@ -64,7 +79,6 @@ class UpdaterService {
     this.saveState();
     this.subscribers.forEach((fn) => { try { fn(this.state); } catch (_) {} });
     document.dispatchEvent(new CustomEvent('bukaake:update-state', { detail: this.state }));
-
     if (window.__TAURI__?.event?.emit) {
       window.__TAURI__.event.emit('bukaake-update-state', this.state);
       window.__TAURI__.event.emit('settings-changed', {
@@ -84,7 +98,6 @@ class UpdaterService {
         } catch (_) {}
       }
     });
-
     if (window.__TAURI__?.event?.listen) {
       window.__TAURI__.event.listen('bukaake-update-state', (e) => {
         if (e.payload) {
@@ -92,15 +105,12 @@ class UpdaterService {
           this.subscribers.forEach((fn) => fn(this.state));
         }
       });
-
       window.__TAURI__.event.listen('bukaake-update-progress', (e) => {
         if (e.payload) {
           const { status, percent } = e.payload;
           this.state.isUpdating = status === 'downloading' || status === 'installing';
           this.state.updateStatus = status || 'downloading';
-          if (typeof percent === 'number') {
-            this.state.updatePercent = Math.round(percent);
-          }
+          if (typeof percent === 'number') this.state.updatePercent = Math.round(percent);
           this.broadcast();
         }
       });
@@ -109,9 +119,7 @@ class UpdaterService {
 
   async getSystemArch() {
     if (window.__TAURI__?.core?.invoke) {
-      try {
-        return await window.__TAURI__.core.invoke('get_system_arch');
-      } catch (_) {}
+      try { return await window.__TAURI__.core.invoke('get_system_arch'); } catch (_) {}
     }
     return /arm64|aarch64/i.test(navigator.userAgent || '') ? 'arm64' : 'x64';
   }
@@ -125,20 +133,25 @@ class UpdaterService {
   }
 
   initLaunchCheck() {
-    if (document.body.classList.contains('mode-viewer')) return;
+    if (this.isStore || document.body.classList.contains('mode-viewer')) return;
     setTimeout(() => {
-      if (document.body.classList.contains('mode-viewer')) return;
+      if (this.isStore || document.body.classList.contains('mode-viewer')) return;
       this.checkUpdate({ silent: true });
     }, 1500);
   }
 
   onSettingsClick() {
+    if (this.isStore) return;
     const ONE_HOUR = 60 * 60 * 1000;
     if (this.state.hasUpdate || (Date.now() - this.state.lastChecked < ONE_HOUR)) return;
     this.checkUpdate({ silent: true });
   }
 
   async checkUpdate({ silent = false } = {}) {
+    if (this.isStore) {
+      if (!silent) toast.show('Updates are managed automatically by Microsoft Store.');
+      return;
+    }
     if (this.state.isChecking || this.state.isUpdating) return;
     this.state.isChecking = true;
     this.broadcast();
@@ -201,10 +214,15 @@ class UpdaterService {
   }
 
   async installUpdate() {
-    if (this.state.isUpdating) return;
-    if (!this.state.hasUpdate) {
-      return this.checkUpdate({ silent: false });
+    if (this.isStore) {
+      const url = 'ms-windows-store://pdp/?productid=9N964R72X9JS';
+      if (window.__TAURI__?.core?.invoke) {
+        window.__TAURI__.core.invoke('open_url', { url }).catch(() => {});
+      }
+      return;
     }
+    if (this.state.isUpdating) return;
+    if (!this.state.hasUpdate) return this.checkUpdate({ silent: false });
 
     const assetUrl = this.state.assetUrl;
     if (!window.__TAURI__?.core?.invoke || !assetUrl) {
@@ -245,20 +263,21 @@ class UpdaterService {
 }
 
 export function hydrateAppVersions(root = document) {
-  root.querySelectorAll('.app-version, .settings-win-version').forEach((el) => {
-    el.textContent = `v${APP_VERSION}`;
-  });
+  const isStore = updaterService.isStore || updaterService.state.isStore;
+  root.querySelectorAll('.app-version, .settings-win-version').forEach((el) => { el.textContent = `v${APP_VERSION}`; });
   root.querySelectorAll('.version-tag').forEach((el) => {
-    el.textContent = `v${APP_VERSION} Portable`;
+    el.textContent = isStore ? `v${APP_VERSION} Store` : `v${APP_VERSION} Portable`;
   });
   root.querySelectorAll('.settings-hero-subtitle').forEach((el) => {
-    el.textContent = `v${APP_VERSION} • Portable Edition`;
+    el.textContent = isStore ? `v${APP_VERSION} • Microsoft Store Edition` : `v${APP_VERSION} • Portable Edition`;
   });
   root.querySelectorAll('.settings-subtitle').forEach((el) => {
-    el.textContent = `v${APP_VERSION} (x64) • Glass Image Viewer`;
+    el.textContent = isStore ? `v${APP_VERSION} • Microsoft Store Edition` : `v${APP_VERSION} (x64) • Glass Image Viewer`;
   });
   root.querySelectorAll('#updateStatusText').forEach((el) => {
-    if (updaterService.state.isUpdating) {
+    if (isStore) {
+      el.textContent = `Bukaake v${APP_VERSION} (Microsoft Store)`;
+    } else if (updaterService.state.isUpdating) {
       el.textContent = `Downloading Bukaake v${updaterService.state.version || APP_VERSION}...`;
     } else if (updaterService.state.isChecking) {
       el.textContent = 'Checking GitHub for updates...';
