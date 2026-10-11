@@ -40,38 +40,27 @@ pub fn configure_low_memory_webview_env() {
     }
 }
 
-/// Recursively flushes the working set of the host process and all child msedgewebview2 processes
+/// Collects the PIDs of the host process and all descendant WebView2 processes
 #[cfg(target_os = "windows")]
-pub fn trim_process_tree() {
-    if RECORDING_ACTIVE.load(Ordering::Relaxed) {
-        return;
-    }
+pub fn collect_tree_pids() -> Vec<u32> {
+    use windows::Win32::{
+        Foundation::CloseHandle,
+        System::{
+            Diagnostics::ToolHelp::{
+                CreateToolhelp32Snapshot, Process32FirstW, Process32NextW, PROCESSENTRY32W,
+                TH32CS_SNAPPROCESS,
+            },
+            Threading::GetCurrentProcessId,
+        },
+    };
+
+    let mut pids = Vec::new();
+    let my_pid = unsafe { GetCurrentProcessId() };
+    pids.push(my_pid);
 
     unsafe {
-        use windows::Win32::{
-            Foundation::CloseHandle,
-            System::{
-                Diagnostics::ToolHelp::{
-                    CreateToolhelp32Snapshot, Process32FirstW, Process32NextW, PROCESSENTRY32W,
-                    TH32CS_SNAPPROCESS,
-                },
-                ProcessStatus::K32EmptyWorkingSet,
-                Threading::{
-                    GetCurrentProcess, GetCurrentProcessId, OpenProcess,
-                    PROCESS_QUERY_INFORMATION, PROCESS_SET_QUOTA,
-                },
-            },
-        };
-
-        // 1. Trim host Rust process
-        let _ = K32EmptyWorkingSet(GetCurrentProcess());
-
-        // 2. Discover and trim all descendant WebView2 processes
-        let my_pid = GetCurrentProcessId();
         if let Ok(snapshot) = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0) {
-            let mut pids_to_trim = Vec::new();
             let mut direct_children = Vec::new();
-
             let mut entry = PROCESSENTRY32W::default();
             entry.dwSize = std::mem::size_of::<PROCESSENTRY32W>() as u32;
 
@@ -79,7 +68,7 @@ pub fn trim_process_tree() {
                 loop {
                     if entry.th32ParentProcessID == my_pid {
                         direct_children.push(entry.th32ProcessID);
-                        pids_to_trim.push(entry.th32ProcessID);
+                        pids.push(entry.th32ProcessID);
                     }
                     if Process32NextW(snapshot, &mut entry).is_err() {
                         break;
@@ -87,11 +76,10 @@ pub fn trim_process_tree() {
                 }
             }
 
-            // Check grandchildren (renderer / utility processes spawned by browser process)
             if !direct_children.is_empty() && Process32FirstW(snapshot, &mut entry).is_ok() {
                 loop {
                     if direct_children.contains(&entry.th32ParentProcessID) {
-                        pids_to_trim.push(entry.th32ProcessID);
+                        pids.push(entry.th32ProcessID);
                     }
                     if Process32NextW(snapshot, &mut entry).is_err() {
                         break;
@@ -100,13 +88,73 @@ pub fn trim_process_tree() {
             }
 
             let _ = CloseHandle(snapshot);
+        }
+    }
+    pids
+}
 
-            // Trim each discovered process
-            for pid in pids_to_trim {
-                if let Ok(h_child) = OpenProcess(PROCESS_SET_QUOTA | PROCESS_QUERY_INFORMATION, false, pid) {
-                    let _ = K32EmptyWorkingSet(h_child);
-                    let _ = CloseHandle(h_child);
+#[cfg(not(target_os = "windows"))]
+pub fn collect_tree_pids() -> Vec<u32> {
+    Vec::new()
+}
+
+/// Computes the total working set size in bytes across the host and all WebView2 child processes
+#[cfg(target_os = "windows")]
+pub fn tree_working_set() -> u64 {
+    use windows::Win32::{
+        Foundation::CloseHandle,
+        System::{
+            ProcessStatus::{K32GetProcessMemoryInfo, PROCESS_MEMORY_COUNTERS},
+            Threading::{OpenProcess, PROCESS_QUERY_INFORMATION},
+        },
+    };
+
+    let pids = collect_tree_pids();
+    let mut total_bytes: u64 = 0;
+
+    unsafe {
+        for pid in pids {
+            if let Ok(h_proc) = OpenProcess(PROCESS_QUERY_INFORMATION, false, pid) {
+                let mut pmc = PROCESS_MEMORY_COUNTERS::default();
+                pmc.cb = std::mem::size_of::<PROCESS_MEMORY_COUNTERS>() as u32;
+                if K32GetProcessMemoryInfo(h_proc, &mut pmc, pmc.cb).as_bool() {
+                    total_bytes += pmc.WorkingSetSize as u64;
                 }
+                let _ = CloseHandle(h_proc);
+            }
+        }
+    }
+
+    total_bytes
+}
+
+#[cfg(not(target_os = "windows"))]
+pub fn tree_working_set() -> u64 {
+    0
+}
+
+/// Recursively flushes the working set of the host process and all child msedgewebview2 processes
+#[cfg(target_os = "windows")]
+pub fn trim_process_tree() {
+    if RECORDING_ACTIVE.load(Ordering::Relaxed) {
+        return;
+    }
+
+    use windows::Win32::{
+        Foundation::CloseHandle,
+        System::{
+            ProcessStatus::K32EmptyWorkingSet,
+            Threading::{GetCurrentProcess, OpenProcess, PROCESS_QUERY_INFORMATION, PROCESS_SET_QUOTA},
+        },
+    };
+
+    let pids = collect_tree_pids();
+    unsafe {
+        let _ = K32EmptyWorkingSet(GetCurrentProcess());
+        for pid in pids {
+            if let Ok(h_child) = OpenProcess(PROCESS_SET_QUOTA | PROCESS_QUERY_INFORMATION, false, pid) {
+                let _ = K32EmptyWorkingSet(h_child);
+                let _ = CloseHandle(h_child);
             }
         }
     }

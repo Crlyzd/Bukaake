@@ -46,6 +46,7 @@ pub fn trim_memory() {
 }
 
 pub fn activate_main_window(app: &tauri::AppHandle) {
+    crate::platform::reclaim::cancel_reclaim();
     if let Some(win) = app.get_webview_window("main") {
         let standby = app.state::<StandbyManager>();
         standby.cancel_countdown();
@@ -129,7 +130,7 @@ pub fn enter_standby(
     if let Some(settings_win) = app_handle.get_webview_window("settings") {
         let _ = settings_win.hide();
     }
-    trim_memory();
+    crate::platform::reclaim::request_idle_reclaim(&app_handle, "standby");
     state.start_countdown(app_handle);
     Ok(())
 }
@@ -140,34 +141,19 @@ pub fn show_main_window(app_handle: tauri::AppHandle) -> Result<(), String> {
     let is_startup = std::env::args().any(|a| a == "--startup" || a == "--minimized" || a == "--background");
     let has_img = std::env::args().skip(1).any(|a| {
         let p = std::path::Path::new(&a);
-        p.is_file() && crate::image_loader::is_image_file(p)
+        p.is_file() && crate::imaging::image_loader::is_image_file(p)
     });
     if is_startup && !has_img {
-        trim_memory();
+        crate::platform::reclaim::request_idle_reclaim(&app_handle, "startup");
         return Ok(());
     }
 
+    crate::platform::reclaim::cancel_reclaim();
     if let Some(win) = app_handle.get_webview_window("main") {
         let _ = win.unminimize();
         let _ = win.show();
         let _ = win.set_focus();
     }
     Ok(())
-}
-
-/// Schedules a delayed memory trim 5 seconds after startup.
-/// Allows all WebView2 background processes (GPU, renderers, manager) to finish
-/// initializing before evicting cold/dormant working sets down to ~19.5MB baseline.
-pub fn schedule_startup_idle_trim() {
-    std::thread::spawn(|| {
-        std::thread::sleep(std::time::Duration::from_secs(5));
-        let has_img = std::env::args().skip(1).any(|a| {
-            let p = std::path::Path::new(&a);
-            p.is_file() && crate::imaging::image_loader::is_image_file(p)
-        });
-        if !has_img {
-            trim_memory();
-        }
-    });
 }
 

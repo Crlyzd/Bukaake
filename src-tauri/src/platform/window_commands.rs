@@ -174,6 +174,7 @@ pub fn open_settings_window(app_handle: tauri::AppHandle) -> Result<(), String> 
                 let _ = settings_win.center();
             }
         }
+        crate::platform::reclaim::cancel_reclaim();
         let _ = settings_win.unminimize();
         let _ = settings_win.show();
         let _ = settings_win.set_focus();
@@ -187,6 +188,7 @@ pub fn hide_settings_window(app_handle: tauri::AppHandle) -> Result<(), String> 
     if let Some(w) = app_handle.get_webview_window("settings") {
         let _ = w.hide();
         let _ = app_handle.emit("settings-modal-state", false);
+        crate::platform::reclaim::request_idle_reclaim(&app_handle, "settings");
     }
     Ok(())
 }

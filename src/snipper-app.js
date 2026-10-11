@@ -52,6 +52,14 @@ export class SnipperApp {
     listen('bukaake://close-snipper', () => {
       this.cancelSnip();
     });
+
+    listen('bukaake://reclaim', () => {
+      if (this.isSnipActive || document.body.classList.contains('mode-recording-pill')) return;
+      this.snipper?.cleanup();
+      if (typeof window !== 'undefined' && window.gc) {
+        try { window.gc(); } catch (_) {}
+      }
+    });
   }
 
   syncTheme() {

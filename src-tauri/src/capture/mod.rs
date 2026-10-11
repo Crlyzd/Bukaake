@@ -2,6 +2,7 @@ pub mod audio_capture;
 pub mod audio_mixer;
 pub mod capture_commands;
 pub mod ebml_patcher;
+pub mod external_launch;
 pub mod recording_border;
 pub mod recording_pill;
 pub mod screen_capture;

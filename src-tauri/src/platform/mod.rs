@@ -4,6 +4,7 @@ pub mod file_assoc;
 pub mod file_ops;
 pub mod hotkeys;
 pub mod process_memory;
+pub mod reclaim;
 pub mod standby;
 pub mod updater;
 pub mod window_commands;

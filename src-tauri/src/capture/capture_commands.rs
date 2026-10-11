@@ -10,12 +10,6 @@ use crate::platform::process_memory;
 use std::fs::{self, OpenOptions};
 use std::io::Write;
 use std::path::{Path, PathBuf};
-use std::process::Command;
-
-#[cfg(target_os = "windows")]
-use std::os::windows::process::CommandExt;
-
-const CREATE_NO_WINDOW: u32 = 0x08000000;
 
 #[tauri::command]
 pub fn capture_screen() -> Result<ScreenCapturePayload, String> {
@@ -139,67 +133,13 @@ pub fn prompt_save_recording(default_name: String, default_dir: Option<String>) 
     Ok(dialog.save_file().map(|p| p.to_string_lossy().to_string()))
 }
 
-#[tauri::command]
-pub fn prompt_select_folder() -> Result<Option<String>, String> {
-    Ok(rfd::FileDialog::new().pick_folder().map(|p| p.to_string_lossy().to_string()))
-}
-
-#[tauri::command]
-pub fn prompt_select_executable() -> Result<Option<String>, String> {
-    Ok(rfd::FileDialog::new()
-        .add_filter("Executable", &["exe", "cmd", "bat"])
-        .pick_file()
-        .map(|p| p.to_string_lossy().to_string()))
-}
-
-#[tauri::command]
-pub fn launch_alitken(video_path: String, custom_exe: Option<String>) -> Result<(), String> {
-    let mut resolved_exe: Option<PathBuf> = None;
-
-    if let Some(custom) = custom_exe {
-        let p = PathBuf::from(&custom);
-        if p.is_file() {
-            resolved_exe = Some(p);
-        }
-    }
-
-    if resolved_exe.is_none() {
-        if let Ok(current_exe) = std::env::current_exe() {
-            if let Some(dir) = current_exe.parent() {
-                let candidates = [
-                    dir.join("AlitConverter.exe"), dir.join("alitken.exe"),
-                    dir.join("Alitken").join("AlitConverter.exe"),
-                    dir.join("..").join("Alitken").join("AlitConverter.exe"),
-                    dir.join("..").join("AlitConverter.exe"),
-                ];
-                for cand in candidates {
-                    if cand.is_file() {
-                        resolved_exe = Some(cand);
-                        break;
-                    }
-                }
-            }
-        }
-    }
-
-    let exe_path = resolved_exe.ok_or_else(|| {
-        "Alitken executable (AlitConverter.exe) not found. Please locate it in Settings.".to_string()
-    })?;
-
-    let mut cmd = Command::new(exe_path);
-    cmd.arg(&video_path);
-
-    #[cfg(target_os = "windows")]
-    cmd.creation_flags(CREATE_NO_WINDOW);
-
-    cmd.spawn().map_err(|e| format!("Failed to launch Alitken: {}", e))?;
-
-    Ok(())
-}
+pub use super::external_launch::{launch_alitken, prompt_select_executable, prompt_select_folder};
 
 #[tauri::command]
 pub fn prepare_screen_snip(app: tauri::AppHandle) -> Result<ScreenCapturePayload, String> {
     use tauri::Manager;
+
+    crate::platform::reclaim::set_snip_active(true);
 
     let mut scale_factor = 1.0;
     if let Some(win) = app.get_webview_window("main") {
@@ -208,9 +148,16 @@ pub fn prepare_screen_snip(app: tauri::AppHandle) -> Result<ScreenCapturePayload
         }
     }
 
-    let mut payload = screen_capture::capture_desktop()?;
-    payload.scale_factor = scale_factor;
-    Ok(payload)
+    match screen_capture::capture_desktop() {
+        Ok(mut payload) => {
+            payload.scale_factor = scale_factor;
+            Ok(payload)
+        }
+        Err(e) => {
+            crate::platform::reclaim::set_snip_active(false);
+            Err(e)
+        }
+    }
 }
 
 #[tauri::command]
@@ -244,7 +191,10 @@ pub fn finish_screen_snip(
         let _ = snipper.hide();
     }
 
+    crate::platform::reclaim::set_snip_active(false);
+
     if open_main.unwrap_or(false) {
+        crate::platform::reclaim::cancel_reclaim();
         if let Some(win) = app.get_webview_window("main") {
             let is_visible = win.is_visible().unwrap_or(false);
             if !is_visible {
@@ -268,6 +218,8 @@ pub fn finish_screen_snip(
                 }
             }
         }
+    } else {
+        crate::platform::reclaim::request_idle_reclaim(&app, "snip");
     }
     Ok(())
 }

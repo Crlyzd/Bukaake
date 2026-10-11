@@ -134,10 +134,12 @@ class UpdaterService {
 
   initLaunchCheck() {
     if (this.isStore || document.body.classList.contains('mode-viewer')) return;
-    setTimeout(() => {
-      if (this.isStore || document.body.classList.contains('mode-viewer')) return;
-      this.checkUpdate({ silent: true });
-    }, 1500);
+    import('./updater-launch-gate.js').then(({ gateLaunchCheck }) => {
+      gateLaunchCheck(() => {
+        if (this.isStore || document.body.classList.contains('mode-viewer')) return;
+        setTimeout(() => this.checkUpdate({ silent: true }), 1500);
+      });
+    });
   }
 
   onSettingsClick() {

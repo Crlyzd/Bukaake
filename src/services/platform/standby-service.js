@@ -36,6 +36,13 @@ class StandbyService {
       onWakeFromStandby?.();
     });
 
+    // Listen for background idle reclaim
+    window.__TAURI__?.event?.listen('bukaake://reclaim', () => {
+      if (typeof window !== 'undefined' && window.gc) {
+        try { window.gc(); } catch (_) {}
+      }
+    });
+
     // Cross-window sync (e.g. from standalone settings window)
     window.addEventListener('storage', (e) => {
       if (e.key === STORAGE_KEY) {

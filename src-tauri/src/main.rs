@@ -66,6 +66,7 @@ fn main() {
         )
         .plugin(tauri_plugin_single_instance::init(|app, argv, _cwd| {
             if let Some(win) = app.get_webview_window("main") {
+                crate::platform::reclaim::cancel_reclaim();
                 let standby = app.state::<StandbyManager>();
                 standby.cancel_countdown();
                 let mut target_file: Option<String> = None;
@@ -133,7 +134,6 @@ fn main() {
                 }
             }
             setup_hotkeys(app);
-            standby::schedule_startup_idle_trim();
             Ok(())
         })
         .on_window_event(|window, event| {
@@ -150,11 +150,14 @@ fn main() {
             } else if window.label() == "settings" {
                 if let tauri::WindowEvent::CloseRequested { .. } = event {
                     let _ = window.app_handle().emit("settings-modal-state", false);
+                    crate::platform::reclaim::request_idle_reclaim(window.app_handle(), "settings");
                 }
             } else if window.label() == "snipper" {
                 if let tauri::WindowEvent::CloseRequested { api, .. } = event {
                     api.prevent_close();
                     let _ = window.hide();
+                    crate::platform::reclaim::set_snip_active(false);
+                    crate::platform::reclaim::request_idle_reclaim(window.app_handle(), "snipper");
                 }
             }
         })

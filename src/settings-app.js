@@ -62,6 +62,11 @@ class SettingsApp {
     });
 
     if (window.__TAURI__?.event?.listen) {
+      window.__TAURI__.event.listen('bukaake://reclaim', () => {
+        if (typeof window !== 'undefined' && window.gc) {
+          try { window.gc(); } catch (_) {}
+        }
+      });
       window.__TAURI__.event.listen('theme-changed', (e) => {
         if (e.payload?.theme) {
           this.applyTheme(e.payload.theme);

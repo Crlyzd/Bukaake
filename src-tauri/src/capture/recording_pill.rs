@@ -103,6 +103,7 @@ pub fn exit_recording_pill_mode(app: tauri::AppHandle, open_main: Option<bool>) 
     }
 
     if open_main.unwrap_or(true) {
+        crate::platform::reclaim::cancel_reclaim();
         if let Some(win) = app.get_webview_window("main") {
             let is_visible = win.is_visible().unwrap_or(false);
             if !is_visible {
@@ -126,6 +127,8 @@ pub fn exit_recording_pill_mode(app: tauri::AppHandle, open_main: Option<bool>) 
                 }
             }
         }
+    } else {
+        crate::platform::reclaim::request_idle_reclaim(&app, "record");
     }
     Ok(())
 }
