@@ -27,7 +27,7 @@ All agents working on this repository **MUST** strictly enforce these five non-n
 - **Updater Architecture (`updater-service.js`, `updater.rs`)**: Queries GitHub Releases API with semver checks and x64/arm64 asset detection.
 - **Native In-Place Updating**: Downloads binaries via `curl.exe` (with PowerShell fallback), emits live progress (`bukaake-update-progress`), replaces the running executable via `self-replace`, and cleanly restarts.
 - **Multi-Window Sync & Visual Telemetry**: Synchronizes update state across main and settings windows via `localStorage` and Tauri events. Settings "About" nav tab features a stroke-free ambient sky glow (`has-update`) and animated pulsating heartbeat indicator when a new version is detected.
-- **Mode 2 Fullscreen Exclusion**: In Fullscreen Mode (`body.mode-viewer`), launch update checks are completely disabled. In Mode 1, background checks delay by 1.5s post-startup.
+- **Mode 2 Fullscreen & Standby Exclusion**: In Fullscreen Mode (`body.mode-viewer`), launch update checks are completely disabled. On autostart / standby launch (`--startup`), checks are gated via `updater-launch-gate.js` and deferred until the window is woken from standby. In Mode 1 normal launch, background checks delay by 1.5s post-startup.
 
 ### Pillar 4: Dual-Mode & Picasa-Style Transparent Viewing
 - **Mode 1: Regular App Mode (`body.mode-regular`)**: Centered aspect-ratio window with docked frameless titlebar and native Windows acrylic blur.
@@ -67,7 +67,7 @@ src/
 │   ├── metadata/               # Client EXIF parser & telemetry formatter
 │   └── text/                   # Typography lifecycle, snapping & rendering
 ├── services/            # Platform & Domain Services (< 300 lines each)
-│   ├── platform/               # Windows OS, autostart, file associations, tray & window mode
+│   ├── platform/               # Windows OS, autostart, file assoc, updater-launch-gate, tray & window mode
 │   ├── image/                  # Image loader, prefetch cache, RAW load controller & file exporter
 │   ├── interaction/            # Hotkeys, shortcuts, idle controller & change tracker
 │   ├── capture/                # Screen capture, native recorder, audio & screenshot saver
@@ -78,6 +78,13 @@ src/
 ├── app.js               # Main viewer bootstrap coordinator (≤ 350 lines)
 ├── settings-app.js      # Standalone settings window coordinator (≤ 350 lines)
 └── snipper-app.js       # Dedicated overlay window coordinator (≤ 300 lines)
+packaging/               # Microsoft Store & Packaging Automation
+├── store-config.json    # Store identity & package configuration
+└── msix/                # AppxManifest.template.xml & visual tile assets
+scripts/                 # Automation & Release Scripts
+├── bump-version.js      # Synchronized version bump script
+├── generate-store-assets.ps1 # Store icon & tile asset generator
+└── package-msix.ps1     # Microsoft Store MSIX packaging pipeline
 src-tauri/src/
 ├── main.rs              # App entry-point & master IPC dispatcher (≤ 350 lines)
 ├── capture/             # Native Screen Capture & Hardware Recording Subsystem
@@ -87,6 +94,7 @@ src-tauri/src/
 │   ├── capture_commands.rs     # Screen snip & recording IPC commands
 │   ├── d3d_device.rs           # Direct3D 11 device & WinRT interop
 │   ├── ebml_patcher.rs         # WebM duration & seek header patcher
+│   ├── external_launch.rs      # Alitken companion launcher & file pickers (< 75 lines)
 │   ├── native_recorder.rs      # GPU capture orchestrator & audio PTS sync
 │   ├── recording_border.rs     # Stroke-free capture region border overlay
 │   ├── recording_pill.rs       # Floating desktop recording pill controller
@@ -111,6 +119,7 @@ src-tauri/src/
 │   ├── file_ops.rs             # Win32 Recycle Bin deletion (SHFileOperationW)
 │   ├── hotkeys.rs              # Win32 global shortcut listener
 │   ├── process_memory.rs       # Working set telemetry & memory trimming
+│   ├── reclaim.rs              # Idle working set memory reclaim coordinator (< 110 lines)
 │   ├── standby.rs              # Tray lifecycle & working set memory trimming
 │   ├── updater.rs              # In-place self-updater, progress & relaunch
 │   ├── wallpaper.rs            # Win32 desktop wallpaper engine & cache transcode (< 110 lines)
@@ -193,14 +202,22 @@ src-tauri/src/
 - **Official Resources Portal & Contrast Calibration**:
   - Settings About tab and main settings modal feature direct links to the official website ([bukaake.kaleksananbagus.com](https://bukaake.kaleksananbagus.com)) and GitHub repository.
   - Elevated contrast for version tag chips in dark mode (`--text-main` over `--glass-btn-hover-bg`).
-- **Tray Standby & Memory Trim (`standby.rs`, `standby-service.js`)**:
-  - Persistent background tray daemon; trims working set memory via `K32EmptyWorkingSet` down to ~8-15 MB RAM. Left-click on tray immediately restores window cleanly into Mode 1.
+- **Tray Standby & Universal Idle Memory Reclaim Coordinator (`reclaim.rs`, `process_memory.rs`, `standby.rs`, `standby-service.js`, `snipper-app.js`, `settings-app.js`)**:
+  - Persistent background tray daemon coordinating idle working set memory reclamation across the Rust host and all descendant `msedgewebview2.exe` processes down to **~15–20 MB total tree Working Set** (~13 MB private). Left-click on tray restores window cleanly into Mode 1.
+  - **Universal Tray Hooking**: Centralized in `request_idle_reclaim()`, automatically triggered whenever the app enters an idle hidden state: main window close/hide, snip finish/cancel (`finish_screen_snip`), recording pill exit (`exit_recording_pill_mode`), settings modal/window close, and autostart settle.
+  - **Two-Stage Delayed Trim Architecture**: Broadcasts the native `bukaake://reclaim` event across webview runtimes to release DOM image caches and trigger Chromium V8 GC (`window.gc?.()`). Executes primary Win32 `trim_process_tree()` (`K32EmptyWorkingSet` across all tree PIDs) at **+1.5s**, followed by a secondary trim at **+5.5s** to capture delayed DWM / DirectX GPU swapchain deallocations.
+  - **Atomic Generation Cancellation (`RECLAIM_GEN`)**: User interaction, window wake, or capture tool activations increment the atomic generation counter, instantly aborting pending background reclaim jobs to guarantee zero hot-path latency.
+  - **Autostart Settle Loop (`--startup`)**: When launched minimized on Windows boot, monitors tree working set delta every 3 seconds (< 3MB delta threshold) before scheduling reclaim, eliminating the 90–100MB startup spike down to ~15–20MB without requiring manual window toggling.
   - **Zero Hardcoded Centering Invariant**: Never invoke `win.center()` on window close, hide, or tray wake. Always preserve user window position and multi-monitor coordinates.
   - **Clean Standby Hide Invariant**: In `enter_standby`, only invoke `win.hide()`. Never apply `set_size` or repositioning during hide, as Win32/Tauri renders moves before completing the hide, causing an unsightly screen jump/flash glitch.
   - **Startup Window Size Lock & WS_THICKFRAME Invariant**: Startup dimensions locked to 680×480. **Never call `set_resizable(false)` natively on Windows**. In Windows 11 DWM, stripping `WS_THICKFRAME` forces DWM to draw an active 1px white border around frameless windows and removes rounded corners/shadows. Window size locking on startup is enforced via DOM handle suppression (`body:not(.image-loaded) .resize-handle { display: none !important; }`), while fixed dialogs (Settings) use native Win32 `WM_NCHITTEST` subclassing (`window_subclass.rs`) to remap edge hit-tests to `HTCLIENT` and block `SC_SIZE` modal loops, keeping `resizable: true` (`WS_THICKFRAME`) active so borders remain completely eliminated and corners stay rounded without resize flicker.
   - **Win32 Titlebar Maximize Interception Invariant**: The main window subclasses `WM_NCLBUTTONDBLCLK` and `SC_MAXIMIZE` in `window_subclass.rs` to intercept titlebar double-clicks and DWM maximize requests, routing them smoothly via the `bukaake-toggle-mode` event directly into Mode 2 transparent fullscreen without DWM maximize flash or Acrylic recreation flicker.
   - **Return-to-Start Brand Button & Window Reset**: The titlebar app icon converts to an interactive back button (`ri-arrow-left-line`) with cross-fade on hover in Mode 1 when an image is loaded. Clicking checks `changeTracker.hasUnsavedChanges()` before triggering the confirmation dialog, clears the active image, and resets/centers the window dimensions back to the default 680×480 start state.
   - **Empty State Aspect Isolation**: In `window-mode-manager.js`, `resizeAndCenter` is strictly guarded by `if (this.viewer?.img && this.lastAspectSize)`. `handleEmptyState()` must always clear `this.windowModeManager.lastAspectSize = null`.
+- **Microsoft Store & Desktop Bridge MSIX Packaging (`scripts/package-msix.ps1`, `packaging/`)**:
+  - Automated packaging pipeline generating signed and unsigned `.msix` Desktop Bridge bundles from release binaries and `package.json` version metadata.
+  - Populates `AppxManifest.template.xml` from `packaging/store-config.json`, registering 49 declarative file associations.
+  - Runtime environment detection via Win32 `GetCurrentPackageFamilyNameW` suppresses the GitHub Releases in-app self-updater in favor of Windows Store background update channels.
 - **Shell File Association (`file_assoc.rs`, `file-assoc-service.js`)**:
   - Registers ProgID and capabilities for 49 formats under `HKCU` (zero UAC prompts).
   - Silent auto-healing on startup checks binary location and updates registry commands in-place if executable is moved.
