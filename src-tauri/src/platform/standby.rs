@@ -154,3 +154,20 @@ pub fn show_main_window(app_handle: tauri::AppHandle) -> Result<(), String> {
     }
     Ok(())
 }
+
+/// Schedules a delayed memory trim 5 seconds after startup.
+/// Allows all WebView2 background processes (GPU, renderers, manager) to finish
+/// initializing before evicting cold/dormant working sets down to ~19.5MB baseline.
+pub fn schedule_startup_idle_trim() {
+    std::thread::spawn(|| {
+        std::thread::sleep(std::time::Duration::from_secs(5));
+        let has_img = std::env::args().skip(1).any(|a| {
+            let p = std::path::Path::new(&a);
+            p.is_file() && crate::imaging::image_loader::is_image_file(p)
+        });
+        if !has_img {
+            trim_memory();
+        }
+    });
+}
+

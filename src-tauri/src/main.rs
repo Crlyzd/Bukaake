@@ -133,6 +133,7 @@ fn main() {
                 }
             }
             setup_hotkeys(app);
+            standby::schedule_startup_idle_trim();
             Ok(())
         })
         .on_window_event(|window, event| {
