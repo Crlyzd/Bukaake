@@ -154,7 +154,7 @@ Quickly add text captions, mark up screenshots, or adjust composition with built
 - **Laser-Guided Crop (`C`)**: Standard aspect presets (1:1, 16:9, 9:16, 4:3, Freeform) featuring dynamic magnetic guides that snap directly to image centers and edges.
 - **Universal Enter-to-Commit**: Press **`Enter`** to immediately apply and commit changes across Text, Crop, and Drawing tools.
 - **Real-Time Color Filters (`E`)**: Adjust Brightness, Contrast, Saturation, Exposure, and Temperature on-the-fly with 60 FPS GPU-accelerated rendering.
-- **[Alitken](https://github.com/Crlyzd/Alitken-GUI) & [Cathet](https://github.com/Crlyzd/Cathet) Companion Bridges**: One-click workflow to transfer photos to [Alitken](https://github.com/Crlyzd/Alitken-GUI) for advanced image editing, or hand off OCR extracted text directly into [Cathet](https://github.com/Crlyzd/Cathet) for instant editing.
+- **[Alitken](https://alitken.kaleksananbagus.com) & [Cathet](https://github.com/Crlyzd/Cathet) Companion Bridges**: One-click workflow to transfer photos to [Alitken](https://alitken.kaleksananbagus.com) for advanced image editing, or hand off OCR extracted text directly into [Cathet](https://github.com/Crlyzd/Cathet) for instant editing.
 
 <p align="center">
   <img width="800" alt="Drawing and Crop Tools" src="https://github.com/user-attachments/assets/846ec474-a1e3-440e-9c35-ac00fe7116cb" style="border-radius: 10px;" />
@@ -334,7 +334,7 @@ If you love using Bukaake and want to support independent, high-performance desk
 
 - 🌐 **Official Website**: [bukaake.kaleksananbagus.com](https://bukaake.kaleksananbagus.com)
 - 🌐 **Creator Portfolio**: [kaleksananbagus.com](https://kaleksananbagus.com)
-- 🎨 **Companion Editor**: [Crlyzd/Alitken-GUI](https://github.com/Crlyzd/Alitken-GUI)
+- 🎨 **Companion Editor**: [alitken.kaleksananbagus.com](https://alitken.kaleksananbagus.com)
 - 🐛 **Report a Bug or Suggest a Feature**: [Feedback Form](https://docs.google.com/forms/d/e/1FAIpQLSciTFA6rWYPq98UwqOvJgLnqGh5P71Vcz5d2GPVdne9Tz34WA/viewform) or open an [Issue](https://github.com/Crlyzd/Bukaake/issues).
 
 <br />

@@ -1,6 +1,6 @@
 [package]
 name = "bukaake"
-version = "1.0.1"
+version = "1.0.2"
 description = "Bukaake — Lightweight Glass Image Viewer"
 authors = ["Bukaake Team"]
 edition = "2021"
