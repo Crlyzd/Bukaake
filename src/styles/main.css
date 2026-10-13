@@ -18,6 +18,7 @@
 @import './components/settings/settings-nav.css';
 @import './components/settings/settings-assoc.css';
 @import './components/settings/settings-capture.css';
+@import './components/settings/settings-accordion.css';
 @import './components/settings/settings-audio.css';
 @import './components/settings/settings-theme.css';
 @import './components/settings/settings-about.css';

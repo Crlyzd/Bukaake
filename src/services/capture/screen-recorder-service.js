@@ -67,6 +67,11 @@ export class ScreenRecorderService {
     const savedOffset = parseInt(localStorage.getItem('bukaake-audio-sync-offset') || '0', 10);
     const syncOffsetMs = Number.isFinite(savedOffset) ? savedOffset : 0;
 
+    const showClickEffects = localStorage.getItem('bukaake-record-click-highlights') !== 'false';
+    const soundClickEffects = localStorage.getItem('bukaake-record-click-sounds') !== 'false';
+    const savedVol = parseInt(localStorage.getItem('bukaake-click-sound-volume') || '70', 10);
+    const clickVolume = Number.isFinite(savedVol) ? Math.max(0, Math.min(100, savedVol)) / 100 : 0.7;
+
     try {
       this.tempFilePath = await invoke('start_native_recording', {
         region: regionPayload,
@@ -75,6 +80,9 @@ export class ScreenRecorderService {
         recordSys,
         recordMic,
         syncOffsetMs,
+        showClickEffects,
+        soundClickEffects,
+        clickVolume,
       });
 
       this.state = 'recording';

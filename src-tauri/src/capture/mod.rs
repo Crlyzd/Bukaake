@@ -1,8 +1,12 @@
 pub mod audio_capture;
 pub mod audio_mixer;
 pub mod capture_commands;
+pub mod click_coordinator;
+pub mod click_sound;
+pub mod click_overlay;
 pub mod ebml_patcher;
 pub mod external_launch;
+pub mod mouse_hook;
 pub mod recording_border;
 pub mod recording_pill;
 pub mod screen_capture;

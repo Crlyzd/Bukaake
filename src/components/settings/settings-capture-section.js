@@ -8,6 +8,7 @@ import { tauriBridge } from '../../services/platform/tauri-bridge.js';
 import { hotkeyService } from '../../services/interaction/hotkey-service.js';
 import { bindTandemSettings } from './settings-tandem-section.js';
 import { bindAudioSettings } from './settings-audio-section.js';
+import { bindClickAndAccordionSettings } from './settings-click-section.js';
 
 export function renderHotkeyBadge(container, combo) {
   if (!container) return;
@@ -252,9 +253,12 @@ export function bindCaptureSettings() {
     });
   }
 
-  // 4. Audio Recording & Sync Offset Section
+  // 4. Click Calibration & Collapsible Section Accordions
+  bindClickAndAccordionSettings();
+
+  // 5. Audio Recording & Sync Offset Section
   bindAudioSettings();
 
-  // 5. Tandem Companion Editors (Alitken & Cathet)
+  // 6. Tandem Companion Editors (Alitken & Cathet)
   bindTandemSettings();
 }

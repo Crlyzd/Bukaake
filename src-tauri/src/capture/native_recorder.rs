@@ -11,10 +11,11 @@ use serde::{Deserialize, Serialize};
 use windows::Win32::Graphics::Direct3D11::{ID3D11Texture2D, D3D11_BIND_RENDER_TARGET, D3D11_BIND_SHADER_RESOURCE};
 use windows::Win32::Graphics::Dxgi::Common::DXGI_FORMAT_B8G8R8A8_UNORM;
 
+use crate::capture::audio_capture;
+use crate::capture::click_coordinator;
 use crate::capture::d3d_device::D3DContext;
 use crate::capture::wgc_capture::WgcCaptureSession;
 use crate::capture::wmf_writer::WmfWriter;
-use crate::capture::audio_capture;
 use crate::platform::process_memory;
 
 #[derive(Deserialize, Clone, Copy, Debug)]
@@ -53,11 +54,7 @@ unsafe impl Sync for RecorderState {}
 static RECORDER_INSTANCE: Mutex<Option<RecorderState>> = Mutex::new(None);
 
 pub fn is_recording_active() -> bool {
-    if let Ok(lock) = RECORDER_INSTANCE.lock() {
-        lock.is_some()
-    } else {
-        false
-    }
+    RECORDER_INSTANCE.lock().map(|l| l.is_some()).unwrap_or(false)
 }
 
 pub fn start_native_recording(
@@ -68,9 +65,13 @@ pub fn start_native_recording(
     record_sys: bool,
     record_mic: bool,
     sync_offset_ms: Option<i32>,
+    show_clicks: bool,
+    sound_clicks: bool,
+    click_volume: Option<f32>,
 ) -> Result<String, String> {
     stop_native_recording().ok();
 
+    click_coordinator::start_click_effects(show_clicks, sound_clicks, click_volume.unwrap_or(0.7));
     process_memory::set_recording_memory_lockout(true);
 
     let d3d = Arc::new(D3DContext::new().map_err(|e| format!("D3D11 init failed: {}", e))?);
@@ -247,6 +248,7 @@ pub fn resume_native_recording() -> Result<(), String> {
 }
 
 pub fn stop_native_recording() -> Result<NativeRecordingResult, String> {
+    click_coordinator::stop_click_effects();
     process_memory::set_recording_memory_lockout(false);
     audio_capture::stop_capture();
 

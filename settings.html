@@ -134,184 +134,269 @@
 
         <!-- ==================== TAB 2: CAPTURE ==================== -->
         <div class="tab-content" id="tabCapture" style="display: none;">
-          <span class="sub-section-title">Screen Capture</span>
 
-          <!-- Hotkey Row -->
-          <div class="row-item">
-            <div class="row-meta">
-              <span class="row-title">Global Shortcut</span>
-              <span class="row-desc">Desktop crosshair region snip</span>
-            </div>
-            <button class="hotkey-btn hotkey-chip" id="btnKeyCapture" title="Click to bind shortcut">
-              <span class="hotkey-key-label" id="lblKeyCapture"></span>
+          <!-- Group 1: Screen Snip & Storage -->
+          <div class="settings-section-group" id="groupSnip">
+            <button type="button" class="settings-section-header" data-toggle="groupSnip">
+              <span class="accordion-title-text">Screen Snip & Storage</span>
+              <span class="accordion-line"></span>
+              <i class="ri-arrow-down-s-line accordion-chevron"></i>
             </button>
-          </div>
-
-          <!-- Save Path Row -->
-          <div class="row-item col-layout">
-            <div class="row-meta">
-              <span class="row-title">Auto-Save Directory</span>
-              <span class="row-desc">Folder where screenshots & recordings are stored</span>
-            </div>
-            <div class="path-row">
-              <input type="text" class="path-field settings-path-input" id="inputVideoSaveDir" placeholder="Default Captures Folder" readonly />
-              <button class="btn btn-glass" id="btnBrowseVideoDir" title="Browse Save Folder">
-                <i class="ri-folder-open-line"></i> Browse
-              </button>
-              <button class="btn btn-glass btn-icon-only" id="btnOpenVideoDir" title="Open Save Folder in Explorer">
-                <i class="ri-external-link-line"></i>
-              </button>
-            </div>
-          </div>
-
-          <span class="sub-section-title">Video Recording</span>
-
-          <!-- Video Quality Dropdown Row (Unclipped Fix) -->
-          <div class="row-item">
-            <div class="row-meta">
-              <span class="row-title">Encoding Quality</span>
-              <span class="row-desc">Target framerate & bitrate</span>
-            </div>
-
-            <div class="dropdown glass-dropdown-wrap" id="wrapVideoQuality">
-              <button class="dropdown-btn glass-dropdown-trigger" id="btnVideoQualityTrigger" type="button" title="Select recording quality">
-                <span id="lblVideoQuality">60 FPS • High (6 Mbps)</span>
-                <i class="ri-arrow-down-s-line trigger-chevron"></i>
-              </button>
-              <div class="dropdown-menu glass-dropdown-menu hidden" id="menuVideoQuality">
-                <button type="button" class="dropdown-item glass-dropdown-item" data-value="balanced">
-                  <span>60 FPS • Balanced (3 Mbps)</span>
-                  <i class="ri-check-line check item-check"></i>
+            <div class="settings-section-content">
+              <!-- Hotkey Row -->
+              <div class="row-item">
+                <div class="row-meta">
+                  <span class="row-title">Global Shortcut</span>
+                  <span class="row-desc">Desktop crosshair region snip</span>
+                </div>
+                <button class="hotkey-btn hotkey-chip" id="btnKeyCapture" title="Click to bind shortcut">
+                  <span class="hotkey-key-label" id="lblKeyCapture"></span>
                 </button>
-                <button type="button" class="dropdown-item glass-dropdown-item active" data-value="high">
-                  <span>60 FPS • High (6 Mbps)</span>
-                  <i class="ri-check-line check item-check"></i>
-                </button>
-                <button type="button" class="dropdown-item glass-dropdown-item" data-value="ultra">
-                  <span>60 FPS • Ultra (12 Mbps)</span>
-                  <i class="ri-check-line check item-check"></i>
-                </button>
+              </div>
+
+              <!-- Save Path Row -->
+              <div class="row-item col-layout">
+                <div class="row-meta">
+                  <span class="row-title">Auto-Save Directory</span>
+                  <span class="row-desc">Folder where screenshots & recordings are stored</span>
+                </div>
+                <div class="path-row">
+                  <input type="text" class="path-field settings-path-input" id="inputVideoSaveDir" placeholder="Default Captures Folder" readonly />
+                  <button class="btn btn-glass" id="btnBrowseVideoDir" title="Browse Save Folder">
+                    <i class="ri-folder-open-line"></i> Browse
+                  </button>
+                  <button class="btn btn-glass btn-icon-only" id="btnOpenVideoDir" title="Open Save Folder in Explorer">
+                    <i class="ri-external-link-line"></i>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Prompt Save Toggle (Moved to Snip & Storage per user request) -->
+              <div class="row-item">
+                <div class="row-meta">
+                  <span class="row-title">Always Prompt Save Location</span>
+                  <span class="row-desc">Ask where to save file each time recording finishes</span>
+                </div>
+                <label class="settings-toggle-switch toggle" title="Prompt where to save each time you stop recording">
+                  <input type="checkbox" id="togglePromptSave" />
+                  <span class="settings-toggle-slider toggle-slider"></span>
+                </label>
               </div>
             </div>
           </div>
 
-          <!-- Space Saver Mode Toggle -->
-          <div class="row-item">
-            <div class="row-meta">
-              <span class="row-title">Space Saver Mode</span>
-              <span class="row-desc">Reduces recording file size by ~75% using 30 FPS and high-efficiency bitrates</span>
-            </div>
-            <label class="settings-toggle-switch toggle" title="Enable Space Saver Mode for recordings">
-              <input type="checkbox" id="toggleSpaceSaver" />
-              <span class="settings-toggle-slider toggle-slider"></span>
-            </label>
-          </div>
+          <!-- Group 2: Video Recording -->
+          <div class="settings-section-group" id="groupVideo">
+            <button type="button" class="settings-section-header" data-toggle="groupVideo">
+              <span class="accordion-title-text">Video Recording</span>
+              <span class="accordion-line"></span>
+              <i class="ri-arrow-down-s-line accordion-chevron"></i>
+            </button>
+            <div class="settings-section-content">
+              <!-- Video Quality Dropdown Row -->
+              <div class="row-item">
+                <div class="row-meta">
+                  <span class="row-title">Encoding Quality</span>
+                  <span class="row-desc">Target framerate & bitrate</span>
+                </div>
 
-          <!-- Prompt Save Toggle -->
-          <div class="row-item">
-            <div class="row-meta">
-              <span class="row-title">Always Prompt Save Location</span>
-              <span class="row-desc">Ask where to save file each time recording finishes</span>
-            </div>
-            <label class="settings-toggle-switch toggle" title="Prompt where to save each time you stop recording">
-              <input type="checkbox" id="togglePromptSave" />
-              <span class="settings-toggle-slider toggle-slider"></span>
-            </label>
-          </div>
+                <div class="dropdown glass-dropdown-wrap" id="wrapVideoQuality">
+                  <button class="dropdown-btn glass-dropdown-trigger" id="btnVideoQualityTrigger" type="button" title="Select recording quality">
+                    <span id="lblVideoQuality">60 FPS • High (6 Mbps)</span>
+                    <i class="ri-arrow-down-s-line trigger-chevron"></i>
+                  </button>
+                  <div class="dropdown-menu glass-dropdown-menu hidden" id="menuVideoQuality">
+                    <button type="button" class="dropdown-item glass-dropdown-item" data-value="balanced">
+                      <span>60 FPS • Balanced (3 Mbps)</span>
+                      <i class="ri-check-line check item-check"></i>
+                    </button>
+                    <button type="button" class="dropdown-item glass-dropdown-item active" data-value="high">
+                      <span>60 FPS • High (6 Mbps)</span>
+                      <i class="ri-check-line check item-check"></i>
+                    </button>
+                    <button type="button" class="dropdown-item glass-dropdown-item" data-value="ultra">
+                      <span>60 FPS • Ultra (12 Mbps)</span>
+                      <i class="ri-check-line check item-check"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
 
-          <!-- Audio Recording Sources (Inline Chip Group) -->
-          <div class="row-item col-layout" id="rowAudioSources">
-            <div class="row-meta">
-              <span class="row-title">Audio Recording</span>
-              <span class="row-desc">Record system sound and microphone</span>
-            </div>
-            <div class="audio-chips-group">
-              <button type="button" class="audio-chip active" id="chipRecordSysAudio" title="Toggle Desktop Audio Capture">
-                <i class="ri-volume-up-line"></i>
-                <span>Desktop Audio</span>
-              </button>
-              <button type="button" class="audio-chip" id="chipRecordMic" title="Toggle Microphone Narration">
-                <i class="ri-mic-line"></i>
-                <span>Microphone</span>
-              </button>
-            </div>
-          </div>
-
-          <!-- Audio Sync Offset -->
-          <div class="row-item" id="rowAudioSync">
-            <div class="row-meta">
-              <span class="row-title">Audio Sync Offset</span>
-              <span class="row-desc">Shift audio timing (−200ms to +200ms)</span>
-            </div>
-            <div class="stepper-pill" id="wrapAudioSyncStepper">
-              <button type="button" class="stepper-btn" id="btnAudioSyncDec" title="Shift 10ms earlier (−10ms, hold to repeat)">
-                <i class="ri-subtract-line"></i>
-              </button>
-              <span class="stepper-val" id="lblAudioSyncVal" title="Click to reset to 0 ms">0 ms</span>
-              <button type="button" class="stepper-btn" id="btnAudioSyncInc" title="Shift 10ms later (+10ms, hold to repeat)">
-                <i class="ri-add-line"></i>
-              </button>
+              <!-- Space Saver Mode Toggle -->
+              <div class="row-item">
+                <div class="row-meta">
+                  <span class="row-title">Space Saver Mode</span>
+                  <span class="row-desc">Reduces recording file size by ~75% using 30 FPS and high-efficiency bitrates</span>
+                </div>
+                <label class="settings-toggle-switch toggle" title="Enable Space Saver Mode for recordings">
+                  <input type="checkbox" id="toggleSpaceSaver" />
+                  <span class="settings-toggle-slider toggle-slider"></span>
+                </label>
+              </div>
             </div>
           </div>
 
-          <span class="sub-section-title">Companion Apps</span>
+          <!-- Group 3: Mouse Click Effects -->
+          <div class="settings-section-group" id="groupClicks">
+            <button type="button" class="settings-section-header" data-toggle="groupClicks">
+              <span class="accordion-title-text">Mouse Click Effects</span>
+              <span class="accordion-line"></span>
+              <i class="ri-arrow-down-s-line accordion-chevron"></i>
+            </button>
+            <div class="settings-section-content">
+              <!-- Mouse Click Highlights Toggle -->
+              <div class="row-item">
+                <div class="row-meta">
+                  <span class="row-title">Mouse Click Highlights</span>
+                  <span class="row-desc">Display animated translucent halos on left and right clicks</span>
+                </div>
+                <label class="settings-toggle-switch toggle" title="Highlight mouse clicks in recording">
+                  <input type="checkbox" id="toggleClickHighlights" />
+                  <span class="settings-toggle-slider toggle-slider"></span>
+                </label>
+              </div>
 
-          <!-- Alitken Row -->
-          <div class="row-item col-layout" id="cardAlitken">
-            <div class="row-meta">
-              <span class="row-title">Alitken Media Converter</span>
-              <span class="row-desc">Seamless companion workflow for splitting & compression</span>
-            </div>
-            <div class="path-row">
-              <input type="text" class="path-field settings-path-input" id="inputAlitkenPath" placeholder="Auto-Detect (./AlitConverter.exe)" readonly />
-              <button class="btn btn-glass" id="btnBrowseAlitken" title="Locate AlitConverter.exe">
-                <i class="ri-folder-open-line"></i> Browse
-              </button>
-              <a href="https://alitken.kaleksananbagus.com" target="_blank" class="btn btn-glass btn-icon-only" id="btnAlitkenWeb" title="Visit Alitken Website">
-                <i class="ri-global-line"></i>
-              </a>
+              <!-- Mouse Click Sounds Toggle -->
+              <div class="row-item">
+                <div class="row-meta">
+                  <span class="row-title">Mouse Click Sounds</span>
+                  <span class="row-desc">Record subtle tactile click sound effects into the audio track</span>
+                </div>
+                <label class="settings-toggle-switch toggle" title="Record click sound effects">
+                  <input type="checkbox" id="toggleClickSounds" />
+                  <span class="settings-toggle-slider toggle-slider"></span>
+                </label>
+              </div>
+
+              <!-- Volume Slider & Sound Test Row -->
+              <div class="click-volume-row" id="rowClickVolume">
+                <div class="row-meta">
+                  <span class="row-title">Click Sound Volume</span>
+                  <span class="row-desc">Loudness of click effects in audio track</span>
+                </div>
+                <div class="click-volume-slider-wrap">
+                  <input type="range" class="glass-range-slider" id="sliderClickVolume" min="0" max="100" value="70" title="Adjust Click Sound Volume" />
+                  <span class="volume-val-badge" id="lblClickVolumeVal">70%</span>
+                  <button type="button" class="btn-test-sound" id="btnTestClickSound" title="Play test click sound">
+                    <i class="ri-volume-up-line"></i>
+                    <span>Test</span>
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
 
-          <div class="row-item">
-            <div class="row-meta">
-              <span class="row-title">Auto-open in Alitken</span>
-              <span class="row-desc">Open recordings directly after stopping</span>
+          <!-- Group 4: Audio Recording & Sync -->
+          <div class="settings-section-group" id="groupAudio">
+            <button type="button" class="settings-section-header" data-toggle="groupAudio">
+              <span class="accordion-title-text">Audio Recording & Sync</span>
+              <span class="accordion-line"></span>
+              <i class="ri-arrow-down-s-line accordion-chevron"></i>
+            </button>
+            <div class="settings-section-content">
+              <!-- Audio Recording Sources (Inline Chip Group) -->
+              <div class="row-item col-layout" id="rowAudioSources">
+                <div class="row-meta">
+                  <span class="row-title">Audio Recording</span>
+                  <span class="row-desc">Record system sound and microphone</span>
+                </div>
+                <div class="audio-chips-group">
+                  <button type="button" class="audio-chip active" id="chipRecordSysAudio" title="Toggle Desktop Audio Capture">
+                    <i class="ri-volume-up-line"></i>
+                    <span>Desktop Audio</span>
+                  </button>
+                  <button type="button" class="audio-chip" id="chipRecordMic" title="Toggle Microphone Narration">
+                    <i class="ri-mic-line"></i>
+                    <span>Microphone</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Audio Sync Offset -->
+              <div class="row-item" id="rowAudioSync">
+                <div class="row-meta">
+                  <span class="row-title">Audio Sync Offset</span>
+                  <span class="row-desc">Shift audio timing (−200ms to +200ms)</span>
+                </div>
+                <div class="stepper-pill" id="wrapAudioSyncStepper">
+                  <button type="button" class="stepper-btn" id="btnAudioSyncDec" title="Shift 10ms earlier (−10ms, hold to repeat)">
+                    <i class="ri-subtract-line"></i>
+                  </button>
+                  <span class="stepper-val" id="lblAudioSyncVal" title="Click to reset to 0 ms">0 ms</span>
+                  <button type="button" class="stepper-btn" id="btnAudioSyncInc" title="Shift 10ms later (+10ms, hold to repeat)">
+                    <i class="ri-add-line"></i>
+                  </button>
+                </div>
+              </div>
             </div>
-            <label class="settings-toggle-switch toggle" title="Automatically open recordings in Alitken after stopping">
-              <input type="checkbox" id="toggleAlitkenAuto" />
-              <span class="settings-toggle-slider toggle-slider"></span>
-            </label>
           </div>
 
-          <div class="settings-divider-dashed"></div>
+          <!-- Group 5: Companion Apps (Collapsed by Default) -->
+          <div class="settings-section-group collapsed" id="groupCompanions">
+            <button type="button" class="settings-section-header" data-toggle="groupCompanions">
+              <span class="accordion-title-text">Companion Apps</span>
+              <span class="accordion-line"></span>
+              <i class="ri-arrow-down-s-line accordion-chevron"></i>
+            </button>
+            <div class="settings-section-content">
+              <!-- Alitken Row -->
+              <div class="row-item col-layout" id="cardAlitken">
+                <div class="row-meta">
+                  <span class="row-title">Alitken Media Converter</span>
+                  <span class="row-desc">Seamless companion workflow for splitting & compression</span>
+                </div>
+                <div class="path-row">
+                  <input type="text" class="path-field settings-path-input" id="inputAlitkenPath" placeholder="Auto-Detect (./AlitConverter.exe)" readonly />
+                  <button class="btn btn-glass" id="btnBrowseAlitken" title="Locate AlitConverter.exe">
+                    <i class="ri-folder-open-line"></i> Browse
+                  </button>
+                  <a href="https://alitken.kaleksananbagus.com" target="_blank" class="btn btn-glass btn-icon-only" id="btnAlitkenWeb" title="Visit Alitken Website">
+                    <i class="ri-global-line"></i>
+                  </a>
+                </div>
+              </div>
 
-          <!-- Cathet Row -->
-          <div class="row-item col-layout" id="cardCathet">
-            <div class="row-meta">
-              <span class="row-title">Cathet Glass Scratchpad</span>
-              <span class="row-desc">Seamless companion markdown editor for extracted notes & text</span>
-            </div>
-            <div class="path-row">
-              <input type="text" class="path-field settings-path-input" id="inputCathetPath" placeholder="Auto-Detect (./Cathet.exe)" readonly />
-              <button class="btn btn-glass" id="btnBrowseCathet" title="Locate Cathet.exe">
-                <i class="ri-folder-open-line"></i> Browse
-              </button>
-              <a href="https://github.com/Crlyzd/Cathet" target="_blank" class="btn btn-glass btn-icon-only" id="btnCathetGithub" title="View Cathet on GitHub">
-                <i class="ri-github-line"></i>
-              </a>
-            </div>
-          </div>
+              <div class="row-item">
+                <div class="row-meta">
+                  <span class="row-title">Auto-open in Alitken</span>
+                  <span class="row-desc">Open recordings directly after stopping</span>
+                </div>
+                <label class="settings-toggle-switch toggle" title="Automatically open recordings in Alitken after stopping">
+                  <input type="checkbox" id="toggleAlitkenAuto" />
+                  <span class="settings-toggle-slider toggle-slider"></span>
+                </label>
+              </div>
 
-          <div class="row-item">
-            <div class="row-meta">
-              <span class="row-title">Auto-open in Cathet</span>
-              <span class="row-desc">Open extracted text directly in Cathet after OCR</span>
+              <div class="settings-divider-dashed"></div>
+
+              <!-- Cathet Row -->
+              <div class="row-item col-layout" id="cardCathet">
+                <div class="row-meta">
+                  <span class="row-title">Cathet Glass Scratchpad</span>
+                  <span class="row-desc">Seamless companion markdown editor for extracted notes & text</span>
+                </div>
+                <div class="path-row">
+                  <input type="text" class="path-field settings-path-input" id="inputCathetPath" placeholder="Auto-Detect (./Cathet.exe)" readonly />
+                  <button class="btn btn-glass" id="btnBrowseCathet" title="Locate Cathet.exe">
+                    <i class="ri-folder-open-line"></i> Browse
+                  </button>
+                  <a href="https://github.com/Crlyzd/Cathet" target="_blank" class="btn btn-glass btn-icon-only" id="btnCathetGithub" title="View Cathet on GitHub">
+                    <i class="ri-github-line"></i>
+                  </a>
+                </div>
+              </div>
+
+              <div class="row-item">
+                <div class="row-meta">
+                  <span class="row-title">Auto-open in Cathet</span>
+                  <span class="row-desc">Open extracted text directly in Cathet after OCR</span>
+                </div>
+                <label class="settings-toggle-switch toggle" title="Automatically open extracted text in Cathet after OCR">
+                  <input type="checkbox" id="toggleCathetAuto" />
+                  <span class="settings-toggle-slider toggle-slider"></span>
+                </label>
+              </div>
             </div>
-            <label class="settings-toggle-switch toggle" title="Automatically open extracted text in Cathet after OCR">
-              <input type="checkbox" id="toggleCathetAuto" />
-              <span class="settings-toggle-slider toggle-slider"></span>
-            </label>
           </div>
         </div>
 

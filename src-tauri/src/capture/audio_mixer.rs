@@ -5,6 +5,26 @@
  */
 
 use std::collections::VecDeque;
+use std::sync::Mutex;
+
+static CLICK_SAMPLES: Mutex<Option<VecDeque<(f32, f32)>>> = Mutex::new(None);
+
+pub fn inject_click_transient(samples: Vec<(f32, f32)>) {
+    if let Ok(mut lock) = CLICK_SAMPLES.lock() {
+        let q = lock.get_or_insert_with(|| VecDeque::with_capacity(1024));
+        for s in samples {
+            q.push_back(s);
+        }
+    }
+}
+
+pub fn clear_click_transients() {
+    if let Ok(mut lock) = CLICK_SAMPLES.lock() {
+        if let Some(ref mut q) = *lock {
+            q.clear();
+        }
+    }
+}
 
 #[inline(always)]
 pub fn transparent_limit(s: f32) -> f32 {
@@ -145,12 +165,19 @@ pub fn mix_and_quantize_stereo(
     let mut pcm_bytes = Vec::with_capacity(frame_count * 4);
     let actual_mic_gain = if is_mic_muted { 0.0 } else { mic_gain };
 
+    let mut click_guard = CLICK_SAMPLES.lock().ok();
+    let mut click_queue = click_guard.as_mut().and_then(|g| g.as_mut());
+
     for i in 0..frame_count {
         let (sys_l, sys_r) = sys_frames.get(i).copied().unwrap_or((0.0, 0.0));
         let (mic_l, mic_r) = mic_frames.get(i).copied().unwrap_or((0.0, 0.0));
+        let (clk_l, clk_r) = click_queue
+            .as_mut()
+            .and_then(|q| q.pop_front())
+            .unwrap_or((0.0, 0.0));
 
-        let mixed_l = transparent_limit(sys_l * sys_gain + mic_l * actual_mic_gain);
-        let mixed_r = transparent_limit(sys_r * sys_gain + mic_r * actual_mic_gain);
+        let mixed_l = transparent_limit(sys_l * sys_gain + mic_l * actual_mic_gain + clk_l);
+        let mixed_r = transparent_limit(sys_r * sys_gain + mic_r * actual_mic_gain + clk_r);
 
         let i16_l = (mixed_l * 32767.0).clamp(-32768.0, 32767.0) as i16;
         let i16_r = (mixed_r * 32767.0).clamp(-32768.0, 32767.0) as i16;
