@@ -65,7 +65,7 @@ Most photo viewers on Windows today are slow to launch, cluttered with heavy too
 | 📷 **49+ Formats & Camera RAW** | Native iPhone HEIC/HEIF (100% free), 24+ RAW camera formats, and 3D VFX textures. |
 | ✍️ **Vector Typography & Crop** | Vector text engine with 8-point handles, dynamic shadows, laser-guided crop, pen & highlighter. |
 | 📸 **Integrated Screen Snipper** | Multi-monitor crosshair capture with instant clipboard copy and auto-saved PNGs. |
-| 🎥 **Hardware GPU Screen Recording** | Direct3D 11 & WGC zero-copy VRAM capture (<2% CPU) with 60 FPS / Space Saver modes & hardware H.264 MP4. |
+| 🎥 **Hardware GPU Screen Recording** | Direct3D 11 & WGC zero-copy capture (<2% CPU) with tactile click sounds, visual halos, cursor toggle & H.264 MP4. |
 | 🏪 **Microsoft Store & Portable** | Distribute as a zero-install ~5MB portable executable or install via Microsoft Store Desktop Bridge MSIX. |
 | 🗑️ **Safe Recycle Bin Deletion** | Win32 Recycle Bin integration (`Delete` to trash, `Shift+Delete` to shred). |
 | 🎨 **Stroke-Free Frosted Glass** | Dual theme engine: Deep Obsidian Dark Mode & Frosted Slate Light Mode. |
@@ -128,10 +128,13 @@ Capture and share anything on your screen without launching heavy third-party so
 #### 🎥 Hardware GPU Screen Recorder
 - **Zero-Copy VRAM Pipeline**: Desktop frames capture directly into Direct3D 11 GPU textures via `Windows.Graphics.Capture` with sub-2% CPU overhead and zero RAM round-trips.
 - **Hardware H.264 & AAC MP4**: Streams hardware-accelerated `.mp4` video directly through Windows Media Foundation `IMFSinkWriter` with instant finalization.
+- **Visual Click Highlights & Tactile Audio**: Projects zero-input-lag amber/sky halo ripples visible to WGC, with punchy 48kHz synthesized mechanical click audio transients.
+- **Dynamic Cursor Visibility**: Dynamically include or exclude the system mouse pointer from recordings via hardware WGC compositing.
 - **Sample-Accurate Audio**: Mixes WASAPI system loopback and microphone inputs at 48kHz stereo with a contiguous sample-accurate clock—zero drift or lag.
-- **Space Saver Mode & Sync Calibration**: Toggle ~75% storage savings with optimized 30 FPS profiles, or capture silky 60 FPS video. Calibrate audio sync with a ±200ms stepper in Settings.
+- **Space Saver & Collapsible Settings**: Toggle ~75% storage savings with 30 FPS profiles, calibrate audio sync (±200ms), and organize recording preferences in stroke-free accordions.
 - **Dedicated Overlay Window**: Isolated transparent window (`snipper.html`) hosts crosshairs, selection bounds, and recording pills with zero desktop redraw flash.
 - **Clean Borderless Capture**: Windows 11 default yellow capture border is completely suppressed.
+
 
 </td>
 </tr>

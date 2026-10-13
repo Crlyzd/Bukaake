@@ -240,7 +240,7 @@ Whenever drafted, release notes **MUST ALWAYS** follow this mandatory standard:
   - **High-Impact Superpower Headings**: Bold, catchy feature titles prioritizing user excitement before deep technical explanations (e.g., *🖼️ Native Desktop Wallpaper Engine — Your Art on Your Desktop in 1 Click!*).
   - **Technical Depth & Mastery**: Back the excitement with exact architectural details (Win32 APIs, zero-copy VRAM blits, zero-Base64 binary streaming, memory clamps, non-blocking thread offloading).
   - **Curated Commit Table**: Cleanly structured commit log (`Commit`, `Scope`, `Description`).
-  - **Download & Portal CTA**: Clear call-to-action with links to the official website and GitHub Releases portable download (~5MB single executable).
+  - **Download & Portal CTA**: Clear call-to-action with links to the official website ([bukaake.kaleksananbagus.com](https://bukaake.kaleksananbagus.com)), Microsoft Store ([Listing 9N964R72X9JS](https://apps.microsoft.com/detail/9N964R72X9JS)), and GitHub Releases portable download (~5MB single executable). **Always include the Microsoft Store link**.
 - **Zero-Repetition Policy**: When composing release notes for any release (e.g. v1.0.0), agents **MUST NEVER** repeat features, architectural highlights, or bug fixes that were already documented in prior version release notes (e.g. v0.9.0, v0.8.1, v0.8.0, etc.).
 - **Commit Range Isolation**: Release notes must strictly document novel changes introduced between the previous release tag (`v(N-1)`) and the target release (`vN`).
 - **Pre-Release Audit Requirement**: Agents must cross-reference prior GitHub Releases or git tag history before writing release documentation to ensure all entries are strictly novel.
