@@ -30,3 +30,10 @@ Deliver implementation plans with:
 3. **Glass & Theme Tokens**: CSS variables and glass classes specified for any new UI element.
 4. **Step-by-Step Actions**: Numbered atomic, executable steps for the Coding Specialist.
 5. **Dependencies & Tradeoffs**: Any cargo/npm dependencies or ambiguities explicitly noted per AGENTS.md.
+
+## Commit Message Protocol
+Whenever requested to write commit messages or commit changes:
+1. **General Commit Message**: Conventional Commit header (`feat(...)`, `fix(...)`, etc.) with high-impact title and bulleted summaries for all modified/created files.
+2. **Per-File Architectural Commit Breakdown Table**: Structured markdown table with `Layer`, `File` (`file:///` link), and `Commit Message & Description`.
+3. **Autonomous Execution**: When asked to "do it for me" or commit directly, verify builds, stage changes, and execute `git commit` with the formatted message.
+

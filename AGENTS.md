@@ -252,6 +252,17 @@ Whenever drafted, release notes **MUST ALWAYS** follow this mandatory standard:
 - `cargo check --manifest-path src-tauri/Cargo.toml` — Fast backend type-check.
 - `npm run bump` — Atomically synchronize version across `package.json`, `Cargo.toml`, and `tauri.conf.json`.
 
+### Standard Git Commit & Per-File Breakdown Protocol
+Whenever the user asks for a commit message or to commit changes:
+1. **General Commit Message**:
+   - Format with Conventional Commits (`feat(...)`, `fix(...)`, `perf(...)`, `refactor(...)`, etc.) and a high-impact title.
+   - Include bulleted summaries of modified/created files detailing architectural decisions and Pillar compliance.
+2. **Per-File Architectural Commit Breakdown Table**:
+   - Provide a structured table with: `Layer`, `File` (clickable `file:///` link), and `Commit Message & Description`.
+3. **Direct Execution ("do it for me")**:
+   - When requested to execute or commit directly, verify `cargo check`/build, stage all relevant changes, and execute `git commit` with the structured message.
+
 ### Compilation Invariant
 - **No Automatic Production Binary Builds**: Agents must **NEVER** run `cargo build --release` or `npm run tauri:build` autonomously after completing tasks. Full compilation is exclusively initiated by the user or via the root control center (`run.bat` / `run.ps1`).
 - **Universal Rule — Never Assume, Always Ask**: If user requirements or aesthetic nuances are ambiguous, agents must ask clarifying questions before committing changes.
+
