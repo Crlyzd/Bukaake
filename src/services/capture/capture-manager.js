@@ -121,7 +121,7 @@ export class CaptureManager {
       <div class="complete-actions">
         <button class="complete-btn play" id="btnPostPlay" title="Play Video Directly"><i class="ri-play-fill"></i> <span>Play</span></button>
         <button class="complete-btn folder" id="btnPostFolder" title="Show in Windows Explorer"><i class="ri-folder-open-line"></i> <span>Folder</span></button>
-        <button class="complete-btn alitken" id="btnPostAlitken" title="Open with Alitken Media Converter"><i class="ri-magic-line"></i> <span>Open in Alitken</span></button>
+        <button class="complete-btn alitken" id="btnPostAlitken" title="Open with Alitken Media Converter"><span>Open in Alitken</span></button>
         <button class="complete-btn close" id="btnPostClose" title="Dismiss"><i class="ri-close-line"></i></button>
       </div>`;
 
