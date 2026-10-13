@@ -26,7 +26,8 @@ export function bindClickAndAccordionSettings() {
     });
   });
 
-  // 2. Click Highlights & Click Sounds Toggles
+  // 2. Cursor, Click Highlights & Click Sounds Toggles
+  const toggleRecordCursor = document.getElementById('toggleRecordCursor');
   const toggleClickHighlights = document.getElementById('toggleClickHighlights');
   const toggleClickSounds = document.getElementById('toggleClickSounds');
   const rowClickVolume = document.getElementById('rowClickVolume');
@@ -36,6 +37,13 @@ export function bindClickAndAccordionSettings() {
     const isSoundsOn = localStorage.getItem('bukaake-record-click-sounds') !== 'false';
     rowClickVolume.classList.toggle('hidden', !isSoundsOn);
   };
+
+  if (toggleRecordCursor) {
+    toggleRecordCursor.checked = localStorage.getItem('bukaake-record-cursor') !== 'false';
+    toggleRecordCursor.addEventListener('change', () => {
+      localStorage.setItem('bukaake-record-cursor', toggleRecordCursor.checked ? 'true' : 'false');
+    });
+  }
 
   if (toggleClickHighlights) {
     toggleClickHighlights.checked = localStorage.getItem('bukaake-record-click-highlights') !== 'false';

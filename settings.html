@@ -236,14 +236,26 @@
             </div>
           </div>
 
-          <!-- Group 3: Mouse Click Effects -->
+          <!-- Group 3: Mouse & Click Effects -->
           <div class="settings-section-group" id="groupClicks">
             <button type="button" class="settings-section-header" data-toggle="groupClicks">
-              <span class="accordion-title-text">Mouse Click Effects</span>
+              <span class="accordion-title-text">Mouse & Click Effects</span>
               <span class="accordion-line"></span>
               <i class="ri-arrow-down-s-line accordion-chevron"></i>
             </button>
             <div class="settings-section-content">
+              <!-- Capture Mouse Pointer Toggle -->
+              <div class="row-item">
+                <div class="row-meta">
+                  <span class="row-title">Capture Mouse Pointer</span>
+                  <span class="row-desc">Include the mouse pointer in recorded screen video</span>
+                </div>
+                <label class="settings-toggle-switch toggle" title="Record mouse pointer in recording">
+                  <input type="checkbox" id="toggleRecordCursor" />
+                  <span class="settings-toggle-slider toggle-slider"></span>
+                </label>
+              </div>
+
               <!-- Mouse Click Highlights Toggle -->
               <div class="row-item">
                 <div class="row-meta">

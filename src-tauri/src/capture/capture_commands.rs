@@ -38,6 +38,7 @@ pub fn start_native_recording(
     show_click_effects: Option<bool>,
     sound_click_effects: Option<bool>,
     click_volume: Option<f32>,
+    record_cursor: Option<bool>,
 ) -> Result<String, String> {
     let temp_dir = std::env::temp_dir().join("Bukaake").join("captures");
     let _ = fs::create_dir_all(&temp_dir);
@@ -54,6 +55,7 @@ pub fn start_native_recording(
         show_click_effects.unwrap_or(true),
         sound_click_effects.unwrap_or(true),
         click_volume,
+        record_cursor.unwrap_or(true),
     )
 }
 

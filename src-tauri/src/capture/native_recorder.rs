@@ -68,6 +68,7 @@ pub fn start_native_recording(
     show_clicks: bool,
     sound_clicks: bool,
     click_volume: Option<f32>,
+    record_cursor: bool,
 ) -> Result<String, String> {
     stop_native_recording().ok();
 
@@ -135,7 +136,7 @@ pub fn start_native_recording(
     let min_frame_interval_100ns = (10_000_000 / target_fps as i64) - 20_000;
 
     // Start WGC capture session
-    let session = WgcCaptureSession::new(&d3d, None, true, move |frame| {
+    let session = WgcCaptureSession::new(&d3d, None, record_cursor, move |frame| {
         if !running_frame.load(Ordering::Relaxed) || paused_frame.load(Ordering::Relaxed) {
             return;
         }

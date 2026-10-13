@@ -71,6 +71,7 @@ export class ScreenRecorderService {
     const soundClickEffects = localStorage.getItem('bukaake-record-click-sounds') !== 'false';
     const savedVol = parseInt(localStorage.getItem('bukaake-click-sound-volume') || '70', 10);
     const clickVolume = Number.isFinite(savedVol) ? Math.max(0, Math.min(100, savedVol)) / 100 : 0.7;
+    const recordCursor = localStorage.getItem('bukaake-record-cursor') !== 'false';
 
     try {
       this.tempFilePath = await invoke('start_native_recording', {
@@ -83,6 +84,7 @@ export class ScreenRecorderService {
         showClickEffects,
         soundClickEffects,
         clickVolume,
+        recordCursor,
       });
 
       this.state = 'recording';
