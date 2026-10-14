@@ -11,6 +11,13 @@ pub fn suppress_edge_resize(window: &tauri::WebviewWindow) {
     if let Ok(hwnd) = window.hwnd() {
         unsafe {
             let win32_hwnd = HWND(hwnd.0);
+            let disable: windows::Win32::Foundation::BOOL = true.into();
+            let _ = windows::Win32::Graphics::Dwm::DwmSetWindowAttribute(
+                win32_hwnd,
+                windows::Win32::Graphics::Dwm::DWMWA_TRANSITIONS_FORCEDISABLED,
+                &disable as *const _ as *const _,
+                std::mem::size_of::<windows::Win32::Foundation::BOOL>() as u32,
+            );
             let _ = SetWindowSubclass(
                 win32_hwnd,
                 Some(suppress_edge_resize_subclass_proc),
@@ -65,12 +72,20 @@ pub fn suppress_titlebar_maximize(window: &tauri::WebviewWindow) {
     use tauri::Manager;
     use windows::Win32::Foundation::HWND;
     use windows::Win32::UI::Shell::SetWindowSubclass;
+    use windows::Win32::Graphics::Dwm::{DwmSetWindowAttribute, DWMWA_TRANSITIONS_FORCEDISABLED};
 
     if let Ok(hwnd) = window.hwnd() {
         let app_handle = window.app_handle().clone();
         let boxed_handle = Box::into_raw(Box::new(app_handle)) as usize;
         unsafe {
             let win32_hwnd = HWND(hwnd.0);
+            let disable: windows::Win32::Foundation::BOOL = true.into();
+            let _ = DwmSetWindowAttribute(
+                win32_hwnd,
+                DWMWA_TRANSITIONS_FORCEDISABLED,
+                &disable as *const _ as *const _,
+                std::mem::size_of::<windows::Win32::Foundation::BOOL>() as u32,
+            );
             let _ = SetWindowSubclass(
                 win32_hwnd,
                 Some(titlebar_maximize_subclass_proc),
@@ -96,7 +111,7 @@ unsafe extern "system" fn titlebar_maximize_subclass_proc(
     use windows::Win32::Foundation::LRESULT;
     use windows::Win32::UI::Shell::DefSubclassProc;
     use windows::Win32::UI::WindowsAndMessaging::{
-        HTCAPTION, SC_MAXIMIZE, WM_NCLBUTTONDBLCLK, WM_NCDESTROY, WM_SYSCOMMAND,
+        HTCAPTION, WM_NCLBUTTONDBLCLK, WM_NCDESTROY, WM_SYSCOMMAND,
     };
     use tauri::Emitter;
 
@@ -111,16 +126,7 @@ unsafe extern "system" fn titlebar_maximize_subclass_proc(
             }
             DefSubclassProc(hwnd, msg, wparam, lparam)
         }
-        WM_SYSCOMMAND => {
-            if (wparam.0 as u32 & 0xFFF0) == SC_MAXIMIZE {
-                if ref_data != 0 {
-                    let app = &*(ref_data as *const tauri::AppHandle);
-                    let _ = app.emit("bukaake-toggle-mode", ());
-                }
-                return LRESULT(0);
-            }
-            DefSubclassProc(hwnd, msg, wparam, lparam)
-        }
+        WM_SYSCOMMAND => DefSubclassProc(hwnd, msg, wparam, lparam),
         WM_NCDESTROY => {
             if ref_data != 0 {
                 let _ = Box::from_raw(ref_data as *mut tauri::AppHandle);

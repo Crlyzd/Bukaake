@@ -37,6 +37,7 @@ use imaging::image_loader::{
 use platform::standby::{self, enter_standby, is_standby_enabled, set_standby_enabled, show_main_window, StandbyManager};
 use platform::process_memory;
 use platform::window_subclass;
+use platform::window_transition;
 use platform::updater::{cleanup_old_update_artifacts, download_and_install_update, get_system_arch};
 use platform::package_info::get_distribution_channel;
 use platform::wallpaper::set_wallpaper;
@@ -48,10 +49,15 @@ use platform::window_commands::{
     is_window_fullscreen, play_windows_ding, open_settings_window, hide_settings_window,
     set_window_vibrancy,
 };
+use platform::window_transition::{
+    cloak_main_window, commit_regular_geometry, commit_viewer_geometry, get_main_window_info,
+    get_regular_target_rect, reveal_main_window, set_main_always_on_top,
+};
 use tauri::{Emitter, Manager};
 use tauri_plugin_global_shortcut::ShortcutState;
 
 fn main() {
+    platform::foreground::allow_any_foreground();
     process_memory::configure_low_memory_webview_env();
     cleanup_old_update_artifacts();
     tauri::Builder::default()
@@ -75,15 +81,8 @@ fn main() {
                     if p.is_file() && image_loader::is_image_file(p) { target_file = Some(arg); break; }
                 }
                 if let Some(path) = target_file {
-                    // File association path: unminimize if iconic, switch to fullscreen viewer, and load image
-                    if win.is_minimized().unwrap_or(false) {
-                        let _ = win.unminimize();
-                    }
-                    let _ = win.show();
-                    let _ = win.set_fullscreen(true);
-                    #[cfg(target_os = "windows")]
-                    let _ = window_vibrancy::clear_acrylic(&win);
-                    let _ = win.set_focus();
+                    // File association path: JS decodes first, then reveals via commit_viewer_geometry
+                    // (cloaked maximize + foreground) so no empty or stale window ever flashes.
                     let _ = win.emit("bukaake://open-path", path);
                 } else {
                     // Bare exe/shortcut re-launch: restore to Mode 1 and signal JS to reset UI
@@ -91,8 +90,8 @@ fn main() {
                     let _ = win.unminimize();
                     let _ = win.set_maximizable(false);
                     let _ = win.emit("bukaake://wake-from-standby", ());
-                    let _ = win.show();
-                    let _ = win.set_focus();
+                    window_transition::set_cloak(&win, false);
+                    platform::foreground::force_foreground(&win);
                 }
             }
         }))
@@ -117,7 +116,6 @@ fn main() {
                     let _ = main_win.set_shadow(true);
                     window_subclass::suppress_titlebar_maximize(&main_win);
                     if has_img {
-                        let _ = main_win.set_fullscreen(true);
                         let _ = window_vibrancy::clear_acrylic(&main_win);
                     } else {
                         let _ = window_vibrancy::apply_acrylic(&main_win, tint);
@@ -189,6 +187,9 @@ fn main() {
             start_audio_capture, stop_audio_capture, set_recording_mic_muted, set_recording_audio_volumes,
             set_wallpaper,
             get_distribution_channel,
+            cloak_main_window, get_main_window_info, get_regular_target_rect,
+            commit_viewer_geometry, commit_regular_geometry, reveal_main_window,
+            set_main_always_on_top,
             process_memory::trim_memory_working_set
         ])
         .run(tauri::generate_context!())

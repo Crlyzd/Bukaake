@@ -54,14 +54,23 @@ pub fn activate_main_window(app: &tauri::AppHandle) {
         let is_visible = win.is_visible().unwrap_or(false);
 
         if !is_visible {
+            crate::platform::window_transition::set_cloak(&win, true);
+            let _ = win.set_always_on_top(false);
             let _ = win.set_fullscreen(false);
-            let _ = win.set_size(tauri::Size::Logical(tauri::LogicalSize { width: 680.0, height: 480.0 }));
+            let _ = win.unmaximize();
+            let target = crate::platform::window_transition::regular_target(&win, 680.0, 480.0);
+            crate::platform::window_transition::apply_rect(&win, target);
+            #[cfg(target_os = "windows")]
+            {
+                let tint = Some((16, 19, 28, 175));
+                let _ = window_vibrancy::apply_acrylic(&win, tint);
+            }
             let _ = win.emit("bukaake://wake-from-standby", ());
+            crate::platform::foreground::force_foreground(&win);
+        } else {
+            crate::platform::window_transition::set_cloak(&win, false);
+            crate::platform::foreground::force_foreground(&win);
         }
-
-        let _ = win.unminimize();
-        let _ = win.show();
-        let _ = win.set_focus();
     }
 }
 
@@ -150,9 +159,8 @@ pub fn show_main_window(app_handle: tauri::AppHandle) -> Result<(), String> {
 
     crate::platform::reclaim::cancel_reclaim();
     if let Some(win) = app_handle.get_webview_window("main") {
-        let _ = win.unminimize();
-        let _ = win.show();
-        let _ = win.set_focus();
+        crate::platform::window_transition::set_cloak(&win, false);
+        crate::platform::foreground::force_foreground(&win);
     }
     Ok(())
 }

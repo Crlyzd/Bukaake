@@ -11,3 +11,5 @@ pub mod window_commands;
 pub mod window_subclass;
 pub mod package_info;
 pub mod wallpaper;
+pub mod foreground;
+pub mod window_transition;
