@@ -15,6 +15,10 @@
   --transition-fast: 0.16s cubic-bezier(0.16, 1, 0.3, 1);
   --transition-normal: 0.24s cubic-bezier(0.16, 1, 0.3, 1);
 
+  /* Mode 1 <-> Mode 2 Morph Choreography */
+  --mode-transition-duration: 260ms;
+  --mode-transition-ease: cubic-bezier(0.22, 1, 0.36, 1);
+
   /* Window Transparency & Opacity Control (Default ~35%) */
   --window-opacity: 0.35;
 

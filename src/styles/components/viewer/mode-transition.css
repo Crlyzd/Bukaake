@@ -1,0 +1,63 @@
+/* ==========================================================================
+   Bukaake Mode Transition Choreography (< 80 lines)
+   Drives the Mode 1 <-> Mode 2 morph and Explorer reveal entrance.
+   Mode 2 end state is untouched: transparent, brightness(0.75), zero blur.
+   ========================================================================== */
+
+/* Mode 2 desktop dim fades in/out instead of snapping */
+html body.mode-viewer {
+  transition:
+    background var(--mode-transition-duration) var(--mode-transition-ease),
+    backdrop-filter var(--mode-transition-duration) var(--mode-transition-ease),
+    -webkit-backdrop-filter var(--mode-transition-duration) var(--mode-transition-ease) !important;
+}
+
+/* Dim released: pure desktop shows through while the image morphs */
+html body.mode-viewer.mode-dim-off {
+  background: transparent !important;
+  backdrop-filter: brightness(1) !important;
+  -webkit-backdrop-filter: brightness(1) !important;
+}
+
+/* Ghost chrome stays hidden mid-morph, then fades back via its own transition */
+html body.mode-viewer.mode-transitioning .app-titlebar,
+html body.mode-viewer.mode-transitioning .floating-toolbar {
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+/* Explorer reveal entrance: image fades up while scaling into its fit */
+html body.mode-viewer #imageCanvas {
+  transition: opacity var(--mode-transition-duration) var(--mode-transition-ease);
+}
+
+html body.mode-viewer.mode-entrance #imageCanvas {
+  opacity: 0;
+}
+
+/* Snap phase (window cloaked): every style change lands instantly, no tweening */
+html body.mode-snap,
+html body.mode-snap * {
+  transition: none !important;
+}
+
+/* Picasa-style smooth dissolve exit into wallpaper on Esc / close */
+html body.mode-viewer.mode-dismissing #imageCanvas {
+  opacity: 0 !important;
+  transition: opacity 180ms cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+html body.mode-viewer.mode-dismissing {
+  background: transparent !important;
+  backdrop-filter: brightness(1) !important;
+  -webkit-backdrop-filter: brightness(1) !important;
+  transition: background 180ms ease, backdrop-filter 180ms ease !important;
+}
+
+html body.mode-viewer.mode-dismissing .app-titlebar,
+html body.mode-viewer.mode-dismissing .floating-toolbar {
+  opacity: 0 !important;
+  pointer-events: none !important;
+  transition: opacity 120ms ease !important;
+}
+

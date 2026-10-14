@@ -29,8 +29,6 @@ body.mode-regular .app-titlebar {
   overflow: visible;
 }
 
-
-
 body.mode-regular .viewport-container {
   top: var(--titlebar-height) !important;
   bottom: 0;
@@ -92,6 +90,27 @@ body.mode-viewer .viewport-container {
   background: transparent !important;
 }
 
+/* Mode 2 Maximized: Win32 8px overscan bleed compensation */
+body.mode-viewer.window-maximized {
+  padding: 8px !important;
+  box-sizing: border-box !important;
+}
+
+body.mode-viewer.window-maximized .viewport-container {
+  top: 8px !important;
+  bottom: 8px !important;
+  left: 8px !important;
+  right: 8px !important;
+}
+
+body.mode-viewer.window-maximized .app-titlebar {
+  top: calc(6.25vh + 8px) !important;
+}
+
+body.mode-viewer.window-maximized.image-loaded .floating-toolbar {
+  bottom: calc(80px + 8px) !important;
+}
+
 /* --------------------------------------------------------------------------
    Mode 2: Floating Filename + Info Overlay (Zero Bars / Zero Pills)
    -------------------------------------------------------------------------- */
@@ -115,6 +134,7 @@ body.mode-viewer .app-titlebar {
   justify-content: center !important;
   gap: 16px !important;
   z-index: 50 !important;
+  transition: opacity var(--transition-fast) !important;
 }
 
 body.mode-viewer .app-titlebar .titlebar-left {
@@ -135,18 +155,12 @@ body.mode-viewer .app-titlebar .titlebar-right {
 }
 
 /* Suppress all chrome, buttons, branding, and startpage drop-zone in Mode 2 */
-body.mode-viewer .drop-zone,
-body.mode-viewer .app-logo,
-body.mode-viewer .app-name,
-body.mode-viewer .app-version,
-body.mode-viewer #titlebarSep,
-body.mode-viewer .window-controls,
-body.mode-viewer .titlebar-divider,
-body.mode-viewer #btnOpenFile,
-body.mode-viewer #btnClipboard,
-body.mode-viewer #btnThemeToggle,
-body.mode-viewer #btnSettings,
-body.mode-viewer #btnTitlebarCapture {
+body.mode-viewer .drop-zone, body.mode-viewer .app-logo,
+body.mode-viewer .app-name, body.mode-viewer .app-version,
+body.mode-viewer #titlebarSep, body.mode-viewer .window-controls,
+body.mode-viewer .titlebar-divider, body.mode-viewer #btnOpenFile,
+body.mode-viewer #btnClipboard, body.mode-viewer #btnThemeToggle,
+body.mode-viewer #btnSettings, body.mode-viewer #btnTitlebarCapture {
   display: none !important;
 }
 

@@ -14,6 +14,7 @@
 @import './components/modals/shortcuts.css';
 @import './components/viewer/toast.css';
 @import './components/viewer/modes.css';
+@import './components/viewer/mode-transition.css';
 @import './components/settings/settings.css';
 @import './components/settings/settings-nav.css';
 @import './components/settings/settings-assoc.css';
