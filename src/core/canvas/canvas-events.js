@@ -6,6 +6,10 @@ export function attachCanvasInteractions(viewer) {
   const { canvas } = viewer;
 
   const handleResize = () => {
+    if (document.body.classList.contains('mode-transitioning') ||
+        document.body.classList.contains('mode-snap')) {
+      return;
+    }
     if (!viewer.img) {
       viewer.resizeCanvas();
       return;
