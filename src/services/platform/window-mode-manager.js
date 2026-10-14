@@ -5,6 +5,8 @@
  */
 
 import { tauriBridge } from './tauri-bridge.js';
+import { windowBridge } from './window-bridge.js';
+import { modeTransition } from './mode-transition.js';
 
 export const MODE_REGULAR = 'mode-regular';
 export const MODE_VIEWER = 'mode-viewer';
@@ -17,7 +19,9 @@ export class WindowModeManager {
     this.onModeChange = options.onModeChange || null;
     this.lastAspectSize = null;
     this.isPendingPathLoad = false;
+    this.isTransitioning = false;
 
+    if (this.viewer) modeTransition.setViewer(this.viewer);
     this.init();
   }
 
@@ -26,13 +30,29 @@ export class WindowModeManager {
     this.bindWindowEvents();
     if (tauriBridge.isTauri() && window.__TAURI__?.event?.listen) {
       window.__TAURI__.event.listen('bukaake-toggle-mode', () => {
-        if (this.viewer?.img) this.toggleMode();
+        if (this.viewer?.img && !this.isTransitioning && !modeTransition.isTransitioning) {
+          this.toggleMode();
+        }
+      });
+      window.__TAURI__.event.listen('settings-changed', async (e) => {
+        if (e.payload?.mode2Style && this.currentMode === MODE_VIEWER) {
+          if (e.payload.mode2Style === 'fullscreen') {
+            await windowBridge.setAlwaysOnTop(true);
+            await tauriBridge.setFullscreen(true);
+          } else {
+            await windowBridge.setAlwaysOnTop(false);
+            await tauriBridge.setFullscreen(false);
+            await tauriBridge.maximizeBorderless();
+          }
+        }
       });
     }
   }
 
   bindWindowEvents() {
+    let resizeTimer = null;
     const checkState = async () => {
+      if (this.isTransitioning || modeTransition.isTransitioning || this.isPendingPathLoad) return;
       if (document.body.classList.contains('mode-capturing') ||
           document.body.classList.contains('mode-recording-pill') ||
           document.querySelector('.screen-snipper-overlay:not(.hidden)')) {
@@ -51,10 +71,16 @@ export class WindowModeManager {
       }
       const nextMode = (isFs || isMax) ? MODE_VIEWER : MODE_REGULAR;
       if (nextMode !== this.currentMode) {
-        this.updateModeClasses(nextMode);
+        this.updateModeClasses(nextMode, isMax);
+      } else {
+        document.body.classList.toggle('window-maximized', isMax);
       }
     };
-    window.addEventListener('resize', checkState);
+    window.addEventListener('resize', () => {
+      if (this.isTransitioning || modeTransition.isTransitioning) return;
+      if (resizeTimer) cancelAnimationFrame(resizeTimer);
+      resizeTimer = requestAnimationFrame(checkState);
+    });
     document.addEventListener('fullscreenchange', checkState);
   }
 
@@ -92,7 +118,7 @@ export class WindowModeManager {
     this.lastAspectSize = dims;
 
     if (!isExpanded) {
-      this.updateModeClasses(MODE_REGULAR);
+      this.updateModeClasses(MODE_REGULAR, false);
       await tauriBridge.resizeAndCenter(dims.width, dims.height);
       setTimeout(() => {
         this.viewer?.fitToScreen(true);
@@ -113,31 +139,41 @@ export class WindowModeManager {
       tauriBridge.setWindowVibrancy(isDark, true);
     } else {
       document.body.classList.remove(MODE_VIEWER);
+      document.body.classList.remove('window-maximized');
       document.body.classList.add(MODE_REGULAR);
       tauriBridge.setWindowVibrancy(isDark, false);
     }
     this.onModeChange?.(mode);
   }
 
+  getMode2Style() {
+    return localStorage.getItem('bukaake-mode2-style') || 'maximized';
+  }
+
   async setMode(newMode, force = false) {
+    if (this.isTransitioning || modeTransition.isTransitioning) return;
     if (newMode === MODE_VIEWER) {
       if (!this.viewer?.img && !force) return;
-      this.updateModeClasses(MODE_VIEWER);
-      await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
-      await tauriBridge.setFullscreen(true);
+      modeTransition.setViewer(this.viewer);
+      const style = this.getMode2Style();
+      await modeTransition.enterViewer({
+        style,
+        updateClasses: () => this.updateModeClasses(MODE_VIEWER),
+      });
     } else {
-      this.updateModeClasses(MODE_REGULAR);
-      await tauriBridge.setFullscreen(false);
-      await tauriBridge.unmaximize();
-      if (this.viewer?.img && this.lastAspectSize) {
-        await tauriBridge.resizeAndCenter(this.lastAspectSize.width, this.lastAspectSize.height);
-      }
+      modeTransition.setViewer(this.viewer);
+      const isDark = !document.body.classList.contains('light-theme');
+      const dims = this.lastAspectSize || { width: 680, height: 480 };
+      await modeTransition.exitViewer({
+        dims,
+        isDark,
+        updateClasses: () => this.updateModeClasses(MODE_REGULAR),
+      });
     }
-    setTimeout(() => { this.viewer?.fitToScreen(); }, 80);
-    setTimeout(() => { this.viewer?.fitToScreen(); }, 220);
   }
 
   async toggleMode() {
+    if (this.isTransitioning || modeTransition.isTransitioning) return;
     const isFs = await tauriBridge.isFullscreen();
     const isMax = await tauriBridge.isMaximized();
     if (isFs || isMax || this.currentMode === MODE_VIEWER) {

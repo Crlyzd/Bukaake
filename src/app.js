@@ -33,6 +33,9 @@ import { standbyService } from './services/platform/standby-service.js';
 import { CaptureManager } from './services/capture/capture-manager.js';
 import { themeManager } from './services/platform/theme-manager.js';
 import { RawLoadController } from './services/image/raw-load-controller.js';
+import { ExternalOpenController } from './services/platform/external-open-controller.js';
+import { windowBridge } from './services/platform/window-bridge.js';
+import { modeTransition } from './services/platform/mode-transition.js';
 
 const RAW_EXTS = new Set(['arw', 'srf', 'sr2', 'cr2', 'cr3', 'nef', 'nrw', 'dng', 'raf', 'rw2', 'orf', 'pef', '3fr', 'mrw', 'srw', 'x3f', 'mos', 'mef', 'raw', 'kdc', 'dcr', 'rwl', 'iiq', 'erf']);
 
@@ -137,7 +140,7 @@ class BukaakeApp {
       const ext = (meta.name || '').split('.').pop().toLowerCase();
       this.toolbar.setRawFile(RAW_EXTS.has(ext));
 
-      if (this.windowModeManager.currentMode !== MODE_VIEWER) {
+      if (this.windowModeManager.currentMode !== MODE_VIEWER && !this.windowModeManager.isPendingPathLoad) {
         this.windowModeManager?.applyImageAspectSize(img.naturalWidth || img.width, img.naturalHeight || img.height, 820);
         tauriBridge.setResizable(true);
       }
@@ -203,7 +206,16 @@ class BukaakeApp {
         if (this.cropper?.active) return this.toolsManager.toggleCrop(false);
         if (this.adjustmentsPanel.isOpen()) return this.toolsManager.closeAdjustments();
         for (const m of [this.metadataDrawer, this.settingsModal, this.shortcutsModal]) if (m.isOpen()) return m.hide();
-        this.confirmModal.promptIfDirty(() => this.enterStandby(), () => this.saveImage());
+        this.confirmModal.promptIfDirty(
+          () => {
+            if (this.windowModeManager.currentMode === MODE_VIEWER) {
+              modeTransition.dismissViewer({ onComplete: () => this.enterStandby() });
+            } else {
+              this.enterStandby();
+            }
+          },
+          () => this.saveImage()
+        );
       },
     });
   }
@@ -215,21 +227,15 @@ class BukaakeApp {
     tauriBridge.onSettingsModalState((open) => shield?.classList.toggle('hidden', !open));
     shield?.addEventListener('mousedown', (e) => { e.preventDefault(); e.stopPropagation(); tauriBridge.playWindowsDing(); tauriBridge.openSettingsWindow(); });
     this.titlebar.syncMaximizedState(await tauriBridge.isFullscreen());
+    this.externalOpenController = new ExternalOpenController({
+      windowModeManager: this.windowModeManager,
+      fileLoader: this.fileLoader,
+      loadingIndicator,
+      dropZoneEl: this.dropZoneEl,
+    });
+
     await standbyService.init({
-      onOpenPath: async (p) => {
-        this.dropZoneEl.style.display = 'none';
-        this.windowModeManager.isPendingPathLoad = true;
-        await this.windowModeManager.setMode(MODE_VIEWER, true);
-        const name = p.split(/[/\\]/).pop() || 'image';
-        loadingIndicator.show(`Loading ${name}...`);
-        try {
-          const ctx = await tauriBridge.readImageContext(p);
-          if (ctx) this.fileLoader.loadFromTauriContext(ctx);
-          else { loadingIndicator.hide(); toast.warn(`Unsupported file format: ${name}`); }
-        } finally {
-          this.windowModeManager.isPendingPathLoad = false;
-        }
-      },
+      onOpenPath: (p) => this.externalOpenController.openFromPath(p),
       onOpenSettings: async () => { if (!(await tauriBridge.openSettingsWindow())) this.settingsModal.toggle(); },
       onWakeFromStandby: () => this.wakeFromStandby(),
     });
@@ -237,19 +243,16 @@ class BukaakeApp {
     try {
       const initial = await tauriBridge.getInitialImage();
       if (initial?.target_path) {
-        this.windowModeManager.isPendingPathLoad = true;
-        await this.windowModeManager.setMode(MODE_VIEWER, true);
-        loadingIndicator.show(`Loading ${initial.file_name}...`);
-        document.body.classList.add('image-loaded');
-        this.dropZoneEl.style.display = 'none';
-        this.fileLoader.loadFromTauriContext(initial);
-        this.windowModeManager.isPendingPathLoad = false;
+        await this.externalOpenController.openContext(initial, { isStartup: true });
       } else {
         if (initial?.error) toast.warn(initial.error);
         await tauriBridge.resizeAndCenter(680, 480);
+        await tauriBridge.invoke('show_main_window');
       }
-    } catch (err) { console.warn('[Bukaake] Startup check failed:', err); }
-    await tauriBridge.invoke('show_main_window');
+    } catch (err) {
+      console.warn('[Bukaake] Startup check failed:', err);
+      await tauriBridge.invoke('show_main_window');
+    }
   }
 
   updateStatusBadges() {
@@ -281,7 +284,7 @@ class BukaakeApp {
     this.rawLoadController.loadFullRaw(this.fileLoader.currentMeta, this.toolsManager?.isEditing());
   }
 
-  handleEmptyState() {
+  handleEmptyState(skipResize = false) {
     this.rawLoadController.cancel();
     if (this.windowModeManager) { this.windowModeManager.lastAspectSize = null; this.windowModeManager.updateModeClasses(MODE_REGULAR); }
     this.fileLoader?.clearItems();
@@ -296,7 +299,7 @@ class BukaakeApp {
     this.titlebar.setFileName(''); this.titlebar.setHasImage(false);
     this.toolbar.updateCounter(0, -1); this.idleController?.refreshState();
     this.toolbar.setRawFile(false);
-    tauriBridge.resizeAndCenter(680, 480);
+    if (!skipResize) tauriBridge.resizeAndCenter(680, 480);
   }
 
   handleNavigateBatch(delta) {
@@ -331,8 +334,11 @@ class BukaakeApp {
     });
   }
 
-  enterStandby() { standbyService.enterStandby({ viewer: this.viewer, fileLoader: this.fileLoader, onHidden: () => this.handleEmptyState() }); }
-  async wakeFromStandby() { this.handleEmptyState(); await this.windowModeManager.setMode(MODE_REGULAR); }
+  enterStandby() { standbyService.enterStandby({ viewer: this.viewer, fileLoader: this.fileLoader, onHidden: () => this.handleEmptyState(true) }); }
+  async wakeFromStandby() {
+    this.handleEmptyState(true);
+    requestAnimationFrame(() => windowBridge.cloak(false));
+  }
 }
 
 document.addEventListener('DOMContentLoaded', () => { window.app = new BukaakeApp(); });

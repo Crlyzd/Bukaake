@@ -114,6 +114,14 @@ export class Titlebar {
 
     window.addEventListener('resize', () => this.syncMaximizedState());
     document.addEventListener('fullscreenchange', () => this.syncMaximizedState());
+    window.addEventListener('storage', (e) => {
+      if (e.key === 'bukaake-mode2-style') this.updateMaxButtonTitle();
+    });
+    if (tauriBridge.isTauri() && window.__TAURI__?.event?.listen) {
+      window.__TAURI__.event.listen('settings-changed', (e) => {
+        if (e.payload?.mode2Style) this.updateMaxButtonTitle();
+      });
+    }
   }
 
   bindActionButtons() {
@@ -157,13 +165,17 @@ export class Titlebar {
   }
 
   async syncMaximizedState(forceState = null) {
-    let isExpanded = forceState;
-    if (isExpanded === null) {
-      const isFs = await tauriBridge.isFullscreen();
-      const isMax = await tauriBridge.isMaximized();
-      isExpanded = Boolean(isFs || isMax);
+    let isMax = false;
+    let isFs = false;
+    if (forceState !== null) {
+      isMax = Boolean(forceState);
+      isFs = !forceState && await tauriBridge.isFullscreen();
+    } else {
+      isFs = await tauriBridge.isFullscreen();
+      isMax = await tauriBridge.isMaximized();
     }
-    document.body.classList.toggle('window-maximized', isExpanded);
+    const isExpanded = Boolean(isFs || isMax);
+    document.body.classList.toggle('window-maximized', isMax);
 
     if (this.btnMax) {
       const icon = this.btnMax.querySelector('i');
@@ -180,9 +192,11 @@ export class Titlebar {
 
   updateMaxButtonTitle() {
     if (!this.btnMax) return;
+    const isMaxStyle = (localStorage.getItem('bukaake-mode2-style') || 'maximized') === 'maximized';
+    const actionName = isMaxStyle ? 'Maximize Viewer' : 'Fullscreen Viewer';
     this.btnMax.title = !this.hasImage
-      ? 'Fullscreen Viewer (Load an image first)'
-      : 'Fullscreen Viewer (F11)';
+      ? `${actionName} (Load an image first)`
+      : `${actionName} (F11 / Enter)`;
   }
 
   setFileName(name) {

@@ -110,7 +110,7 @@ export class FileLoader {
     });
   }
 
-  loadFromTauriContext(payload) {
+  async loadFromTauriContext(payload) {
     if (!payload?.target_path) return;
     this.items = payload.neighbors?.length > 0
       ? payload.neighbors.map((n) => ({ type: 'tauri', path: n.path, name: n.name, sizeBytes: n.size_bytes }))
@@ -119,7 +119,7 @@ export class FileLoader {
 
     this.emitListChanged();
     this.onLoadingStart?.(`Loading ${payload.file_name}...`);
-    this.createImageFromUrl(payload.data_url, {
+    return await this.createImageFromUrl(payload.data_url, {
       name: payload.file_name, path: payload.target_path, sizeBytes: payload.size_bytes,
       dimensions: payload.dimensions, mimeType: payload.mime_type,
       lastModified: payload.last_modified, exif: payload.exif,
