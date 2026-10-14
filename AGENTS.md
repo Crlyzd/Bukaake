@@ -52,12 +52,13 @@ All agents working on this repository **MUST** strictly enforce these five non-n
 The project contains **100+ modular files** cleanly organized across distinct layers:
 
 ```
+history.md               # Living project documentation, agent memory & mistake log
 src/
 ├── components/          # UI Component Modules (< 300 lines each)
 │   ├── viewer/                 # Main viewing chrome (titlebar, titlebar-loader, toolbar, context menu, toast)
 │   ├── modals/                 # Modals (confirm, delete, shortcuts)
-│   ├── capture/                # Screen snipper, recording dock, OCR & tools
-│   ├── settings/               # Settings window sections & modal
+│   ├── capture/                # Screen snipper, action dock, color picker, OCR & recording dock
+│   ├── settings/               # Settings window sections (capture, audio, click, tandem, modal)
 │   └── text/                   # Floating text typography sub-toolbar
 ├── core/                # Canvas & Image Math Engines (< 300 lines each)
 │   ├── canvas/                 # Canvas viewer engine, events & helpers
@@ -70,7 +71,7 @@ src/
 │   ├── platform/               # Windows OS, autostart, file assoc, updater-launch-gate, tray & window mode
 │   ├── image/                  # Image loader, prefetch cache, RAW load controller & file exporter
 │   ├── interaction/            # Hotkeys, shortcuts, idle controller & change tracker
-│   ├── capture/                # Screen capture, native recorder, audio & screenshot saver
+│   ├── capture/                # Screen capture, native recorder, audio stream receiver & screenshot saver
 │   └── integrations/           # External companion integrations (Alitken, Cathet)
 ├── styles/              # Stroke-Free Modular Stylesheets (< 300 lines each)
 │   ├── base.css, glass.css, main.css, tokens.css
@@ -92,9 +93,13 @@ src-tauri/src/
 │   ├── audio_capture.rs        # WASAPI loopback & microphone audio capture
 │   ├── audio_mixer.rs          # FIFO resampling queue, clock sync & peak limiter
 │   ├── capture_commands.rs     # Screen snip & recording IPC commands
+│   ├── click_coordinator.rs    # Low-level click event and visual/audio coordinator
+│   ├── click_overlay.rs        # Stroke-free translucent animated click ripple overlay
+│   ├── click_sound.rs          # Tactile mechanical click audio synthesizer
 │   ├── d3d_device.rs           # Direct3D 11 device & WinRT interop
 │   ├── ebml_patcher.rs         # WebM duration & seek header patcher
 │   ├── external_launch.rs      # Alitken companion launcher & file pickers (< 75 lines)
+│   ├── mouse_hook.rs           # Win32 low-level mouse hook (WH_MOUSE_LL)
 │   ├── native_recorder.rs      # GPU capture orchestrator & audio PTS sync
 │   ├── recording_border.rs     # Stroke-free capture region border overlay
 │   ├── recording_pill.rs       # Floating desktop recording pill controller
@@ -118,6 +123,7 @@ src-tauri/src/
 │   ├── file_assoc.rs           # HKCU shell registration & auto-heal
 │   ├── file_ops.rs             # Win32 Recycle Bin deletion (SHFileOperationW)
 │   ├── hotkeys.rs              # Win32 global shortcut listener
+│   ├── package_info.rs         # MSIX package identity & Store runtime detection (< 70 lines)
 │   ├── process_memory.rs       # Working set telemetry & memory trimming
 │   ├── reclaim.rs              # Idle working set memory reclaim coordinator (< 110 lines)
 │   ├── standby.rs              # Tray lifecycle & working set memory trimming
@@ -152,6 +158,11 @@ src-tauri/src/
     - Standard mode records at uniform 60 FPS (Balanced 6 Mbps, High 12 Mbps, Ultra 24 Mbps).
     - Space Saver mode yields ~75% file size reduction via 30 FPS profiles at 25% target bitrates (Balanced 1.5 Mbps, High 3 Mbps, Ultra 6 Mbps) with native recorder clamp floor reduced to 500 Kbps.
     - Dynamic dropdown labels adapt immediately to the toggle state in real time.
+  - **Click Highlights & Tactile Sound Feedback (`mouse_hook.rs`, `click_coordinator.rs`, `click_overlay.rs`, `click_sound.rs`, `settings-click-section.js`)**:
+    - Win32 low-level mouse hook (`WH_MOUSE_LL`) detects left/right mouse clicks exclusively during active screen recording sessions.
+    - `click_coordinator.rs` triggers stroke-free animated ripple rings (`click_overlay.rs`) centered on cursor coordinates.
+    - Synthesizes tactile mechanical click audio (`click_sound.rs`) mixed into WASAPI audio streams or playback feeds.
+    - Configurable cursor visibility toggle (`includeCursor`), click highlight ripple toggle, and audio click toggle persisted in settings with collapsible accordion UI.
   - Stroke-free frosted recording dock with live timer, pause/resume, and stop/discard buttons.
   - Native overlay border around recorded region (`recording_border.rs`) with zero window chrome. Automatic toast notification and optional external editor launch upon finalization.
 - **Dedicated Transparent Overlay Window (`snipper.html`, `snipper-app.js`, `tauri.conf.json`)**:
@@ -214,10 +225,10 @@ src-tauri/src/
   - **Win32 Titlebar Maximize Interception Invariant**: The main window subclasses `WM_NCLBUTTONDBLCLK` and `SC_MAXIMIZE` in `window_subclass.rs` to intercept titlebar double-clicks and DWM maximize requests, routing them smoothly via the `bukaake-toggle-mode` event directly into Mode 2 transparent fullscreen without DWM maximize flash or Acrylic recreation flicker.
   - **Return-to-Start Brand Button & Window Reset**: The titlebar app icon converts to an interactive back button (`ri-arrow-left-line`) with cross-fade on hover in Mode 1 when an image is loaded. Clicking checks `changeTracker.hasUnsavedChanges()` before triggering the confirmation dialog, clears the active image, and resets/centers the window dimensions back to the default 680×480 start state.
   - **Empty State Aspect Isolation**: In `window-mode-manager.js`, `resizeAndCenter` is strictly guarded by `if (this.viewer?.img && this.lastAspectSize)`. `handleEmptyState()` must always clear `this.windowModeManager.lastAspectSize = null`.
-- **Microsoft Store & Desktop Bridge MSIX Packaging (`scripts/package-msix.ps1`, `packaging/`)**:
+- **Microsoft Store & Desktop Bridge MSIX Packaging (`scripts/package-msix.ps1`, `packaging/`, `package_info.rs`)**:
   - Automated packaging pipeline generating signed and unsigned `.msix` Desktop Bridge bundles from release binaries and `package.json` version metadata.
   - Populates `AppxManifest.template.xml` from `packaging/store-config.json`, registering 49 declarative file associations.
-  - Runtime environment detection via Win32 `GetCurrentPackageFamilyNameW` suppresses the GitHub Releases in-app self-updater in favor of Windows Store background update channels.
+  - Runtime environment detection via Win32 `GetCurrentPackageFamilyNameW` (`package_info.rs`) suppresses the GitHub Releases in-app self-updater in favor of Windows Store background update channels.
 - **Shell File Association (`file_assoc.rs`, `file-assoc-service.js`)**:
   - Registers ProgID and capabilities for 49 formats under `HKCU` (zero UAC prompts).
   - Silent auto-healing on startup checks binary location and updates registry commands in-place if executable is moved.
@@ -229,21 +240,28 @@ src-tauri/src/
 ### Agent Output Protocol & Workspace Hygiene
 
 - **Artifact Isolation Protocol**: **ALL planning, analysis, release note drafts, behaviour descriptions, and architectural decisions MUST be written directly into the active task artifact file** in the designated IDE artifact directory (`<appDataDir>\brain\<conversation-id>`). Chat responses may only contain a 1-3 sentence pointer to the artifact plus any open questions.
-- **Zero Artifact Littering Policy**: **Agents must NEVER litter the project workspace with temporary artifacts, drafts, scratch notes, or release note markdown files** (e.g. `RELEASE_NOTES_*.md`, plan docs). The project repository must remain strictly clean and contain only production codebase files, official repository docs (`README.md`, `AGENTS.md`), and build assets.
+- **Zero Artifact Littering Policy**: **Agents must NEVER litter the project workspace with temporary artifacts, drafts, scratch notes, or release note markdown files** (e.g. `RELEASE_NOTES_*.md`, plan docs). The project repository must remain strictly clean and contain only production codebase files, official repository docs (`README.md`, `AGENTS.md`, `history.md`), and build assets.
 
-### Release Notes Invariant: Hyped Milestone Format & Zero-Repetition
+### Project Memory & Documentation Protocol (`history.md`)
 
-Whenever drafted, release notes **MUST ALWAYS** follow this mandatory standard:
-- **Hyped & Celebratory Tone**: Release notes must be high-energy, exciting, and proud—celebrating Bukaake's mission of reviving Google Picasa's distraction-free desktop immersion with modern stroke-free frosted glass and Rust/Tauri v2 warp-speed performance.
-- **Electrifying Structure**:
-  - **Milestone Manifesto**: Grand opening proclamation with celebratory emojis (`🚀 Bukaake vX.Y.Z — THE ... RELEASE! 🎉`).
-  - **High-Impact Superpower Headings**: Bold, catchy feature titles prioritizing user excitement before deep technical explanations (e.g., *🖼️ Native Desktop Wallpaper Engine — Your Art on Your Desktop in 1 Click!*).
-  - **Technical Depth & Mastery**: Back the excitement with exact architectural details (Win32 APIs, zero-copy VRAM blits, zero-Base64 binary streaming, memory clamps, non-blocking thread offloading).
-  - **Curated Commit Table**: Cleanly structured commit log (`Commit`, `Scope`, `Description`).
-  - **Download & Portal CTA**: Clear call-to-action with links to the official website ([bukaake.kaleksananbagus.com](https://bukaake.kaleksananbagus.com)), Microsoft Store ([Listing 9N964R72X9JS](https://apps.microsoft.com/detail/9N964R72X9JS)), and GitHub Releases portable download (~5MB single executable). **Always include the Microsoft Store link**.
-- **Zero-Repetition Policy**: When composing release notes for any release (e.g. v1.0.0), agents **MUST NEVER** repeat features, architectural highlights, or bug fixes that were already documented in prior version release notes (e.g. v0.9.0, v0.8.1, v0.8.0, etc.).
-- **Commit Range Isolation**: Release notes must strictly document novel changes introduced between the previous release tag (`v(N-1)`) and the target release (`vN`).
-- **Pre-Release Audit Requirement**: Agents must cross-reference prior GitHub Releases or git tag history before writing release documentation to ensure all entries are strictly novel.
+- **Mandatory Pre-Planning Check**: Before making ANY plan, architectural decision, or code modification, agents **MUST** view and inspect [history.md](file:///e:/Default/DEVS/Bukaake/history.md). Review the logged mistakes and user corrections to guarantee no previous mistakes are repeated.
+- **Change Logging ("The Gist of It")**: Every time agents modify code across the project, write a concise entry into `history.md` summarizing the changes, affected files, and rationale.
+- **Mistake & Correction Logging**: When the user corrects an agent (e.g., *"don't do this"*, *"this isn't like what I expected"*, *"I never told you to do this"*), the agent **MUST immediately record the mistake** in `history.md` tagged as `[MISTAKE]` and `[CORRECTION]`, explaining what was wrong, why it was wrong, and the strict prevention rule.
+
+### Strict Release Notes Protocol
+
+Whenever the user asks to generate or draft release notes:
+- **Strict Artifact Placement**: **NEVER write release note documents in the project repository folder**. Always write them inside the task artifact directory (`<appDataDir>\brain\<conversation-id>`).
+- **Zero Blockquotes Policy**: **NEVER use `>` markdown quote blocks** in release notes because they degrade formatting aesthetics.
+- **Zero Emojis Policy**: **NEVER use emojis** anywhere in release notes.
+- **Zero Repetition Policy**: **NEVER include any change or bug fix that was already covered in prior release notes**. Strictly document novel changes since the previous release tag.
+- **Professional & Detailed Tone**: Use strictly professional, factual, and objective language. Do not hype up the tone. More technical details and depth is better (APIs, synchronization mechanics, GPU blits, Win32 hooks, memory bounds).
+- **Zero Download Links Policy**: **DO NOT include any download links**.
+- **Mandatory 4-Part Structure**:
+  1. **Title**
+  2. **Target of the change / release note**
+  3. **Summary of the change**
+  4. **Detailed changes**: detailing what changed, explaining why the change was made, bug fixing (if any), technical details, and what commits are covered by the release note.
 
 ### Fast Validation Commands
 - `npm run dev` — Launch Vite dev server on port 3000.
@@ -252,15 +270,16 @@ Whenever drafted, release notes **MUST ALWAYS** follow this mandatory standard:
 - `cargo check --manifest-path src-tauri/Cargo.toml` — Fast backend type-check.
 - `npm run bump` — Atomically synchronize version across `package.json`, `Cargo.toml`, and `tauri.conf.json`.
 
-### Standard Git Commit & Per-File Breakdown Protocol
-Whenever the user asks for a commit message or to commit changes:
-1. **General Commit Message**:
-   - Format with Conventional Commits (`feat(...)`, `fix(...)`, `perf(...)`, `refactor(...)`, etc.) and a high-impact title.
-   - Include bulleted summaries of modified/created files detailing architectural decisions and Pillar compliance.
-2. **Per-File Architectural Commit Breakdown Table**:
-   - Provide a structured table with: `Layer`, `File` (clickable `file:///` link), and `Commit Message & Description`.
-3. **Direct Execution ("do it for me")**:
-   - When requested to execute or commit directly, verify `cargo check`/build, stage all relevant changes, and execute `git commit` with the structured message.
+### Grouped Staging & Commit Workflow
+
+Whenever the user asks for a commit message, to commit changes, or when handling commits across multiple modified/untracked files:
+1. **Inspect Waiting List / Untracked Files**: Check current `git status` and inspect the specific changes (`git diff`) in each file.
+2. **Group Files by Category & Similarity**: Group related files into logical batches based on their domain and scope (e.g., Group 1: Frontend UI/styling components; Group 2: Native Rust backend/capture; Group 3: Documentation/configuration).
+3. **Stage Files by Group**: For each group, stage only its matching files using `git add <files>`.
+4. **Structured Group Commit Message**:
+   - Specific per-file line item documenting changes in each file.
+   - Broader commit message documenting the commit batch context and overarching purpose.
+5. **Autonomous Commit Execution**: Run `git commit -m "..."` for each group so the user does not have to type it manually. The user will inspect the completed commits afterwards.
 
 ### Compilation Invariant
 - **No Automatic Production Binary Builds**: Agents must **NEVER** run `cargo build --release` or `npm run tauri:build` autonomously after completing tasks. Full compilation is exclusively initiated by the user or via the root control center (`run.bat` / `run.ps1`).
