@@ -11,12 +11,14 @@ export function bindClickAndAccordionSettings() {
     const header = group.querySelector('.settings-section-header');
     if (!header || !id) return;
 
-    // Restore saved state (companions default to collapsed)
+    // Restore saved state (groupSnip defaults to expanded; others default to collapsed)
     const saved = localStorage.getItem(`bukaake-accordion-${id}`);
-    if (saved === 'collapsed') {
-      group.classList.add('collapsed');
-    } else if (saved === 'expanded') {
+    if (saved === 'expanded') {
       group.classList.remove('collapsed');
+    } else if (saved === 'collapsed') {
+      group.classList.add('collapsed');
+    } else {
+      group.classList.toggle('collapsed', id !== 'groupSnip');
     }
 
     header.addEventListener('click', (e) => {

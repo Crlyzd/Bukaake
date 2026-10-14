@@ -82,6 +82,30 @@
             </label>
           </div>
 
+          <!-- Viewer Mode Window Presentation Row -->
+          <div class="row-item" id="cardMode2Style">
+            <div class="row-meta">
+              <span class="row-title">Viewer Mode Presentation</span>
+              <span class="row-desc">Window display mode when entering Mode 2 transparent viewer</span>
+            </div>
+            <div class="dropdown glass-dropdown-wrap" id="wrapMode2Style">
+              <button class="dropdown-btn glass-dropdown-trigger" id="btnMode2StyleTrigger" type="button" title="Select viewer window presentation">
+                <span id="lblMode2Style">Maximized (Default)</span>
+                <i class="ri-arrow-down-s-line trigger-chevron"></i>
+              </button>
+              <div class="dropdown-menu glass-dropdown-menu hidden" id="menuMode2Style">
+                <button type="button" class="dropdown-item glass-dropdown-item active" data-value="maximized">
+                  <span>Maximized (Default)</span>
+                  <i class="ri-check-line check item-check"></i>
+                </button>
+                <button type="button" class="dropdown-item glass-dropdown-item" data-value="fullscreen">
+                  <span>Fullscreen</span>
+                  <i class="ri-check-line check item-check"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+
           <span class="sub-section-title">Default Application</span>
           
           <div class="row-item" id="cardFileAssoc">
@@ -186,7 +210,7 @@
           </div>
 
           <!-- Group 2: Video Recording -->
-          <div class="settings-section-group" id="groupVideo">
+          <div class="settings-section-group collapsed" id="groupVideo">
             <button type="button" class="settings-section-header" data-toggle="groupVideo">
               <span class="accordion-title-text">Video Recording</span>
               <span class="accordion-line"></span>
@@ -237,7 +261,7 @@
           </div>
 
           <!-- Group 3: Mouse & Click Effects -->
-          <div class="settings-section-group" id="groupClicks">
+          <div class="settings-section-group collapsed" id="groupClicks">
             <button type="button" class="settings-section-header" data-toggle="groupClicks">
               <span class="accordion-title-text">Mouse & Click Effects</span>
               <span class="accordion-line"></span>
@@ -299,7 +323,7 @@
           </div>
 
           <!-- Group 4: Audio Recording & Sync -->
-          <div class="settings-section-group" id="groupAudio">
+          <div class="settings-section-group collapsed" id="groupAudio">
             <button type="button" class="settings-section-header" data-toggle="groupAudio">
               <span class="accordion-title-text">Audio Recording & Sync</span>
               <span class="accordion-line"></span>

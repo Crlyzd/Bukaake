@@ -10,6 +10,7 @@ import { updaterService, APP_VERSION, hydrateAppVersions } from './services/plat
 import { fileAssocService } from './services/platform/file-assoc-service.js';
 import { autostartService } from './services/platform/autostart-service.js';
 import { bindCaptureSettings } from './components/settings/settings-capture-section.js';
+import { bindGeneralSettings } from './components/settings/settings-general-section.js';
 import { initHeartSprouter } from './components/viewer/heart-sprouter.js';
 
 class SettingsApp {
@@ -39,8 +40,7 @@ class SettingsApp {
     this.syncThemeFromStorage();
     this.bindWindowControls();
     this.bindNavigation();
-    this.bindThemeCards();
-    this.bindCheckerboard();
+    bindGeneralSettings(this);
     this.bindUpdater();
     this.bindFileAssociations();
     this.bindAutostartSettings();
@@ -123,35 +123,6 @@ class SettingsApp {
     const isLight = theme === 'light';
     this.btnCardLight?.classList.toggle('active-theme', isLight);
     this.btnCardDark?.classList.toggle('active-theme', !isLight);
-  }
-
-  bindThemeCards() {
-    const setTheme = (theme) => {
-      if (this.currentTheme === theme) return;
-      localStorage.setItem('bukaake_theme', theme);
-      this.applyTheme(theme);
-      tauriBridge.setWindowVibrancy(theme === 'dark');
-      if (window.__TAURI__?.event?.emit) {
-        window.__TAURI__.event.emit('theme-changed', { theme });
-      }
-    };
-
-    this.btnCardDark?.addEventListener('click', () => setTheme('dark'));
-    this.btnCardLight?.addEventListener('click', () => setTheme('light'));
-  }
-
-  bindCheckerboard() {
-    if (!this.toggleCheckerboard) return;
-    const isEnabled = localStorage.getItem('bukaake_checkerboard') === 'true';
-    this.toggleCheckerboard.checked = isEnabled;
-
-    this.toggleCheckerboard.addEventListener('change', () => {
-      const checked = this.toggleCheckerboard.checked;
-      localStorage.setItem('bukaake_checkerboard', checked ? 'true' : 'false');
-      if (window.__TAURI__?.event?.emit) {
-        window.__TAURI__.event.emit('settings-changed', { checkerboard: checked });
-      }
-    });
   }
 
   bindWindowControls() {
