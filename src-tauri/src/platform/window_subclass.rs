@@ -111,7 +111,7 @@ unsafe extern "system" fn titlebar_maximize_subclass_proc(
     use windows::Win32::Foundation::LRESULT;
     use windows::Win32::UI::Shell::DefSubclassProc;
     use windows::Win32::UI::WindowsAndMessaging::{
-        HTCAPTION, SC_MAXIMIZE, WM_NCLBUTTONDBLCLK, WM_NCDESTROY, WM_SYSCOMMAND,
+        HTCAPTION, WM_NCLBUTTONDBLCLK, WM_NCDESTROY, WM_SYSCOMMAND,
     };
     use tauri::Emitter;
 
@@ -126,16 +126,7 @@ unsafe extern "system" fn titlebar_maximize_subclass_proc(
             }
             DefSubclassProc(hwnd, msg, wparam, lparam)
         }
-        WM_SYSCOMMAND => {
-            if (wparam.0 as u32 & 0xFFF0) == SC_MAXIMIZE {
-                if ref_data != 0 {
-                    let app = &*(ref_data as *const tauri::AppHandle);
-                    let _ = app.emit("bukaake-toggle-mode", ());
-                }
-                return LRESULT(0);
-            }
-            DefSubclassProc(hwnd, msg, wparam, lparam)
-        }
+        WM_SYSCOMMAND => DefSubclassProc(hwnd, msg, wparam, lparam),
         WM_NCDESTROY => {
             if ref_data != 0 {
                 let _ = Box::from_raw(ref_data as *mut tauri::AppHandle);

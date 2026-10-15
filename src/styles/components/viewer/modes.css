@@ -90,6 +90,27 @@ body.mode-viewer .viewport-container {
   background: transparent !important;
 }
 
+/* Mode 2 Maximized: Win32 8px overscan bleed compensation */
+body.mode-viewer.window-maximized {
+  padding: 8px !important;
+  box-sizing: border-box !important;
+}
+
+body.mode-viewer.window-maximized .viewport-container {
+  top: 8px !important;
+  bottom: 8px !important;
+  left: 8px !important;
+  right: 8px !important;
+}
+
+body.mode-viewer.window-maximized .app-titlebar {
+  top: calc(6.25vh + 8px) !important;
+}
+
+body.mode-viewer.window-maximized.image-loaded .floating-toolbar {
+  bottom: calc(80px + 8px) !important;
+}
+
 /* --------------------------------------------------------------------------
    Mode 2: Floating Filename + Info Overlay (Zero Bars / Zero Pills)
    -------------------------------------------------------------------------- */
