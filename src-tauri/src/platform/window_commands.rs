@@ -99,13 +99,30 @@ pub fn minimize_window(window: tauri::Window) { let _ = window.minimize(); }
 
 #[tauri::command]
 pub fn toggle_maximize_window(window: tauri::Window) {
-    if let Ok(is_max) = window.is_maximized() {
-        if is_max { let _ = window.unmaximize(); } else { let _ = window.maximize(); }
-    }
+    let _ = window.emit("bukaake-toggle-mode", ());
 }
 
 #[tauri::command]
-pub fn is_window_maximized(window: tauri::Window) -> bool { window.is_maximized().unwrap_or(false) }
+pub fn is_window_maximized(window: tauri::Window) -> bool {
+    if window.is_maximized().unwrap_or(false) {
+        return true;
+    }
+    #[cfg(target_os = "windows")]
+    {
+        if let Some(app) = window.app_handle().get_webview_window("main") {
+            if let Some((work, _)) = crate::platform::window_transition::monitor_rects(&app) {
+                if let (Ok(p), Ok(s)) = (app.outer_position(), app.outer_size()) {
+                    let dx = (p.x - work.0).abs();
+                    let dy = (p.y - work.1).abs();
+                    let dw = (s.width as i32 - (work.2 - work.0)).abs();
+                    let dh = (s.height as i32 - (work.3 - work.1)).abs();
+                    return dx <= 2 && dy <= 2 && dw <= 4 && dh <= 4;
+                }
+            }
+        }
+    }
+    false
+}
 
 #[tauri::command]
 pub fn unmaximize_window(window: tauri::Window) { let _ = window.unmaximize(); }

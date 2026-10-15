@@ -61,7 +61,7 @@ fn logical_rect(win: &tauri::WebviewWindow) -> LogicalRect {
 
 /// Physical rects (work_area, monitor) of the display monitor hosting the window.
 #[cfg(target_os = "windows")]
-fn monitor_rects(win: &tauri::WebviewWindow) -> Option<((i32, i32, i32, i32), (i32, i32, i32, i32))> {
+pub fn monitor_rects(win: &tauri::WebviewWindow) -> Option<((i32, i32, i32, i32), (i32, i32, i32, i32))> {
     use windows::Win32::Foundation::HWND;
     use windows::Win32::Graphics::Gdi::{GetMonitorInfoW, MonitorFromWindow, MONITORINFO, MONITOR_DEFAULTTONEAREST};
     let hwnd = win.hwnd().ok()?;
@@ -99,24 +99,31 @@ pub fn regular_target(win: &tauri::WebviewWindow, width: f64, height: f64) -> Lo
     LogicalRect { x: cur.x, y: cur.y, width, height }
 }
 
+#[cfg(target_os = "windows")]
+pub fn apply_physical_rect(win: &tauri::WebviewWindow, x: i32, y: i32, w: i32, h: i32) {
+    if let Ok(hwnd) = win.hwnd() {
+        use windows::Win32::Foundation::HWND;
+        use windows::Win32::UI::WindowsAndMessaging::{SetWindowPos, SWP_NOACTIVATE, SWP_NOZORDER};
+        unsafe {
+            let _ = SetWindowPos(HWND(hwnd.0), HWND::default(), x, y, w, h, SWP_NOZORDER | SWP_NOACTIVATE);
+        }
+    }
+}
+
 pub fn apply_rect(win: &tauri::WebviewWindow, rect: LogicalRect) {
     let sf = win.scale_factor().unwrap_or(1.0);
     let (x, y) = ((rect.x * sf).round() as i32, (rect.y * sf).round() as i32);
     let (w, h) = ((rect.width * sf).round() as i32, (rect.height * sf).round() as i32);
     #[cfg(target_os = "windows")]
     {
-        if let Ok(hwnd) = win.hwnd() {
-            use windows::Win32::Foundation::HWND;
-            use windows::Win32::UI::WindowsAndMessaging::{SetWindowPos, SWP_NOACTIVATE, SWP_NOZORDER};
-            unsafe {
-                // Single atomic move + resize: no intermediate unmaximize/center hops
-                let _ = SetWindowPos(HWND(hwnd.0), HWND::default(), x, y, w, h, SWP_NOZORDER | SWP_NOACTIVATE);
-            }
-            return;
-        }
+        apply_physical_rect(win, x, y, w, h);
+        return;
     }
-    let _ = win.set_size(tauri::Size::Physical(tauri::PhysicalSize { width: w as u32, height: h as u32 }));
-    let _ = win.set_position(tauri::Position::Physical(tauri::PhysicalPosition { x, y }));
+    #[allow(unreachable_code)]
+    {
+        let _ = win.set_size(tauri::Size::Physical(tauri::PhysicalSize { width: w as u32, height: h as u32 }));
+        let _ = win.set_position(tauri::Position::Physical(tauri::PhysicalPosition { x, y }));
+    }
 }
 
 #[tauri::command]
@@ -142,6 +149,7 @@ pub fn get_regular_target_rect(app: tauri::AppHandle, width: f64, height: f64) -
 
 /// Mode 2 commit: cloak -> maximize/fullscreen -> clear acrylic (-> show + foreground when revealing).
 /// When style == "fullscreen", sets always_on_top so the transparent borderless window occludes the Windows taskbar.
+/// When style == "maximized", snaps borderless to work area (rcWork) without WS_MAXIMIZE to preserve taskbar translucency.
 #[tauri::command]
 pub fn commit_viewer_geometry(app: tauri::AppHandle, style: String, reveal: bool) -> Result<LogicalRect, String> {
     let win = main_window(&app)?;
@@ -176,7 +184,17 @@ pub fn commit_viewer_geometry(app: tauri::AppHandle, style: String, reveal: bool
     } else {
         let _ = win.set_always_on_top(false);
         let _ = win.set_fullscreen(false);
-        let _ = win.maximize();
+        let _ = win.unmaximize();
+        #[cfg(target_os = "windows")]
+        {
+            if let Some((work, _)) = monitor_rects(&win) {
+                apply_physical_rect(&win, work.0, work.1, work.2 - work.0, work.3 - work.1);
+            } else {
+                apply_rect(&win, target);
+            }
+        }
+        #[cfg(not(target_os = "windows"))]
+        apply_rect(&win, target);
     }
     #[cfg(target_os = "windows")]
     let _ = window_vibrancy::clear_acrylic(&win);
