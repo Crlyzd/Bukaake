@@ -40,9 +40,7 @@ export class WindowModeManager {
             await windowBridge.setAlwaysOnTop(true);
             await tauriBridge.setFullscreen(true);
           } else {
-            await windowBridge.setAlwaysOnTop(false);
-            await tauriBridge.setFullscreen(false);
-            await tauriBridge.maximizeBorderless();
+            await windowBridge.commitViewer('maximized', true);
           }
         }
       });
@@ -69,7 +67,8 @@ export class WindowModeManager {
         }
         return;
       }
-      const nextMode = (isFs || isMax) ? MODE_VIEWER : MODE_REGULAR;
+      const isExpanded = Boolean(isFs || isMax || this.currentMode === MODE_VIEWER);
+      const nextMode = isExpanded ? MODE_VIEWER : MODE_REGULAR;
       if (nextMode !== this.currentMode) {
         this.updateModeClasses(nextMode, isMax);
       } else {
