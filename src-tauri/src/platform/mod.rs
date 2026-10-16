@@ -13,3 +13,4 @@ pub mod package_info;
 pub mod wallpaper;
 pub mod foreground;
 pub mod window_transition;
+pub mod bootstrapper;

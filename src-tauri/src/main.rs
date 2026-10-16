@@ -57,10 +57,13 @@ use tauri::{Emitter, Manager};
 use tauri_plugin_global_shortcut::ShortcutState;
 
 fn main() {
+    if platform::bootstrapper::run_preflight_checks().is_err() {
+        std::process::exit(0);
+    }
     platform::foreground::allow_any_foreground();
     process_memory::configure_low_memory_webview_env();
     cleanup_old_update_artifacts();
-    tauri::Builder::default()
+    let app_run_res = tauri::Builder::default()
         .plugin(
             tauri_plugin_global_shortcut::Builder::new()
                 .with_handler(|app, shortcut, event| {
@@ -192,6 +195,17 @@ fn main() {
             set_main_always_on_top,
             process_memory::trim_memory_working_set
         ])
-        .run(tauri::generate_context!())
-        .expect("error while running tauri application");
+        .build(tauri::generate_context!())
+        .map_err(|e| e.to_string())
+        .and_then(|app| {
+            app.run(|_, _| {});
+            Ok(())
+        });
+
+    if let Err(e) = app_run_res {
+        platform::bootstrapper::show_fatal_error(
+            "Bukaake Launch Error",
+            &format!("Failed to initialize application window:\n\n{}\n\nPlease verify that your graphics drivers and system updates are installed.", e),
+        );
+    }
 }
