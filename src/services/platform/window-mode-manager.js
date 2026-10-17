@@ -18,6 +18,7 @@ export class WindowModeManager {
     this.currentMode = MODE_REGULAR;
     this.onModeChange = options.onModeChange || null;
     this.lastAspectSize = null;
+    this.mode2Style = localStorage.getItem('bukaake-mode2-style') || 'maximized';
     this.isPendingPathLoad = false;
     this.isTransitioning = false;
 
@@ -35,14 +36,23 @@ export class WindowModeManager {
         }
       });
       window.__TAURI__.event.listen('settings-changed', async (e) => {
-        if (e.payload?.mode2Style && this.currentMode === MODE_VIEWER) {
-          if (e.payload.mode2Style === 'fullscreen') {
-            await windowBridge.setAlwaysOnTop(true);
-            await tauriBridge.setFullscreen(true);
-          } else {
-            await windowBridge.setAlwaysOnTop(false);
-            await tauriBridge.setFullscreen(false);
-            await tauriBridge.maximizeBorderless();
+        if (e.payload?.mode2Style) {
+          const newStyle = e.payload.mode2Style;
+          this.mode2Style = newStyle;
+          try {
+            localStorage.setItem('bukaake-mode2-style', newStyle);
+          } catch (_) {}
+          window.dispatchEvent(new CustomEvent('bukaake-mode2-style-changed', { detail: { mode2Style: newStyle } }));
+
+          if (this.currentMode === MODE_VIEWER) {
+            if (newStyle === 'fullscreen') {
+              await windowBridge.setAlwaysOnTop(true);
+              await tauriBridge.setFullscreen(true);
+            } else {
+              await windowBridge.setAlwaysOnTop(false);
+              await tauriBridge.setFullscreen(false);
+              await tauriBridge.maximizeBorderless();
+            }
           }
         }
       });
@@ -82,6 +92,12 @@ export class WindowModeManager {
       resizeTimer = requestAnimationFrame(checkState);
     });
     document.addEventListener('fullscreenchange', checkState);
+    window.addEventListener('storage', (e) => {
+      if (e.key === 'bukaake-mode2-style' && e.newValue) {
+        this.mode2Style = e.newValue;
+        window.dispatchEvent(new CustomEvent('bukaake-mode2-style-changed', { detail: { mode2Style: e.newValue } }));
+      }
+    });
   }
 
   calculateAspectDimensions(imgWidth, imgHeight, maxDim = 820) {
@@ -147,7 +163,7 @@ export class WindowModeManager {
   }
 
   getMode2Style() {
-    return localStorage.getItem('bukaake-mode2-style') || 'maximized';
+    return this.mode2Style || localStorage.getItem('bukaake-mode2-style') || 'maximized';
   }
 
   async setMode(newMode, force = false) {

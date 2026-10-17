@@ -103,4 +103,12 @@ export function bindGeneralSettings(app) {
       refreshModeLabels();
     }
   });
+
+  if (window.__TAURI__?.event?.listen) {
+    window.__TAURI__.event.listen('settings-changed', (e) => {
+      if (e.payload?.mode2Style) {
+        refreshModeLabels();
+      }
+    });
+  }
 }

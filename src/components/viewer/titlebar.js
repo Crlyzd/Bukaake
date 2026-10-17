@@ -118,11 +118,14 @@ export class Titlebar {
     window.addEventListener('resize', () => this.syncMaximizedState());
     document.addEventListener('fullscreenchange', () => this.syncMaximizedState());
     window.addEventListener('storage', (e) => {
-      if (e.key === 'bukaake-mode2-style') this.updateMaxButtonTitle();
+      if (e.key === 'bukaake-mode2-style') this.updateMaxButtonTitle(e.newValue);
+    });
+    window.addEventListener('bukaake-mode2-style-changed', (e) => {
+      this.updateMaxButtonTitle(e.detail?.mode2Style);
     });
     if (tauriBridge.isTauri() && window.__TAURI__?.event?.listen) {
       window.__TAURI__.event.listen('settings-changed', (e) => {
-        if (e.payload?.mode2Style) this.updateMaxButtonTitle();
+        if (e.payload?.mode2Style) this.updateMaxButtonTitle(e.payload.mode2Style);
       });
     }
 
@@ -200,9 +203,10 @@ export class Titlebar {
     }
   }
 
-  updateMaxButtonTitle() {
+  updateMaxButtonTitle(overrideStyle = null) {
     if (!this.btnMax) return;
-    const isMaxStyle = (localStorage.getItem('bukaake-mode2-style') || 'maximized') === 'maximized';
+    const style = overrideStyle || localStorage.getItem('bukaake-mode2-style') || 'maximized';
+    const isMaxStyle = style === 'maximized';
     const actionName = isMaxStyle ? 'Maximize Viewer' : 'Fullscreen Viewer';
     this.btnMax.title = !this.hasImage
       ? `${actionName} (Load an image first)`
