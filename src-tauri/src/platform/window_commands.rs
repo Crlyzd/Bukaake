@@ -154,30 +154,40 @@ pub fn play_windows_ding() {
 pub fn open_settings_window(app_handle: tauri::AppHandle) -> Result<(), String> {
     if let Some(settings_win) = app_handle.get_webview_window("settings") {
         let is_visible = settings_win.is_visible().unwrap_or(false);
-        if !is_visible {
+        let current_pos = settings_win.outer_position().unwrap_or_default();
+        let is_offscreen = current_pos.x < -10000 || current_pos.y < -10000;
+
+        if !is_visible || is_offscreen {
+            let mut positioned = false;
             if let Some(main_win) = app_handle.get_webview_window("main") {
-                if let (Ok(main_pos), Ok(main_size), Ok(settings_size)) = (
-                    main_win.outer_position(),
-                    main_win.outer_size(),
-                    settings_win.outer_size(),
-                ) {
-                    let center_x = main_pos.x + (main_size.width as i32 - settings_size.width as i32) / 2;
-                    let center_y = main_pos.y + (main_size.height as i32 - settings_size.height as i32) / 2;
-                    let _ = settings_win.set_position(tauri::Position::Physical(tauri::PhysicalPosition {
-                        x: center_x,
-                        y: center_y,
-                    }));
-                } else {
-                    let _ = settings_win.center();
+                let main_visible = main_win.is_visible().unwrap_or(false);
+                let main_minimized = main_win.is_minimized().unwrap_or(false);
+                if main_visible && !main_minimized {
+                    if let (Ok(main_pos), Ok(main_size), Ok(settings_size)) = (
+                        main_win.outer_position(),
+                        main_win.outer_size(),
+                        settings_win.outer_size(),
+                    ) {
+                        if main_pos.x > -10000 && main_pos.y > -10000 {
+                            let center_x = main_pos.x + (main_size.width as i32 - settings_size.width as i32) / 2;
+                            let center_y = main_pos.y + (main_size.height as i32 - settings_size.height as i32) / 2;
+                            let _ = settings_win.set_position(tauri::Position::Physical(tauri::PhysicalPosition {
+                                x: center_x,
+                                y: center_y,
+                            }));
+                            positioned = true;
+                        }
+                    }
                 }
-            } else {
+            }
+            if !positioned {
                 let _ = settings_win.center();
             }
         }
         crate::platform::reclaim::cancel_reclaim();
+        let _ = settings_win.set_always_on_top(true);
         let _ = settings_win.unminimize();
-        let _ = settings_win.show();
-        let _ = settings_win.set_focus();
+        crate::platform::foreground::force_foreground(&settings_win);
         let _ = app_handle.emit("settings-modal-state", true);
     }
     Ok(())
@@ -186,6 +196,7 @@ pub fn open_settings_window(app_handle: tauri::AppHandle) -> Result<(), String> 
 #[tauri::command]
 pub fn hide_settings_window(app_handle: tauri::AppHandle) -> Result<(), String> {
     if let Some(w) = app_handle.get_webview_window("settings") {
+        let _ = w.set_always_on_top(false);
         let _ = w.hide();
         let _ = app_handle.emit("settings-modal-state", false);
         crate::platform::reclaim::request_idle_reclaim(&app_handle, "settings");

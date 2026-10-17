@@ -137,7 +137,9 @@ pub fn enter_standby(
         let _ = win.set_maximizable(false);
     }
     if let Some(settings_win) = app_handle.get_webview_window("settings") {
+        let _ = settings_win.set_always_on_top(false);
         let _ = settings_win.hide();
+        let _ = app_handle.emit("settings-modal-state", false);
     }
     crate::platform::reclaim::request_idle_reclaim(&app_handle, "standby");
     state.start_countdown(app_handle);
