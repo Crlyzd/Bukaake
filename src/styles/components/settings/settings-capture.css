@@ -178,6 +178,23 @@ html[data-theme="light"] .key-token {
   display: flex;
   flex-direction: column;
   gap: 2px;
+  box-sizing: border-box;
+}
+
+/* Compact Dropdown Variant (e.g. Mode 2 Window Presentation) */
+.glass-dropdown-wrap.compact .glass-dropdown-trigger,
+.glass-dropdown-wrap.compact .dropdown-btn,
+#wrapMode2Style .glass-dropdown-trigger,
+#wrapMode2Style .dropdown-btn {
+  min-width: 124px;
+}
+
+.glass-dropdown-wrap.compact .glass-dropdown-menu,
+.glass-dropdown-wrap.compact .dropdown-menu,
+#wrapMode2Style .glass-dropdown-menu,
+#wrapMode2Style .dropdown-menu {
+  min-width: 124px;
+  width: 100%;
 }
 
 body.light-theme .glass-dropdown-menu,
