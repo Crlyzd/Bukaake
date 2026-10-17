@@ -5,6 +5,7 @@
  */
 
 import { windowBridge } from './window-bridge.js';
+import { transitionCard } from '../../components/viewer/transition-card.js';
 import {
   captureClientRect,
   applyClientRect,
@@ -159,6 +160,10 @@ export class ModeTransition {
             panY: targetImageScreen.y - (window.screenY || 0) - r.top,
           };
 
+          const filename = document.getElementById('fileNameBadge')?.textContent || '';
+          const dimensions = document.getElementById('titlebarDimensions')?.textContent || '';
+          transitionCard.showExitTarget(targetWinRect, { filename, dimensions });
+
           document.body.classList.add('mode-dim-off', 'mode-transitioning');
           await animateTo(this.viewer, targetInViewer, 220);
         }
@@ -170,6 +175,7 @@ export class ModeTransition {
       updateClasses?.();
       this.viewer?.resizeCanvas();
       this.viewer?.fitToScreen(true);
+      transitionCard.hide();
 
       // Double-rAF presentation buffer ensures WebView2 presents Mode 1 canvas frame before uncloak
       await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
@@ -252,6 +258,7 @@ export class ModeTransition {
 
   cleanup() {
     this.isTransitioning = false;
+    transitionCard.hide();
     document.body.classList.remove(
       'mode-transitioning',
       'mode-snap',

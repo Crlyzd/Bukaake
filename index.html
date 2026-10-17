@@ -87,6 +87,29 @@
   <!-- Ambient Glowing Loading Beam for Background Decodes (Unconstrained by titlebar transform) -->
   <div class="titlebar-loading-beam" id="titlebarLoadingBeam"></div>
 
+  <!-- Fluid Mode Transition Glass Shell -->
+  <div class="mode-transition-card hidden" id="modeTransitionCard" aria-hidden="true">
+    <div class="tc-titlebar">
+      <div class="tc-left">
+        <div class="tc-brand">
+          <div class="tc-logo">
+            <img src="/icon-frameless.png" alt="Bukaake" />
+          </div>
+          <span>Bukaake</span>
+        </div>
+        <span class="tc-version app-version">v1.2.0</span>
+        <span class="tc-sep hidden" id="transitionCardSep">/</span>
+        <span class="tc-filename hidden" id="transitionCardFilename"></span>
+        <span class="tc-dimensions hidden" id="transitionCardDimensions"></span>
+      </div>
+      <div class="tc-controls">
+        <div class="win-btn win-min"><i class="ri-subtract-line"></i></div>
+        <div class="win-btn win-max"><i class="ri-checkbox-blank-line"></i></div>
+        <div class="win-btn win-close"><i class="ri-close-line"></i></div>
+      </div>
+    </div>
+  </div>
+
   <!-- Main Viewing Container -->
   <main class="viewport-container" id="viewportContainer">
 
