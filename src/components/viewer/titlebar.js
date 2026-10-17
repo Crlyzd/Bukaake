@@ -6,6 +6,7 @@
 import { tauriBridge } from '../../services/platform/tauri-bridge.js';
 import { themeManager } from '../../services/platform/theme-manager.js';
 import { updaterService, hydrateAppVersions } from '../../services/platform/updater-service.js';
+import { hotkeyService } from '../../services/interaction/hotkey-service.js';
 
 export class Titlebar {
   constructor(options = {}) {
@@ -19,6 +20,7 @@ export class Titlebar {
     this.btnTheme = document.getElementById('btnThemeToggle');
     this.btnInfo = document.getElementById('btnToggleInfo');
     this.btnSettings = document.getElementById('btnSettings');
+    this.btnCapture = document.getElementById('btnTitlebarCapture');
     this.appBrandBtn = document.getElementById('appBrandBtn') || document.getElementById('appLogo');
 
     this.onOpenFile = options.onOpenFile || null;
@@ -41,6 +43,7 @@ export class Titlebar {
     this.syncMaximizedState();
     this.setHasImage(false);
     this.initUpdateListeners();
+    this.updateCaptureButtonTitle();
 
     if (this.btnTheme) {
       themeManager.bindToggleBtn(this.btnTheme);
@@ -122,6 +125,13 @@ export class Titlebar {
         if (e.payload?.mode2Style) this.updateMaxButtonTitle();
       });
     }
+
+    window.addEventListener('bukaake-hotkeys-changed', () => this.updateCaptureButtonTitle());
+    window.addEventListener('storage', (e) => {
+      if (e.key === 'bukaake-hotkey-capture' || e.key === 'bukaake-hotkey-screenshot') {
+        this.updateCaptureButtonTitle();
+      }
+    });
   }
 
   bindActionButtons() {
@@ -197,6 +207,12 @@ export class Titlebar {
     this.btnMax.title = !this.hasImage
       ? `${actionName} (Load an image first)`
       : `${actionName} (F11 / Enter)`;
+  }
+
+  updateCaptureButtonTitle() {
+    if (!this.btnCapture) return;
+    const combo = hotkeyService.getHotkey();
+    this.btnCapture.title = `Take Screenshot (${combo})`;
   }
 
   setFileName(name) {

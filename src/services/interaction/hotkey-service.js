@@ -19,6 +19,8 @@ export class HotkeyService {
     window.addEventListener('storage', (e) => {
       if (e.key === this.STORAGE_KEY || e.key === this.LEGACY_STORAGE_KEY) {
         this.applyToBackend();
+        const val = this.getHotkey();
+        window.dispatchEvent(new CustomEvent('bukaake-hotkeys-changed', { detail: { combo: val, screenshot: val } }));
       }
     });
 
@@ -28,6 +30,7 @@ export class HotkeyService {
         if (val) {
           localStorage.setItem(this.STORAGE_KEY, val);
           localStorage.setItem(this.LEGACY_STORAGE_KEY, val);
+          window.dispatchEvent(new CustomEvent('bukaake-hotkeys-changed', { detail: { combo: val, screenshot: val } }));
         }
       }).catch(() => {});
     }

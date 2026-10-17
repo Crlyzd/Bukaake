@@ -43,7 +43,7 @@ export function bindGeneralSettings(app) {
   const menuMode = document.getElementById('menuMode2Style');
 
   const MODE_LABELS = {
-    maximized: 'Maximized (Default)',
+    maximized: 'Maximized',
     fullscreen: 'Fullscreen',
   };
 
