@@ -332,7 +332,7 @@ If you love using Bukaake and want to support independent, high-performance desk
 
 <p>
   <a href="https://saweria.co/curlyzed" target="_blank"><img src="https://img.shields.io/badge/%E2%98%95_Saweria-Support_on_Saweria-fa8231?style=for-the-badge&logoColor=white" alt="Support on Saweria" /></a>
-  <a href="https://paypal.me/BagusMassani" target="_blank"><img src="https://img.shields.io/badge/%F0%9F%92%B3_PayPal-Donate_via_PayPal-003087?style=for-the-badge&logo=paypal&logoColor=white" alt="Donate with PayPal" /></a>
+  <a href="https://ko-fi.com/curlyzed" target="_blank"><img src="https://img.shields.io/badge/%E2%98%95_Ko--fi-Support_on_Ko--fi-FF5E5B?style=for-the-badge&logo=kofi&logoColor=white" alt="Support on Ko-fi" /></a>
 </p>
 
 - 🌐 **Official Website**: [bukaake.kaleksananbagus.com](https://bukaake.kaleksananbagus.com)
