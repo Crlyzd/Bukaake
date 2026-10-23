@@ -58,8 +58,16 @@ pub fn launch_alitken(video_path: String, custom_exe: Option<String>) -> Result<
         "Alitken executable (AlitConverter.exe) not found. Please locate it in Settings.".to_string()
     })?;
 
-    let mut cmd = Command::new(exe_path);
+    let mut cmd = Command::new(&exe_path);
     cmd.arg(&video_path);
+
+    // Isolate companion process from Bukaake's internal WebView2 memory flags
+    cmd.env_remove("WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS");
+    cmd.env_remove("WEBVIEW2_USER_DATA_FOLDER");
+
+    if let Some(parent) = exe_path.parent() {
+        cmd.current_dir(parent);
+    }
 
     #[cfg(target_os = "windows")]
     cmd.creation_flags(CREATE_NO_WINDOW);

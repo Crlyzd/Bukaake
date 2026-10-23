@@ -57,9 +57,16 @@ pub fn launch_cathet(text: String, custom_exe: Option<String>) -> Result<(), Str
     fs::write(&temp_file, text.as_bytes())
         .map_err(|e| format!("Failed to write OCR payload file: {}", e))?;
 
-    let mut cmd = Command::new(exe_path);
+    let mut cmd = Command::new(&exe_path);
     cmd.arg(&temp_file);
 
+    // Isolate companion process from Bukaake's internal WebView2 memory flags
+    cmd.env_remove("WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS");
+    cmd.env_remove("WEBVIEW2_USER_DATA_FOLDER");
+
+    if let Some(parent) = exe_path.parent() {
+        cmd.current_dir(parent);
+    }
 
     cmd.spawn().map_err(|e| format!("Failed to launch Cathet: {}", e))?;
 
