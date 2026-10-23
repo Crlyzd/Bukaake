@@ -98,7 +98,7 @@ src-tauri/src/
 │   ├── click_sound.rs          # Tactile mechanical click audio synthesizer
 │   ├── d3d_device.rs           # Direct3D 11 device & WinRT interop
 │   ├── ebml_patcher.rs         # WebM duration & seek header patcher
-│   ├── external_launch.rs      # Alitken companion launcher & file pickers (< 75 lines)
+│   ├── external_launch.rs      # Alitken companion launcher & file pickers (< 85 lines)
 │   ├── mouse_hook.rs           # Win32 low-level mouse hook (WH_MOUSE_LL)
 │   ├── native_recorder.rs      # GPU capture orchestrator & audio PTS sync
 │   ├── recording_border.rs     # Stroke-free capture region border overlay
@@ -133,7 +133,7 @@ src-tauri/src/
 │   └── window_subclass.rs      # Win32 subclassing & native edge resize suppression
 └── integrations/        # External & Companion App Integrations
     ├── mod.rs                  # Module exports
-    ├── cathet.rs               # Cathet companion bridge commands
+    ├── cathet.rs               # Cathet companion bridge & subprocess isolation (< 80 lines)
     └── ocr.rs                  # Native Windows.Media.Ocr text recognition
 ```
 
@@ -169,8 +169,10 @@ src-tauri/src/
   - Decouples all capture crosshairs, selection bounds, and floating recording pills into an isolated transparent secondary window (`snipper`).
   - Eliminates main window hide/restore cycles, DWM DirectComposition redraw flash, and Acrylic recreation flicker.
   - Zero residue: ensures crosshair overlays and post-recording blur backdrops cleanly unmount without intercepting desktop mouse clicks or resurfacing on subsequent triggers.
-- **Alitken Tandem Workflow (`alitken-service.js`)**:
-  - Deep-link bridge allowing one-click transfer of active images to Alitken for advanced editing and seamless auto-reload in Bukaake upon save.
+- **Companion Tandem Workflows & Subprocess Isolation (`cathet.rs`, `cathet-service.js`, `ocr-service.js`, `external_launch.rs`, `alitken-service.js`)**:
+  - **Cathet Glass Scratchpad Tandem**: OCR text handoff via temporary markdown payload dispatching directly to Cathet (`Cathet.exe`).
+  - **Alitken Video Companion Tandem**: Deep-link bridge allowing one-click transfer of active images and captured snips to Alitken for advanced editing and seamless auto-reload in Bukaake upon save.
+  - **Subprocess Environment Isolation Protocol**: Both companion launchers explicitly purge Bukaake's internal Chromium flags (`WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS` and `WEBVIEW2_USER_DATA_FOLDER`) and anchor the child `current_dir` to the companion executable directory. This eliminates WebView2 argument mismatch conflicts on shared User Data Folders (`com.cathet.app\EBWebView`), ensuring companion windows open cleanly without deadlocks even when already running prior to Bukaake.
 - **Unified Hotkeys (`hotkey-service.js`, `hotkeys.rs`)**:
   - Coordinates global Windows shortcuts and in-app triggers for instant capture without input conflicts.
 
@@ -211,7 +213,7 @@ src-tauri/src/
   - Single-instance launch unminimizes window placement (`unminimize()`) before entering fullscreen when opened from Windows Explorer.
   - `isPendingPathLoad` guard in `window-mode-manager.js` suppresses race-condition fullscreen teardown during image path IPC transfer.
 - **Official Resources Portal & Contrast Calibration**:
-  - Settings About tab and main settings modal feature direct links to the official website ([bukaake.kaleksananbagus.com](https://bukaake.kaleksananbagus.com)) and GitHub repository.
+  - Settings About tab and main settings modal feature direct links to the official website ([bukaake.kaleksananbagus.com](https://bukaake.kaleksananbagus.com)), GitHub repository, and community support channels (Saweria and Ko-fi at `https://ko-fi.com/curlyzed`).
   - Elevated contrast for version tag chips in dark mode (`--text-main` over `--glass-btn-hover-bg`).
 - **Tray Standby & Universal Idle Memory Reclaim Coordinator (`reclaim.rs`, `process_memory.rs`, `standby.rs`, `standby-service.js`, `snipper-app.js`, `settings-app.js`)**:
   - Persistent background tray daemon coordinating idle working set memory reclamation across the Rust host and all descendant `msedgewebview2.exe` processes down to **~15–20 MB total tree Working Set** (~13 MB private). Left-click on tray restores window cleanly into Mode 1.
