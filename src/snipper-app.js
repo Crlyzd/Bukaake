@@ -16,6 +16,7 @@ import { i18n } from './services/platform/i18n-service.js';
 
 export class SnipperApp {
   constructor() {
+    i18n.init();
     this.snipper = new ScreenSnipper();
     this.recordingDock = new RecordingDock();
     this.isSnipActive = false;

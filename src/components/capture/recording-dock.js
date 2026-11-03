@@ -3,6 +3,8 @@
  * Stroke-free frosted glass recording widget with live timer and controls (< 160 lines)
  */
 
+import { i18n } from '../../services/platform/i18n-service.js';
+
 export class RecordingDock {
   constructor(containerEl = null) {
     this.container = containerEl || document.body;
@@ -40,7 +42,7 @@ export class RecordingDock {
         </button>
         <button class="recording-btn stop" id="btnRecStop" title="Stop & Save Recording">
           <i class="ri-stop-fill"></i>
-          <span>Done</span>
+          <span data-i18n="snipper.done">${i18n.t("snipper.done")}</span>
         </button>
         <button class="recording-btn cancel" id="btnRecCancel" title="Discard Recording (Esc)">
           <i class="ri-close-line"></i>

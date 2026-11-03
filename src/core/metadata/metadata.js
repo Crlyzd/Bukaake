@@ -3,6 +3,8 @@
  * Extracts and formats image metadata details from web files or Tauri IPC payloads
  */
 
+import { i18n } from '../../services/platform/i18n-service.js';
+
 export class MetadataInspector {
   constructor(metadataBodyElement) {
     this.container = metadataBodyElement;
@@ -43,11 +45,12 @@ export class MetadataInspector {
       lastModifiedStr = new Date(meta.fileObj.lastModified).toLocaleString();
     }
 
-    const orientation = width === height ? 'Square' : (width > height ? 'Landscape' : 'Portrait');
+    const orientationKey = width === height ? 'square' : (width > height ? 'landscape' : 'portrait');
+    const orientation = i18n.t('metadata.' + orientationKey);
 
     const folderRow = folderPath ? `
       <tr>
-        <td class="meta-key">Folder</td>
+        <td class="meta-key">${i18n.t('metadata.folder')}</td>
         <td class="meta-val" title="${this.escapeHtml(filePath)}">${this.escapeHtml(folderPath)}</td>
       </tr>
     ` : '';
@@ -57,27 +60,27 @@ export class MetadataInspector {
     this.container.innerHTML = `
       <table class="meta-table">
         <tbody>
-          <tr><td class="meta-key">File Name</td><td class="meta-val" title="${fileName}">${fileName}</td></tr>
+          <tr><td class="meta-key">${i18n.t('metadata.fileName')}</td><td class="meta-val" title="${fileName}">${fileName}</td></tr>
           ${folderRow}
-          <tr><td class="meta-key">File Size</td><td class="meta-val">${fileSize}</td></tr>
-          <tr><td class="meta-key">Format / MIME</td><td class="meta-val">${mimeType}</td></tr>
-          <tr><td class="meta-key">Dimensions</td><td class="meta-val">${width} × ${height} px</td></tr>
-          <tr><td class="meta-key">Resolution</td><td class="meta-val">${megapixels} MP</td></tr>
-          <tr><td class="meta-key">Aspect Ratio</td><td class="meta-val">${aspect}</td></tr>
-          <tr><td class="meta-key">Orientation</td><td class="meta-val">${orientation}</td></tr>
-          <tr><td class="meta-key">Modified</td><td class="meta-val">${lastModifiedStr}</td></tr>
+          <tr><td class="meta-key">${i18n.t('metadata.fileSize')}</td><td class="meta-val">${fileSize}</td></tr>
+          <tr><td class="meta-key">${i18n.t('metadata.mime')}</td><td class="meta-val">${mimeType}</td></tr>
+          <tr><td class="meta-key">${i18n.t('metadata.dimensions')}</td><td class="meta-val">${width} × ${height} px</td></tr>
+          <tr><td class="meta-key">${i18n.t('metadata.resolution')}</td><td class="meta-val">${megapixels} MP</td></tr>
+          <tr><td class="meta-key">${i18n.t('metadata.aspectRatio')}</td><td class="meta-val">${aspect}</td></tr>
+          <tr><td class="meta-key">${i18n.t('metadata.orientation')}</td><td class="meta-val">${orientation}</td></tr>
+          <tr><td class="meta-key">${i18n.t('metadata.modified')}</td><td class="meta-val">${lastModifiedStr}</td></tr>
         </tbody>
       </table>
 
       ${exifSection}
 
       <div class="meta-section-divider">
-        <span class="filter-section-title">Color Profile</span>
+        <span class="filter-section-title">${i18n.t('metadata.colorProfile')}</span>
         <table class="meta-table" style="margin-top: 6px;">
           <tbody>
-            <tr><td class="meta-key">Color Space</td><td class="meta-val">sRGB / Canvas2D</td></tr>
-            <tr><td class="meta-key">Color Depth</td><td class="meta-val">32-bit RGBA</td></tr>
-            <tr><td class="meta-key">Alpha Channel</td><td class="meta-val">Supported</td></tr>
+            <tr><td class="meta-key">${i18n.t('metadata.colorSpace')}</td><td class="meta-val">sRGB / Canvas2D</td></tr>
+            <tr><td class="meta-key">${i18n.t('metadata.colorDepth')}</td><td class="meta-val">32-bit RGBA</td></tr>
+            <tr><td class="meta-key">${i18n.t('metadata.alphaChannel')}</td><td class="meta-val">${i18n.t('metadata.supported')}</td></tr>
           </tbody>
         </table>
       </div>
@@ -94,32 +97,32 @@ export class MetadataInspector {
       const cam = exif.make && !exif.model.toLowerCase().includes(exif.make.toLowerCase())
         ? `${exif.make} ${exif.model}`
         : exif.model;
-      rows.push(`<tr><td class="meta-key">Camera</td><td class="meta-val">${this.escapeHtml(cam)}</td></tr>`);
+      rows.push(`<tr><td class="meta-key">${i18n.t('metadata.camera')}</td><td class="meta-val">${this.escapeHtml(cam)}</td></tr>`);
     } else if (exif.make) {
       rows.push(`<tr><td class="meta-key">Camera</td><td class="meta-val">${this.escapeHtml(exif.make)}</td></tr>`);
     }
 
     if (exif.lens) {
-      rows.push(`<tr><td class="meta-key">Lens</td><td class="meta-val">${this.escapeHtml(exif.lens)}</td></tr>`);
+      rows.push(`<tr><td class="meta-key">${i18n.t('metadata.lens')}</td><td class="meta-val">${this.escapeHtml(exif.lens)}</td></tr>`);
     }
 
     if (exif.f_number) {
-      rows.push(`<tr><td class="meta-key">Aperture</td><td class="meta-val">${this.escapeHtml(exif.f_number)}</td></tr>`);
+      rows.push(`<tr><td class="meta-key">${i18n.t('metadata.aperture')}</td><td class="meta-val">${this.escapeHtml(exif.f_number)}</td></tr>`);
     }
 
     if (exif.exposure_time) {
-      rows.push(`<tr><td class="meta-key">Shutter Speed</td><td class="meta-val">${this.escapeHtml(exif.exposure_time)}</td></tr>`);
+      rows.push(`<tr><td class="meta-key">${i18n.t('metadata.shutter')}</td><td class="meta-val">${this.escapeHtml(exif.exposure_time)}</td></tr>`);
     }
 
     if (exif.iso) {
-      rows.push(`<tr><td class="meta-key">ISO</td><td class="meta-val">ISO ${this.escapeHtml(exif.iso)}</td></tr>`);
+      rows.push(`<tr><td class="meta-key">${i18n.t('metadata.iso')}</td><td class="meta-val">ISO ${this.escapeHtml(exif.iso)}</td></tr>`);
     }
 
     if (exif.focal_length) {
       const flText = exif.focal_length_35mm
         ? `${exif.focal_length} (${exif.focal_length_35mm} eq)`
         : exif.focal_length;
-      rows.push(`<tr><td class="meta-key">Focal Length</td><td class="meta-val">${this.escapeHtml(flText)}</td></tr>`);
+      rows.push(`<tr><td class="meta-key">${i18n.t('metadata.focalLength')}</td><td class="meta-val">${this.escapeHtml(flText)}</td></tr>`);
     }
 
     if (exif.exposure_bias) {

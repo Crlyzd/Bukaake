@@ -142,7 +142,7 @@ export class ContextMenu {
         disabled: !this.hasImage() || this.isCropActive(),
         action: () => {
           if (this.isCropActive()) {
-            toast.show('Please apply or cancel crop before exporting');
+            toast.show(i18n.t('contextMenu.cropWarning'));
             return;
           }
           this.actions.onSaveImage?.();
@@ -158,35 +158,35 @@ export class ContextMenu {
       { type: 'divider' },
       {
         id: 'rotate-cw',
-        label: 'Rotate 90° CW',
+        label: i18n.t('contextMenu.rotateCW'),
         icon: 'ri-clockwise-2-line',
         shortcut: 'R',
         action: () => this.actions.onRotateRight?.(),
       },
       {
         id: 'flip-h',
-        label: 'Flip Horizontal',
+        label: i18n.t('contextMenu.flipH'),
         icon: 'ri-flip-horizontal-line',
         shortcut: 'H',
         action: () => this.actions.onFlipH?.(),
       },
       {
         id: 'fit-screen',
-        label: 'Fit to Screen',
+        label: i18n.t('contextMenu.fitScreen'),
         icon: 'ri-aspect-ratio-line',
         shortcut: 'F',
         action: () => this.actions.onFitScreen?.(),
       },
       ...(this.isRaw() ? [{
         id: 'raw-full-sensor',
-        label: 'Load Full Sensor Decode',
+        label: i18n.t('contextMenu.loadRaw'),
         icon: 'ri-focus-2-fill',
         shortcut: 'Q',
         action: () => this.actions.onLoadFullRaw?.(),
       }] : []),
       {
         id: 'crop',
-        label: 'Crop Image',
+        label: i18n.t('contextMenu.crop'),
         icon: 'ri-crop-line',
         shortcut: 'C',
         action: () => this.actions.onCrop?.(),
@@ -194,7 +194,7 @@ export class ContextMenu {
       { type: 'divider' },
       {
         id: 'image-info',
-        label: 'Image Properties',
+        label: i18n.t('contextMenu.properties'),
         icon: 'ri-information-line',
         shortcut: 'I',
         action: () => this.actions.onToggleMetadata?.(),
@@ -216,7 +216,7 @@ export class ContextMenu {
         { type: 'divider' },
         {
           id: 'inspect-dev',
-          label: 'Inspect (Dev Mode)',
+          label: i18n.t('contextMenu.inspectDev'),
           icon: 'ri-code-s-slash-line',
           action: () => {
             console.log('[DevMode] Press F12 or Ctrl+Shift+I to open DevTools');

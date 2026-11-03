@@ -1,3 +1,4 @@
+import { i18n } from '../../services/platform/i18n-service.js';
 /**
  * Bukaake Screen Snipper Action Dock Submodule
  * Floating stroke-free frosted glass action bar for Open, Copy, OCR, and Recording (< 120 lines)
@@ -21,11 +22,11 @@ export class SnipperActionDock {
     this.el = document.createElement('div');
     this.el.className = 'snipper-action-dock glass-panel hidden';
     this.el.innerHTML = `
-      <button class="snipper-btn confirm" id="btnSnipConfirm" title="Open in Bukaake (Enter)">
-        <i class="ri-check-line"></i> <span id="snipConfirmLabel">Open</span>
+      <button class="snipper-btn confirm" id="btnSnipConfirm" title="${i18n.t('snipper.openTooltip')}" data-i18n-title="snipper.openTooltip">
+        <i class="ri-check-line"></i> <span id="snipConfirmLabel" data-i18n="snipper.open">${i18n.t("snipper.open")}</span>
       </button>
-      <button class="snipper-btn" id="btnSnipCopy" title="Copy to Clipboard (Ctrl+C)">
-        <i class="ri-file-copy-line"></i> <span>Copy</span>
+      <button class="snipper-btn" id="btnSnipCopy" title="${i18n.t('snipper.copyTooltip')}" data-i18n-title="snipper.copyTooltip">
+        <i class="ri-file-copy-line"></i> <span data-i18n="snipper.copy">${i18n.t("snipper.copy")}</span>
       </button>
       <button class="snipper-btn" id="btnSnipOcr" title="Read Text (OCR)">
         <i class="ri-character-recognition-line"></i>
@@ -56,8 +57,14 @@ export class SnipperActionDock {
   setType(type) {
     const isRec = type === 'record';
     this.btnConfirm.classList.toggle('record', isRec);
-    this.btnConfirm.title = isRec ? 'Start Screen Recording (Enter)' : 'Open in Bukaake (Enter)';
-    if (this.confirmLabel) this.confirmLabel.textContent = isRec ? 'Start Recording' : 'Open';
+    const titleKey = isRec ? 'snipper.recTooltip' : 'snipper.openTooltip';
+    this.btnConfirm.title = i18n.t(titleKey);
+    this.btnConfirm.setAttribute('data-i18n-title', titleKey);
+    const labelKey = isRec ? 'snipper.startRecording' : 'snipper.open';
+    if (this.confirmLabel) {
+      this.confirmLabel.setAttribute('data-i18n', labelKey);
+      this.confirmLabel.textContent = i18n.t(labelKey);
+    }
     if (this.confirmIcon) this.confirmIcon.className = isRec ? 'ri-record-circle-fill' : 'ri-check-line';
     this.btnCopy?.classList.toggle('hidden', isRec);
     this.btnOcr?.classList.toggle('hidden', isRec);

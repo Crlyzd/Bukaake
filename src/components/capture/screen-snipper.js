@@ -1,3 +1,4 @@
+import { i18n } from '../../services/platform/i18n-service.js';
 /**
  * Bukaake Screen Snipper Component
  * Interactive drag-to-snip overlay with dimensions tag, OCR, and Color Picker submodules (< 260 lines)
@@ -28,9 +29,9 @@ export class ScreenSnipper {
       `<div class="snipper-type-toggle"><button class="snipper-pill-btn active" id="btnTypeScreenshot" title="Screenshot Mode"><i class="ri-screenshot-line"></i></button>` +
       `<button class="snipper-pill-btn" id="btnTypeRecord" title="Screen Record Mode"><i class="ri-video-on-line"></i></button></div>` +
       `<div class="snipper-dock-divider"></div><div class="snipper-region-modes">` +
-      `<button class="snipper-pill-btn active" id="btnModeRegion" title="Region Snip"><i class="ri-screenshot-2-line"></i> <span>Region</span></button>` +
-      `<button class="snipper-pill-btn" id="btnModeWindow" title="Active Window"><i class="ri-window-line"></i> <span>Window</span></button>` +
-      `<button class="snipper-pill-btn" id="btnModeFullscreen" title="Full Screen"><i class="ri-aspect-ratio-line"></i> <span>Full Screen</span></button></div>` +
+      `<button class="snipper-pill-btn active" id="btnModeRegion" title="Region Snip"><i class="ri-screenshot-2-line"></i> <span data-i18n="snipper.region">${i18n.t("snipper.region")}</span></button>` +
+      `<button class="snipper-pill-btn" id="btnModeWindow" title="Active Window"><i class="ri-window-line"></i> <span data-i18n="snipper.window">${i18n.t("snipper.window")}</span></button>` +
+      `<button class="snipper-pill-btn" id="btnModeFullscreen" title="Full Screen"><i class="ri-aspect-ratio-line"></i> <span data-i18n="snipper.fullscreen">${i18n.t("snipper.fullscreen")}</span></button></div>` +
       `<div class="snipper-dock-divider"></div><div class="snipper-tools-group">` +
       `<button class="snipper-pill-btn" id="btnModeOcr" title="Read Text (OCR)"><i class="ri-character-recognition-line"></i></button>` +
       `<button class="snipper-pill-btn" id="btnModeColorPicker" title="Color Picker (Eyedropper)"><i class="ri-sip-line"></i></button></div>` +
@@ -88,7 +89,7 @@ export class ScreenSnipper {
       const physW = Math.round(window.innerWidth * this.screenDpr), physH = Math.round(window.innerHeight * this.screenDpr);
       this.currentRect = { x: 0, y: 0, width: physW, height: physH, cssX: 0, cssY: 0, cssWidth: window.innerWidth, cssHeight: window.innerHeight };
       Object.assign(this.box.style, { left: '0px', top: '0px', width: `${window.innerWidth}px`, height: `${window.innerHeight}px` });
-      if (this.currentType === 'record') { this.dimTag.textContent = `${window.innerWidth} × ${window.innerHeight} • Full Screen`; this.actionDock.positionFullscreen(); }
+      if (this.currentType === 'record') { this.dimTag.textContent = `${window.innerWidth} × ${window.innerHeight} • ${i18n.t('snipper.fullscreen')}`; this.actionDock.positionFullscreen(); }
     } else if (this.currentMode === 'window' && this.currentType === 'record') {
       this.actionDock.positionFullscreen();
     }
@@ -98,7 +99,7 @@ export class ScreenSnipper {
 
   targetWindow(win) {
     this.updateBox(win.cssX, win.cssY, win.cssWidth, win.cssHeight);
-    const prompt = this.currentType === 'record' ? 'Click window to lock' : 'Click to capture';
+    const prompt = this.currentType === 'record' ? i18n.t('snipper.clickToLock') : i18n.t('snipper.clickToCapture');
     this.dimTag.textContent = `${win.title ? win.title.slice(0, 18) + ' • ' : ''}${Math.round(win.cssWidth)} × ${Math.round(win.cssHeight)} • ${prompt}`;
     this.box.classList.remove('hidden');
   }
@@ -112,7 +113,7 @@ export class ScreenSnipper {
 
     if (this.currentMode === 'fullscreen' || this.currentMode === 'window') {
       if (type === 'record') {
-        if (this.currentMode === 'fullscreen') this.dimTag.textContent = `${window.innerWidth} × ${window.innerHeight} • Full Screen`;
+        if (this.currentMode === 'fullscreen') this.dimTag.textContent = `${window.innerWidth} × ${window.innerHeight} • ${i18n.t('snipper.fullscreen')}`;
         else if (this.currentMode === 'window' && !this.currentRect && this.detectedWindows[0]) this.targetWindow(this.detectedWindows[0]);
         this.actionDock.positionFullscreen(); this.actionDock.show();
       } else {
@@ -144,7 +145,7 @@ export class ScreenSnipper {
       this.currentRect = { x: 0, y: 0, width: physW, height: physH, cssX: 0, cssY: 0, cssWidth: window.innerWidth, cssHeight: window.innerHeight };
       if (this.currentType === 'screenshot') { this.confirmSnip(false); return; }
       Object.assign(this.box.style, { left: '0px', top: '0px', width: `${window.innerWidth}px`, height: `${window.innerHeight}px` });
-      this.dimTag.textContent = `${window.innerWidth} × ${window.innerHeight} • Full Screen`;
+      this.dimTag.textContent = `${window.innerWidth} × ${window.innerHeight} • ${i18n.t('snipper.fullscreen')}`;
       this.box.classList.remove('hidden');
       this.actionDock.positionFullscreen(); this.actionDock.show();
       return;
@@ -185,7 +186,7 @@ export class ScreenSnipper {
     if (this.currentMode === 'window') {
       if (this.currentRect && this.currentRect.width > 20) {
         if (this.currentType === 'screenshot') this.confirmSnip(false);
-        else { this.isWindowLocked = true; this.dimTag.textContent = `${Math.round(this.currentRect.cssWidth)} × ${Math.round(this.currentRect.cssHeight)} • Window locked`; }
+        else { this.isWindowLocked = true; this.dimTag.textContent = `${Math.round(this.currentRect.cssWidth)} × ${Math.round(this.currentRect.cssHeight)} • ${i18n.t('snipper.windowLocked')}`; }
       }
       return;
     }
