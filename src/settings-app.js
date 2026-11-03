@@ -12,6 +12,7 @@ import { autostartService } from './services/platform/autostart-service.js';
 import { bindCaptureSettings } from './components/settings/settings-capture-section.js';
 import { bindGeneralSettings } from './components/settings/settings-general-section.js';
 import { initHeartSprouter } from './components/viewer/heart-sprouter.js';
+import { i18n } from './services/platform/i18n-service.js';
 
 class SettingsApp {
   constructor() {
@@ -36,6 +37,7 @@ class SettingsApp {
   }
 
   init() {
+    i18n.init();
     hydrateAppVersions(document);
     this.syncThemeFromStorage();
     this.bindWindowControls();

@@ -36,6 +36,7 @@ import { RawLoadController } from './services/image/raw-load-controller.js';
 import { ExternalOpenController } from './services/platform/external-open-controller.js';
 import { windowBridge } from './services/platform/window-bridge.js';
 import { modeTransition } from './services/platform/mode-transition.js';
+import { i18n } from './services/platform/i18n-service.js';
 
 const RAW_EXTS = new Set(['arw', 'srf', 'sr2', 'cr2', 'cr3', 'nef', 'nrw', 'dng', 'raf', 'rw2', 'orf', 'pef', '3fr', 'mrw', 'srw', 'x3f', 'mos', 'mef', 'raw', 'kdc', 'dcr', 'rwl', 'iiq', 'erf']);
 
@@ -221,6 +222,7 @@ class BukaakeApp {
   }
 
   async init() {
+    i18n.init();
     tauriBridge.initExternalLinks();
     this.fileLoader.bindDropAndPaste(this.viewportEl, this.fileInput);
     const shield = document.getElementById('modalShield');

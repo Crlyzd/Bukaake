@@ -12,6 +12,7 @@ import { screenRecorderService } from './services/capture/screen-recorder-servic
 import { screenshotSaver } from './services/capture/screenshot-saver.js';
 import { alitkenService } from './services/integrations/alitken-service.js';
 import { toast } from './components/viewer/toast.js';
+import { i18n } from './services/platform/i18n-service.js';
 
 export class SnipperApp {
   constructor() {
@@ -22,6 +23,7 @@ export class SnipperApp {
   }
 
   init() {
+    i18n.init();
     this.syncTheme();
     window.addEventListener('storage', () => this.syncTheme());
     listen('bukaake://theme-changed', () => this.syncTheme());

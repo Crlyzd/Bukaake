@@ -3,6 +3,8 @@
  * Stroke-free frosted glass modal confirming file deletion or move to Recycle Bin (< 90 lines).
  */
 
+import { i18n } from '../../services/platform/i18n-service.js';
+
 export class DeleteModal {
   constructor(containerId = 'deleteModalOverlay') {
     this.overlay = document.getElementById(containerId);
@@ -71,18 +73,23 @@ export class DeleteModal {
     this.pendingConfirm = onConfirm;
 
     if (this.titleEl) {
-      this.titleEl.textContent = isPermanent ? 'Delete File Permanently?' : 'Move to Recycle Bin?';
+      this.titleEl.textContent = isPermanent ? i18n.t('modals.delete.titlePermanent') : i18n.t('modals.delete.titleTrash');
     }
     if (this.descEl) {
       this.descEl.textContent = isPermanent
-        ? 'This image will be permanently deleted from disk. This action cannot be undone.'
-        : 'Are you sure you want to move this file to the Windows Recycle Bin?';
+        ? i18n.t('modals.delete.descPermanent')
+        : i18n.t('modals.delete.descTrash');
     }
     if (this.fileNameTag) {
       this.fileNameTag.textContent = fileName || 'Untitled';
     }
     if (this.btnConfirm) {
-      this.btnConfirm.textContent = isPermanent ? 'Delete Permanently' : 'Move to Recycle Bin';
+      this.btnConfirm.textContent = isPermanent
+        ? i18n.t('modals.delete.btnPermanent')
+        : i18n.t('modals.delete.btnTrash');
+    }
+    if (this.btnCancel) {
+      this.btnCancel.textContent = i18n.t('modals.delete.cancel');
     }
 
     this.show();

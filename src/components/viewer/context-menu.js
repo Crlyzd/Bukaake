@@ -5,6 +5,7 @@
 
 import { tauriBridge } from '../../services/platform/tauri-bridge.js';
 import { toast } from './toast.js';
+import { i18n } from '../../services/platform/i18n-service.js';
 
 const WINDOWS_WALLPAPER_EXTS = new Set(['jpg', 'jpeg', 'png', 'bmp', 'jfif', 'dib']);
 
@@ -116,26 +117,26 @@ export class ContextMenu {
     const items = [
       {
         id: 'open-location',
-        label: 'Open File Location',
+        label: i18n.t('contextMenu.openLocation'),
         icon: 'ri-folder-open-line',
         disabled: !canOpenFileLocation,
         action: () => {
           if (filePath) {
             tauriBridge.showInFolder(filePath);
           } else {
-            toast.show('No local file path available');
+            toast.show(i18n.t('contextMenu.noFilePath'));
           }
         },
       },
       {
         id: 'copy-image',
-        label: 'Copy Image',
+        label: i18n.t('contextMenu.copyImage'),
         icon: 'ri-file-copy-line',
         action: () => this.actions.onCopyImage?.(),
       },
       {
         id: 'save-image',
-        label: 'Save Image As...',
+        label: i18n.t('contextMenu.saveAs'),
         icon: 'ri-download-2-line',
         shortcut: 'Ctrl+S',
         disabled: !this.hasImage() || this.isCropActive(),
@@ -149,7 +150,7 @@ export class ContextMenu {
       },
       {
         id: 'set-wallpaper',
-        label: 'Set as Desktop Wallpaper',
+        label: i18n.t('contextMenu.setWallpaper'),
         icon: 'ri-landscape-line',
         disabled: !this.hasImage() || this.isCropActive() || !canSetWallpaper,
         action: () => this.actions.onSetWallpaper?.(),
@@ -201,7 +202,7 @@ export class ContextMenu {
       { type: 'divider' },
       {
         id: 'delete-file',
-        label: 'Move to Recycle Bin',
+        label: i18n.t('contextMenu.delete'),
         icon: 'ri-delete-bin-line',
         shortcut: 'Del',
         danger: true,

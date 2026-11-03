@@ -121,12 +121,14 @@ html[data-theme="light"] .key-token {
 /* ==========================================================================
    ELEVATED FROSTED GLASS DROPDOWN (Zero Clipping Bug Fix)
    ========================================================================== */
-.glass-dropdown-wrap, .dropdown {
+.glass-dropdown-wrap,
+.dropdown {
   position: relative;
   display: inline-block;
 }
 
-.glass-dropdown-trigger, .dropdown-btn {
+.glass-dropdown-trigger,
+.dropdown-btn {
   height: 32px;
   display: inline-flex;
   align-items: center;
@@ -146,12 +148,14 @@ html[data-theme="light"] .key-token {
   box-sizing: border-box;
 }
 
-.glass-dropdown-trigger:hover, .dropdown-btn:hover {
+.glass-dropdown-trigger:hover,
+.dropdown-btn:hover {
   background: var(--glass-btn-hover-bg);
   transform: translateY(-1px);
 }
 
-.glass-dropdown-trigger i.trigger-chevron, .dropdown-btn i {
+.glass-dropdown-trigger i.trigger-chevron,
+.dropdown-btn i {
   font-size: 14px;
   color: var(--text-muted);
   transition: transform var(--transition-fast);
@@ -162,7 +166,8 @@ html[data-theme="light"] .key-token {
   transform: rotate(180deg);
 }
 
-.glass-dropdown-menu, .dropdown-menu {
+.glass-dropdown-menu,
+.dropdown-menu {
   position: absolute;
   top: calc(100% + 6px);
   right: 0;
@@ -181,7 +186,7 @@ html[data-theme="light"] .key-token {
   box-sizing: border-box;
 }
 
-/* Compact Dropdown Variant (e.g. Mode 2 Window Presentation) */
+/* Compact Dropdown Variant (e.g. Mode 2 Window Presentation & Language) */
 .glass-dropdown-wrap.compact .glass-dropdown-trigger,
 .glass-dropdown-wrap.compact .dropdown-btn,
 #wrapMode2Style .glass-dropdown-trigger,
@@ -189,11 +194,22 @@ html[data-theme="light"] .key-token {
   min-width: 124px;
 }
 
+#wrapLanguage .glass-dropdown-trigger,
+#wrapLanguage .dropdown-btn {
+  min-width: 154px;
+}
+
 .glass-dropdown-wrap.compact .glass-dropdown-menu,
 .glass-dropdown-wrap.compact .dropdown-menu,
 #wrapMode2Style .glass-dropdown-menu,
 #wrapMode2Style .dropdown-menu {
   min-width: 124px;
+  width: 100%;
+}
+
+#wrapLanguage .glass-dropdown-menu,
+#wrapLanguage .dropdown-menu {
+  min-width: 154px;
   width: 100%;
 }
 
@@ -208,7 +224,8 @@ html[data-theme="light"] .dropdown-menu {
   display: none !important;
 }
 
-.glass-dropdown-item, .dropdown-item {
+.glass-dropdown-item,
+.dropdown-item {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -228,12 +245,14 @@ html[data-theme="light"] .dropdown-menu {
   box-sizing: border-box;
 }
 
-.glass-dropdown-item:hover, .dropdown-item:hover {
+.glass-dropdown-item:hover,
+.dropdown-item:hover {
   background: var(--glass-btn-hover-bg);
   color: var(--text-main);
 }
 
-.glass-dropdown-item.active, .dropdown-item.active {
+.glass-dropdown-item.active,
+.dropdown-item.active {
   color: var(--accent-indigo, #818cf8);
   font-weight: 600;
 }
@@ -243,12 +262,14 @@ html[data-theme="light"] .dropdown-item.active {
   color: #4f46e5;
 }
 
-.glass-dropdown-item .item-check, .dropdown-item i.check {
+.glass-dropdown-item .item-check,
+.dropdown-item i.check {
   font-size: 14px;
   opacity: 0;
 }
 
-.glass-dropdown-item.active .item-check, .dropdown-item.active i.check {
+.glass-dropdown-item.active .item-check,
+.dropdown-item.active i.check {
   opacity: 1;
 }
 
@@ -265,4 +286,3 @@ body.light-theme .settings-divider-dashed,
 html[data-theme="light"] .settings-divider-dashed {
   border-top: 1px dashed rgba(26, 32, 44, 0.12);
 }
-

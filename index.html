@@ -54,32 +54,32 @@
     </div>
 
     <div class="titlebar-right">
-      <button class="titlebar-ghost-btn" id="btnOpenFile" title="Open Image File (Ctrl+O)">
+      <button class="titlebar-ghost-btn" id="btnOpenFile" title="Open Image File (Ctrl+O)" data-i18n-title="titlebar.openFile">
         <i class="ri-folder-open-line"></i>
       </button>
-      <button class="titlebar-ghost-btn" id="btnClipboard" title="Paste Image from Clipboard (Ctrl+V)">
+      <button class="titlebar-ghost-btn" id="btnClipboard" title="Paste Image from Clipboard (Ctrl+V)" data-i18n-title="titlebar.clipboard">
         <i class="ri-clipboard-line"></i>
       </button>
-      <button class="titlebar-ghost-btn" id="btnThemeToggle" title="Toggle Dark / Light Theme">
+      <button class="titlebar-ghost-btn" id="btnThemeToggle" title="Toggle Dark / Light Theme" data-i18n-title="titlebar.themeToggle">
         <i class="ri-sun-line"></i>
       </button>
-      <button class="titlebar-ghost-btn" id="btnTitlebarCapture" title="Take Screenshot (Alt+Shift+S)">
+      <button class="titlebar-ghost-btn" id="btnTitlebarCapture" title="Take Screenshot (Alt+Shift+S)" data-i18n-title="titlebar.capture">
         <i class="ri-screenshot-fill"></i>
       </button>
-      <button class="titlebar-ghost-btn" id="btnToggleInfo" title="Toggle Image Properties (I)">
+      <button class="titlebar-ghost-btn" id="btnToggleInfo" title="Toggle Image Properties (I)" data-i18n-title="titlebar.info">
         <i class="ri-information-line"></i>
       </button>
-      <button class="titlebar-ghost-btn" id="btnSettings" title="Settings & About">
+      <button class="titlebar-ghost-btn" id="btnSettings" title="Settings & About" data-i18n-title="titlebar.settings">
         <i class="ri-settings-3-line"></i>
       </button>
 
       <div class="titlebar-divider"></div>
 
       <div class="window-controls">
-        <button class="win-btn win-min" id="winMin" title="Minimize"><i class="ri-subtract-line"></i></button>
-        <button class="win-btn win-max" id="winMax" title="Maximize / Restore"><i
+        <button class="win-btn win-min" id="winMin" title="Minimize" data-i18n-title="titlebar.minimize"><i class="ri-subtract-line"></i></button>
+        <button class="win-btn win-max" id="winMax" title="Maximize / Restore" data-i18n-title="titlebar.maximize"><i
             class="ri-checkbox-blank-line"></i></button>
-        <button class="win-btn win-close" id="winClose" title="Close"><i class="ri-close-line"></i></button>
+        <button class="win-btn win-close" id="winClose" title="Close" data-i18n-title="titlebar.close"><i class="ri-close-line"></i></button>
       </div>
     </div>
   </header>
@@ -128,30 +128,30 @@
         <div class="drop-icon">
           <img src="/icon-frameless.png" alt="Bukaake" />
         </div>
-        <h2>Bukaake Viewer</h2>
+        <h2 data-i18n="dropZone.title">Bukaake Viewer</h2>
         <div class="drop-actions">
           <button class="btn-primary glass-btn" id="dropOpenBtn">
-            <i class="ri-folder-open-fill"></i> Select Image File
+            <i class="ri-folder-open-fill"></i> <span data-i18n="dropZone.selectFile">Select Image File</span>
           </button>
         </div>
 
         <div class="drop-subtext-group">
-          <p class="drop-hint">Drop image anywhere or press <kbd class="subtle-kbd">Ctrl+V</kbd> to paste</p>
+          <p class="drop-hint" data-i18n="dropZone.hint">Drop image anywhere or press Ctrl+V to paste</p>
           <div class="pro-capabilities-strip">
             <span class="pro-cap-pill" title="Precision Crop (C)">
-              <i class="ri-crop-line"></i> Crop <kbd>C</kbd>
+              <i class="ri-crop-line"></i> <span data-i18n="dropZone.cropPill">Crop</span> <kbd>C</kbd>
             </span>
             <span class="pro-cap-pill" title="Freehand Pen & Highlighter (D)">
-              <i class="ri-mark-pen-line"></i> Draw <kbd>D</kbd>
+              <i class="ri-mark-pen-line"></i> <span data-i18n="dropZone.drawPill">Draw</span> <kbd>D</kbd>
             </span>
             <span class="pro-cap-pill" title="Color Adjustments (E)">
-              <i class="ri-equalizer-line"></i> Adjust <kbd>E</kbd>
+              <i class="ri-equalizer-line"></i> <span data-i18n="dropZone.adjustPill">Adjust</span> <kbd>E</kbd>
             </span>
             <span class="pro-cap-pill" title="Camera EXIF Telemetry (I)">
-              <i class="ri-information-line"></i> EXIF <kbd>I</kbd>
+              <i class="ri-information-line"></i> <span data-i18n="dropZone.exifPill">EXIF</span> <kbd>I</kbd>
             </span>
             <span class="pro-cap-pill" title="Typography & Text Annotations (T)">
-              <i class="ri-text"></i> Text <kbd>T</kbd>
+              <i class="ri-text"></i> <span data-i18n="dropZone.textPill">Text</span> <kbd>T</kbd>
             </span>
           </div>
         </div>
@@ -194,11 +194,11 @@
     <nav class="floating-toolbar glass-panel" id="floatingToolbar">
       <!-- Navigation Group -->
       <div class="toolbar-group">
-        <button class="toolbar-btn" id="btnPrevImage" title="Previous Image (Left Arrow)" disabled>
+        <button class="toolbar-btn" id="btnPrevImage" title="Previous Image (Left Arrow)" data-i18n-title="toolbar.prevImage" disabled>
           <i class="ri-arrow-left-s-line"></i>
         </button>
         <span class="file-counter" id="fileCounter">0 / 0</span>
-        <button class="toolbar-btn" id="btnNextImage" title="Next Image (Right Arrow)" disabled>
+        <button class="toolbar-btn" id="btnNextImage" title="Next Image (Right Arrow)" data-i18n-title="toolbar.nextImage" disabled>
           <i class="ri-arrow-right-s-line"></i>
         </button>
       </div>
@@ -207,19 +207,19 @@
 
       <!-- Zoom Group -->
       <div class="toolbar-group">
-        <button class="toolbar-btn" id="btnZoomOut" title="Zoom Out (-)">
+        <button class="toolbar-btn" id="btnZoomOut" title="Zoom Out (-)" data-i18n-title="toolbar.zoomOut">
           <i class="ri-zoom-out-line"></i>
         </button>
-        <button class="toolbar-btn zoom-preset-btn" id="btnZoomLabel" title="Reset Zoom (1:1 / Fit)">
+        <button class="toolbar-btn zoom-preset-btn" id="btnZoomLabel" title="Reset Zoom (1:1 / Fit)" data-i18n-title="toolbar.zoomReset">
           <span id="zoomPercentText">100%</span>
         </button>
-        <button class="toolbar-btn" id="btnZoomIn" title="Zoom In (+)">
+        <button class="toolbar-btn" id="btnZoomIn" title="Zoom In (+)" data-i18n-title="toolbar.zoomIn">
           <i class="ri-zoom-in-line"></i>
         </button>
-        <button class="toolbar-btn" id="btnFitScreen" title="Fit to Screen (F)">
+        <button class="toolbar-btn" id="btnFitScreen" title="Fit to Screen (F)" data-i18n-title="toolbar.fitScreen">
           <i class="ri-aspect-ratio-line"></i>
         </button>
-        <button class="toolbar-btn" id="btnActualSize" title="Actual Size 1:1 (1)">
+        <button class="toolbar-btn" id="btnActualSize" title="Actual Size 1:1 (1)" data-i18n-title="toolbar.actualSize">
           <i class="ri-expand-diagonal-2-line"></i>
         </button>
       </div>
@@ -228,37 +228,37 @@
 
       <!-- Tools & Effects Group -->
       <div class="toolbar-group">
-        <button class="toolbar-btn" id="btnRotateLeft" title="Rotate Left 90° (,)">
+        <button class="toolbar-btn" id="btnRotateLeft" title="Rotate Left 90° (,)" data-i18n-title="toolbar.rotateLeft">
           <i class="ri-anticlockwise-2-line"></i>
         </button>
-        <button class="toolbar-btn" id="btnRotateRight" title="Rotate Right 90° (.)">
+        <button class="toolbar-btn" id="btnRotateRight" title="Rotate Right 90° (.)" data-i18n-title="toolbar.rotateRight">
           <i class="ri-clockwise-2-line"></i>
         </button>
-        <button class="toolbar-btn" id="btnFlipH" title="Flip Horizontal (H)">
+        <button class="toolbar-btn" id="btnFlipH" title="Flip Horizontal (H)" data-i18n-title="toolbar.flipH">
           <i class="ri-flip-horizontal-line"></i>
         </button>
-        <button class="toolbar-btn" id="btnFlipV" title="Flip Vertical (V)">
+        <button class="toolbar-btn" id="btnFlipV" title="Flip Vertical (V)" data-i18n-title="toolbar.flipV">
           <i class="ri-flip-vertical-line"></i>
         </button>
-        <button class="toolbar-btn" id="btnCropMode" title="Crop Image (C)">
+        <button class="toolbar-btn" id="btnCropMode" title="Crop Image (C)" data-i18n-title="toolbar.crop">
           <i class="ri-crop-line"></i>
         </button>
-        <button class="toolbar-btn" id="btnDrawMode" title="Draw & Highlight (D)">
+        <button class="toolbar-btn" id="btnDrawMode" title="Draw & Highlight (D)" data-i18n-title="toolbar.draw">
           <i class="ri-mark-pen-line"></i>
         </button>
-        <button class="toolbar-btn" id="btnTextMode" title="Add Text (T)">
+        <button class="toolbar-btn" id="btnTextMode" title="Add Text (T)" data-i18n-title="toolbar.text">
           <i class="ri-text"></i>
         </button>
-        <button class="toolbar-btn" id="btnAdjustments" title="Color & Filters (E)">
+        <button class="toolbar-btn" id="btnAdjustments" title="Color & Filters (E)" data-i18n-title="toolbar.adjustments">
           <i class="ri-equalizer-line"></i>
         </button>
-        <button class="toolbar-btn" id="btnPixelated" title="Toggle Pixel Anti-Aliasing (P)">
+        <button class="toolbar-btn" id="btnPixelated" title="Toggle Pixel Anti-Aliasing (P)" data-i18n-title="toolbar.pixelated">
           <i class="ri-grid-fill"></i>
         </button>
-        <button class="toolbar-btn" id="btnBgMode" title="Toggle Canvas Background Theme (B)">
+        <button class="toolbar-btn" id="btnBgMode" title="Toggle Canvas Background Theme (B)" data-i18n-title="toolbar.bgMode">
           <i class="ri-contrast-drop-2-line"></i>
         </button>
-        <button class="toolbar-btn" id="btnRawFull" title="Load Full Sensor Decode (Q)">
+        <button class="toolbar-btn" id="btnRawFull" title="Load Full Sensor Decode (Q)" data-i18n-title="toolbar.rawFull">
           <i class="ri-focus-2-fill"></i>
         </button>
       </div>
@@ -267,9 +267,9 @@
 
       <!-- Action & Export Group -->
       <div class="toolbar-group">
-        <button class="toolbar-btn highlight-btn" id="btnSaveAs" title="Save / Export Image (Ctrl+S)">
+        <button class="toolbar-btn highlight-btn" id="btnSaveAs" title="Save / Export Image (Ctrl+S)" data-i18n-title="toolbar.save">
           <i class="ri-download-2-line"></i>
-          <span>Save</span>
+          <span data-i18n="toolbar.saveBtn">Save</span>
         </button>
       </div>
     </nav>
@@ -278,11 +278,11 @@
     <div class="crop-toolbar glass-panel hidden" id="cropToolbar">
       <div class="crop-pill-brand">
         <i class="ri-crop-2-line"></i>
-        <span>Crop</span>
+        <span data-i18n="crop.brand">Crop</span>
       </div>
       <div class="crop-pill-divider"></div>
       <div class="crop-presets">
-        <button class="crop-preset-btn active" data-ratio="free" title="Free Aspect Ratio">Free</button>
+        <button class="crop-preset-btn active" data-ratio="free" title="Free Aspect Ratio" data-i18n="crop.free">Free</button>
         <button class="crop-preset-btn" data-ratio="1:1" title="Square (1:1)">1:1</button>
         <button class="crop-preset-btn" data-ratio="16:9" title="Widescreen (16:9)">16:9</button>
         <button class="crop-preset-btn" data-ratio="9:16" title="Story / Reel (9:16)">9:16</button>
@@ -293,9 +293,9 @@
       <div class="crop-pill-divider"></div>
       <div class="crop-actions">
         <button class="crop-action-btn btn-cancel" id="btnCancelCrop" title="Cancel Crop (Esc)"><i
-            class="ri-close-line"></i> Cancel</button>
+            class="ri-close-line"></i> <span data-i18n="crop.cancel">Cancel</span></button>
         <button class="crop-action-btn btn-apply" id="btnApplyCrop" title="Apply Crop"><i class="ri-check-line"></i>
-          Apply</button>
+          <span data-i18n="crop.apply">Apply</span></button>
       </div>
     </div>
 
@@ -303,16 +303,16 @@
     <div class="draw-toolbar glass-panel hidden" id="drawToolbar">
       <div class="draw-pill-brand">
         <i class="ri-mark-pen-line"></i>
-        <span>Draw</span>
+        <span data-i18n="draw.brand">Draw</span>
       </div>
       <div class="draw-pill-divider"></div>
 
       <!-- Mode Segmented Capsule -->
       <div class="draw-modes">
         <button class="draw-mode-btn active" id="btnDrawPen" title="Pen Tool"><i class="ri-ball-pen-line"></i>
-          Pen</button>
+          <span data-i18n="draw.pen">Pen</span></button>
         <button class="draw-mode-btn" id="btnDrawHighlighter" title="Highlighter Tool"><i class="ri-mark-pen-line"></i>
-          Highlight</button>
+          <span data-i18n="draw.highlighter">Highlight</span></button>
       </div>
       <div class="draw-pill-divider"></div>
 
@@ -377,9 +377,9 @@
       <!-- Actions -->
       <div class="draw-actions">
         <button class="draw-action-btn btn-cancel" id="btnCancelDraw" title="Cancel (Esc)"><i class="ri-close-line"></i>
-          Cancel</button>
+          <span data-i18n="draw.cancel">Cancel</span></button>
         <button class="draw-action-btn btn-apply" id="btnApplyDraw" title="Apply Drawing"><i class="ri-check-line"></i>
-          Apply</button>
+          <span data-i18n="draw.apply">Apply</span></button>
       </div>
     </div>
 
@@ -387,14 +387,14 @@
     <div class="text-toolbar glass-panel hidden" id="textToolbar">
       <div class="text-pill-brand">
         <i class="ri-text"></i>
-        <span class="text-brand-text">Text</span>
+        <span class="text-brand-text" data-i18n="text.brand">Text</span>
       </div>
       <div class="text-pill-divider"></div>
 
       <!-- Add New Text Box -->
       <button class="text-pill-btn text-add-btn" id="btnTextAdd" title="Add New Text Box">
         <i class="ri-add-line"></i>
-        <span class="text-pill-label">Add</span>
+        <span class="text-pill-label" data-i18n="text.add">Add</span>
       </button>
       <div class="text-pill-divider"></div>
 
@@ -821,32 +821,32 @@
     <div class="modal-overlay hidden" id="helpModal">
       <div class="modal-card glass-card">
         <div class="modal-header">
-          <h3><i class="ri-keyboard-line"></i> Keyboard Shortcuts</h3>
+          <h3><i class="ri-keyboard-line"></i> <span data-i18n="modals.shortcuts.title">Keyboard Shortcuts</span></h3>
           <button class="icon-btn-close" id="btnCloseHelp"><i class="ri-close-line"></i></button>
         </div>
         <div class="modal-body shortcuts-grid">
-          <div class="shortcut-item"><kbd>Left</kbd> / <kbd>Right</kbd> <span>Navigate Batch Images</span></div>
-          <div class="shortcut-item"><kbd>Up</kbd> / <kbd>Down</kbd> / <kbd>Wheel</kbd> <span>Zoom In / Zoom Out</span>
+          <div class="shortcut-item"><kbd>Left</kbd> / <kbd>Right</kbd> <span data-i18n="modals.shortcuts.navBatch">Navigate Batch Images</span></div>
+          <div class="shortcut-item"><kbd>Up</kbd> / <kbd>Down</kbd> / <kbd>Wheel</kbd> <span data-i18n="modals.shortcuts.zoom">Zoom In / Zoom Out</span>
           </div>
-          <div class="shortcut-item"><kbd>F</kbd> <span>Fit to Screen</span></div>
-          <div class="shortcut-item"><kbd>1</kbd> <span>Actual Size (100%)</span></div>
-          <div class="shortcut-item"><kbd>,</kbd> / <kbd>.</kbd> <span>Rotate Left / Right</span></div>
-          <div class="shortcut-item"><kbd>H</kbd> / <kbd>V</kbd> <span>Flip Horizontal / Vertical</span></div>
-          <div class="shortcut-item"><kbd>C</kbd> <span>Toggle Crop Mode</span></div>
-          <div class="shortcut-item"><kbd>D</kbd> <span>Draw & Highlight</span></div>
-          <div class="shortcut-item"><kbd>T</kbd> <span>Add Text & Typography</span></div>
-          <div class="shortcut-item"><kbd>Ctrl</kbd> + <kbd>Z</kbd> <span>Undo Stroke / Text</span></div>
-          <div class="shortcut-item"><kbd>Ctrl</kbd> + <kbd>Y</kbd> <span>Redo Stroke / Text</span></div>
-          <div class="shortcut-item"><kbd>E</kbd> <span>Toggle Color & Filters</span></div>
-          <div class="shortcut-item"><kbd id="helpShortcutCapture">Alt+Shift+S</kbd> / <kbd>PrtScn</kbd> <span>Capture / Record Screen</span></div>
-          <div class="shortcut-item"><kbd>I</kbd> <span>Image Properties / EXIF</span></div>
-          <div class="shortcut-item"><kbd>B</kbd> <span>Toggle Background Theme</span></div>
-          <div class="shortcut-item"><kbd>P</kbd> <span>Toggle Pixel Smoothing</span></div>
-          <div class="shortcut-item"><kbd>Q</kbd> <span>Load Full Sensor Decode (RAW)</span></div>
-          <div class="shortcut-item"><kbd>Ctrl</kbd> + <kbd>V</kbd> <span>Paste Image from Clipboard</span></div>
-          <div class="shortcut-item"><kbd>Ctrl</kbd> + <kbd>S</kbd> <span>Save / Export Image</span></div>
-          <div class="shortcut-item"><kbd>Delete</kbd> <span>Move to Recycle Bin</span></div>
-          <div class="shortcut-item"><kbd>Esc</kbd> <span>Cancel Crop / Close Modals</span></div>
+          <div class="shortcut-item"><kbd>F</kbd> <span data-i18n="modals.shortcuts.fit">Fit to Screen</span></div>
+          <div class="shortcut-item"><kbd>1</kbd> <span data-i18n="modals.shortcuts.actual">Actual Size (100%)</span></div>
+          <div class="shortcut-item"><kbd>,</kbd> / <kbd>.</kbd> <span data-i18n="modals.shortcuts.rotate">Rotate Left / Right</span></div>
+          <div class="shortcut-item"><kbd>H</kbd> / <kbd>V</kbd> <span data-i18n="modals.shortcuts.flip">Flip Horizontal / Vertical</span></div>
+          <div class="shortcut-item"><kbd>C</kbd> <span data-i18n="modals.shortcuts.crop">Toggle Crop Mode</span></div>
+          <div class="shortcut-item"><kbd>D</kbd> <span data-i18n="modals.shortcuts.draw">Draw & Highlight</span></div>
+          <div class="shortcut-item"><kbd>T</kbd> <span data-i18n="modals.shortcuts.text">Add Text & Typography</span></div>
+          <div class="shortcut-item"><kbd>Ctrl</kbd> + <kbd>Z</kbd> <span data-i18n="modals.shortcuts.undo">Undo Stroke / Text</span></div>
+          <div class="shortcut-item"><kbd>Ctrl</kbd> + <kbd>Y</kbd> <span data-i18n="modals.shortcuts.redo">Redo Stroke / Text</span></div>
+          <div class="shortcut-item"><kbd>E</kbd> <span data-i18n="modals.shortcuts.filter">Toggle Color & Filters</span></div>
+          <div class="shortcut-item"><kbd id="helpShortcutCapture">Alt+Shift+S</kbd> / <kbd>PrtScn</kbd> <span data-i18n="modals.shortcuts.capture">Capture / Record Screen</span></div>
+          <div class="shortcut-item"><kbd>I</kbd> <span data-i18n="modals.shortcuts.info">Image Properties / EXIF</span></div>
+          <div class="shortcut-item"><kbd>B</kbd> <span data-i18n="modals.shortcuts.bg">Toggle Background Theme</span></div>
+          <div class="shortcut-item"><kbd>P</kbd> <span data-i18n="modals.shortcuts.pixel">Toggle Pixel Smoothing</span></div>
+          <div class="shortcut-item"><kbd>Q</kbd> <span data-i18n="modals.shortcuts.raw">Load Full Sensor Decode (RAW)</span></div>
+          <div class="shortcut-item"><kbd>Ctrl</kbd> + <kbd>V</kbd> <span data-i18n="modals.shortcuts.paste">Paste Image from Clipboard</span></div>
+          <div class="shortcut-item"><kbd>Ctrl</kbd> + <kbd>S</kbd> <span data-i18n="modals.shortcuts.save">Save / Export Image</span></div>
+          <div class="shortcut-item"><kbd>Delete</kbd> <span data-i18n="modals.shortcuts.delete">Move to Recycle Bin</span></div>
+          <div class="shortcut-item"><kbd>Esc</kbd> <span data-i18n="modals.shortcuts.esc">Cancel Crop / Close Modals</span></div>
         </div>
       </div>
     </div>
@@ -860,14 +860,14 @@
         <div class="confirm-modal-header">
           <div class="confirm-modal-icon"><i class="ri-error-warning-line"></i></div>
           <div class="confirm-modal-title-wrap">
-            <h3 class="confirm-modal-title">Unsaved Changes</h3>
-            <p class="confirm-modal-desc">You have modified this image. Save changes before leaving?</p>
+            <h3 class="confirm-modal-title" data-i18n="modals.confirm.title">Unsaved Changes</h3>
+            <p class="confirm-modal-desc" data-i18n="modals.confirm.desc">You have modified this image. Save changes before leaving?</p>
           </div>
         </div>
         <div class="confirm-modal-actions">
-          <button class="confirm-btn btn-cancel" id="btnConfirmCancel">Cancel</button>
-          <button class="confirm-btn btn-discard" id="btnConfirmDiscard">Don't Save</button>
-          <button class="confirm-btn btn-save" id="btnConfirmSave">Save</button>
+          <button class="confirm-btn btn-cancel" id="btnConfirmCancel" data-i18n="modals.confirm.cancel">Cancel</button>
+          <button class="confirm-btn btn-discard" id="btnConfirmDiscard" data-i18n="modals.confirm.discard">Don't Save</button>
+          <button class="confirm-btn btn-save" id="btnConfirmSave" data-i18n="modals.confirm.save">Save Changes</button>
         </div>
       </div>
     </div>
@@ -878,15 +878,14 @@
         <div class="confirm-modal-header">
           <div class="confirm-modal-icon danger-icon"><i class="ri-delete-bin-line"></i></div>
           <div class="confirm-modal-title-wrap">
-            <h3 class="confirm-modal-title" id="deleteModalTitle">Move to Recycle Bin?</h3>
-            <p class="confirm-modal-desc" id="deleteModalDesc">Are you sure you want to move this file to the Windows
-              Recycle Bin?</p>
+            <h3 class="confirm-modal-title" id="deleteModalTitle" data-i18n="modals.delete.titleTrash">Move to Recycle Bin?</h3>
+            <p class="confirm-modal-desc" id="deleteModalDesc" data-i18n="modals.delete.descTrash">Are you sure you want to move this file to the Windows Recycle Bin?</p>
             <span class="delete-filename-tag" id="deleteModalFileName"></span>
           </div>
         </div>
         <div class="confirm-modal-actions">
-          <button class="confirm-btn btn-cancel" id="btnDeleteCancel">Cancel</button>
-          <button class="confirm-btn btn-danger" id="btnDeleteConfirm">Move to Recycle Bin</button>
+          <button class="confirm-btn btn-cancel" id="btnDeleteCancel" data-i18n="modals.delete.cancel">Cancel</button>
+          <button class="confirm-btn btn-danger" id="btnDeleteConfirm" data-i18n="modals.delete.btnTrash">Move to Recycle Bin</button>
         </div>
       </div>
     </div>

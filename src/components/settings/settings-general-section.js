@@ -1,9 +1,10 @@
 /**
  * Bukaake Settings General Section Controller
- * Encapsulates Theme cards, Canvas Checkerboard, and Mode 2 Window Presentation dropdown (< 110 lines)
+ * Encapsulates Theme cards, Canvas Checkerboard, Mode 2 Window Presentation, and Display Language (< 180 lines)
  */
 
 import { tauriBridge } from '../../services/platform/tauri-bridge.js';
+import { i18n } from '../../services/platform/i18n-service.js';
 
 export function bindGeneralSettings(app) {
   // 1. Theme Selection Cards
@@ -98,10 +99,74 @@ export function bindGeneralSettings(app) {
     });
   }
 
+  // 4. Display Language Dropdown
+  const wrapLang = document.getElementById('wrapLanguage');
+  const btnLangTrigger = document.getElementById('btnLanguageTrigger');
+  const lblLang = document.getElementById('lblLanguage');
+  const menuLang = document.getElementById('menuLanguage');
+
+  if (menuLang) {
+    menuLang.innerHTML = i18n.getLocales().map((loc) => `
+      <button type="button" class="dropdown-item glass-dropdown-item ${loc.code === i18n.getLanguage() ? 'active' : ''}" data-value="${loc.code}">
+        <span>${loc.nativeName}</span>
+        <i class="ri-check-line check item-check"></i>
+      </button>
+    `).join('');
+  }
+
+  const refreshLanguageLabels = () => {
+    const meta = i18n.getLocaleMeta();
+    if (lblLang) lblLang.textContent = meta.nativeName;
+    menuLang?.querySelectorAll('.glass-dropdown-item').forEach((item) => {
+      item.classList.toggle('active', item.dataset.value === i18n.getLanguage());
+    });
+  };
+
+  refreshLanguageLabels();
+
+  if (btnLangTrigger && menuLang && wrapLang) {
+    const closeLangDropdown = () => {
+      menuLang.classList.add('hidden');
+      wrapLang.classList.remove('open');
+      document.removeEventListener('click', onLangDocClick);
+    };
+
+    const onLangDocClick = (e) => {
+      if (!wrapLang.contains(e.target)) closeLangDropdown();
+    };
+
+    btnLangTrigger.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const isOpen = !menuLang.classList.contains('hidden');
+      if (isOpen) {
+        closeLangDropdown();
+      } else {
+        menuLang.classList.remove('hidden');
+        wrapLang.classList.add('open');
+        setTimeout(() => document.addEventListener('click', onLangDocClick), 10);
+      }
+    });
+
+    menuLang.querySelectorAll('.glass-dropdown-item').forEach((item) => {
+      item.addEventListener('click', (e) => {
+        e.stopPropagation();
+        i18n.setLanguage(item.dataset.value);
+        refreshLanguageLabels();
+        closeLangDropdown();
+      });
+    });
+  }
+
   window.addEventListener('storage', (e) => {
     if (e.key === 'bukaake-mode2-style') {
       refreshModeLabels();
+    } else if (e.key === 'bukaake-language') {
+      refreshLanguageLabels();
     }
+  });
+
+  window.addEventListener('bukaake-language-changed', () => {
+    refreshLanguageLabels();
   });
 
   if (window.__TAURI__?.event?.listen) {

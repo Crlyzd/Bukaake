@@ -21,7 +21,7 @@
         <div class="app-logo">
           <img src="/icon-frameless.png" alt="Bukaake" />
         </div>
-        <span class="settings-win-title" data-tauri-drag-region>Bukaake Settings</span>
+        <span class="settings-win-title" data-tauri-drag-region data-i18n="settings.winTitle">Bukaake Settings</span>
       </div>
       <div class="settings-win-controls">
         <button class="settings-win-btn close" id="btnCloseWindow" title="Close (Esc)">
@@ -33,9 +33,9 @@
     <!-- Segmented Navigation (3 Tabs) -->
     <div class="segmented-nav-wrap">
       <nav class="segmented-nav">
-        <button type="button" class="nav-item active" data-tab="general"><i class="ri-settings-4-line"></i><span>General</span></button>
-        <button type="button" class="nav-item" data-tab="capture"><i class="ri-camera-line"></i><span>Capture</span></button>
-        <button type="button" class="nav-item" data-tab="about"><i class="ri-heart-3-line"></i><span>About</span></button>
+        <button type="button" class="nav-item active" data-tab="general"><i class="ri-settings-4-line"></i><span data-i18n="settings.nav.general">General</span></button>
+        <button type="button" class="nav-item" data-tab="capture"><i class="ri-camera-line"></i><span data-i18n="settings.nav.capture">Capture</span></button>
+        <button type="button" class="nav-item" data-tab="about"><i class="ri-heart-3-line"></i><span data-i18n="settings.nav.about">About</span></button>
       </nav>
     </div>
 
@@ -45,7 +45,7 @@
 
         <!-- ==================== TAB 1: GENERAL (MERGED WITH APPEARANCE) ==================== -->
         <div class="tab-content" id="tabGeneral">
-          <span class="sub-section-title">Theme & Appearance</span>
+          <span class="sub-section-title" data-i18n="settings.general.themeTitle">Theme & Appearance</span>
 
           <!-- Giant Dark & Light Selection Cards with Galactic Glow -->
           <div class="theme-cards-grid">
@@ -54,8 +54,8 @@
                 <i class="ri-moon-line"></i>
               </div>
               <div class="theme-card-text">
-                <span class="theme-card-title">Dark Mode</span>
-                <span class="theme-card-subtitle">Deep Obsidian</span>
+                <span class="theme-card-title" data-i18n="settings.general.darkMode">Dark Mode</span>
+                <span class="theme-card-subtitle" data-i18n="settings.general.darkSub">Deep Obsidian</span>
               </div>
             </button>
 
@@ -64,8 +64,8 @@
                 <i class="ri-sun-line"></i>
               </div>
               <div class="theme-card-text">
-                <span class="theme-card-title">Light Mode</span>
-                <span class="theme-card-subtitle">Luminous Slate</span>
+                <span class="theme-card-title" data-i18n="settings.general.lightMode">Light Mode</span>
+                <span class="theme-card-subtitle" data-i18n="settings.general.lightSub">Luminous Slate</span>
               </div>
             </button>
           </div>
@@ -73,8 +73,8 @@
           <!-- Canvas Checkerboard Row -->
           <div class="row-item">
             <div class="row-meta">
-              <span class="row-title">Canvas Checkerboard</span>
-              <span class="row-desc">Show slate grid pattern for transparent PNG/WebP files</span>
+              <span class="row-title" data-i18n="settings.general.checkerboardTitle">Canvas Checkerboard</span>
+              <span class="row-desc" data-i18n="settings.general.checkerboardDesc">Show slate grid pattern for transparent PNG/WebP files</span>
             </div>
             <label class="settings-toggle-switch toggle" title="Toggle canvas checkerboard pattern">
               <input type="checkbox" id="toggleCheckerboard" />
@@ -85,8 +85,8 @@
           <!-- Viewer Mode Window Presentation Row -->
           <div class="row-item" id="cardMode2Style">
             <div class="row-meta">
-              <span class="row-title">Viewer Mode Presentation</span>
-              <span class="row-desc">Window display mode when entering Mode 2 transparent viewer</span>
+              <span class="row-title" data-i18n="settings.general.mode2Title">Viewer Mode Presentation</span>
+              <span class="row-desc" data-i18n="settings.general.mode2Desc">Window display mode when entering Mode 2 transparent viewer</span>
             </div>
             <div class="dropdown glass-dropdown-wrap compact" id="wrapMode2Style">
               <button class="dropdown-btn glass-dropdown-trigger" id="btnMode2StyleTrigger" type="button" title="Select viewer window presentation">
@@ -95,48 +95,65 @@
               </button>
               <div class="dropdown-menu glass-dropdown-menu hidden" id="menuMode2Style">
                 <button type="button" class="dropdown-item glass-dropdown-item active" data-value="maximized">
-                  <span>Maximized</span>
+                  <span data-i18n="settings.general.modeMaximized">Maximized</span>
                   <i class="ri-check-line check item-check"></i>
                 </button>
                 <button type="button" class="dropdown-item glass-dropdown-item" data-value="fullscreen">
-                  <span>Fullscreen</span>
+                  <span data-i18n="settings.general.modeFullscreen">Fullscreen</span>
                   <i class="ri-check-line check item-check"></i>
                 </button>
               </div>
             </div>
           </div>
 
-          <span class="sub-section-title">Default Application</span>
+          <!-- Display Language Row -->
+          <div class="row-item" id="cardLanguage">
+            <div class="row-meta">
+              <span class="row-title" data-i18n="settings.general.languageTitle">Display Language</span>
+              <span class="row-desc" data-i18n="settings.general.languageDesc">Interface language for buttons, menus, and notifications</span>
+            </div>
+            <div class="dropdown glass-dropdown-wrap compact" id="wrapLanguage">
+              <button class="dropdown-btn glass-dropdown-trigger" id="btnLanguageTrigger" type="button" title="Select display language">
+                <span id="lblLanguage">English</span>
+                <i class="ri-arrow-down-s-line trigger-chevron"></i>
+              </button>
+              <div class="dropdown-menu glass-dropdown-menu hidden" id="menuLanguage">
+                <!-- Dynamically populated from LOCALES -->
+              </div>
+            </div>
+          </div>
+
+          <span class="sub-section-title" data-i18n="settings.general.defaultAppTitle">Default Application</span>
           
           <div class="row-item" id="cardFileAssoc">
             <div class="row-meta">
               <div class="row-title">
-                Default Image Viewer
+                <span data-i18n="settings.general.defaultAppTitle">Default Image Viewer</span>
                 <span class="badge badge-success settings-assoc-chip" id="assocStatusBadge">37 Formats</span>
               </div>
-              <span class="row-desc" id="assocSubText">Set as default for photos, RAW & VFX</span>
+              <span class="row-desc" id="assocSubText" data-i18n="settings.general.defaultAppDesc">Set as default for photos, RAW & VFX</span>
             </div>
             <button class="btn btn-primary btn-assoc-action" id="btnSetDefaultApp" title="Register Bukaake in Windows">
-              <i class="ri-check-line"></i> Register
+              <i class="ri-check-line"></i> <span data-i18n="settings.general.defaultAppBtn">Register</span>
             </button>
           </div>
 
           <div class="row-item assoc-target-row">
             <div class="row-meta">
-              <span class="row-title">Executable Target</span>
+              <span class="row-title" data-i18n="settings.general.execTargetTitle">Executable Target</span>
             </div>
             <span class="settings-assoc-location" id="assocPathText">Locating...</span>
           </div>
 
-          <span class="sub-section-title">System & Startup</span>
+          <span class="sub-section-title" data-i18n="settings.general.startupTitle">System & Startup</span>
 
           <div class="row-item" id="cardAutostart">
             <div class="row-meta">
               <div class="row-title">
-                Start with Windows
+                <span data-i18n="settings.general.autostartTitle">Start with Windows</span>
                 <span class="badge settings-assoc-chip" id="autostartStatusBadge">Disabled</span>
               </div>
-              <span class="row-desc">Launch automatically in system tray on computer startup</span>
+              <span class="row-desc" data-i18n="settings.general.autostartDesc">Launch automatically in system tray on computer startup</span>
             </div>
             <label class="settings-toggle-switch toggle" title="Toggle Start with Windows">
               <input type="checkbox" id="toggleAutostart" />
@@ -146,8 +163,8 @@
 
           <div class="row-item" id="cardStandby">
             <div class="row-meta">
-              <span class="row-title">Run in Background</span>
-              <span class="row-desc">Keep running in tray when closed for sub-10ms launch & global snip</span>
+              <span class="row-title" data-i18n="settings.general.standbyTitle">Run in Background</span>
+              <span class="row-desc" data-i18n="settings.general.standbyDesc">Keep running in tray when closed for sub-10ms launch & global snip</span>
             </div>
             <label class="settings-toggle-switch toggle" title="Toggle Run in Background">
               <input type="checkbox" id="toggleStandby" checked />
