@@ -47,7 +47,7 @@
         </div>
         <span class="app-name">Bukaake</span>
       </button>
-      <span class="app-version">v1.2.1</span>
+      <span class="app-version">v1.3.0</span>
       <span class="titlebar-sep hidden" id="titlebarSep">/</span>
       <span class="titlebar-filename hidden" id="fileNameBadge"></span>
       <span class="titlebar-dimensions hidden" id="titlebarDimensions"></span>
@@ -128,7 +128,7 @@
         <div class="drop-icon">
           <img src="/icon-frameless.png" alt="Bukaake" />
         </div>
-        <h2 data-i18n="dropZone.title">Bukaake Viewer</h2>
+        <h2 data-i18n="dropZone.title">Bukaake</h2>
         <div class="drop-actions">
           <button class="btn-primary glass-btn" id="dropOpenBtn">
             <i class="ri-folder-open-fill"></i> <span data-i18n="dropZone.selectFile">Select Image File</span>
@@ -587,14 +587,14 @@
     <!-- Adjustments & Filters Floating Panel -->
     <aside class="adjustments-panel glass-panel hidden" id="adjustmentsPanel">
       <div class="panel-header">
-        <h3><i class="ri-equalizer-2-line"></i> Color & Image Tuning</h3>
+        <h3><i class="ri-equalizer-2-line"></i> <span data-i18n="adjustments.title">Color & Filters</span></h3>
         <button class="icon-btn-close" id="btnCloseAdjustments"><i class="ri-close-line"></i></button>
       </div>
 
       <!-- Sliders -->
       <div class="panel-body">
         <div class="filter-preset-row">
-          <span class="filter-section-title">Presets</span>
+          <span class="filter-section-title" data-i18n="adjustments.presets">Presets</span>
           <div class="preset-chips">
             <button class="preset-chip active" data-preset="normal">Normal</button>
             <button class="preset-chip" data-preset="vivid">Vivid</button>
@@ -607,7 +607,7 @@
 
         <div class="slider-control">
           <div class="slider-label">
-            <span>Brightness</span>
+            <span data-i18n="adjustments.brightness">Brightness</span>
             <span class="slider-val" id="valBrightness">100%</span>
           </div>
           <input type="range" id="sliderBrightness" min="0" max="200" value="100">
@@ -615,7 +615,7 @@
 
         <div class="slider-control">
           <div class="slider-label">
-            <span>Contrast</span>
+            <span data-i18n="adjustments.contrast">Contrast</span>
             <span class="slider-val" id="valContrast">100%</span>
           </div>
           <input type="range" id="sliderContrast" min="0" max="200" value="100">
@@ -623,7 +623,7 @@
 
         <div class="slider-control">
           <div class="slider-label">
-            <span>Saturation</span>
+            <span data-i18n="adjustments.saturation">Saturation</span>
             <span class="slider-val" id="valSaturation">100%</span>
           </div>
           <input type="range" id="sliderSaturation" min="0" max="200" value="100">
@@ -654,8 +654,7 @@
         </div>
 
         <div class="panel-footer-actions">
-          <button class="glass-btn btn-secondary" id="btnResetFilters"><i class="ri-refresh-line"></i> Reset
-            Filters</button>
+          <button class="glass-btn btn-secondary" id="btnResetFilters"><i class="ri-refresh-line"></i> <span data-i18n="adjustments.resetAll">Reset All</span></button>
         </div>
       </div>
     </aside>
@@ -663,7 +662,7 @@
     <!-- Metadata & Information Drawer -->
     <aside class="metadata-drawer glass-panel hidden" id="metadataDrawer">
       <div class="drawer-header">
-        <h3><i class="ri-information-line"></i> Image Properties</h3>
+        <h3><i class="ri-information-line"></i> <span data-i18n="metadata.title">Image Properties</span></h3>
         <button class="icon-btn-close" id="btnCloseMetadata"><i class="ri-close-line"></i></button>
       </div>
       <div class="drawer-body" id="metadataBody">
@@ -681,7 +680,7 @@
             </div>
             <div class="settings-title-wrap">
               <span class="settings-title">Bukaake</span>
-              <span class="settings-subtitle">v1.2.1 (x64) • Glass Image Viewer</span>
+              <span class="settings-subtitle">v1.3.0 (x64) • Glass Image Viewer</span>
             </div>
           </div>
           <button class="icon-btn-close" id="btnCloseSettings"><i class="ri-close-line"></i></button>
@@ -694,7 +693,7 @@
                 <img src="/icon-frameless.png" alt="Bukaake" />
               </div>
               <h2 class="settings-hero-title">Bukaake</h2>
-              <span class="settings-hero-subtitle">v1.2.1 • Portable Edition</span>
+              <span class="settings-hero-subtitle">v1.3.0 • Portable Edition</span>
             </div>
             <p class="settings-desc">
               Ultra-fast, distraction-free image viewer crafted in native Windows frosted glass.
@@ -792,7 +791,7 @@
             <div class="settings-update-header">
               <div class="update-status-wrap">
                 <i class="ri-checkbox-circle-line" id="updateStatusIcon"></i>
-                <span id="updateStatusText">Bukaake v1.2.1 (Latest Version)</span>
+                <span id="updateStatusText">Bukaake v1.3.0 (Latest Version)</span>
               </div>
               <button class="btn-check-update" id="btnCheckUpdate"><i class="ri-restart-line"></i> Check</button>
             </div>
