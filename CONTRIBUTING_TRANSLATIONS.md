@@ -27,13 +27,14 @@ Open your new file in any text editor. Translate the text values **on the right 
     "apply": "Aplicar"
   },
   "titlebar": {
-    "openFile": "Abrir archivo de imagen ({shortcut})",
+    "openFile": "Abrir archivo de imagen (Ctrl+O)",
+    "capture": "Captura de pantalla ({hotkey})",
     "themeToggle": "Cambiar tema oscuro / claro"
   }
 }
 ```
 
-> **Note on Placeholders**: Variables wrapped in curly braces like `{hotkey}` or `{count}` are dynamically replaced by Bukaake at runtime. Keep them exactly as they appear in `en.json`.
+> **Note on Placeholders**: Variables wrapped in curly braces like `{hotkey}` or `{lang}` are dynamically replaced by Bukaake at runtime. Keep them exactly as they appear in `en.json`.
 
 ### Step 3: Register Your Language in `manifest.js`
 Open `src/locales/manifest.js` and add your language to the `LOCALES` list:

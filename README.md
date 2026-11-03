@@ -69,6 +69,7 @@ Most photo viewers on Windows today are slow to launch, cluttered with heavy too
 | 🏪 **Microsoft Store & Portable** | Distribute as a zero-install ~5MB portable executable or install via Microsoft Store Desktop Bridge MSIX. |
 | 🗑️ **Safe Recycle Bin Deletion** | Win32 Recycle Bin integration (`Delete` to trash, `Shift+Delete` to shred). |
 | 🎨 **Stroke-Free Frosted Glass** | Dual theme engine: Deep Obsidian Dark Mode & Frosted Slate Light Mode. |
+| 🌐 **Multi-Language & Micro-i18n** | First-class English, Indonesian, Javanese Ngoko & Krama with live hot-swapping and community translation support. |
 
 <br />
 
@@ -187,6 +188,15 @@ Designed from the ground up for modern Windows aesthetics:
 - **True Portability**: A single standalone executable. Move `bukaake.exe` to a USB drive or secondary SSD—file associations self-heal automatically on launch.
 - **Microsoft Store & Desktop Bridge (MSIX)**: Native runtime channel detection via Win32 `GetCurrentPackageFamilyNameW`, declarative file associations, automatic Store background updates, and zero registry modifications.
 - **Built-In Self-Updater**: Background GitHub Releases checks with in-place executable updates via `self-replace`.
+
+---
+
+### 🌐 7. Multi-Language Localization & Micro-i18n
+Bukaake features a zero-dependency, lightning-fast micro-i18n engine built directly into its core:
+- **Zero Runtime Overhead**: Dictionaries are compiled directly into the binary—no external translation folders, extra files, or runtime delay.
+- **Cross-Window Live Hot-Swapping**: Switch your display language in **Settings > General** and watch the main viewer, settings dialog, and transparent snipper overlay update immediately without restarting.
+- **First-Class Cultural Localization**: Fully translated into **English**, **Indonesian (Bahasa Indonesia)**, **Javanese Ngoko (Basa Jawa Ngoko)**, and **Javanese Krama (Basa Jawa Krama)**.
+- **Community Translation Ready**: Anyone can easily contribute new languages by creating a single JSON file without touching Rust code. See **[CONTRIBUTING_TRANSLATIONS.md](CONTRIBUTING_TRANSLATIONS.md)** for details.
 
 <br />
 

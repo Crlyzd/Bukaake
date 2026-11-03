@@ -67,8 +67,12 @@ src/
 │   ├── filters/                # Real-time color adjustments processor
 │   ├── metadata/               # Client EXIF parser & telemetry formatter
 │   └── text/                   # Typography lifecycle, snapping & rendering
+├── locales/             # Multi-Language Dictionaries & Manifest (< 30 lines manifest)
+│   ├── manifest.js             # Locale registry & metadata
+│   ├── en.json, id.json        # English, Indonesian dictionaries
+│   └── jv-ngoko.json, jv-krama.json # Javanese Ngoko & Krama dictionaries
 ├── services/            # Platform & Domain Services (< 300 lines each)
-│   ├── platform/               # Windows OS, autostart, file assoc, updater-launch-gate, tray & window mode
+│   ├── platform/               # Windows OS, autostart, file assoc, i18n, updater-launch-gate, tray & window mode
 │   ├── image/                  # Image loader, prefetch cache, RAW load controller & file exporter
 │   ├── interaction/            # Hotkeys, shortcuts, idle controller & change tracker
 │   ├── capture/                # Screen capture, native recorder, audio stream receiver & screenshot saver
@@ -234,6 +238,13 @@ src-tauri/src/
 - **Shell File Association (`file_assoc.rs`, `file-assoc-service.js`)**:
   - Registers ProgID and capabilities for 49 formats under `HKCU` (zero UAC prompts).
   - Silent auto-healing on startup checks binary location and updates registry commands in-place if executable is moved.
+- **Internationalization (i18n) & Multi-Language Subsystem (`i18n-service.js`, `manifest.js`, `src/locales/`)**:
+  - Zero-dependency micro-i18n engine with dictionaries (`en.json`, `id.json`, `jv-ngoko.json`, `jv-krama.json`) bundled directly into the Vite binary payload, maintaining 100% portable single-executable architecture.
+  - Multi-attribute DOM batch engine: automatically hydrates `[data-i18n]` (textContent), `[data-i18n-title]` (titles & tooltips), and `[data-i18n-placeholder]` (input placeholders).
+  - Fallback chaining (`activeLocale` -> `en` -> `rawKey`) and runtime parameter interpolation (`{key}`).
+  - Cross-window live synchronization: coordinates instant live hot-swapping across main viewer, settings, and transparent snipper overlay windows via `localStorage` storage events and Tauri IPC without window reloads.
+  - First-class support for English (`en`), Indonesian (`id`), Javanese Ngoko (`jv-ngoko`), and Javanese Krama (`jv-krama`).
+  - Community Translations: Standardized contributor guide via `CONTRIBUTING_TRANSLATIONS.md`.
 
 ---
 
