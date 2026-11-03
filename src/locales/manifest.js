@@ -8,6 +8,7 @@ export const LOCALES = [
   { code: 'id', name: 'Indonesian', nativeName: 'Bahasa Indonesia' },
   { code: 'jv-ngoko', name: 'Javanese (Ngoko)', nativeName: 'Basa Jawa (Ngoko)' },
   { code: 'jv-krama', name: 'Javanese (Krama)', nativeName: 'Basa Jawa (Krama)' },
+  { code: 'jv-malangan', name: 'Javanese (Malangan)', nativeName: 'Basa Jawa (Malangan)' },
 ];
 
 export const DEFAULT_LOCALE = 'en';
@@ -15,4 +16,3 @@ export const DEFAULT_LOCALE = 'en';
 export function getLocaleMeta(code) {
   return LOCALES.find((l) => l.code === code) || LOCALES[0];
 }
-

@@ -1,12 +1,13 @@
 /**
  * Bukaake Internationalization (i18n) Service
- * Micro-i18n coordinator with fallback chaining, DOM batch translation, and cross-window sync (< 150 lines)
+ * Micro-i18n coordinator with fallback chaining, DOM batch translation, and cross-window sync (< 160 lines)
  */
 
 import en from '../../locales/en.json';
 import id from '../../locales/id.json';
 import jvNgoko from '../../locales/jv-ngoko.json';
 import jvKrama from '../../locales/jv-krama.json';
+import jvMalangan from '../../locales/jv-malangan.json';
 import { LOCALES, DEFAULT_LOCALE, getLocaleMeta } from '../../locales/manifest.js';
 
 const STORAGE_KEY = 'bukaake-language';
@@ -20,6 +21,7 @@ class I18nService {
       id,
       'jv-ngoko': jvNgoko,
       'jv-krama': jvKrama,
+      'jv-malangan': jvMalangan,
     };
     this.currentLocale = DEFAULT_LOCALE;
     this.initialized = false;
@@ -147,4 +149,3 @@ class I18nService {
 }
 
 export const i18n = new I18nService();
-
