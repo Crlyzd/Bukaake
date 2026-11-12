@@ -88,7 +88,8 @@ class BukaakeApp {
         onCropPreset: (r) => this.cropper.setAspectRatio(r),
         onToggleDraw: () => this.toolsManager.toggleDraw(), onCancelDraw: () => this.toolsManager.toggleDraw(false), onApplyDraw: () => this.toolsManager.applyDraw(),
         onDrawMode: (m) => this.drawingTool.setMode(m), onDrawColor: (c) => this.drawingTool.setColor(c),
-        onDrawSize: (s) => this.drawingTool.setSize(s), onDrawUndo: () => this.drawingTool.undo(), onDrawRedo: () => this.drawingTool.redo(), onDrawClear: () => this.drawingTool.clear(),
+        onDrawSize: (s) => this.drawingTool.setSize(s), onDrawAutoSmooth: (v) => this.drawingTool.setAutoSmooth(v),
+        onDrawUndo: () => this.drawingTool.undo(), onDrawRedo: () => this.drawingTool.redo(), onDrawClear: () => this.drawingTool.clear(),
         onToggleText: () => this.toolsManager.toggleText(),
       },
     });

@@ -82,6 +82,16 @@ export class Toolbar {
     document.getElementById('btnDrawRedo')?.addEventListener('click', () => this.actions.onDrawRedo?.());
     document.getElementById('btnDrawClear')?.addEventListener('click', () => this.actions.onDrawClear?.());
 
+    const btnSmooth = document.getElementById('btnDrawSmooth');
+    const initSmooth = localStorage.getItem('bukaake-draw-auto-smooth') === 'true';
+    btnSmooth?.classList.toggle('active', initSmooth);
+    this.actions.onDrawAutoSmooth?.(initSmooth);
+    btnSmooth?.addEventListener('click', () => {
+      const active = btnSmooth.classList.toggle('active');
+      localStorage.setItem('bukaake-draw-auto-smooth', String(active));
+      this.actions.onDrawAutoSmooth?.(active);
+    });
+
     const sizeAnchor = document.getElementById('drawSizeAnchor');
     document.getElementById('btnDrawPen')?.addEventListener('click', () => {
       document.getElementById('btnDrawPen')?.classList.add('active');
