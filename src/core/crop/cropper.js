@@ -21,11 +21,19 @@ export class CropperTool {
     this.startMouseX = 0;
     this.startMouseY = 0;
     this.startBoxState = { left: 0, top: 0, width: 0, height: 0 };
+    this.onApplyRequest = null;
 
     this.initEvents();
   }
 
   initEvents() {
+    this.box.addEventListener('dblclick', (e) => {
+      if (!this.active) return;
+      e.stopPropagation();
+      e.preventDefault();
+      this.onApplyRequest?.();
+    });
+
     this.box.addEventListener('mousedown', (e) => {
       if (!this.active) return;
       e.stopPropagation();

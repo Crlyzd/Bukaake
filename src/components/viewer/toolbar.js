@@ -193,6 +193,7 @@ export class Toolbar {
     sizePop?.addEventListener('wheel', (e) => {
       e.stopPropagation(); e.preventDefault(); updateSize(currentSize + (e.deltaY < 0 ? 5 : -5));
     }, { passive: false });
+    window.addEventListener('bukaake-draw-step-size', (e) => updateSize(currentSize + (e.detail || 0)));
     document.addEventListener('click', (e) => { if (!e.target.closest('#drawToolbar, .draw-popover')) closeDrawPopovers(); });
   }
 

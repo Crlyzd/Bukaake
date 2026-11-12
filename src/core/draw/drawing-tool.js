@@ -13,28 +13,35 @@ import {
 
 export class DrawingTool {
   constructor(canvasElement, canvasViewer, options = {}) {
-    this.canvas = canvasElement;
-    this.ctx = this.canvas.getContext('2d');
-    this.viewer = canvasViewer;
-    this.onModified = options.onModified || null;
-    this.onHistoryChange = options.onHistoryChange || null;
+    this.canvas = canvasElement; this.ctx = this.canvas.getContext('2d'); this.viewer = canvasViewer;
+    this.onModified = options.onModified || null; this.onHistoryChange = options.onHistoryChange || null;
     this.cursorRing = document.getElementById('drawCursorRing');
-
-    this.active = false;
-    this.mode = 'pen'; // 'pen' | 'highlighter'
-    this.color = '#00f0ff';
-    this.size = 24;
+    this.active = false; this.mode = 'pen'; this.color = '#00f0ff'; this.size = 24;
     this.smoothLevel = parseInt(options.smoothLevel ?? (options.autoSmooth ? 1 : 0), 10) || 0;
-    this.isDrawing = false;
-    this.isPanning = false;
-    this.panStartX = 0;
-    this.panStartY = 0;
-
-    this.strokes = [];
-    this.redoStrokes = [];
-    this.currentStroke = null;
+    this.isDrawing = false; this.isPanning = false; this.panStartX = 0; this.panStartY = 0;
+    this.strokes = []; this.redoStrokes = []; this.currentStroke = null;
 
     this.initEvents();
+    this.initKeyboard();
+  }
+
+  initKeyboard() {
+    window.addEventListener('keydown', (e) => {
+      if (!this.active) return;
+      if (['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName)) return;
+      if (e.ctrlKey || e.metaKey || e.altKey) return;
+
+      if (e.key === 's' || e.key === 'S') {
+        e.preventDefault();
+        document.getElementById('btnDrawSmooth')?.click();
+      } else if (e.key === '[') {
+        e.preventDefault();
+        window.dispatchEvent(new CustomEvent('bukaake-draw-step-size', { detail: -4 }));
+      } else if (e.key === ']') {
+        e.preventDefault();
+        window.dispatchEvent(new CustomEvent('bukaake-draw-step-size', { detail: 4 }));
+      }
+    });
   }
 
   initEvents() {

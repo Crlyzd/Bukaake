@@ -66,6 +66,22 @@ export function attachTextInteractions(tool) {
     viewer.zoomTo(viewer.targetScale * zoomFactor, false, e.clientX - rect.left, e.clientY - rect.top);
   }, { passive: false });
 
+  canvas.addEventListener('dblclick', (e) => {
+    if (!tool.active || !viewer.img || e.button !== 0) return;
+    const rect = canvas.getBoundingClientRect();
+    const pt = viewer.screenToImageCoords(e.clientX - rect.left, e.clientY - rect.top);
+    if (pt.x < 0 || pt.x > viewer.img.width || pt.y < 0 || pt.y > viewer.img.height) return;
+    tool.createItemAt(pt.x, pt.y);
+  });
+
+  window.addEventListener('keydown', (e) => {
+    if (!tool.active) return;
+    if (e.altKey && (e.key === 't' || e.key === 'T')) {
+      e.preventDefault();
+      tool.addNewTextBox();
+    }
+  });
+
   const preventMiddleAux = (e) => { if (e.button === 1) e.preventDefault(); };
   canvas.addEventListener('auxclick', preventMiddleAux);
   overlayContainer?.addEventListener('auxclick', preventMiddleAux);
