@@ -83,13 +83,27 @@ export class Toolbar {
     document.getElementById('btnDrawClear')?.addEventListener('click', () => this.actions.onDrawClear?.());
 
     const btnSmooth = document.getElementById('btnDrawSmooth');
-    const initSmooth = localStorage.getItem('bukaake-draw-auto-smooth') === 'true';
-    btnSmooth?.classList.toggle('active', initSmooth);
-    this.actions.onDrawAutoSmooth?.(initSmooth);
+    const iconSmooth = btnSmooth?.querySelector('i'), labelSmooth = btnSmooth?.querySelector('.draw-pill-label');
+    let smoothLevel = parseInt(localStorage.getItem('bukaake-draw-smooth-level') ?? (localStorage.getItem('bukaake-draw-auto-smooth') === 'true' ? '1' : '0'), 10) || 0;
+
+    const applySmoothUI = (lvl) => {
+      btnSmooth?.classList.toggle('active-subtle', lvl === 1);
+      btnSmooth?.classList.toggle('active-galaxy', lvl === 2);
+      if (iconSmooth) iconSmooth.className = lvl === 2 ? 'ri-sparkling-fill' : 'ri-magic-line';
+      if (labelSmooth) labelSmooth.textContent = lvl === 2 ? 'Galaxy' : 'Smooth';
+      if (btnSmooth) {
+        btnSmooth.title = lvl === 2
+          ? 'Auto Smooth (Galaxy: Painting & Streamline Arcs)'
+          : (lvl === 1 ? 'Auto Smooth (Natural: Subtle Jitter Filter)' : 'Auto Smooth (Off)');
+      }
+      this.actions.onDrawAutoSmooth?.(lvl);
+    };
+    applySmoothUI(smoothLevel);
+
     btnSmooth?.addEventListener('click', () => {
-      const active = btnSmooth.classList.toggle('active');
-      localStorage.setItem('bukaake-draw-auto-smooth', String(active));
-      this.actions.onDrawAutoSmooth?.(active);
+      smoothLevel = (smoothLevel + 1) % 3;
+      localStorage.setItem('bukaake-draw-smooth-level', String(smoothLevel));
+      applySmoothUI(smoothLevel);
     });
 
     const sizeAnchor = document.getElementById('drawSizeAnchor');
