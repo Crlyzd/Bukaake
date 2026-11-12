@@ -1,7 +1,15 @@
 /**
  * Bukaake Interactive Drawing & Highlighting Engine
- * Vector/canvas freehand drawing tool supporting pen, highlighter, undo, and image baking (< 240 lines).
+ * Vector/canvas freehand drawing tool supporting pen, highlighter, undo, auto-smooth, and image baking (< 260 lines).
  */
+
+import {
+  constrainAxis,
+  filterJitterPoints,
+  smoothStrokePoints,
+  renderSingleStroke,
+  createBakedImage,
+} from './stroke-smoother.js';
 
 export class DrawingTool {
   constructor(canvasElement, canvasViewer, options = {}) {
@@ -16,6 +24,7 @@ export class DrawingTool {
     this.mode = 'pen'; // 'pen' | 'highlighter'
     this.color = '#00f0ff';
     this.size = 24;
+    this.autoSmooth = Boolean(options.autoSmooth ?? false);
     this.isDrawing = false;
     this.isPanning = false;
     this.panStartX = 0;
@@ -53,6 +62,7 @@ export class DrawingTool {
       const strokeSize = isHighlighter ? (20 / (this.viewer.scale || 1)) : this.size;
       this.currentStroke = {
         mode: this.mode, color: this.color, size: strokeSize, points: [imgPt],
+        smoothed: this.autoSmooth,
       };
       this.strokes.push(this.currentStroke);
       this.redraw();
@@ -74,7 +84,10 @@ export class DrawingTool {
       this.updateCursor(e);
       if (!this.isDrawing || !this.currentStroke) return;
       const rect = this.canvas.getBoundingClientRect();
-      const imgPt = this.viewer.screenToImageCoords(e.clientX - rect.left, e.clientY - rect.top);
+      let imgPt = this.viewer.screenToImageCoords(e.clientX - rect.left, e.clientY - rect.top);
+      if (!this.autoSmooth && (e.shiftKey || e.ctrlKey)) {
+        imgPt = constrainAxis(imgPt, this.currentStroke.points[0], e.shiftKey, e.ctrlKey);
+      }
       this.currentStroke.points.push(imgPt);
       this.redraw();
     });
@@ -86,7 +99,15 @@ export class DrawingTool {
         this.updateCursor(e);
         this.viewer.snapBackToBounds(true);
       }
-      if (this.isDrawing) {
+      if (this.isDrawing && this.currentStroke) {
+        if (this.autoSmooth && this.currentStroke.points.length > 2) {
+          this.currentStroke.points = smoothStrokePoints(
+            filterJitterPoints(this.currentStroke.points, 2.0),
+            2
+          );
+          this.currentStroke.smoothed = true;
+          this.redraw();
+        }
         this.isDrawing = false;
         this.currentStroke = null;
       }
@@ -244,48 +265,17 @@ export class DrawingTool {
     this.ctx.restore();
   }
 
+  setAutoSmooth(enabled) {
+    this.autoSmooth = Boolean(enabled);
+  }
+
   _renderStroke(ctx, stroke) {
-    ctx.save();
-    ctx.strokeStyle = stroke.color;
-    ctx.fillStyle = stroke.color;
-    if (stroke.mode === 'highlighter') {
-      ctx.globalAlpha = 0.40; ctx.lineCap = 'butt'; ctx.lineJoin = 'miter'; ctx.lineWidth = stroke.size;
-      if (stroke.points.length === 1) {
-        const p = stroke.points[0], w = Math.max(2, stroke.size / 3);
-        ctx.fillRect(p.x - w / 2, p.y - stroke.size / 2, w, stroke.size);
-        ctx.restore();
-        return;
-      }
-    } else {
-      ctx.globalAlpha = 1.0; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.lineWidth = stroke.size;
-    }
-    ctx.beginPath();
-    ctx.moveTo(stroke.points[0].x, stroke.points[0].y);
-    for (let i = 1; i < stroke.points.length; i++) ctx.lineTo(stroke.points[i].x, stroke.points[i].y);
-    ctx.stroke();
-    ctx.restore();
+    renderSingleStroke(ctx, stroke, this.autoSmooth);
   }
 
   bakeToImage() {
-    if (!this.viewer.img || this.strokes.length === 0) return null;
-    const offCanvas = document.createElement('canvas');
-    offCanvas.width = this.viewer.img.width;
-    offCanvas.height = this.viewer.img.height;
-    const octx = offCanvas.getContext('2d');
-    octx.drawImage(this.viewer.img, 0, 0);
-
-    octx.save();
-    octx.beginPath();
-    octx.rect(0, 0, this.viewer.img.width, this.viewer.img.height);
-    octx.clip();
-    for (const stroke of this.strokes) {
-      if (stroke.points?.length > 0) this._renderStroke(octx, stroke);
-    }
-    octx.restore();
-
-    const bakedImg = new Image();
-    bakedImg.src = offCanvas.toDataURL('image/png');
-    this.clear();
-    return bakedImg;
+    const baked = createBakedImage(this.viewer.img, this.strokes, this.autoSmooth);
+    if (baked) this.clear();
+    return baked;
   }
 }
