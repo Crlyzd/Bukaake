@@ -24,7 +24,7 @@ export class DrawingTool {
     this.mode = 'pen'; // 'pen' | 'highlighter'
     this.color = '#00f0ff';
     this.size = 24;
-    this.autoSmooth = Boolean(options.autoSmooth ?? false);
+    this.smoothLevel = parseInt(options.smoothLevel ?? (options.autoSmooth ? 1 : 0), 10) || 0;
     this.isDrawing = false;
     this.isPanning = false;
     this.panStartX = 0;
@@ -62,7 +62,7 @@ export class DrawingTool {
       const strokeSize = isHighlighter ? (20 / (this.viewer.scale || 1)) : this.size;
       this.currentStroke = {
         mode: this.mode, color: this.color, size: strokeSize, points: [imgPt],
-        smoothed: this.autoSmooth,
+        smoothed: this.smoothLevel,
       };
       this.strokes.push(this.currentStroke);
       this.redraw();
@@ -85,8 +85,11 @@ export class DrawingTool {
       if (!this.isDrawing || !this.currentStroke) return;
       const rect = this.canvas.getBoundingClientRect();
       let imgPt = this.viewer.screenToImageCoords(e.clientX - rect.left, e.clientY - rect.top);
-      if (!this.autoSmooth && (e.shiftKey || e.ctrlKey)) {
+      if (this.smoothLevel === 0 && (e.shiftKey || e.ctrlKey)) {
         imgPt = constrainAxis(imgPt, this.currentStroke.points[0], e.shiftKey, e.ctrlKey);
+      } else if (this.smoothLevel === 2 && this.currentStroke.points.length > 0) {
+        const last = this.currentStroke.points[this.currentStroke.points.length - 1];
+        imgPt = { x: last.x + (imgPt.x - last.x) * 0.45, y: last.y + (imgPt.y - last.y) * 0.45 };
       }
       this.currentStroke.points.push(imgPt);
       this.redraw();
@@ -100,12 +103,9 @@ export class DrawingTool {
         this.viewer.snapBackToBounds(true);
       }
       if (this.isDrawing && this.currentStroke) {
-        if (this.autoSmooth && this.currentStroke.points.length > 2) {
-          this.currentStroke.points = smoothStrokePoints(
-            filterJitterPoints(this.currentStroke.points, 2.0),
-            2
-          );
-          this.currentStroke.smoothed = true;
+        if (this.smoothLevel > 0 && this.currentStroke.points.length > 2) {
+          this.currentStroke.points = smoothStrokePoints(this.currentStroke.points, this.smoothLevel);
+          this.currentStroke.smoothed = this.smoothLevel;
           this.redraw();
         }
         this.isDrawing = false;
@@ -265,16 +265,16 @@ export class DrawingTool {
     this.ctx.restore();
   }
 
-  setAutoSmooth(enabled) {
-    this.autoSmooth = Boolean(enabled);
+  setAutoSmooth(level) {
+    this.smoothLevel = typeof level === 'boolean' ? (level ? 1 : 0) : (parseInt(level, 10) || 0);
   }
 
   _renderStroke(ctx, stroke) {
-    renderSingleStroke(ctx, stroke, this.autoSmooth);
+    renderSingleStroke(ctx, stroke, this.smoothLevel > 0);
   }
 
   bakeToImage() {
-    const baked = createBakedImage(this.viewer.img, this.strokes, this.autoSmooth);
+    const baked = createBakedImage(this.viewer.img, this.strokes, this.smoothLevel > 0);
     if (baked) this.clear();
     return baked;
   }
