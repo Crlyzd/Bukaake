@@ -1,0 +1,247 @@
+/* ==========================================================================
+   Bukaake In-Tool Contextual Shortcut HUD (Heads-Up Display) Stylesheet
+   Strict Stroke-Free Glassmorphism (Pillars 1, 2 & 4) (< 260 lines)
+   ========================================================================== */
+
+.tool-hud-container {
+  position: absolute;
+  z-index: 100;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  transition: top 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+              left 0.24s cubic-bezier(0.16, 1, 0.3, 1),
+              opacity 0.22s ease,
+              transform 0.22s ease;
+}
+
+/* 1. Collapsed State: Equal Top & Left Corner Margin (20px by 20px)
+   - Zero auto-move when metadata drawer opens (stays anchored in corner!)
+   - Never disappears */
+.tool-hud-container.is-collapsed {
+  top: 20px !important;
+  left: 20px !important;
+}
+
+/* 2. Expanded State: Strictly Aligned with Image Properties Drawer (top: 50px)
+   - When drawer closed: top 50px, left 20px
+   - When drawer open: top 50px, left 356px (sits right beside it)
+   Both panels share the exact same top: 50px baseline */
+.tool-hud-container:not(.is-collapsed) {
+  top: 50px;
+  left: 20px;
+}
+
+body:has(#metadataDrawer:not(.hidden)) .tool-hud-container:not(.is-collapsed),
+body.metadata-drawer-open .tool-hud-container:not(.is-collapsed) {
+  top: 50px !important;
+  left: 356px !important;
+}
+
+.tool-hud-container.hidden { opacity: 0 !important; pointer-events: none !important; transform: translateY(-6px); }
+
+/* --------------------------------------------------------------------------
+   HUD Card (Expanded State)
+   -------------------------------------------------------------------------- */
+.tool-hud-card {
+  pointer-events: auto;
+  width: 280px;
+  border-radius: var(--radius-lg, 14px);
+  padding: 12px 14px;
+  backdrop-filter: blur(28px) saturate(200%);
+  -webkit-backdrop-filter: blur(28px) saturate(200%);
+  border: none !important;
+  box-sizing: border-box;
+  user-select: none;
+  outline: none !important;
+}
+
+/* Themes */
+body.dark .tool-hud-card {
+  background: rgba(14, 18, 27, 0.58);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.60), 0 2px 8px rgba(0, 0, 0, 0.35);
+  color: #ffffff;
+}
+
+body.light-theme .tool-hud-card,
+[data-theme="light"] .tool-hud-card {
+  background: rgba(255, 255, 255, 0.62) !important;
+  box-shadow: 0 16px 42px rgba(26, 32, 44, 0.18), 0 4px 12px rgba(26, 32, 44, 0.08) !important;
+  color: #181b24 !important;
+}
+
+/* Card Header (Clean: Zero 'X' Button) */
+.tool-hud-header {
+  display: flex;
+  align-items: center;
+  padding-bottom: 8px;
+  margin-bottom: 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+body.light-theme .tool-hud-header,
+[data-theme="light"] .tool-hud-header { border-bottom: 1px solid rgba(26, 32, 44, 0.08) !important; }
+
+.tool-hud-title-wrap { display: flex; align-items: center; gap: 8px; }
+
+.tool-hud-icon-box {
+  width: 22px; height: 22px; border-radius: var(--radius-sm, 6px);
+  display: flex; align-items: center; justify-content: center; font-size: 13px;
+}
+.tool-hud-icon-box i { font-style: normal !important; font-weight: normal !important; }
+.tool-hud-icon-box.tool-crop   { background: rgba(245, 158, 11, 0.18); color: #f59e0b; }
+.tool-hud-icon-box.tool-draw   { background: rgba(56, 189, 248, 0.18); color: #38bdf8; }
+.tool-hud-icon-box.tool-text   { background: rgba(168, 85, 247, 0.18); color: #a855f7; }
+.tool-hud-icon-box.tool-adjust { background: rgba(52, 211, 153, 0.18); color: #34d399; }
+
+.tool-hud-title { font-size: 12px; font-weight: 600; letter-spacing: -0.01em; }
+body.dark .tool-hud-title { color: #ffffff; }
+body.light-theme .tool-hud-title,
+[data-theme="light"] .tool-hud-title { color: #181b24 !important; font-weight: 700; }
+
+/* Shortcut Rows with Generous Breathing Gap */
+.tool-hud-rows { display: flex; flex-direction: column; gap: 12px; }
+.tool-hud-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 11px; }
+
+.tool-hud-kbds { display: flex; align-items: center; gap: 3px; flex-shrink: 0; }
+.tool-hud-kbds kbd {
+  font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 600;
+  padding: 2px 5px; border-radius: 4px; border: none !important; line-height: 1.2;
+}
+body.dark .tool-hud-kbds kbd { background: rgba(255, 255, 255, 0.09); color: #ffffff; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35); }
+body.light-theme .tool-hud-kbds kbd,
+[data-theme="light"] .tool-hud-kbds kbd {
+  background: rgba(26, 32, 44, 0.09) !important; color: #181b24 !important; box-shadow: 0 1px 3px rgba(26, 32, 44, 0.14) !important;
+}
+
+.tool-hud-label { font-size: 11px; text-align: right; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+body.dark .tool-hud-label { color: rgba(255, 255, 255, 0.75); }
+body.light-theme .tool-hud-label,
+[data-theme="light"] .tool-hud-label { color: #242938 !important; font-weight: 500; }
+
+/* Dedicated Footer Collapse Button (Refined Monochrome Ghost) */
+.tool-hud-footer {
+  display: flex; align-items: center; justify-content: space-between;
+  padding-top: 6px; margin-top: 6px; font-size: 10px; border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+body.light-theme .tool-hud-footer,
+[data-theme="light"] .tool-hud-footer { border-top: 1px solid rgba(26, 32, 44, 0.08) !important; }
+.tool-hud-footer-tip { color: rgba(255, 255, 255, 0.45); font-size: 9.5px; }
+body.light-theme .tool-hud-footer-tip,
+[data-theme="light"] .tool-hud-footer-tip { color: rgba(26, 32, 44, 0.50) !important; }
+
+.tool-hud-bottom-collapse-btn {
+  background: transparent; border: none !important; outline: none !important;
+  display: flex; align-items: center; gap: 4px; font-size: 10.5px; font-weight: 500;
+  cursor: pointer; padding: 3px 8px; border-radius: var(--radius-sm, 6px);
+  transition: all 0.16s ease; color: var(--text-dim, rgba(255, 255, 255, 0.60));
+}
+.tool-hud-bottom-collapse-btn:hover { background: rgba(255, 255, 255, 0.08); color: var(--text-main, #ffffff); }
+body.light-theme .tool-hud-bottom-collapse-btn,
+[data-theme="light"] .tool-hud-bottom-collapse-btn { color: rgba(26, 32, 44, 0.60) !important; }
+body.light-theme .tool-hud-bottom-collapse-btn:hover,
+[data-theme="light"] .tool-hud-bottom-collapse-btn:hover { background: rgba(26, 32, 44, 0.06) !important; color: #181b24 !important; }
+
+.tool-hud-bottom-collapse-btn i {
+  font-style: normal !important; font-weight: normal !important;
+  font-size: 13px; color: inherit; transition: transform 0.16s ease;
+}
+
+/* --------------------------------------------------------------------------
+   Collapsed Glowing Outline Ring with '!' Beacon (Zero Solid Fill)
+   - Matches titlebar info button style
+   - Small vector glyph (18px)
+   - Lines themselves glow with radiant luminescence
+   - High contrast in both dark & light themes
+   -------------------------------------------------------------------------- */
+.tool-hud-beacon-wrap {
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  user-select: none;
+  background: transparent !important;
+}
+
+.tool-hud-beacon-icon {
+  font-size: 18px;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #38bdf8;
+  filter: drop-shadow(0 0 4px #38bdf8) drop-shadow(0 0 8px rgba(56, 189, 248, 0.65));
+  transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1), filter 0.18s ease;
+  animation: toolBeaconPulse 2.8s infinite ease-in-out;
+}
+
+body.light-theme .tool-hud-beacon-icon,
+[data-theme="light"] .tool-hud-beacon-icon {
+  color: #0284c7 !important;
+  filter: drop-shadow(0 0 3px rgba(2, 132, 199, 0.85)) drop-shadow(0 0 8px rgba(2, 132, 199, 0.50)) !important;
+  animation: toolBeaconPulseLight 2.8s infinite ease-in-out;
+}
+
+.tool-hud-beacon-wrap:hover .tool-hud-beacon-icon {
+  transform: scale(1.15);
+  filter: drop-shadow(0 0 6px #38bdf8) drop-shadow(0 0 12px rgba(168, 85, 246, 0.80));
+}
+
+body.light-theme .tool-hud-beacon-wrap:hover .tool-hud-beacon-icon,
+[data-theme="light"] .tool-hud-beacon-wrap:hover .tool-hud-beacon-icon {
+  filter: drop-shadow(0 0 5px #0284c7) drop-shadow(0 0 10px rgba(14, 165, 233, 0.70)) !important;
+}
+
+.tool-hud-beacon-wrap:active .tool-hud-beacon-icon {
+  transform: scale(0.92);
+}
+
+@keyframes toolBeaconPulse {
+  0%, 100% {
+    color: #38bdf8;
+    filter: drop-shadow(0 0 3px #38bdf8) drop-shadow(0 0 7px rgba(56, 189, 248, 0.55));
+  }
+  50% {
+    color: #7dd3fc;
+    filter: drop-shadow(0 0 6px #7dd3fc) drop-shadow(0 0 12px rgba(168, 85, 246, 0.75));
+  }
+}
+
+@keyframes toolBeaconPulseLight {
+  0%, 100% {
+    color: #0284c7;
+    filter: drop-shadow(0 0 3px rgba(2, 132, 199, 0.75)) drop-shadow(0 0 7px rgba(2, 132, 199, 0.45));
+  }
+  50% {
+    color: #0369a1;
+    filter: drop-shadow(0 0 5px rgba(2, 132, 199, 0.95)) drop-shadow(0 0 11px rgba(14, 165, 233, 0.65));
+  }
+}
+
+/* Micro Hover Tooltip Pill */
+.tool-hud-beacon-tooltip {
+  opacity: 0;
+  pointer-events: none;
+  font-size: 10px;
+  font-weight: 500;
+  padding: 2px 7px;
+  border-radius: var(--radius-sm, 6px);
+  background: rgba(14, 18, 27, 0.85);
+  color: #ffffff;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.40);
+  transform: translateX(-4px);
+  transition: opacity 0.18s ease, transform 0.18s ease;
+  white-space: nowrap;
+}
+
+.tool-hud-beacon-wrap:hover .tool-hud-beacon-tooltip { opacity: 1; transform: translateX(0); }
+body.light-theme .tool-hud-beacon-tooltip,
+[data-theme="light"] .tool-hud-beacon-tooltip {
+  background: rgba(255, 255, 255, 0.90) !important;
+  color: #181b24 !important;
+  box-shadow: 0 4px 12px rgba(26, 32, 44, 0.15) !important;
+}

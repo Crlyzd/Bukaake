@@ -29,6 +29,7 @@ export class MetadataDrawer {
   toggle() {
     if (this.container) {
       const isHidden = this.container.classList.toggle('hidden');
+      document.body.classList.toggle('metadata-drawer-open', !isHidden);
       return !isHidden;
     }
     return false;
@@ -36,10 +37,12 @@ export class MetadataDrawer {
 
   show() {
     this.container?.classList.remove('hidden');
+    document.body.classList.add('metadata-drawer-open');
   }
 
   hide() {
     this.container?.classList.add('hidden');
+    document.body.classList.remove('metadata-drawer-open');
   }
 
   isOpen() {

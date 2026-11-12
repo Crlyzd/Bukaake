@@ -5,6 +5,7 @@
 
 import { changeTracker } from './change-tracker.js';
 import { toast } from '../../components/viewer/toast.js';
+import { ToolHud } from '../../components/viewer/tool-hud.js';
 
 export class CanvasToolsManager {
   constructor({ viewer, cropper, drawingTool, textTool, toolbar, fileLoader, adjustmentsPanel }) {
@@ -15,6 +16,11 @@ export class CanvasToolsManager {
     this.toolbar = toolbar;
     this.fileLoader = fileLoader;
     this.adjustmentsPanel = adjustmentsPanel;
+
+    this.toolHud = new ToolHud();
+    if (this.cropper) {
+      this.cropper.onApplyRequest = () => this.applyCrop(this.adjustmentsPanel?.filters);
+    }
   }
 
   isEditing() {
@@ -30,6 +36,7 @@ export class CanvasToolsManager {
     if (this.adjustmentsPanel?.isOpen()) {
       this.adjustmentsPanel.hide();
       this.toolbar?.setAdjustmentsActive(false);
+      this.toolHud?.hide();
     }
   }
 
@@ -43,6 +50,8 @@ export class CanvasToolsManager {
     }
     const active = this.adjustmentsPanel?.toggle();
     this.toolbar?.setAdjustmentsActive(active);
+    if (active) this.toolHud?.show('adjustments');
+    else this.toolHud?.hide();
     return active;
   }
 
@@ -56,10 +65,12 @@ export class CanvasToolsManager {
       this.viewer.setBottomInset(110, false);
       this.cropper.show();
       this.toolbar.setCropActive(true);
+      this.toolHud?.show('crop');
     } else {
       this.viewer.setBottomInset(0, true);
       this.cropper.hide();
       this.toolbar.setCropActive(false);
+      this.toolHud?.hide();
     }
   }
 
@@ -100,11 +111,13 @@ export class CanvasToolsManager {
       this.viewer.setBottomInset(110, false);
       this.drawingTool.show();
       this.toolbar.setDrawActive(true);
+      this.toolHud?.show('draw');
     } else {
       this.viewer.setBottomInset(0, true);
       this.drawingTool.hide();
       this.toolbar.setDrawActive(false);
       changeTracker.markDraw(false);
+      this.toolHud?.hide();
     }
   }
 
@@ -133,11 +146,13 @@ export class CanvasToolsManager {
       this.viewer.setBottomInset(110, false);
       this.textTool?.show();
       this.toolbar.setTextActive(true);
+      this.toolHud?.show('text');
     } else {
       this.viewer.setBottomInset(0, true);
       this.textTool?.hide();
       this.toolbar.setTextActive(false);
       changeTracker.markText(false);
+      this.toolHud?.hide();
     }
   }
 
