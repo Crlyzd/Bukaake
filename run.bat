@@ -5,6 +5,12 @@ title Bukaake — Desktop Image Viewer Manager
 cd /d "%~dp0"
 
 set "CARGO_BUILD_JOBS=%NUMBER_OF_PROCESSORS%"
+if exist "D:\BuildTools\Rust\.cargo" (
+    set "CARGO_HOME=D:\BuildTools\Rust\.cargo"
+    set "RUSTUP_HOME=D:\BuildTools\Rust\.rustup"
+    set "SCCACHE_DIR=D:\BuildTools\Rust\sccache"
+    set "PATH=D:\BuildTools\Rust\.cargo\bin;%PATH%"
+)
 
 :MENU
 cls
@@ -123,6 +129,12 @@ if not exist "release-builds" mkdir release-builds
 
 :: Utilize all CPU cores for maximum compilation speed
 set "CARGO_BUILD_JOBS=%NUMBER_OF_PROCESSORS%"
+if exist "D:\BuildTools\Rust\.cargo" (
+    set "CARGO_HOME=D:\BuildTools\Rust\.cargo"
+    set "RUSTUP_HOME=D:\BuildTools\Rust\.rustup"
+    set "SCCACHE_DIR=D:\BuildTools\Rust\sccache"
+    set "PATH=D:\BuildTools\Rust\.cargo\bin;%PATH%"
+)
 
 echo  [1/3] Bundling frontend assets...
 call npm run build

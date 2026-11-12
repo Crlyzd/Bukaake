@@ -5,6 +5,12 @@
 $Host.UI.RawUI.WindowTitle = "Bukaake - Desktop Image Viewer Manager"
 Set-Location -Path $PSScriptRoot
 $env:CARGO_BUILD_JOBS = [System.Environment]::ProcessorCount
+if (Test-Path "D:\BuildTools\Rust\.cargo") {
+    if (-not $env:CARGO_HOME) { $env:CARGO_HOME = "D:\BuildTools\Rust\.cargo" }
+    if (-not $env:RUSTUP_HOME) { $env:RUSTUP_HOME = "D:\BuildTools\Rust\.rustup" }
+    if (-not $env:SCCACHE_DIR) { $env:SCCACHE_DIR = "D:\BuildTools\Rust\sccache" }
+    if ($env:PATH -notmatch "BuildTools") { $env:PATH = "D:\BuildTools\Rust\.cargo\bin;$env:PATH" }
+}
 
 function Get-AppVersion {
     if (Test-Path "package.json") {
@@ -54,6 +60,12 @@ function Invoke-BuildFastX64 {
     if (-not (Test-Path "release-builds")) { New-Item -ItemType Directory -Path "release-builds" | Out-Null }
 
     $env:CARGO_BUILD_JOBS = [System.Environment]::ProcessorCount
+if (Test-Path "D:\BuildTools\Rust\.cargo") {
+    if (-not $env:CARGO_HOME) { $env:CARGO_HOME = "D:\BuildTools\Rust\.cargo" }
+    if (-not $env:RUSTUP_HOME) { $env:RUSTUP_HOME = "D:\BuildTools\Rust\.rustup" }
+    if (-not $env:SCCACHE_DIR) { $env:SCCACHE_DIR = "D:\BuildTools\Rust\sccache" }
+    if ($env:PATH -notmatch "BuildTools") { $env:PATH = "D:\BuildTools\Rust\.cargo\bin;$env:PATH" }
+}
 
     Write-Host "  [1/3] Bundling frontend assets..." -ForegroundColor Yellow
     cmd /c "npm run build"
