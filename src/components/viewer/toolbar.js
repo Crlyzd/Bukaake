@@ -11,9 +11,11 @@ export class Toolbar {
     this.cropToolbar = document.getElementById('cropToolbar');
     this.btnCropMode = document.getElementById('btnCropMode');
     this.btnDrawMode = document.getElementById('btnDrawMode');
+    this.btnBlurMode = document.getElementById('btnBlurMode');
     this.btnTextMode = document.getElementById('btnTextMode');
     this.btnAdjustments = document.getElementById('btnAdjustments');
     this.drawToolbar = document.getElementById('drawToolbar');
+    this.blurToolbar = document.getElementById('blurToolbar');
     this.btnSaveAs = document.getElementById('btnSaveAs');
 
     this.actions = options.actions || {};
@@ -198,6 +200,7 @@ export class Toolbar {
   }
 
   bindTextControls() {
+    this.btnBlurMode?.addEventListener('click', () => this.actions.onToggleBlur?.());
     this.btnTextMode?.addEventListener('click', () => this.actions.onToggleText?.());
   }
 
@@ -223,7 +226,7 @@ export class Toolbar {
     if (this.btnCropMode) this.btnCropMode.classList.toggle('active', active);
     if (this.cropToolbar) this.cropToolbar.classList.toggle('hidden', !active);
     if (this.container) this.container.classList.toggle('crop-locked', active);
-    this._setLocked(['btnPrevImage', 'btnNextImage', 'btnDrawMode', 'btnTextMode', 'btnAdjustments', 'btnPixelated', 'btnBgMode', 'btnRawFull', 'btnSaveAs'], active);
+    this._setLocked(['btnPrevImage', 'btnNextImage', 'btnDrawMode', 'btnBlurMode', 'btnTextMode', 'btnAdjustments', 'btnPixelated', 'btnBgMode', 'btnRawFull', 'btnSaveAs'], active);
   }
 
   setDrawActive(active) {
@@ -236,7 +239,18 @@ export class Toolbar {
       document.getElementById('btnDrawColorPop')?.classList.remove('active');
       document.getElementById('btnDrawSizePop')?.classList.remove('active');
     }
-    this._setLocked(['btnPrevImage', 'btnNextImage', 'btnRotateLeft', 'btnRotateRight', 'btnFlipH', 'btnFlipV', 'btnCropMode', 'btnTextMode', 'btnAdjustments', 'btnPixelated', 'btnBgMode', 'btnRawFull', 'btnSaveAs'], active);
+    this._setLocked(['btnPrevImage', 'btnNextImage', 'btnRotateLeft', 'btnRotateRight', 'btnFlipH', 'btnFlipV', 'btnCropMode', 'btnBlurMode', 'btnTextMode', 'btnAdjustments', 'btnPixelated', 'btnBgMode', 'btnRawFull', 'btnSaveAs'], active);
+  }
+
+  setBlurActive(active) {
+    if (this.btnBlurMode) this.btnBlurMode.classList.toggle('active', active);
+    if (this.blurToolbar) this.blurToolbar.classList.toggle('hidden', !active);
+    if (this.container) this.container.classList.toggle('blur-locked', active);
+    if (!active) {
+      document.getElementById('blurSizePopover')?.classList.add('hidden');
+      document.getElementById('btnBlurSizePop')?.classList.remove('active');
+    }
+    this._setLocked(['btnPrevImage', 'btnNextImage', 'btnRotateLeft', 'btnRotateRight', 'btnFlipH', 'btnFlipV', 'btnCropMode', 'btnDrawMode', 'btnTextMode', 'btnAdjustments', 'btnPixelated', 'btnBgMode', 'btnRawFull', 'btnSaveAs'], active);
   }
 
   setTextActive(active) {
@@ -247,13 +261,13 @@ export class Toolbar {
     if (!active) {
       document.querySelectorAll('.text-popover').forEach((p) => p.classList.add('hidden'));
     }
-    this._setLocked(['btnPrevImage', 'btnNextImage', 'btnRotateLeft', 'btnRotateRight', 'btnFlipH', 'btnFlipV', 'btnCropMode', 'btnDrawMode', 'btnAdjustments', 'btnPixelated', 'btnBgMode', 'btnRawFull', 'btnSaveAs'], active);
+    this._setLocked(['btnPrevImage', 'btnNextImage', 'btnRotateLeft', 'btnRotateRight', 'btnFlipH', 'btnFlipV', 'btnCropMode', 'btnDrawMode', 'btnBlurMode', 'btnAdjustments', 'btnPixelated', 'btnBgMode', 'btnRawFull', 'btnSaveAs'], active);
   }
 
   setAdjustmentsActive(active) {
     if (this.btnAdjustments) this.btnAdjustments.classList.toggle('active', active);
     if (this.container) this.container.classList.toggle('adjustments-locked', active);
-    this._setLocked(['btnPrevImage', 'btnNextImage', 'btnRotateLeft', 'btnRotateRight', 'btnFlipH', 'btnFlipV', 'btnCropMode', 'btnDrawMode', 'btnTextMode', 'btnPixelated', 'btnBgMode', 'btnRawFull', 'btnSaveAs'], active);
+    this._setLocked(['btnPrevImage', 'btnNextImage', 'btnRotateLeft', 'btnRotateRight', 'btnFlipH', 'btnFlipV', 'btnCropMode', 'btnDrawMode', 'btnBlurMode', 'btnTextMode', 'btnPixelated', 'btnBgMode', 'btnRawFull', 'btnSaveAs'], active);
   }
 
   setRawFile(isRaw) {

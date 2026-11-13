@@ -161,6 +161,7 @@
     <!-- HTML5 Canvas Renderer -->
     <canvas id="imageCanvas"></canvas>
     <canvas id="drawCanvas" class="hidden"></canvas>
+    <canvas id="blurCanvas" class="hidden"></canvas>
     <div id="drawCursorRing" class="hidden"></div>
     <canvas id="textCanvas" class="hidden"></canvas>
     <div class="text-overlay-container hidden" id="textOverlayContainer"></div>
@@ -245,6 +246,9 @@
         </button>
         <button class="toolbar-btn" id="btnDrawMode" title="Draw & Highlight (D)" data-i18n-title="toolbar.draw">
           <i class="ri-mark-pen-line"></i>
+        </button>
+        <button class="toolbar-btn" id="btnBlurMode" title="Blur & Pixelate (U)" data-i18n-title="toolbar.blur">
+          <i class="ri-drop-line"></i>
         </button>
         <button class="toolbar-btn" id="btnTextMode" title="Add Text (T)" data-i18n-title="toolbar.text">
           <i class="ri-text"></i>
@@ -387,6 +391,97 @@
           <span data-i18n="draw.cancel">Cancel</span></button>
         <button class="draw-action-btn btn-apply" id="btnApplyDraw" title="Apply Drawing"><i class="ri-check-line"></i>
           <span data-i18n="draw.apply">Apply</span></button>
+      </div>
+    </div>
+
+    <!-- Blur & Pixelate Sub-Toolbar -->
+    <div class="draw-toolbar blur-toolbar glass-panel hidden" id="blurToolbar">
+      <div class="draw-pill-brand">
+        <i class="ri-drop-line"></i>
+        <span data-i18n="blur.brand">Blur</span>
+      </div>
+      <div class="draw-pill-divider"></div>
+
+      <!-- Effect Mode Segmented Capsule (Blur vs Pixelate) -->
+      <div class="draw-modes">
+        <button class="draw-mode-btn active" id="btnBlurModeGaussian" title="Gaussian Blur"><i class="ri-drop-line"></i>
+          <span data-i18n="blur.gaussian">Blur</span></button>
+        <button class="draw-mode-btn" id="btnBlurModePixelate" title="Pixelate / Mosaic"><i class="ri-grid-line"></i>
+          <span data-i18n="blur.pixelate">Pixelate</span></button>
+      </div>
+      <div class="draw-pill-divider"></div>
+
+      <!-- Shape Mode Segmented Capsule (Brush / Rectangle / Circle) -->
+      <div class="draw-modes">
+        <button class="draw-mode-btn active" id="btnBlurShapeBrush" title="Freehand Brush" data-i18n-title="blur.shapeBrush">
+          <i class="ri-brush-line"></i>
+          <span data-i18n="blur.brush">Brush</span>
+        </button>
+        <button class="draw-mode-btn" id="btnBlurShapeRect" title="Rectangle Region (Shift for Square)" data-i18n-title="blur.shapeRect">
+          <i class="ri-rectangle-line"></i>
+          <span data-i18n="blur.rect">Rect</span>
+        </button>
+        <button class="draw-mode-btn" id="btnBlurShapeCircle" title="Circle / Ellipse Region (Shift for Circle)" data-i18n-title="blur.shapeCircle">
+          <i class="ri-circle-line"></i>
+          <span data-i18n="blur.circle">Circle</span>
+        </button>
+      </div>
+      <div class="draw-pill-divider" id="blurSizeDivider"></div>
+
+      <!-- Brush Size Drop-Up Trigger & Vertical Slider Popover (Brush shape only) -->
+      <div class="draw-popover-anchor" id="blurSizeAnchor">
+        <button class="draw-pill-btn" id="btnBlurSizePop" title="Brush Size (10px - 150px)" data-i18n-title="blur.size">
+          <span class="draw-size-badge" id="blurSizeBadge">32px</span>
+          <i class="ri-arrow-up-s-line draw-chevron"></i>
+        </button>
+        <div class="draw-popover draw-size-popover glass-panel hidden" id="blurSizePopover">
+          <div class="draw-size-preview-wrap">
+            <div class="draw-size-preview-dot" id="blurSizePreviewDot"
+              style="width: 14px; height: 14px; background-color: #38bdf8;"></div>
+          </div>
+          <div class="draw-size-slider-wrap">
+            <span class="slider-limit-label">150</span>
+            <div class="draw-slider-track" id="blurSizeTrack">
+              <div class="draw-slider-fill" id="blurSizeFill"></div>
+              <div class="draw-slider-thumb" id="blurSizeThumb"></div>
+            </div>
+            <span class="slider-limit-label">10</span>
+          </div>
+        </div>
+      </div>
+      <div class="draw-pill-divider"></div>
+
+      <!-- Strength Cycle Pill (Low -> Med -> High) -->
+      <button class="draw-pill-btn draw-smooth-btn active-subtle" id="btnBlurStrength" title="Intensity: Med (Click to cycle)">
+        <i class="ri-equalizer-line"></i>
+        <span class="draw-pill-label" id="blurStrengthLabel" data-i18n="blur.strengthMed">Med</span>
+      </button>
+      <div class="draw-pill-divider"></div>
+
+      <!-- Feather Edge Toggle Pill (Off = Sharp, On = Soft Fade) -->
+      <button class="draw-pill-btn draw-smooth-btn" id="btnBlurFeather" title="Feather Edge: Off (Sharp boundary)">
+        <i class="ri-contrast-drop-line"></i>
+        <span class="draw-pill-label" data-i18n="blur.feather">Feather</span>
+      </button>
+      <div class="draw-pill-divider"></div>
+
+      <!-- History Controls -->
+      <div class="draw-history">
+        <button class="draw-tool-btn" id="btnBlurUndo" title="Undo (Ctrl+Z)" data-i18n-title="blur.undo"><i
+            class="ri-arrow-go-back-line"></i></button>
+        <button class="draw-tool-btn" id="btnBlurRedo" title="Redo (Ctrl+Y)" data-i18n-title="blur.redo"><i
+            class="ri-arrow-go-forward-line"></i></button>
+        <button class="draw-tool-btn" id="btnBlurClear" title="Clear All Blur" data-i18n-title="blur.clear"><i
+            class="ri-delete-bin-line"></i></button>
+      </div>
+      <div class="draw-pill-divider"></div>
+
+      <!-- Actions -->
+      <div class="draw-actions">
+        <button class="draw-action-btn btn-cancel" id="btnCancelBlur" title="Cancel (Esc)" data-i18n-title="blur.cancel"><i class="ri-close-line"></i>
+          <span data-i18n="common.cancel">Cancel</span></button>
+        <button class="draw-action-btn btn-apply" id="btnApplyBlur" title="Apply Blur" data-i18n-title="blur.apply"><i class="ri-check-line"></i>
+          <span data-i18n="common.apply">Apply</span></button>
       </div>
     </div>
 
@@ -840,6 +935,7 @@
           <div class="shortcut-item"><kbd>H</kbd> / <kbd>V</kbd> <span data-i18n="modals.shortcuts.flip">Flip Horizontal / Vertical</span></div>
           <div class="shortcut-item"><kbd>C</kbd> <span data-i18n="modals.shortcuts.crop">Toggle Crop Mode</span></div>
           <div class="shortcut-item"><kbd>D</kbd> <span data-i18n="modals.shortcuts.draw">Draw & Highlight</span></div>
+          <div class="shortcut-item"><kbd>U</kbd> <span data-i18n="modals.shortcuts.blur">Blur & Pixelate Tool</span></div>
           <div class="shortcut-item"><kbd>T</kbd> <span data-i18n="modals.shortcuts.text">Add Text & Typography</span></div>
           <div class="shortcut-item"><kbd>Ctrl</kbd> + <kbd>Z</kbd> <span data-i18n="modals.shortcuts.undo">Undo Stroke / Text</span></div>
           <div class="shortcut-item"><kbd>Ctrl</kbd> + <kbd>Y</kbd> <span data-i18n="modals.shortcuts.redo">Redo Stroke / Text</span></div>

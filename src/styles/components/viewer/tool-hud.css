@@ -92,8 +92,20 @@ body.light-theme .tool-hud-header,
 .tool-hud-icon-box i { font-style: normal !important; font-weight: normal !important; }
 .tool-hud-icon-box.tool-crop   { background: rgba(245, 158, 11, 0.18); color: #f59e0b; }
 .tool-hud-icon-box.tool-draw   { background: rgba(56, 189, 248, 0.18); color: #38bdf8; }
+.tool-hud-icon-box.tool-blur   { background: rgba(244, 114, 182, 0.18); color: #f472b6; }
 .tool-hud-icon-box.tool-text   { background: rgba(168, 85, 247, 0.18); color: #a855f7; }
 .tool-hud-icon-box.tool-adjust { background: rgba(52, 211, 153, 0.18); color: #34d399; }
+
+body.light-theme .tool-hud-icon-box.tool-crop,
+[data-theme="light"] .tool-hud-icon-box.tool-crop   { background: rgba(217, 119, 6, 0.22) !important; color: #b45309 !important; }
+body.light-theme .tool-hud-icon-box.tool-draw,
+[data-theme="light"] .tool-hud-icon-box.tool-draw   { background: rgba(2, 132, 199, 0.22) !important; color: #0369a1 !important; }
+body.light-theme .tool-hud-icon-box.tool-blur,
+[data-theme="light"] .tool-hud-icon-box.tool-blur   { background: rgba(190, 24, 93, 0.22) !important; color: #9d174d !important; }
+body.light-theme .tool-hud-icon-box.tool-text,
+[data-theme="light"] .tool-hud-icon-box.tool-text   { background: rgba(126, 34, 206, 0.22) !important; color: #6b21a8 !important; }
+body.light-theme .tool-hud-icon-box.tool-adjust,
+[data-theme="light"] .tool-hud-icon-box.tool-adjust { background: rgba(5, 150, 105, 0.22) !important; color: #047857 !important; }
 
 .tool-hud-title { font-size: 12px; font-weight: 600; letter-spacing: -0.01em; }
 body.dark .tool-hud-title { color: #ffffff; }

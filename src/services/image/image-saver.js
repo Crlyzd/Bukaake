@@ -13,10 +13,11 @@ function getEditTimestamp() {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}_${pad(d.getHours())}-${pad(d.getMinutes())}-${pad(d.getSeconds())}`;
 }
 
-export async function exportImage(viewer, filters, fileLoader, isCropActive, isDrawActive, isTextActive) {
+export async function exportImage(viewer, filters, fileLoader, isCropActive, isDrawActive, isTextActive, isBlurActive = false) {
   if (!viewer.img) { toast.show('No image loaded to save'); return false; }
   if (isCropActive) { toast.show('Please apply or cancel crop before saving'); return false; }
   if (isDrawActive) { toast.show('Please apply or cancel drawing before saving'); return false; }
+  if (isBlurActive) { toast.show('Please apply or cancel blur before saving'); return false; }
   if (isTextActive) { toast.show('Please apply or cancel text before saving'); return false; }
 
   const off = viewer.getProcessedCanvas(null, filters.getFilterCssString());
@@ -99,10 +100,11 @@ export function copyProcessedImage(viewer, filters) {
   }, 'image/png');
 }
 
-export async function setAsWallpaper(viewer, filters, fileLoader, isCropActive, isDrawActive, isTextActive) {
+export async function setAsWallpaper(viewer, filters, fileLoader, isCropActive, isDrawActive, isTextActive, isBlurActive = false) {
   if (!viewer?.img) { toast.show('No image loaded to set as wallpaper'); return false; }
   if (isCropActive) { toast.show('Please apply or cancel crop first'); return false; }
   if (isDrawActive) { toast.show('Please apply or cancel drawing first'); return false; }
+  if (isBlurActive) { toast.show('Please apply or cancel blur first'); return false; }
   if (isTextActive) { toast.show('Please apply or cancel text first'); return false; }
 
   if (!tauriBridge.isTauri()) {

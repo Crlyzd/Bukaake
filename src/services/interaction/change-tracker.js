@@ -9,6 +9,7 @@ export class ChangeTracker {
     this.cropModified = false;
     this.colorModified = false;
     this.drawModified = false;
+    this.blurModified = false;
     this.textModified = false;
     this.listeners = [];
   }
@@ -41,19 +42,25 @@ export class ChangeTracker {
     this.notify();
   }
 
+  markBlur(isDirty = true) {
+    this.blurModified = isDirty;
+    this.notify();
+  }
+
   markText(isDirty = true) {
     this.textModified = isDirty;
     this.notify();
   }
 
   hasUnsavedChanges() {
-    return this.cropModified || this.colorModified || this.drawModified || this.textModified;
+    return this.cropModified || this.colorModified || this.drawModified || this.blurModified || this.textModified;
   }
 
   markSaved() {
     this.cropModified = false;
     this.colorModified = false;
     this.drawModified = false;
+    this.blurModified = false;
     this.textModified = false;
     this.notify();
   }

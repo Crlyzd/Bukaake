@@ -81,6 +81,19 @@ export class ToolHud {
             { kbds: ['Enter', 'Esc'], label: i18n.t('toolHud.drawApply', {}, 'Apply / Discard') },
           ],
         };
+      case 'blur':
+        return {
+          title: i18n.t('toolHud.blurTitle', {}, 'Blur Shortcuts'),
+          icon: 'ri-drop-line',
+          iconClass: 'tool-blur',
+          shortcuts: [
+            { kbds: ['[', ']'], label: i18n.t('toolHud.blurSize', {}, 'Brush size down / up') },
+            { kbds: ['Shift', 'Drag'], label: i18n.t('toolHud.blurConstrain', {}, 'Straight line / 1:1 shape') },
+            { kbds: ['Ctrl', 'Drag'], label: i18n.t('toolHud.blurVert', {}, 'Lock vertical brush line') },
+            { kbds: ['Ctrl', 'Z / Y'], label: i18n.t('toolHud.blurUndo', {}, 'Undo / Redo blur') },
+            { kbds: ['Enter', 'Esc'], label: i18n.t('toolHud.blurApply', {}, 'Apply / Discard') },
+          ],
+        };
       case 'text':
         return {
           title: i18n.t('toolHud.textTitle', {}, 'Typography Shortcuts'),
