@@ -1,4 +1,4 @@
-# Bukaake — Project Agent Guidelines & Architecture Manual
+# Bukaake â€” Project Agent Guidelines & Architecture Manual
 
 > **Bukaake**: A high-performance, lightweight, and portable Windows image viewer built with Rust, Tauri v2, and modern Vanilla Web technologies, reviving the fluid, desktop-immersive experience of the classic **Google Picasa Photo Viewer**.
 
@@ -38,11 +38,11 @@ All agents working on this repository **MUST** strictly enforce these five non-n
   - **Elevated Floating Toolbar**: Control dock elevated to `bottom: 80px !important;` to avoid colliding with the Windows taskbar, with a 140px bottom mouse-hover threshold.
   - **Checkerboard Disabled in Mode 2**: Canvas checkerboard toggle is disabled/dimmed to preserve desktop immersion.
 - **Picasa Idle Mouse Fade**: 2.5s of stationary mouse fades all UI chrome to `opacity: 0` (`pointer-events: none`); mouse movement restores controls immediately.
-- **Navigation & Ergonomics**: Smooth mouse wheel zoom anchored to cursor; `Up`/`Down` arrow keys for intuitive centered/anchored zoom in and zoom out (matching Picasa navigation alongside mouse wheel); `Left`/`Right` arrow keys for directory navigation; quick keys `F` (fit), `1` (1:1), `,`/`.` (rotate), `Esc` (exit/close), `C` (crop), `D` (draw), `E` (filters), `I` (EXIF info), `Q` (full RAW decode), `Delete` (Recycle Bin), `Shift+Delete` (permanent delete), `Ctrl+V` (paste image).
+- **Navigation & Ergonomics**: Smooth mouse wheel zoom anchored to cursor; `Up`/`Down` arrow keys for intuitive centered/anchored zoom in and zoom out (matching Picasa navigation alongside mouse wheel); `Left`/`Right` arrow keys for directory navigation; quick keys `F` (fit), `1` (1:1), `,`/`.` (rotate), `Esc` (layered: closes open tool popovers, exits active editor, or exits/closes viewer), `C` (crop), `D` (draw), `U` (blur/pixelate), `T` (text), `E` (filters), `I` (EXIF info), `Q` (full RAW decode), `Delete` (Recycle Bin), `Shift+Delete` (permanent delete), `Ctrl+V` (paste image).
 
 ### Pillar 5: Strict Modularity Architecture (< 300 Lines per File)
 - **Hard Rule**: No source file (`.js`, `.css`, `.rs`) may exceed **300 lines of code**. Files approaching this limit must be proactively split into focused modules.
-- **Coordinator Exception (Max 350 Lines)**: Pure bootstrap and orchestration entry-points that only instantiate, inject, and wire submodules—specifically `src/app.js`, `src/settings-app.js`, and `src-tauri/src/main.rs`—are permitted up to **350 lines**. No business logic or styling may be placed directly in coordinator files.
+- **Coordinator Exception (Max 350 Lines)**: Pure bootstrap and orchestration entry-points that only instantiate, inject, and wire submodulesâ€”specifically `src/app.js`, `src/settings-app.js`, and `src-tauri/src/main.rs`â€”are permitted up to **350 lines**. No business logic or styling may be placed directly in coordinator files.
 - **Single Responsibility**: UI components handle DOM events only; services handle Tauri IPC, state, and external systems; core engines handle canvas transforms, drawing, and math.
 
 ---
@@ -54,91 +54,97 @@ The project contains **100+ modular files** cleanly organized across distinct la
 ```
 history.md               # Living project documentation, agent memory & mistake log
 src/
-├── components/          # UI Component Modules (< 300 lines each)
-│   ├── viewer/                 # Main viewing chrome (titlebar, titlebar-loader, toolbar, context menu, toast)
-│   ├── modals/                 # Modals (confirm, delete, shortcuts)
-│   ├── capture/                # Screen snipper, action dock, color picker, OCR & recording dock
-│   ├── settings/               # Settings window sections (capture, audio, click, tandem, modal)
-│   └── text/                   # Floating text typography sub-toolbar
-├── core/                # Canvas & Image Math Engines (< 300 lines each)
-│   ├── canvas/                 # Canvas viewer engine, events & helpers
-│   ├── crop/                   # Precision crop box & laser magnetic guides
-│   ├── draw/                   # Freehand pen, highlighter, cursor ring
-│   ├── filters/                # Real-time color adjustments processor
-│   ├── metadata/               # Client EXIF parser & telemetry formatter
-│   └── text/                   # Typography lifecycle, snapping & rendering
-├── locales/             # Multi-Language Dictionaries & Manifest (< 30 lines manifest)
-│   ├── manifest.js             # Locale registry & metadata
-│   ├── en.json, id.json        # English, Indonesian dictionaries
-│   └── jv-ngoko.json, jv-krama.json # Javanese Ngoko & Krama dictionaries
-├── services/            # Platform & Domain Services (< 300 lines each)
-│   ├── platform/               # Windows OS, autostart, file assoc, i18n, updater-launch-gate, tray & window mode
-│   ├── image/                  # Image loader, prefetch cache, RAW load controller & file exporter
-│   ├── interaction/            # Hotkeys, shortcuts, idle controller & change tracker
-│   ├── capture/                # Screen capture, native recorder, audio stream receiver & screenshot saver
-│   └── integrations/           # External companion integrations (Alitken, Cathet)
-├── styles/              # Stroke-Free Modular Stylesheets (< 300 lines each)
-│   ├── base.css, glass.css, main.css, tokens.css
-│   └── components/     # viewer/ (including titlebar-loader.css), modals/, tools/, capture/, settings/, text/
-├── app.js               # Main viewer bootstrap coordinator (≤ 350 lines)
-├── settings-app.js      # Standalone settings window coordinator (≤ 350 lines)
-└── snipper-app.js       # Dedicated overlay window coordinator (≤ 300 lines)
+â”œâ”€â”€ components/          # UI Component Modules (< 300 lines each)
+â”‚   â”œâ”€â”€ viewer/                 # Main viewing chrome (titlebar, titlebar-loader, toolbar, tool-hud, context menu, toast)
+â”‚   â”œâ”€â”€ modals/                 # Modals (confirm, delete, shortcuts)
+â”‚   â”œâ”€â”€ capture/                # Screen snipper, action dock, color picker, OCR & recording dock
+â”‚   â”œâ”€â”€ settings/               # Settings window sections (capture, audio, click, general, tandem, modal)
+â”‚   â”œâ”€â”€ text/                   # Floating text typography sub-toolbar
+â”‚   â””â”€â”€ tools/                  # Editing tool sub-toolbars (blur-toolbar)
+â”œâ”€â”€ core/                # Canvas & Image Math Engines (< 300 lines each)
+â”‚   â”œâ”€â”€ blur/                   # Non-stacking blur/pixelate tool & offscreen renderer
+â”‚   â”œâ”€â”€ canvas/                 # Canvas viewer engine, events, FLIP & helpers
+â”‚   â”œâ”€â”€ crop/                   # Precision crop box & laser magnetic guides
+â”‚   â”œâ”€â”€ draw/                   # Freehand pen, highlighter, stroke smoother & cursor ring
+â”‚   â”œâ”€â”€ filters/                # Real-time color adjustments processor
+â”‚   â”œâ”€â”€ metadata/               # Client EXIF parser & telemetry formatter
+â”‚   â””â”€â”€ text/                   # Typography lifecycle, snapping & rendering
+â”œâ”€â”€ locales/             # Multi-Language Dictionaries & Manifest (< 30 lines manifest)
+â”‚   â”œâ”€â”€ manifest.js             # Locale registry & metadata
+â”‚   â”œâ”€â”€ en.json, id.json        # English, Indonesian dictionaries
+â”‚   â””â”€â”€ jv-ngoko.json, jv-krama.json, jv-malangan.json # Javanese Ngoko, Krama & Malangan dictionaries
+â”œâ”€â”€ services/            # Platform & Domain Services (< 300 lines each)
+â”‚   â”œâ”€â”€ platform/               # Windows OS, autostart, file assoc, i18n, updater-launch-gate, tray & window mode
+â”‚   â”œâ”€â”€ image/                  # Image loader, prefetch cache, RAW load controller & file exporter
+â”‚   â”œâ”€â”€ interaction/            # Hotkeys, shortcuts, idle controller & change tracker
+â”‚   â”œâ”€â”€ capture/                # Screen capture, native recorder, audio stream receiver & screenshot saver
+â”‚   â””â”€â”€ integrations/           # External companion integrations (Alitken, Cathet)
+â”œâ”€â”€ styles/              # Stroke-Free Modular Stylesheets (< 300 lines each)
+â”‚   â”œâ”€â”€ base.css, glass.css, main.css, tokens.css
+â”‚   â””â”€â”€ components/     # viewer/ (including titlebar-loader.css), modals/, tools/, capture/, settings/, text/
+â”œâ”€â”€ app.js               # Main viewer bootstrap coordinator (â‰¤ 350 lines)
+â”œâ”€â”€ settings-app.js      # Standalone settings window coordinator (â‰¤ 350 lines)
+â””â”€â”€ snipper-app.js       # Dedicated overlay window coordinator (â‰¤ 300 lines)
 packaging/               # Microsoft Store & Packaging Automation
-├── store-config.json    # Store identity & package configuration
-└── msix/                # AppxManifest.template.xml & visual tile assets
+â”œâ”€â”€ store-config.json    # Store identity & package configuration
+â””â”€â”€ msix/                # AppxManifest.template.xml & visual tile assets
 scripts/                 # Automation & Release Scripts
-├── bump-version.js      # Synchronized version bump script
-├── generate-store-assets.ps1 # Store icon & tile asset generator
-└── package-msix.ps1     # Microsoft Store MSIX packaging pipeline
+â”œâ”€â”€ bump-version.js      # Synchronized version bump script
+â”œâ”€â”€ generate-store-assets.ps1 # Store icon & tile asset generator
+â”œâ”€â”€ i18n-tool.js         # Bi-directional JSON/template i18n translation helper
+â””â”€â”€ package-msix.ps1     # Microsoft Store MSIX packaging pipeline
 src-tauri/src/
-├── main.rs              # App entry-point & master IPC dispatcher (≤ 350 lines)
-├── capture/             # Native Screen Capture & Hardware Recording Subsystem
-│   ├── mod.rs                  # Module exports & conditional declarations
-│   ├── audio_capture.rs        # WASAPI loopback & microphone audio capture
-│   ├── audio_mixer.rs          # FIFO resampling queue, clock sync & peak limiter
-│   ├── capture_commands.rs     # Screen snip & recording IPC commands
-│   ├── click_coordinator.rs    # Low-level click event and visual/audio coordinator
-│   ├── click_overlay.rs        # Stroke-free translucent animated click ripple overlay
-│   ├── click_sound.rs          # Tactile mechanical click audio synthesizer
-│   ├── d3d_device.rs           # Direct3D 11 device & WinRT interop
-│   ├── ebml_patcher.rs         # WebM duration & seek header patcher
-│   ├── external_launch.rs      # Alitken companion launcher & file pickers (< 85 lines)
-│   ├── mouse_hook.rs           # Win32 low-level mouse hook (WH_MOUSE_LL)
-│   ├── native_recorder.rs      # GPU capture orchestrator & audio PTS sync
-│   ├── recording_border.rs     # Stroke-free capture region border overlay
-│   ├── recording_pill.rs       # Floating desktop recording pill controller
-│   ├── screen_capture.rs       # Windows desktop monitor & region capture
-│   ├── wgc_capture.rs          # Windows.Graphics.Capture D3D11 frame pool
-│   └── wmf_writer.rs           # IMFSinkWriter hardware H.264/AAC MP4 writer
-├── imaging/             # Image Decoders & VFX Pipelines
-│   ├── mod.rs                  # Module exports
-│   ├── exif_reader.rs          # Native EXIF extraction via kamadak-exif
-│   ├── heif_reader.rs          # HEIC/HEIF container parsing & preview extraction
-│   ├── image_loader.rs         # Native image decoding & 49 format traversal
-│   ├── neighbor_scanner.rs     # Directory neighbor traversal & CLI argument scanner (< 100 lines)
-│   ├── pro_decoder.rs          # VFX decoders (HDR, EXR, DDS, TGA, QOI)
-│   ├── raw_reader.rs           # 4-tier LibRaw camera RAW pipeline (< 300 lines)
-│   ├── raw_tests.rs            # Dedicated LibRaw sample test harness
-│   └── wic_decoder.rs          # Windows Imaging Component GPU transcoder
-├── platform/            # Native Windows Desktop Integration
-│   ├── mod.rs                  # Module exports
-│   ├── autostart.rs            # HKCU autostart registry management
-│   ├── clipboard.rs            # Win32 clipboard engine (CF_HDROP / CF_DIB)
-│   ├── file_assoc.rs           # HKCU shell registration & auto-heal
-│   ├── file_ops.rs             # Win32 Recycle Bin deletion (SHFileOperationW)
-│   ├── hotkeys.rs              # Win32 global shortcut listener
-│   ├── package_info.rs         # MSIX package identity & Store runtime detection (< 70 lines)
-│   ├── process_memory.rs       # Working set telemetry & memory trimming
-│   ├── reclaim.rs              # Idle working set memory reclaim coordinator (< 110 lines)
-│   ├── standby.rs              # Tray lifecycle & working set memory trimming
-│   ├── updater.rs              # In-place self-updater, progress & relaunch
-│   ├── wallpaper.rs            # Win32 desktop wallpaper engine & cache transcode (< 110 lines)
-│   ├── window_commands.rs      # Window vibrancy, dialogs, and window state IPC
-│   └── window_subclass.rs      # Win32 subclassing & native edge resize suppression
-└── integrations/        # External & Companion App Integrations
-    ├── mod.rs                  # Module exports
-    ├── cathet.rs               # Cathet companion bridge & subprocess isolation (< 80 lines)
-    └── ocr.rs                  # Native Windows.Media.Ocr text recognition
+â”œâ”€â”€ main.rs              # App entry-point & master IPC dispatcher (â‰¤ 350 lines)
+â”œâ”€â”€ capture/             # Native Screen Capture & Hardware Recording Subsystem
+â”‚   â”œâ”€â”€ mod.rs                  # Module exports & conditional declarations
+â”‚   â”œâ”€â”€ audio_capture.rs        # WASAPI loopback & microphone audio capture
+â”‚   â”œâ”€â”€ audio_mixer.rs          # FIFO resampling queue, clock sync & peak limiter
+â”‚   â”œâ”€â”€ capture_commands.rs     # Screen snip & recording IPC commands
+â”‚   â”œâ”€â”€ click_coordinator.rs    # Low-level click event and visual/audio coordinator
+â”‚   â”œâ”€â”€ click_overlay.rs        # Stroke-free translucent animated click ripple overlay
+â”‚   â”œâ”€â”€ click_sound.rs          # Tactile mechanical click audio synthesizer
+â”‚   â”œâ”€â”€ d3d_device.rs           # Direct3D 11 device & WinRT interop
+â”‚   â”œâ”€â”€ ebml_patcher.rs         # WebM duration & seek header patcher
+â”‚   â”œâ”€â”€ external_launch.rs      # Alitken companion launcher & file pickers (< 85 lines)
+â”‚   â”œâ”€â”€ mouse_hook.rs           # Win32 low-level mouse hook (WH_MOUSE_LL)
+â”‚   â”œâ”€â”€ native_recorder.rs      # GPU capture orchestrator & audio PTS sync
+â”‚   â”œâ”€â”€ recording_border.rs     # Stroke-free capture region border overlay
+â”‚   â”œâ”€â”€ recording_pill.rs       # Floating desktop recording pill controller
+â”‚   â”œâ”€â”€ screen_capture.rs       # Windows desktop monitor & region capture
+â”‚   â”œâ”€â”€ wgc_capture.rs          # Windows.Graphics.Capture D3D11 frame pool
+â”‚   â””â”€â”€ wmf_writer.rs           # IMFSinkWriter hardware H.264/AAC MP4 writer
+â”œâ”€â”€ imaging/             # Image Decoders & VFX Pipelines
+â”‚   â”œâ”€â”€ mod.rs                  # Module exports
+â”‚   â”œâ”€â”€ exif_reader.rs          # Native EXIF extraction via kamadak-exif
+â”‚   â”œâ”€â”€ heif_reader.rs          # HEIC/HEIF container parsing & preview extraction
+â”‚   â”œâ”€â”€ image_loader.rs         # Native image decoding & 49 format traversal
+â”‚   â”œâ”€â”€ neighbor_scanner.rs     # Directory neighbor traversal & CLI argument scanner (< 100 lines)
+â”‚   â”œâ”€â”€ pro_decoder.rs          # VFX decoders (HDR, EXR, DDS, TGA, QOI)
+â”‚   â”œâ”€â”€ raw_reader.rs           # 4-tier LibRaw camera RAW pipeline (< 300 lines)
+â”‚   â”œâ”€â”€ raw_tests.rs            # Dedicated LibRaw sample test harness
+â”‚   â””â”€â”€ wic_decoder.rs          # Windows Imaging Component GPU transcoder
+â”œâ”€â”€ platform/            # Native Windows Desktop Integration
+â”‚   â”œâ”€â”€ mod.rs                  # Module exports
+â”‚   â”œâ”€â”€ autostart.rs            # HKCU autostart registry management
+â”‚   â”œâ”€â”€ bootstrapper.rs         # Pre-flight OS/WebView2 runtime check & auto-installer
+â”‚   â”œâ”€â”€ clipboard.rs            # Win32 clipboard engine (CF_HDROP / CF_DIB)
+â”‚   â”œâ”€â”€ file_assoc.rs           # HKCU shell registration & auto-heal
+â”‚   â”œâ”€â”€ file_ops.rs             # Win32 Recycle Bin deletion (SHFileOperationW)
+â”‚   â”œâ”€â”€ foreground.rs           # Win32 foreground lock bypass (ASFW_ANY + AttachThreadInput)
+â”‚   â”œâ”€â”€ hotkeys.rs              # Win32 global shortcut listener
+â”‚   â”œâ”€â”€ package_info.rs         # MSIX package identity & Store runtime detection (< 70 lines)
+â”‚   â”œâ”€â”€ process_memory.rs       # Working set telemetry & memory trimming
+â”‚   â”œâ”€â”€ reclaim.rs              # Idle working set memory reclaim coordinator (< 110 lines)
+â”‚   â”œâ”€â”€ standby.rs              # Tray lifecycle & working set memory trimming
+â”‚   â”œâ”€â”€ updater.rs              # In-place self-updater, progress & relaunch
+â”‚   â”œâ”€â”€ wallpaper.rs            # Win32 desktop wallpaper engine & cache transcode (< 110 lines)
+â”‚   â”œâ”€â”€ window_commands.rs      # Window vibrancy, dialogs, and window state IPC
+â”‚   â”œâ”€â”€ window_subclass.rs      # Win32 subclassing & native edge resize suppression
+â”‚   â””â”€â”€ window_transition.rs    # DWM cloaking & atomic Mode 1 <-> Mode 2 geometry commits
+â””â”€â”€ integrations/        # External & Companion App Integrations
+    â”œâ”€â”€ mod.rs                  # Module exports
+    â”œâ”€â”€ cathet.rs               # Cathet companion bridge & subprocess isolation (< 80 lines)
+    â””â”€â”€ ocr.rs                  # Native Windows.Media.Ocr text recognition
 ```
 
 ---
@@ -195,14 +201,20 @@ src-tauri/src/
   - Dual-theme continuous dual-train laser animation across titlebar bottom (`Mode 1`) or monitor top edge (`Mode 2`) indicates background RAW decoding without layout shifts.
   - Smooth emerald flash (`#34d399`) upon completion before cross-fading away; titlebar stays pinned and steady during background decodes.
 
-### Precision Crop, Drawing & Editing Exclusivity
+### Precision Crop, Drawing, Blur & Editing Exclusivity
 - **Precision Crop (`cropper.js`, `crop-snapping.js`, `crop.css`)**:
   - Dual-stroke sandwich contrast layering (1px core flanked by dark casing shadows) guarantees visibility on pure white or pure black photos.
   - Magnetic laser guides detect image edges and centers with dynamic snapping.
 - **Drawing Tool (`drawing-tool.js`, `draw.css`)**:
   - Screen-to-image coordinate mapping (`screenToImageCoords`), strokes clipped strictly to image bounds (`ctx.clip()`), discrete undo stack (`Ctrl+Z`).
+  - **Tri-State Auto-Smooth & Axis Constraints (`stroke-smoother.js`)**: Cycles `Off â†’ Natural â†’ Galaxy` via `S` (`localStorage`: `bukaake-draw-auto-smooth`). Galaxy mode applies 24px macro-stride decimation, 3-pass Chaikin B-Spline subdivision, and calligraphic tapered ribbon rendering with rounded dome caps; `Shift`/`Ctrl` enforce horizontal/vertical axis constraints when Auto-Smooth is Off.
+- **Blur & Pixelate Tool (`blur-tool.js`, `blur-renderer.js`, `blur-toolbar.js`)**:
+  - Activated via `U` with freehand Brush, Rectangle, and Circle shapes, Low/Med/High intensity presets, Feather Edge toggle, brush size slider (`10pxâ€“150px`), and per-stroke non-stacking offscreen caching.
+- **In-Tool Contextual Shortcut HUD (`tool-hud.js`, `tool-hud.css`)**:
+  - Non-closable stroke-free glass shortcut guidance anchored at equal `20px` corner insets (`top: calc(var(--titlebar-height, 42px) + 20px)` in Mode 1, `top: 20px` in Mode 2), collapsible to a transparent glowing outline `ri-error-warning-line` beacon, with anti-stacking offset (`left: 356px`) when `metadata-drawer.js` is open.
 - **Tool Exclusivity (`canvas-tools-manager.js`)**:
-  - Crop, Draw, and Color Adjustments are mutually exclusive; activating any tool locks out context menus, directory navigation, and file deletion.
+  - Crop (`C`), Draw (`D`), Blur & Pixelate (`U`), Text (`T`), and Color Adjustments (`E`) are mutually exclusive; activating any tool locks out context menus, directory navigation, and file deletion.
+  - **Layered `Escape` & Editing Expansion**: `CanvasToolsManager.handleEscape()` closes open tool popovers first and exits only the active editor without closing the image. Entering any of the 5 editors in Mode 1 expands the window to `1280 Ã— 720` (clamped to screen work area) and restores pre-edit dimensions on exit.
 - **Change Safety (`change-tracker.js`, `confirm-modal.js`)**:
   - Tracks dirty status on crop, draw, and filter changes; prompts before navigation, file opening, or closing.
 
@@ -220,16 +232,19 @@ src-tauri/src/
   - Settings About tab and main settings modal feature direct links to the official website ([bukaake.kaleksananbagus.com](https://bukaake.kaleksananbagus.com)), GitHub repository, and community support channels (Saweria and Ko-fi at `https://ko-fi.com/curlyzed`).
   - Elevated contrast for version tag chips in dark mode (`--text-main` over `--glass-btn-hover-bg`).
 - **Tray Standby & Universal Idle Memory Reclaim Coordinator (`reclaim.rs`, `process_memory.rs`, `standby.rs`, `standby-service.js`, `snipper-app.js`, `settings-app.js`)**:
-  - Persistent background tray daemon coordinating idle working set memory reclamation across the Rust host and all descendant `msedgewebview2.exe` processes down to **~15–20 MB total tree Working Set** (~13 MB private). Left-click on tray restores window cleanly into Mode 1.
+  - Persistent background tray daemon coordinating idle working set memory reclamation across the Rust host and all descendant `msedgewebview2.exe` processes down to **~15â€“20 MB total tree Working Set** (~13 MB private). Left-click on tray restores window cleanly into Mode 1.
   - **Universal Tray Hooking**: Centralized in `request_idle_reclaim()`, automatically triggered whenever the app enters an idle hidden state: main window close/hide, snip finish/cancel (`finish_screen_snip`), recording pill exit (`exit_recording_pill_mode`), settings modal/window close, and autostart settle.
   - **Two-Stage Delayed Trim Architecture**: Broadcasts the native `bukaake://reclaim` event across webview runtimes to release DOM image caches and trigger Chromium V8 GC (`window.gc?.()`). Executes primary Win32 `trim_process_tree()` (`K32EmptyWorkingSet` across all tree PIDs) at **+1.5s**, followed by a secondary trim at **+5.5s** to capture delayed DWM / DirectX GPU swapchain deallocations.
   - **Atomic Generation Cancellation (`RECLAIM_GEN`)**: User interaction, window wake, or capture tool activations increment the atomic generation counter, instantly aborting pending background reclaim jobs to guarantee zero hot-path latency.
-  - **Autostart Settle Loop (`--startup`)**: When launched minimized on Windows boot, monitors tree working set delta every 3 seconds (< 3MB delta threshold) before scheduling reclaim, eliminating the 90–100MB startup spike down to ~15–20MB without requiring manual window toggling.
+  - **Autostart Settle Loop (`--startup`)**: When launched minimized on Windows boot, monitors tree working set delta every 3 seconds (< 3MB delta threshold) before scheduling reclaim, eliminating the 90â€“100MB startup spike down to ~15â€“20MB without requiring manual window toggling.
   - **Zero Hardcoded Centering Invariant**: Never invoke `win.center()` on window close, hide, or tray wake. Always preserve user window position and multi-monitor coordinates.
   - **Clean Standby Hide Invariant**: In `enter_standby`, only invoke `win.hide()`. Never apply `set_size` or repositioning during hide, as Win32/Tauri renders moves before completing the hide, causing an unsightly screen jump/flash glitch.
-  - **Startup Window Size Lock & WS_THICKFRAME Invariant**: Startup dimensions locked to 680×480. **Never call `set_resizable(false)` natively on Windows**. In Windows 11 DWM, stripping `WS_THICKFRAME` forces DWM to draw an active 1px white border around frameless windows and removes rounded corners/shadows. Window size locking on startup is enforced via DOM handle suppression (`body:not(.image-loaded) .resize-handle { display: none !important; }`), while fixed dialogs (Settings) use native Win32 `WM_NCHITTEST` subclassing (`window_subclass.rs`) to remap edge hit-tests to `HTCLIENT` and block `SC_SIZE` modal loops, keeping `resizable: true` (`WS_THICKFRAME`) active so borders remain completely eliminated and corners stay rounded without resize flicker.
+  - **Startup Window Size Lock & WS_THICKFRAME Invariant**: Empty/drop-zone startup dimensions and minimum bounds are locked to `680Ã—480`, while Mode 1 dynamically enforces `740Ã—520` minimum bounds when an image is loaded. **Never call `set_resizable(false)` natively on Windows**. In Windows 11 DWM, stripping `WS_THICKFRAME` forces DWM to draw an active 1px white border around frameless windows and removes rounded corners/shadows. Window size locking on startup is enforced via DOM handle suppression (`body:not(.image-loaded) .resize-handle { display: none !important; }`), while fixed dialogs (Settings) use native Win32 `WM_NCHITTEST` subclassing (`window_subclass.rs`) to remap edge hit-tests to `HTCLIENT` and block `SC_SIZE` modal loops, keeping `resizable: true` (`WS_THICKFRAME`) active so borders remain completely eliminated and corners stay rounded without resize flicker.
+- **Mode 1 â†” Mode 2 FLIP Transitions & Pre-Flight Bootstrapper (`window_transition.rs`, `mode-transition.js`, `transition-card.js`, `foreground.rs`, `bootstrapper.rs`)**:
+  - Uses DWM cloaking, atomic geometry/acrylic commits, and a stroke-free glass transition shell for smooth Mode 1 â†” Mode 2 (`Maximized` default vs `Fullscreen` presentation style) FLIP morphing and Explorer single-instance reveal (`ASFW_ANY` + `AttachThreadInput`).
+  - `.cargo/config.toml` enables static CRT linking (`+crt-static`), and `bootstrapper.rs` verifies Windows 10 (1809+) and WebView2 Evergreen Runtime availability on launch.
   - **Win32 Titlebar Maximize Interception Invariant**: The main window subclasses `WM_NCLBUTTONDBLCLK` and `SC_MAXIMIZE` in `window_subclass.rs` to intercept titlebar double-clicks and DWM maximize requests, routing them smoothly via the `bukaake-toggle-mode` event directly into Mode 2 transparent fullscreen without DWM maximize flash or Acrylic recreation flicker.
-  - **Return-to-Start Brand Button & Window Reset**: The titlebar app icon converts to an interactive back button (`ri-arrow-left-line`) with cross-fade on hover in Mode 1 when an image is loaded. Clicking checks `changeTracker.hasUnsavedChanges()` before triggering the confirmation dialog, clears the active image, and resets/centers the window dimensions back to the default 680×480 start state.
+  - **Return-to-Start Brand Button & Window Reset**: The titlebar app icon converts to an interactive back button (`ri-arrow-left-line`) with cross-fade on hover in Mode 1 when an image is loaded. Clicking checks `changeTracker.hasUnsavedChanges()` before triggering the confirmation dialog, clears the active image, and resets/centers the window dimensions back to the default 680Ã—480 start state.
   - **Empty State Aspect Isolation**: In `window-mode-manager.js`, `resizeAndCenter` is strictly guarded by `if (this.viewer?.img && this.lastAspectSize)`. `handleEmptyState()` must always clear `this.windowModeManager.lastAspectSize = null`.
 - **Microsoft Store & Desktop Bridge MSIX Packaging (`scripts/package-msix.ps1`, `packaging/`, `package_info.rs`)**:
   - Automated packaging pipeline generating signed and unsigned `.msix` Desktop Bridge bundles from release binaries and `package.json` version metadata.
@@ -239,11 +254,11 @@ src-tauri/src/
   - Registers ProgID and capabilities for 49 formats under `HKCU` (zero UAC prompts).
   - Silent auto-healing on startup checks binary location and updates registry commands in-place if executable is moved.
 - **Internationalization (i18n) & Multi-Language Subsystem (`i18n-service.js`, `manifest.js`, `src/locales/`)**:
-  - Zero-dependency micro-i18n engine with dictionaries (`en.json`, `id.json`, `jv-ngoko.json`, `jv-krama.json`) bundled directly into the Vite binary payload, maintaining 100% portable single-executable architecture.
+  - Zero-dependency micro-i18n engine with 5 dictionaries (`en.json`, `id.json`, `jv-ngoko.json`, `jv-krama.json`, `jv-malangan.json`) bundled directly into the Vite binary payload, maintaining 100% portable single-executable architecture, plus `scripts/i18n-tool.js` for bi-directional translation templates.
   - Multi-attribute DOM batch engine: automatically hydrates `[data-i18n]` (textContent), `[data-i18n-title]` (titles & tooltips), and `[data-i18n-placeholder]` (input placeholders).
   - Fallback chaining (`activeLocale` -> `en` -> `rawKey`) and runtime parameter interpolation (`{key}`).
   - Cross-window live synchronization: coordinates instant live hot-swapping across main viewer, settings, and transparent snipper overlay windows via `localStorage` storage events and Tauri IPC without window reloads.
-  - First-class support for English (`en`), Indonesian (`id`), Javanese Ngoko (`jv-ngoko`), and Javanese Krama (`jv-krama`).
+  - First-class support for English (`en`), Indonesian (`id`), Javanese Ngoko (`jv-ngoko`), Javanese Krama (`jv-krama`), and Javanese Malangan (`jv-malangan`).
   - Community Translations: Standardized contributor guide via `CONTRIBUTING_TRANSLATIONS.md`.
 
 ---
@@ -264,24 +279,25 @@ src-tauri/src/
 ### Strict Release Notes Protocol
 
 Whenever the user asks to generate or draft release notes:
-- **Strict Artifact Placement**: **NEVER write release note documents in the project repository folder**. Always write them inside the task artifact directory (`<appDataDir>\brain\<conversation-id>`).
+- **Strict Artifact Placement**: **NEVER write release note documents in the project repository folder**. Always write them inside the task artifact directory (`<appDataDir>\brain\<conversation-id>\release_notes_v<version>.md`).
 - **Zero Blockquotes Policy**: **NEVER use `>` markdown quote blocks** in release notes because they degrade formatting aesthetics.
-- **Zero Emojis Policy**: **NEVER use emojis** anywhere in release notes.
-- **Zero Repetition Policy**: **NEVER include any change or bug fix that was already covered in prior release notes**. Strictly document novel changes since the previous release tag.
-- **Professional & Detailed Tone**: Use strictly professional, factual, and objective language. Do not hype up the tone. More technical details and depth is better (APIs, synchronization mechanics, GPU blits, Win32 hooks, memory bounds).
 - **Zero Download Links Policy**: **DO NOT include any download links**.
+- **Zero Repetition Policy**: **NEVER include any change or bug fix that was already covered in prior release notes**. Strictly document novel changes since the previous release tag (`git log <prev_tag>..HEAD --oneline`).
+- **Dual-Audience Tone (Casual Summary + Technical Details)**:
+  - **Summary**: Write for casual / non-pro users using brief, engaging README-style bullet points with feature icons (`🔒`, `✨`, `💡`, etc.) highlighting everyday benefits in plain language (no internal file names or engineering jargon).
+  - **Target & Detailed Changes**: Use strictly professional, factual, and objective technical language with **zero emojis** and no hype. More technical depth is better (APIs, synchronization mechanics, GPU blits, Win32 hooks, memory bounds).
 - **Mandatory 4-Part Structure**:
-  1. **Title**
-  2. **Target of the change / release note**
-  3. **Summary of the change**
-  4. **Detailed changes**: detailing what changed, explaining why the change was made, bug fixing (if any), technical details, and what commits are covered by the release note.
+  1. **Title** (`# Bukaake vX.Y.Z Release Notes`)
+  2. **Target** (project, version/baseline tag, platform, scope)
+  3. **Summary** (casual/non-pro README-style bullet points with feature icons)
+  4. **Detailed Changes** (what changed, why the change was made, bug fixes, technical details, and covered commits)
 
 ### Fast Validation Commands
-- `npm run dev` — Launch Vite dev server on port 3000.
-- `npm run tauri:dev` — Launch Tauri v2 desktop app in development mode.
-- `npm run build` — Fast production bundle check for frontend assets.
-- `cargo check --manifest-path src-tauri/Cargo.toml` — Fast backend type-check.
-- `npm run bump` — Atomically synchronize version across `package.json`, `Cargo.toml`, and `tauri.conf.json`.
+- `npm run dev` â€” Launch Vite dev server on port 3000.
+- `npm run tauri:dev` â€” Launch Tauri v2 desktop app in development mode.
+- `npm run build` â€” Fast production bundle check for frontend assets.
+- `cargo check --manifest-path src-tauri/Cargo.toml` â€” Fast backend type-check.
+- `npm run bump` â€” Atomically synchronize version across `package.json`, `Cargo.toml`, and `tauri.conf.json`.
 
 ### Grouped Staging & Commit Workflow
 
@@ -296,5 +312,5 @@ Whenever the user asks for a commit message, to commit changes, or when handling
 
 ### Compilation Invariant
 - **No Automatic Production Binary Builds**: Agents must **NEVER** run `cargo build --release` or `npm run tauri:build` autonomously after completing tasks. Full compilation is exclusively initiated by the user or via the root control center (`run.bat` / `run.ps1`).
-- **Universal Rule — Never Assume, Always Ask**: If user requirements or aesthetic nuances are ambiguous, agents must ask clarifying questions before committing changes.
+- **Universal Rule â€” Never Assume, Always Ask**: If user requirements or aesthetic nuances are ambiguous, agents must ask clarifying questions before committing changes.
 

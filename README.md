@@ -63,13 +63,13 @@ Most photo viewers on Windows today are slow to launch, cluttered with heavy too
 | 🖼️ **Native Desktop Wallpaper** | One-click Win32 wallpaper setting with automatic PNG caching and format transcoding. |
 | ⚡ **Sub-10ms Launch & Standby** | Instant tray daemon with automatic memory trimming down to ~8–15 MB RAM. |
 | 📷 **49+ Formats & Camera RAW** | Native iPhone HEIC/HEIF (100% free), 24+ RAW camera formats, and 3D VFX textures. |
-| ✍️ **Vector Typography & Crop** | Vector text engine with 8-point handles, dynamic shadows, laser-guided crop, pen & highlighter. |
+| ✍️ **5-Tool Creative & Redaction Suite** | Vector text (`T`), laser-guided crop (`C`), smooth/Galaxy pen (`D`), blur/pixelate redaction (`U`), and color filters (`E`) with an on-screen shortcut HUD. |
 | 📸 **Integrated Screen Snipper** | Multi-monitor crosshair capture with instant clipboard copy and auto-saved PNGs. |
 | 🎥 **Hardware GPU Screen Recording** | Direct3D 11 & WGC zero-copy capture (<2% CPU) with tactile click sounds, visual halos, cursor toggle & H.264 MP4. |
 | 🏪 **Microsoft Store & Portable** | Distribute as a zero-install ~5MB portable executable or install via Microsoft Store Desktop Bridge MSIX. |
 | 🗑️ **Safe Recycle Bin Deletion** | Win32 Recycle Bin integration (`Delete` to trash, `Shift+Delete` to shred). |
 | 🎨 **Stroke-Free Frosted Glass** | Dual theme engine: Deep Obsidian Dark Mode & Frosted Slate Light Mode. |
-| 🌐 **Multi-Language & Micro-i18n** | First-class English, Indonesian, Javanese Ngoko & Krama with live hot-swapping and community translation support. |
+| 🌐 **Multi-Language & Micro-i18n** | First-class English, Indonesian, Javanese Ngoko, Krama & Malangan with live hot-swapping and community translation support. |
 
 <br />
 
@@ -151,12 +151,14 @@ Capture and share anything on your screen without launching heavy third-party so
 
 ---
 
-### ✍️ 4. Vector Typography, Markup & Precision Crop
+### ✍️ 4. Vector Typography, Redaction, Markup & Precision Crop
 Quickly add text captions, mark up screenshots, or adjust composition with built-in creative tools:
-- **Precision Typography Engine (`T`)**: Add rich, draggable vector text with **center-anchored scaling** and 8-point handles. Features font sizes up to **600px** with quadratic precision, scroll-wheel sizing, unified tabbed popovers for soft shadows and rounded background fills, and **magnetic laser guides** for flush center and edge snapping.
-- **Freehand Pen & Highlighter (`D`)**: Draw sharp annotations or mark lines with translucent ink. Features curated palettes, stroke thickness sliders, and multi-step **Undo (`Ctrl+Z`)** and **Redo (`Ctrl+Y`)**.
-- **Laser-Guided Crop (`C`)**: Standard aspect presets (1:1, 16:9, 9:16, 4:3, Freeform) featuring dynamic magnetic guides that snap directly to image centers and edges.
-- **Universal Enter-to-Commit**: Press **`Enter`** to immediately apply and commit changes across Text, Crop, and Drawing tools.
+- **Blur & Pixelate Redaction (`U`)**: Obscure sensitive info or soften backgrounds using **Brush**, **Rectangle**, or **Circle** modes with `Low`/`Med`/`High` intensity presets, soft **Feather Edge** blending, non-stacking stroke caching, and `10px–150px` brush sizing (`[` / `]`).
+- **Precision Typography Engine (`T`)**: Add rich, draggable vector text with **center-anchored scaling** and 8-point handles (`Alt+T` or double-click canvas to spawn). Features font sizes up to **600px** with quadratic precision, scroll-wheel sizing, unified tabbed popovers for soft shadows and rounded background fills, and **magnetic laser guides** for flush center and edge snapping.
+- **Freehand Pen & Galaxy Auto-Smooth (`D`)**: Draw sharp annotations or mark lines with translucent ink. Toggle Tri-State Auto-Smooth (`S`) between **Off**, **Natural**, and **Galaxy Mode** (calligraphic tapered ribbons with S-curve smoothing), or hold `Shift` / `Ctrl` for instant horizontal/vertical straight lines—plus multi-step **Undo (`Ctrl+Z`)** and **Redo (`Ctrl+Y`)**.
+- **Laser-Guided Crop (`C`)**: Standard aspect presets (1:1, 16:9, 9:16, 4:3, Freeform) featuring dynamic magnetic guides that snap directly to image centers and edges, plus double-click to apply.
+- **In-Tool Shortcut HUD & Smart Window Sizing**: A collapsible, stroke-free shortcut guide tucks into a glowing corner icon when minimized. Entering any editor in Mode 1 automatically expands the window (`1280×720` clamped to screen) for comfortable editing and restores your previous size on exit, with layered `Esc` handling to close popovers and tools without dismissing your photo.
+- **Universal Enter-to-Commit**: Press **`Enter`** to immediately apply and commit changes across Text, Crop, Blur, and Drawing tools.
 - **Real-Time Color Filters (`E`)**: Adjust Brightness, Contrast, Saturation, Exposure, and Temperature on-the-fly with 60 FPS GPU-accelerated rendering.
 - **[Alitken](https://alitken.kaleksananbagus.com) & [Cathet](https://github.com/Crlyzd/Cathet) Companion Bridges**: One-click workflow to transfer photos to [Alitken](https://alitken.kaleksananbagus.com) for advanced image editing, or hand off OCR extracted text directly into [Cathet](https://github.com/Crlyzd/Cathet) for instant editing.
 
@@ -195,7 +197,7 @@ Designed from the ground up for modern Windows aesthetics:
 Bukaake features a zero-dependency, lightning-fast micro-i18n engine built directly into its core:
 - **Zero Runtime Overhead**: Dictionaries are compiled directly into the binary—no external translation folders, extra files, or runtime delay.
 - **Cross-Window Live Hot-Swapping**: Switch your display language in **Settings > General** and watch the main viewer, settings dialog, and transparent snipper overlay update immediately without restarting.
-- **First-Class Cultural Localization**: Fully translated into **English**, **Indonesian (Bahasa Indonesia)**, **Javanese Ngoko (Basa Jawa Ngoko)**, and **Javanese Krama (Basa Jawa Krama)**.
+- **First-Class Cultural Localization**: Fully translated into **English**, **Indonesian (Bahasa Indonesia)**, **Javanese Ngoko (Basa Jawa Ngoko)**, **Javanese Krama (Basa Jawa Krama)**, and **Javanese Malangan (Basa Jawa Malangan)**.
 - **Community Translation Ready**: Anyone can easily contribute new languages by creating a single JSON file without touching Rust code. See **[CONTRIBUTING_TRANSLATIONS.md](CONTRIBUTING_TRANSLATIONS.md)** for details.
 
 <br />
@@ -232,8 +234,11 @@ Bukaake features a zero-dependency, lightning-fast micro-i18n engine built direc
 | :--- | :--- |
 | **`T`** | **Toggle Typography & Text Tool** |
 | `D` | Toggle Pen & Highlighter |
+| `U` | Toggle Blur & Pixelate Tool |
 | `C` | Toggle Precision Crop |
 | `E` | Toggle Color Adjustments |
+| `S` | Cycle Drawing Auto-Smooth (Off / Natural / Galaxy) |
+| `[` / `]` | Decrease / Increase Brush Size |
 | `H` / `V` | Flip Horizontal / Vertical |
 | `Q` | Full Sensor RAW Develop |
 | `I` | Toggle EXIF Info Drawer |
@@ -255,7 +260,7 @@ Bukaake features a zero-dependency, lightning-fast micro-i18n engine built direc
 | `Delete` | Move to Recycle Bin (safe) |
 | `Shift + Del` | Permanently delete |
 | `F11` / `Enter` | Toggle Fullscreen Mode |
-| `Esc` | Cancel tool / Close / Standby |
+| `Esc` | Close popover / Exit tool / Standby |
 
 </td>
 </tr>
