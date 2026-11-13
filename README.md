@@ -25,7 +25,7 @@
 
   <br />
 
-  <img width="1280" alt="Bukaake Photo Viewer Showcase" src="https://github.com/user-attachments/assets/6626a09e-23c3-41d3-8796-6fe82474fb0d" style="border-radius: 12px; box-shadow: 0 20px 50px rgba(0,0,0,0.4);" />
+  <img width="1280" alt="Bukaake Photo Viewer Showcase" src="screenshots/hero.png" />
 
   <p align="center">
     <em>Pure transparent desktop immersion: softly dimmed wallpaper background, centered floating controls, and zero bulky borders.</em>
@@ -39,166 +39,176 @@
 
 ## 💡 Why Bukaake?
 
-Most photo viewers on Windows today are slow to launch, cluttered with heavy toolbars, or trap your pictures inside thick, distracting window frames. Some even force you to pay for extra codecs just to open photos from your iPhone!
+Most photo viewers on Windows today are slow to launch, cluttered with heavy toolbars, or trap your pictures inside thick, distracting window frames. Some even force you to pay for extra codecs just to open photos from your iPhone.
 
 **Bukaake** revives what made **Google Picasa Photo Viewer** so beloved, supercharged with modern Windows 10 & 11 design:
 
 - 🪟 **Zero Distractions**: Truly borderless and translucent. Your desktop wallpaper stays softly dimmed in the background while your photo takes center stage.
-- ⚡ **Auto-Hiding Controls**: Relax and enjoy your photos in peace. The second your mouse stops moving, all buttons and titles gently fade away.
-- 🚀 **Instant Launch**: Opens in the blink of an eye and uses almost no RAM. A single ~5 MB portable file—no installation needed.
-- 🖱️ **Smooth Navigation**: Zoom like butter with your mouse wheel right into the fine details, click-and-drag to pan, and flip effortlessly through folders with your arrow keys.
-- ✍️ **Vector Typography & Markup**: Add scalable text overlays with 8-point handles, dynamic shadows, rounded fills, pen, and highlighter without external editors.
-- 🗑️ **Stress-Free & Safe**: Send bad photos straight to your **Windows Recycle Bin** with `Delete`—easily restore them if you ever change your mind!
-- 📸 **Built-in Snip & Record**: Take instant screenshots of any monitor or region, or record video clips with crisp audio right from the app.
+- ⚡ **Instant Launch & Standby**: Opens in the blink of an eye (~5 MB single portable file) and trims idle tray memory down to ~8–15 MB RAM.
+- 📷 **49+ Formats & Camera RAW**: Native iPhone HEIC/HEIF (100% free), 24+ RAW camera formats, and 3D VFX textures—zero external codecs needed.
+- 🎨 **5-Tool Creative & Redaction Suite**: Blur/Pixelate (`U`), Smooth & Galaxy Pen (`D`), Vector Text (`T`), Laser-Guided Crop (`C`), and Real-Time Filters (`E`) with an on-screen Shortcut HUD.
+- 📸 **Built-in Snip, OCR & GPU Record**: Capture regions, extract text with native Windows OCR, pick pixel colors, or record 60 FPS H.264 MP4 clips with <2% CPU overhead.
+- 🗑️ **Stress-Free & Safe**: Send unwanted photos straight to your **Windows Recycle Bin** with `Delete`—easily restore them if you change your mind.
 
 <br />
 
 ---
 
-## ⚡ Highlights at a Glance
+## ✨ Feature Showcase
 
-| Superpower | Why It Matters |
-| :--- | :--- |
-| 🪟 **Desktop-Immersive Transparency** | Translucent dimmed background lets your desktop show through without heavy borders. |
-| 🖼️ **Native Desktop Wallpaper** | One-click Win32 wallpaper setting with automatic PNG caching and format transcoding. |
-| ⚡ **Sub-10ms Launch & Standby** | Instant tray daemon with automatic memory trimming down to ~8–15 MB RAM. |
-| 📷 **49+ Formats & Camera RAW** | Native iPhone HEIC/HEIF (100% free), 24+ RAW camera formats, and 3D VFX textures. |
-| ✍️ **5-Tool Creative & Redaction Suite** | Vector text (`T`), laser-guided crop (`C`), smooth/Galaxy pen (`D`), blur/pixelate redaction (`U`), and color filters (`E`) with an on-screen shortcut HUD. |
-| 📸 **Integrated Screen Snipper** | Multi-monitor crosshair capture with instant clipboard copy and auto-saved PNGs. |
-| 🎥 **Hardware GPU Screen Recording** | Direct3D 11 & WGC zero-copy capture (<2% CPU) with tactile click sounds, visual halos, cursor toggle & H.264 MP4. |
-| 🏪 **Microsoft Store & Portable** | Distribute as a zero-install ~5MB portable executable or install via Microsoft Store Desktop Bridge MSIX. |
-| 🗑️ **Safe Recycle Bin Deletion** | Win32 Recycle Bin integration (`Delete` to trash, `Shift+Delete` to shred). |
-| 🎨 **Stroke-Free Frosted Glass** | Dual theme engine: Deep Obsidian Dark Mode & Frosted Slate Light Mode. |
-| 🌐 **Multi-Language & Micro-i18n** | First-class English, Indonesian, Javanese Ngoko, Krama & Malangan with live hot-swapping and community translation support. |
+### 1. 🪟 Picasa-Style Transparent Immersion
 
-<br />
+Open any picture and Bukaake softly dims your surrounding desktop wallpaper with zero blur artifacts, giving your photo center stage without boxing it inside an opaque window frame.
 
----
-
-## ✨ Feature Deep Dive
-
-### 🪟 1. Picasa-Style Transparent Immersion
-When you open any picture, Bukaake softly dims your surrounding desktop wallpaper with zero blur artifacts, giving your photo center stage without boxing it inside an opaque window frame.
-- **75% Viewport Ceiling**: Images comfortably fill up to 75% of your screen so your desktop remains visible.
-- **Elevated Control Dock**: Floating toolbars stay elevated safely above your Windows taskbar.
-- **Auto-Hiding Controls**: Move your mouse to bring up controls; stay idle for 2.5 seconds and all chrome fades smoothly to 0% opacity.
-- **Interactive Return-to-Start**: Hover over the titlebar app icon in Mode 1 to reveal a back arrow, cleanly closing the image and resetting/centering window bounds back to start.
-- **1-Click Desktop Wallpaper**: Set any photo, cropped composition, or edited canvas directly as your Windows desktop wallpaper via native Win32 APIs, with automatic PNG caching for non-standard formats to prevent grey desktop glitches.
+- **75% Viewport Ceiling**: Images comfortably fill up to 75% of your screen so your desktop stays visible.
+- **Auto-Hiding Controls**: Move your mouse to reveal controls; stay idle for 2.5 seconds and all chrome fades smoothly away.
+- **Elevated Control Dock**: Floating toolbars sit safely above your Windows taskbar.
+- **1-Click Desktop Wallpaper**: Set any photo or edited canvas as your Windows wallpaper via native Win32 APIs with automatic PNG caching.
 
 <p align="center">
-  <img width="1280" alt="Transparent Immersion" src="https://github.com/user-attachments/assets/c29df440-32b0-49dd-b3d6-a25a9567b370" style="border-radius: 10px;" />
+  <img width="1280" alt="Picasa-Style Transparent Immersion" src="screenshots/viewer.png" />
 </p>
 
 ---
 
-### 📷 2. Comprehensive Format Engine & Camera RAW
-Bukaake natively opens **49 image formats** with zero external dependencies, codecs, or paid Microsoft Store extensions.
+### 2. 📷 49+ Formats, Camera RAW & EXIF Telemetry
 
-```
-• Everyday Web     : PNG, JPG, JPEG, WebP, GIF, SVG, BMP, ICO, TIFF, AVIF
-• Apple Ecosystem  : HEIC, HEIF, HIF, HEIFS, HEICS (Fully hardware-accelerated, free)
-• Camera RAW       : ARW, CR2, CR3, NEF, NRW, DNG, RAF, RW2, ORF, PEF, SRF, SR2
-• 3D & VFX Art     : OpenEXR (.exr), Radiance HDR (.hdr), DDS, TGA, QOI, PNM, PPM, PGM
-```
+Bukaake natively opens **49 image formats** with zero external dependencies or paid extensions—from everyday WebP and Apple HEIC to full-sensor Camera RAW and 3D VFX textures.
 
-- **Instant Embedded Previews**: Camera RAW files open instantly (~15ms) from high-speed embedded previews.
-- **Full Sensor RAW Develop (`Q`)**: Press **`Q`** or click the sensor icon to unpack full uncompressed sensor Bayer data with unclipped dynamic range. Powered by a **zero-base64 binary streaming pipeline** and **off-thread browser rasterization (`img.decode()`)** with a dual-theme **ambient glowing loading beam** across the titlebar.
-- **EXIF Telemetry Drawer (`I`)**: Press **`I`** anytime to inspect detailed camera telemetry: camera body, lens model, focal length, aperture ($f$-stop), shutter speed, ISO, and GPS location.
-- **5-Slot Predictive Prefetch**: Photos in your current folder pre-load silently in the background for zero-latency arrow navigation.
-
----
-
-### 📸 3. Screen Snipping & Desktop Recording
-Capture and share anything on your screen without launching heavy third-party software.
-
-<table width="100%">
-<tr>
-<td width="50%" valign="top">
-
-#### 📸 Precision Screen Snipper & OCR
-- **Capture Modes**: Snip your Full Screen, Active Display, or drag any Custom Region.
-- **Native Screen OCR**: Extract text from any on-screen region instantly using native hardware-accelerated `Windows.Media.Ocr`. Spatial geometry analysis preserves line wraps, stanza breaks, and paragraph indents.
-- **Loupe Color Eyedropper**: Zoom into details with a 9x9 magnified pixel grid to inspect and copy exact HEX and RGB color values in one click.
-- **Smart Alignment**: Live coordinate crosshairs and dimension badges.
-- **Direct Clipboard Delivery**: Automatically copies snips or OCR text to your clipboard (`CF_DIB` / Unicode text) for instant pasting (`Ctrl+V`).
-- **Timestamped Auto-Save**: Clean PNG files automatically save to your `Pictures/Screenshots` folder.
-
-</td>
-<td width="50%" valign="top">
-
-#### 🎥 Hardware GPU Screen Recorder
-- **Zero-Copy VRAM Pipeline**: Desktop frames capture directly into Direct3D 11 GPU textures via `Windows.Graphics.Capture` with sub-2% CPU overhead and zero RAM round-trips.
-- **Hardware H.264 & AAC MP4**: Streams hardware-accelerated `.mp4` video directly through Windows Media Foundation `IMFSinkWriter` with instant finalization.
-- **Visual Click Highlights & Tactile Audio**: Projects zero-input-lag amber/sky halo ripples visible to WGC, with punchy 48kHz synthesized mechanical click audio transients.
-- **Dynamic Cursor Visibility**: Dynamically include or exclude the system mouse pointer from recordings via hardware WGC compositing.
-- **Sample-Accurate Audio**: Mixes WASAPI system loopback and microphone inputs at 48kHz stereo with a contiguous sample-accurate clock—zero drift or lag.
-- **Space Saver & Collapsible Settings**: Toggle ~75% storage savings with 30 FPS profiles, calibrate audio sync (±200ms), and organize recording preferences in stroke-free accordions.
-- **Dedicated Overlay Window**: Isolated transparent window (`snipper.html`) hosts crosshairs, selection bounds, and recording pills with zero desktop redraw flash.
-- **Clean Borderless Capture**: Windows 11 default yellow capture border is completely suppressed.
-
-
-</td>
-</tr>
-<tr>
-<td>
-  <img width="600" alt="Screen Snipping" src="https://github.com/user-attachments/assets/500290d7-a62d-4d9c-a766-b937177567aa" style="border-radius: 8px;" />
-</td>
-<td>
-  <img width="600" alt="Screen Recording" src="https://github.com/user-attachments/assets/e4821226-86e9-4300-b231-969b4eb377da" style="border-radius: 8px;" />
-</td>
-</tr>
-</table>
-
----
-
-### ✍️ 4. Vector Typography, Redaction, Markup & Precision Crop
-Quickly add text captions, mark up screenshots, or adjust composition with built-in creative tools:
-- **Blur & Pixelate Redaction (`U`)**: Obscure sensitive info or soften backgrounds using **Brush**, **Rectangle**, or **Circle** modes with `Low`/`Med`/`High` intensity presets, soft **Feather Edge** blending, non-stacking stroke caching, and `10px–150px` brush sizing (`[` / `]`).
-- **Precision Typography Engine (`T`)**: Add rich, draggable vector text with **center-anchored scaling** and 8-point handles (`Alt+T` or double-click canvas to spawn). Features font sizes up to **600px** with quadratic precision, scroll-wheel sizing, unified tabbed popovers for soft shadows and rounded background fills, and **magnetic laser guides** for flush center and edge snapping.
-- **Freehand Pen & Galaxy Auto-Smooth (`D`)**: Draw sharp annotations or mark lines with translucent ink. Toggle Tri-State Auto-Smooth (`S`) between **Off**, **Natural**, and **Galaxy Mode** (calligraphic tapered ribbons with S-curve smoothing), or hold `Shift` / `Ctrl` for instant horizontal/vertical straight lines—plus multi-step **Undo (`Ctrl+Z`)** and **Redo (`Ctrl+Y`)**.
-- **Laser-Guided Crop (`C`)**: Standard aspect presets (1:1, 16:9, 9:16, 4:3, Freeform) featuring dynamic magnetic guides that snap directly to image centers and edges, plus double-click to apply.
-- **In-Tool Shortcut HUD & Smart Window Sizing**: A collapsible, stroke-free shortcut guide tucks into a glowing corner icon when minimized. Entering any editor in Mode 1 automatically expands the window (`1280×720` clamped to screen) for comfortable editing and restores your previous size on exit, with layered `Esc` handling to close popovers and tools without dismissing your photo.
-- **Universal Enter-to-Commit**: Press **`Enter`** to immediately apply and commit changes across Text, Crop, Blur, and Drawing tools.
-- **Real-Time Color Filters (`E`)**: Adjust Brightness, Contrast, Saturation, Exposure, and Temperature on-the-fly with 60 FPS GPU-accelerated rendering.
-- **[Alitken](https://alitken.kaleksananbagus.com) & [Cathet](https://github.com/Crlyzd/Cathet) Companion Bridges**: One-click workflow to transfer photos to [Alitken](https://alitken.kaleksananbagus.com) for advanced image editing, or hand off OCR extracted text directly into [Cathet](https://github.com/Crlyzd/Cathet) for instant editing.
+- **Supported Formats**: `PNG`, `JPG`, `WebP`, `GIF`, `SVG`, `AVIF`, `HEIC`/`HEIF`, `ARW`, `CR2`, `CR3`, `NEF`, `DNG`, `RAF`, `RW2`, `ORF`, `EXR`, `HDR`, `DDS`, `TGA`, `QOI`, and more.
+- **Instant Preview + Full Sensor Develop (`Q`)**: Opens embedded RAW previews in ~15ms, or press `Q` to unpack full uncompressed sensor data with an ambient titlebar progress beam.
+- **EXIF Telemetry Drawer (`I`)**: Inspect camera body, lens, focal length, aperture, shutter speed, ISO, and GPS metadata.
+- **5-Slot Predictive Prefetch**: Folder neighbors pre-load silently in the background for zero-latency arrow navigation.
 
 <p align="center">
-  <img width="800" alt="Drawing and Crop Tools" src="https://github.com/user-attachments/assets/846ec474-a1e3-440e-9c35-ac00fe7116cb" style="border-radius: 10px;" />
+  <img width="1280" alt="Camera RAW and EXIF Telemetry Drawer" src="screenshots/raw.png" />
 </p>
 
 ---
 
-### 🎨 5. Stroke-Free Dual Theme Engine
-Designed from the ground up for modern Windows aesthetics:
-- **Zero-Stroke Policy**: No ugly 1px border outlines or lines on windows, buttons, or floating bars. Depth is created purely through frosted glass fills and multi-layered ambient drop shadows.
-- **Deep Obsidian Dark Mode**: True deep obsidian dark (`rgba(6, 7, 10, 0.92)`).
-- **Soft Slate Light Mode**: Elegant daytime palette eliminating harsh pure-black borders in favor of soft obsidian slate (`#242938`).
+### 3. 📸 Screen Snipper, Native OCR & Loupe Eyedropper
+
+Capture anything on your screen without launching heavy third-party tools.
+
+- **Full Screen, Active Display, or Custom Region**: Multi-monitor crosshair capture with live dimension badges.
+- **Native Screen OCR**: Extract text from any region using hardware-accelerated `Windows.Media.Ocr` while preserving line wraps and paragraphs, or send it straight to **[Cathet](https://github.com/Crlyzd/Cathet)**.
+- **9×9 Loupe Color Eyedropper**: Magnify pixels to inspect and copy exact HEX and RGB color values in one click.
+- **Instant Clipboard & Auto-Save**: Automatically copies snips (`CF_DIB`) and saves timestamped PNGs to `Pictures/Screenshots`.
 
 <p align="center">
-  <img width="1280" alt="Dual Themes" src="https://github.com/user-attachments/assets/5ec39b3a-28b5-468b-86e9-73beeb451728" style="border-radius: 10px;" />
+  <img width="1280" alt="Precision Screen Snipper and OCR" src="screenshots/snip.png" />
 </p>
 
 ---
 
-### ⚡ 6. Native Windows Performance & Portability
-- **Sub-10ms Launch via Tray Standby**: Keeps Bukaake pre-warmed in your notification tray. Double-clicking any image opens instantaneously.
-- **Windows 11 DWM 1px Border Elimination**: Seamless frameless geometry achieved by preserving native `WS_THICKFRAME`, retaining rounded corners, drop shadows, and acrylic transparency without white outline artifacts or window resize flash.
-- **Win32 Subclassing & Smooth Maximize**: Subclasses `WM_NCHITTEST` and `SC_SIZE` to prevent edge-click jump on dialogs, and intercepts titlebar double-clicks (`WM_NCLBUTTONDBLCLK` / `SC_MAXIMIZE`) to smoothly transition into Mode 2 transparent fullscreen without DWM maximize flash.
-- **Automatic Memory Trimming**: Uses Win32 working-set trimming to shrink idle background memory down to ~8–15 MB RAM.
-- **Multi-Monitor Position Memory**: Restores to your preferred monitor and window coordinates without annoying screen-jumping.
-- **1-Click Shell Association**: Make Bukaake your default photo viewer for 49 formats under `HKCU` without annoying UAC permission prompts.
-- **True Portability**: A single standalone executable. Move `bukaake.exe` to a USB drive or secondary SSD—file associations self-heal automatically on launch.
-- **Microsoft Store & Desktop Bridge (MSIX)**: Native runtime channel detection via Win32 `GetCurrentPackageFamilyNameW`, declarative file associations, automatic Store background updates, and zero registry modifications.
-- **Built-In Self-Updater**: Background GitHub Releases checks with in-place executable updates via `self-replace`.
+### 4. 🎥 Hardware GPU Screen Recorder
+
+Record silky-smooth desktop or region videos directly to native `.mp4` files with minimal system impact.
+
+- **Zero-Copy Direct3D 11 & WGC Pipeline**: Captures frames directly on the GPU (<2% CPU) and encodes hardware H.264/AAC via Windows Media Foundation.
+- **Click Highlights & Tactile Audio**: Projects crisp halo ripples around mouse clicks with synthesized mechanical click audio and an optional cursor visibility toggle.
+- **Sample-Accurate WASAPI Audio**: Mixes system loopback and microphone inputs at 48kHz stereo with ±200ms sync calibration and **Space Saver** 30 FPS mode (~75% smaller files).
+
+<p align="center">
+  <img width="1280" alt="Hardware GPU Screen Recorder" src="screenshots/record.png" />
+</p>
 
 ---
 
-### 🌐 7. Multi-Language Localization & Micro-i18n
-Bukaake features a zero-dependency, lightning-fast micro-i18n engine built directly into its core:
-- **Zero Runtime Overhead**: Dictionaries are compiled directly into the binary—no external translation folders, extra files, or runtime delay.
-- **Cross-Window Live Hot-Swapping**: Switch your display language in **Settings > General** and watch the main viewer, settings dialog, and transparent snipper overlay update immediately without restarting.
-- **First-Class Cultural Localization**: Fully translated into **English**, **Indonesian (Bahasa Indonesia)**, **Javanese Ngoko (Basa Jawa Ngoko)**, **Javanese Krama (Basa Jawa Krama)**, and **Javanese Malangan (Basa Jawa Malangan)**.
-- **Community Translation Ready**: Anyone can easily contribute new languages by creating a single JSON file without touching Rust code. See **[CONTRIBUTING_TRANSLATIONS.md](CONTRIBUTING_TRANSLATIONS.md)** for details.
+### 5. 🔒 Blur & Pixelate Redaction (`U`)
+
+Hide sensitive details or softly blur backgrounds directly inside the viewer before sharing.
+
+- **3 Masking Shapes**: Switch between freehand **Brush**, **Rectangle**, and **Circle** modes.
+- **Non-Stacking Stroke Caching**: Overlapping brush strokes stay clean and uniform without muddy or double-darkened artifacts.
+- **Customizable Intensity & Feathering**: Choose `Low`, `Med`, or `High` strength, toggle soft **Feather Edge** blending, and adjust brush size (`10px–150px`) with `[` / `]`.
+
+<p align="center">
+  <img width="1280" alt="Blur and Pixelate Redaction Tool" src="screenshots/blur.png" />
+</p>
+
+---
+
+### 6. ✍️ Freehand Pen, Highlighter & Galaxy Auto-Smooth (`D` / `S`)
+
+Sketch annotations, highlight details, or draw expressive calligraphic strokes right over your photos.
+
+- **Tri-State Auto-Smooth (`S`)**: Cycle between **Off** (raw precision), **Natural** (clean curve smoothing), and **Galaxy Mode** (expressive tapered calligraphic ribbons with S-curve smoothing).
+- **Straight-Line Axis Locks**: Hold `Shift` for horizontal lines or `Ctrl` for vertical lines when smoothing is off.
+- **Full History**: Multi-step **Undo (`Ctrl+Z`)** and **Redo (`Ctrl+Y`)**, plus `[` / `]` quick brush sizing.
+
+<p align="center">
+  <img width="1280" alt="Freehand Pen and Galaxy Auto-Smooth" src="screenshots/draw.png" />
+</p>
+
+---
+
+### 7. ✂️ Laser-Guided Crop (`C`)
+
+Reframe photos effortlessly with precision snapping and instant aspect ratios.
+
+- **Aspect Presets**: `1:1`, `16:9`, `9:16`, `4:3`, and `Freeform`.
+- **Magnetic Laser Guides**: Snap crop edges and handles cleanly to image centers and borders.
+- **Quick Commit**: Double-click inside the crop box or press `Enter` to apply immediately.
+
+<p align="center">
+  <img width="1280" alt="Laser-Guided Crop Tool" src="screenshots/crop.png" />
+</p>
+
+---
+
+### 8. 🔤 Vector Typography (`T`)
+
+Add crisp, scalable text captions and badges without opening an external editor.
+
+- **Center-Anchored 8-Point Handles**: Resize and position text up to **600px** with scroll-wheel sizing and `Alt+T` or canvas double-click to spawn new boxes.
+- **Shadows & Rounded Fills**: Unified popover for soft drop shadows, rounded background pills, and color palettes.
+- **Magnetic Alignment**: Laser guides snap text boxes flush to center lines and edges.
+
+<p align="center">
+  <img width="1280" alt="Vector Typography Tool" src="screenshots/text.png" />
+</p>
+
+---
+
+### 9. 🎛️ Real-Time Color Filters (`E`) & On-Screen Shortcut HUD
+
+Fine-tune lighting and color at 60 FPS while keeping every tool shortcut within reach.
+
+- **60 FPS Adjustments**: Real-time sliders for Brightness, Contrast, Saturation, Exposure, and Temperature, plus one-click transfer to **[Alitken](https://alitken.kaleksananbagus.com)** for advanced editing.
+- **Collapsible Shortcut HUD**: Floating stroke-free cheat sheet for the active tool that tucks into a glowing corner beacon when minimized.
+- **Smart Editing Window & Layered `Esc`**: Entering any tool in Mode 1 automatically expands the window (`1280×720`) for breathing room and restores your previous size on exit; pressing `Esc` closes popups first, then exits the tool without closing your photo.
+
+<p align="center">
+  <img width="1280" alt="Real-Time Color Filters and Shortcut HUD" src="screenshots/filters.png" />
+</p>
+
+---
+
+### 10. 🎨 Stroke-Free Dark & Light Themes
+
+Designed from the ground up for modern Windows frosted-glass aesthetics with zero 1px border outlines.
+
+- **Deep Obsidian Dark Mode**: True deep obsidian glass (`rgba(6, 7, 10, 0.92)`) with soft ambient shadows.
+- **Soft Slate Light Mode**: Refined daytime palette using soft obsidian slate (`#242938`) with zero harsh pure-black borders.
+
+<p align="center">
+  <img width="1280" alt="Stroke-Free Dark and Light Themes" src="screenshots/themes.png" />
+</p>
+
+---
+
+### 11. 🌐 Multi-Language & Portable Windows Integration
+
+Built as a single ~5 MB standalone executable (or Microsoft Store MSIX) with zero external runtimes.
+
+- **5 Built-In Languages**: Live hot-swapping across **English**, **Indonesian (Bahasa Indonesia)**, **Javanese Ngoko**, **Javanese Krama**, and **Javanese Malangan**—see **[CONTRIBUTING_TRANSLATIONS.md](CONTRIBUTING_TRANSLATIONS.md)** to add more.
+- **1-Click HKCU File Associations**: Register 49 formats without UAC prompts; associations self-heal if you move `bukaake.exe` to another folder or USB drive.
+- **In-Place Self-Updater**: Background GitHub Releases updates via `self-replace` (or automatic Windows Store updates for MSIX).
+
+<p align="center">
+  <img width="1280" alt="Multi-Language Settings and Localization" src="screenshots/i18n.png" />
+</p>
 
 <br />
 
@@ -387,8 +397,6 @@ Bukaake is built on top of an incredible ecosystem of open-source projects, high
 
 ---
 
-## 📄 License
-
-Bukaake is open-source software licensed under the **[GPL-3.0 License](LICENSE)**.  
-Distributed without warranty in the hope of bringing back fluid, beautiful, and distraction-free viewing to the Windows desktop.
-
+<p align="center">
+  Released under the <strong>GPL-3.0 License</strong>.
+</p>
