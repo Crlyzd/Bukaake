@@ -58,6 +58,10 @@ pub fn activate_main_window(app: &tauri::AppHandle) {
             let _ = win.set_always_on_top(false);
             let _ = win.set_fullscreen(false);
             let _ = win.unmaximize();
+            let _ = win.set_min_size(Some(tauri::Size::Logical(tauri::LogicalSize {
+                width: 680.0,
+                height: 480.0,
+            })));
             let target = crate::platform::window_transition::regular_target(&win, 680.0, 480.0);
             crate::platform::window_transition::apply_rect(&win, target);
             #[cfg(target_os = "windows")]

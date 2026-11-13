@@ -18,7 +18,9 @@ export class ShortcutsRegistry {
   }
 
   handleKeyDown(e) {
-    if (['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName)) {
+    const activeEl = document.activeElement;
+    const isTextInput = activeEl?.tagName === 'TEXTAREA' || (activeEl?.tagName === 'INPUT' && !['range', 'button', 'checkbox', 'radio'].includes(activeEl.type));
+    if (isTextInput || activeEl?.isContentEditable) {
       return;
     }
 
@@ -111,6 +113,12 @@ export class ShortcutsRegistry {
         e.preventDefault();
         if (isEditing) return;
         this.actions.onToggleDraw?.();
+        break;
+      case 'u':
+      case 'U':
+        e.preventDefault();
+        if (isEditing) return;
+        this.actions.onToggleBlur?.();
         break;
       case 't':
       case 'T':

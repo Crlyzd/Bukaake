@@ -194,6 +194,8 @@ pub fn commit_regular_geometry(app: tauri::AppHandle, width: f64, height: f64, i
     let _ = win.set_always_on_top(false);
     let _ = win.set_fullscreen(false);
     let _ = win.unmaximize();
+    let (min_w, min_h) = if width < 740.0 || height < 520.0 { (680.0, 480.0) } else { (740.0, 520.0) };
+    let _ = win.set_min_size(Some(tauri::Size::Logical(tauri::LogicalSize { width: min_w, height: min_h })));
     let target = regular_target(&win, width, height);
     apply_rect(&win, target);
     #[cfg(target_os = "windows")]

@@ -7,6 +7,7 @@ import { CanvasViewer } from './core/canvas/canvas-viewer.js';
 import { CropperTool } from './core/crop/cropper.js';
 import { FilterEngine } from './core/filters/filters.js';
 import { DrawingTool } from './core/draw/drawing-tool.js';
+import { BlurTool } from './core/blur/blur-tool.js';
 import { TextTool } from './core/text/text-tool.js';
 import { MetadataInspector } from './core/metadata/metadata.js';
 import { tauriBridge } from './services/platform/tauri-bridge.js';
@@ -17,6 +18,7 @@ import { changeTracker } from './services/interaction/change-tracker.js';
 import { WindowModeManager, MODE_REGULAR, MODE_VIEWER } from './services/platform/window-mode-manager.js';
 import { Titlebar } from './components/viewer/titlebar.js';
 import { Toolbar } from './components/viewer/toolbar.js';
+import { BlurToolbar } from './components/tools/blur-toolbar.js';
 import { TextToolbar } from './components/text/text-toolbar.js';
 import { AdjustmentsPanel } from './components/viewer/adjustments-panel.js';
 import { MetadataDrawer } from './components/viewer/metadata-drawer.js';
@@ -50,6 +52,7 @@ class BukaakeApp {
     this.filters = new FilterEngine(this.viewer, { onModified: (d) => changeTracker.markColor(d) });
     this.cropper = new CropperTool(document.getElementById('cropOverlayContainer'), document.getElementById('cropBox'), document.getElementById('cropDimensionsTag'), this.viewer);
     this.drawingTool = new DrawingTool(document.getElementById('drawCanvas'), this.viewer, { onModified: (d) => changeTracker.markDraw(d) });
+    this.blurTool = new BlurTool(document.getElementById('blurCanvas'), this.viewer, { onModified: (d) => changeTracker.markBlur(d) });
     this.textTool = new TextTool(document.getElementById('textCanvas'), this.viewer, { onModified: (d) => changeTracker.markText(d) });
     this.metadataInspector = new MetadataInspector(document.getElementById('metadataBody'));
     this.fileLoader = new FileLoader();
@@ -90,18 +93,16 @@ class BukaakeApp {
         onDrawMode: (m) => this.drawingTool.setMode(m), onDrawColor: (c) => this.drawingTool.setColor(c),
         onDrawSize: (s) => this.drawingTool.setSize(s), onDrawAutoSmooth: (v) => this.drawingTool.setAutoSmooth(v),
         onDrawUndo: () => this.drawingTool.undo(), onDrawRedo: () => this.drawingTool.redo(), onDrawClear: () => this.drawingTool.clear(),
-        onToggleText: () => this.toolsManager.toggleText(),
+        onToggleBlur: () => this.toolsManager.toggleBlur(), onToggleText: () => this.toolsManager.toggleText(),
       },
     });
 
-    this.textToolbar = new TextToolbar(this.textTool, {
-      onCancel: () => this.toolsManager.toggleText(false),
-      onApply: () => this.toolsManager.applyText(),
-    });
-
+    this.blurToolbar = new BlurToolbar(this.blurTool, { onCancel: () => this.toolsManager.toggleBlur(false), onApply: () => this.toolsManager.applyBlur() });
+    this.textToolbar = new TextToolbar(this.textTool, { onCancel: () => this.toolsManager.toggleText(false), onApply: () => this.toolsManager.applyText() });
     this.toolsManager = new CanvasToolsManager({
-      viewer: this.viewer, cropper: this.cropper, drawingTool: this.drawingTool, textTool: this.textTool,
-      toolbar: this.toolbar, fileLoader: this.fileLoader, adjustmentsPanel: this.adjustmentsPanel,
+      viewer: this.viewer, cropper: this.cropper, drawingTool: this.drawingTool, blurTool: this.blurTool,
+      textTool: this.textTool, toolbar: this.toolbar, fileLoader: this.fileLoader, adjustmentsPanel: this.adjustmentsPanel,
+      onEditingStateChange: (editing) => this.windowModeManager?.setEditingWindowSize(editing),
     });
 
     this.rawLoadController = new RawLoadController({
@@ -119,7 +120,7 @@ class BukaakeApp {
       isRaw: () => document.body.classList.contains('is-raw'),
       actions: {
         onCopyImage: () => this.copyImage(), onSaveImage: () => this.saveImage(),
-        onSetWallpaper: () => setAsWallpaper(this.viewer, this.filters, this.fileLoader, this.cropper?.active, this.drawingTool?.active, this.textTool?.active),
+        onSetWallpaper: () => setAsWallpaper(this.viewer, this.filters, this.fileLoader, this.cropper?.active, this.drawingTool?.active, this.textTool?.active, this.blurTool?.active),
         onRotateRight: () => this.handleRotate(90), onFlipH: () => this.handleFlip('h'),
         onFitScreen: () => this.viewer.fitToScreen(), onCrop: () => this.toolsManager.toggleCrop(true),
         onToggleMetadata: () => { if (this.viewer.img) this.metadataDrawer.toggle(); },
@@ -133,8 +134,9 @@ class BukaakeApp {
       document.body.classList.add('image-loaded');
       this.dropZoneEl.style.display = 'none';
       this.viewer.setImage(img);
-      this.filters.reset(); changeTracker.reset(); this.drawingTool?.clear(); this.textTool?.clear();
+      this.filters.reset(); changeTracker.reset(); this.drawingTool?.clear(); this.blurTool?.clear(); this.textTool?.clear();
       if (this.drawingTool?.active) this.toolsManager?.toggleDraw(false);
+      if (this.blurTool?.active) this.toolsManager?.toggleBlur(false);
       if (this.textTool?.active) this.toolsManager?.toggleText(false);
       this.adjustmentsPanel.syncSliderUI(); this.metadataDrawer.update(meta, img);
       this.titlebar.setFileName(meta.name); this.titlebar.setHasImage(true);
@@ -158,6 +160,7 @@ class BukaakeApp {
     this.viewer.onTransformChange = () => {
       this.updateStatusBadges();
       if (this.drawingTool?.active) this.drawingTool.redraw();
+      if (this.blurTool?.active) this.blurTool.redraw();
       if (this.textTool?.active) this.textTool.redraw();
       if (this.cropper?.active) this.cropper.onTransform();
     };
@@ -170,7 +173,7 @@ class BukaakeApp {
 
     this.viewer.onToggleMode = () => this.windowModeManager.toggleMode();
     this.viewer.onOutsideClick = () => {
-      if (this.windowModeManager.currentMode === MODE_VIEWER && !this.cropper.active && !this.drawingTool.active && !this.textTool?.active) {
+      if (this.windowModeManager.currentMode === MODE_VIEWER && !this.toolsManager?.isEditing()) {
         this.windowModeManager.setMode(MODE_REGULAR);
       }
     };
@@ -178,7 +181,7 @@ class BukaakeApp {
     this.idleController = new IdleController({
       titlebar: document.getElementById('appTitlebar'), toolbar: document.getElementById('floatingToolbar'),
       topThreshold: 55, bottomThreshold: 90, hasImage: () => Boolean(this.viewer.img),
-      isBlocked: () => Boolean(this.cropper.active || this.drawingTool.active || this.textTool?.active || this.settingsModal.isOpen()),
+      isBlocked: () => Boolean(this.toolsManager?.isEditing() || this.settingsModal.isOpen()),
     });
 
     this.shortcuts = new ShortcutsRegistry({
@@ -191,7 +194,7 @@ class BukaakeApp {
       onFitScreen: () => this.viewer.fitToScreen(), onActualSize: () => this.viewer.zoomTo(1.0),
       onRotateLeft: () => this.handleRotate(-90), onRotateRight: () => this.handleRotate(90),
       onFlipH: () => this.handleFlip('h'), onFlipV: () => this.handleFlip('v'),
-      onToggleCrop: () => this.toolsManager.toggleCrop(), onToggleDraw: () => this.toolsManager.toggleDraw(), onToggleText: () => this.toolsManager.toggleText(),
+      onToggleCrop: () => this.toolsManager.toggleCrop(), onToggleDraw: () => this.toolsManager.toggleDraw(), onToggleBlur: () => this.toolsManager.toggleBlur(), onToggleText: () => this.toolsManager.toggleText(),
       onUndo: () => this.toolsManager.handleUndo(), onRedo: () => this.toolsManager.handleRedo(),
       onToggleAdjustments: () => this.toolsManager.toggleAdjustments(),
       onToggleMetadata: () => { if (this.viewer.img) this.metadataDrawer.toggle(); },
@@ -203,21 +206,12 @@ class BukaakeApp {
       onEscape: () => {
         if (this.deleteModal.isOpen()) return this.deleteModal.hide();
         if (this.confirmModal.isOpen()) return this.confirmModal.hide();
-        if (this.textTool?.active) return this.toolsManager.toggleText(false);
-        if (this.drawingTool?.active) return this.toolsManager.toggleDraw(false);
-        if (this.cropper?.active) return this.toolsManager.toggleCrop(false);
-        if (this.adjustmentsPanel.isOpen()) return this.toolsManager.closeAdjustments();
+        if (this.toolsManager?.handleEscape() || this.toolsManager?.isEditing()) return;
         for (const m of [this.metadataDrawer, this.settingsModal, this.shortcutsModal]) if (m.isOpen()) return m.hide();
-        this.confirmModal.promptIfDirty(
-          () => {
-            if (this.windowModeManager.currentMode === MODE_VIEWER) {
-              modeTransition.dismissViewer({ onComplete: () => this.enterStandby() });
-            } else {
-              this.enterStandby();
-            }
-          },
-          () => this.saveImage()
-        );
+        this.confirmModal.promptIfDirty(() => {
+          if (this.windowModeManager.currentMode === MODE_VIEWER) modeTransition.dismissViewer({ onComplete: () => this.enterStandby() });
+          else this.enterStandby();
+        }, () => this.saveImage());
       },
     });
   }
@@ -230,12 +224,7 @@ class BukaakeApp {
     tauriBridge.onSettingsModalState((open) => shield?.classList.toggle('hidden', !open));
     shield?.addEventListener('mousedown', (e) => { e.preventDefault(); e.stopPropagation(); tauriBridge.playWindowsDing(); tauriBridge.openSettingsWindow(); });
     this.titlebar.syncMaximizedState(await tauriBridge.isFullscreen());
-    this.externalOpenController = new ExternalOpenController({
-      windowModeManager: this.windowModeManager,
-      fileLoader: this.fileLoader,
-      loadingIndicator,
-      dropZoneEl: this.dropZoneEl,
-    });
+    this.externalOpenController = new ExternalOpenController({ windowModeManager: this.windowModeManager, fileLoader: this.fileLoader, loadingIndicator, dropZoneEl: this.dropZoneEl });
 
     await standbyService.init({
       onOpenPath: (p) => this.externalOpenController.openFromPath(p),
@@ -272,7 +261,7 @@ class BukaakeApp {
   }
 
   copyImage() { copyProcessedImage(this.viewer, this.filters); }
-  async saveImage() { return await exportImage(this.viewer, this.filters, this.fileLoader, this.cropper.active, this.drawingTool.active, this.textTool?.active); }
+  async saveImage() { return await exportImage(this.viewer, this.filters, this.fileLoader, this.cropper.active, this.drawingTool.active, this.textTool?.active, this.blurTool?.active); }
 
   async openFile() {
     if (!tauriBridge.isTauri()) return this.fileInput?.click();
@@ -289,13 +278,14 @@ class BukaakeApp {
 
   handleEmptyState(skipResize = false) {
     this.rawLoadController.cancel();
-    if (this.windowModeManager) { this.windowModeManager.lastAspectSize = null; this.windowModeManager.updateModeClasses(MODE_REGULAR); }
+    if (this.windowModeManager) { this.windowModeManager.lastAspectSize = null; this.windowModeManager.preEditSize = null; this.windowModeManager.updateModeClasses(MODE_REGULAR); }
     this.fileLoader?.clearItems();
     document.body.classList.remove('image-loaded');
     this.dropZoneEl.style.display = 'flex';
     this.viewer.setImage(null);
-    this.filters.reset(); changeTracker.reset(); this.drawingTool?.clear(); this.textTool?.clear();
+    this.filters.reset(); changeTracker.reset(); this.drawingTool?.clear(); this.blurTool?.clear(); this.textTool?.clear();
     if (this.drawingTool?.active) this.toolsManager?.toggleDraw(false);
+    if (this.blurTool?.active) this.toolsManager?.toggleBlur(false);
     if (this.textTool?.active) this.toolsManager?.toggleText(false);
     if (this.cropper?.active) this.toolsManager?.toggleCrop(false);
     this.adjustmentsPanel.syncSliderUI(); this.metadataDrawer.hide();
@@ -312,12 +302,12 @@ class BukaakeApp {
   }
 
   handleRotate(deg) {
-    if (this.drawingTool?.active || this.textTool?.active || this.adjustmentsPanel?.isOpen()) return toast.show('Please finish active edits first');
+    if (this.drawingTool?.active || this.blurTool?.active || this.textTool?.active || this.adjustmentsPanel?.isOpen()) return toast.show('Please finish active edits first');
     this.viewer.rotate(deg, this.cropper.active); this.toolsManager?.onTransformWhileCropping();
   }
 
   handleFlip(dir) {
-    if (this.drawingTool?.active || this.textTool?.active || this.adjustmentsPanel?.isOpen()) return toast.show('Please finish active edits first');
+    if (this.drawingTool?.active || this.blurTool?.active || this.textTool?.active || this.adjustmentsPanel?.isOpen()) return toast.show('Please finish active edits first');
     if (dir === 'h') this.viewer.toggleFlipH(); else this.viewer.toggleFlipV();
     this.toolsManager?.onTransformWhileCropping();
   }

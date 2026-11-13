@@ -8,14 +8,17 @@ import { toast } from '../../components/viewer/toast.js';
 import { ToolHud } from '../../components/viewer/tool-hud.js';
 
 export class CanvasToolsManager {
-  constructor({ viewer, cropper, drawingTool, textTool, toolbar, fileLoader, adjustmentsPanel }) {
+  constructor({ viewer, cropper, drawingTool, blurTool, textTool, toolbar, fileLoader, adjustmentsPanel, onEditingStateChange }) {
     this.viewer = viewer;
     this.cropper = cropper;
     this.drawingTool = drawingTool;
+    this.blurTool = blurTool;
     this.textTool = textTool;
     this.toolbar = toolbar;
     this.fileLoader = fileLoader;
     this.adjustmentsPanel = adjustmentsPanel;
+    this.onEditingStateChange = onEditingStateChange || null;
+    this._suppressEditingSync = false;
 
     this.toolHud = new ToolHud();
     if (this.cropper) {
@@ -27,51 +30,71 @@ export class CanvasToolsManager {
     return Boolean(
       this.cropper?.active ||
       this.drawingTool?.active ||
+      this.blurTool?.active ||
       this.textTool?.active ||
       this.adjustmentsPanel?.isOpen()
     );
   }
 
-  closeAdjustments() {
-    if (this.adjustmentsPanel?.isOpen()) {
-      this.adjustmentsPanel.hide();
-      this.toolbar?.setAdjustmentsActive(false);
-      this.toolHud?.hide();
+  _withEditingSync(fn) {
+    if (this._suppressEditingSync) return fn();
+    const wasEditing = this.isEditing();
+    this._suppressEditingSync = true;
+    try { return fn(); } finally {
+      this._suppressEditingSync = false;
+      const nowEditing = this.isEditing();
+      if (wasEditing !== nowEditing) this.onEditingStateChange?.(nowEditing);
     }
+  }
+
+  closeAdjustments() {
+    return this._withEditingSync(() => {
+      if (this.adjustmentsPanel?.isOpen()) {
+        this.adjustmentsPanel.hide();
+        this.toolbar?.setAdjustmentsActive(false);
+        this.toolHud?.hide();
+      }
+    });
   }
 
   toggleAdjustments() {
-    const isOpening = !this.adjustmentsPanel?.isOpen();
-    if (isOpening) {
-      if (!this.viewer.img) return toast.show('Load an image first for adjustments');
-      if (this.cropper?.active) this.toggleCrop(false);
-      if (this.drawingTool?.active) this.toggleDraw(false);
-      if (this.textTool?.active) this.toggleText(false);
-    }
-    const active = this.adjustmentsPanel?.toggle();
-    this.toolbar?.setAdjustmentsActive(active);
-    if (active) this.toolHud?.show('adjustments');
-    else this.toolHud?.hide();
-    return active;
+    return this._withEditingSync(() => {
+      const isOpening = !this.adjustmentsPanel?.isOpen();
+      if (isOpening) {
+        if (!this.viewer.img) return toast.show('Load an image first for adjustments');
+        if (this.cropper?.active) this.toggleCrop(false);
+        if (this.drawingTool?.active) this.toggleDraw(false);
+        if (this.blurTool?.active) this.toggleBlur(false);
+        if (this.textTool?.active) this.toggleText(false);
+      }
+      const active = this.adjustmentsPanel?.toggle();
+      this.toolbar?.setAdjustmentsActive(active);
+      if (active) this.toolHud?.show('adjustments');
+      else this.toolHud?.hide();
+      return active;
+    });
   }
 
   toggleCrop(forceState = null) {
-    const should = forceState !== null ? forceState : !this.cropper.active;
-    if (should) {
-      if (!this.viewer.img) return toast.show('Load an image first to crop');
-      if (this.drawingTool?.active) this.toggleDraw(false);
-      if (this.textTool?.active) this.toggleText(false);
-      this.closeAdjustments();
-      this.viewer.setBottomInset(110, false);
-      this.cropper.show();
-      this.toolbar.setCropActive(true);
-      this.toolHud?.show('crop');
-    } else {
-      this.viewer.setBottomInset(0, true);
-      this.cropper.hide();
-      this.toolbar.setCropActive(false);
-      this.toolHud?.hide();
-    }
+    return this._withEditingSync(() => {
+      const should = forceState !== null ? forceState : !this.cropper.active;
+      if (should) {
+        if (!this.viewer.img) return toast.show('Load an image first to crop');
+        if (this.drawingTool?.active) this.toggleDraw(false);
+        if (this.blurTool?.active) this.toggleBlur(false);
+        if (this.textTool?.active) this.toggleText(false);
+        this.closeAdjustments();
+        this.viewer.setBottomInset(110, false);
+        this.cropper.show();
+        this.toolbar.setCropActive(true);
+        this.toolHud?.show('crop');
+      } else {
+        this.viewer.setBottomInset(0, true);
+        this.cropper.hide();
+        this.toolbar.setCropActive(false);
+        this.toolHud?.hide();
+      }
+    });
   }
 
   onTransformWhileCropping() {
@@ -102,23 +125,26 @@ export class CanvasToolsManager {
   }
 
   toggleDraw(forceState = null) {
-    const should = forceState !== null ? forceState : !this.drawingTool.active;
-    if (should) {
-      if (!this.viewer.img) return toast.show('Load an image first to draw');
-      if (this.cropper?.active) this.toggleCrop(false);
-      if (this.textTool?.active) this.toggleText(false);
-      this.closeAdjustments();
-      this.viewer.setBottomInset(110, false);
-      this.drawingTool.show();
-      this.toolbar.setDrawActive(true);
-      this.toolHud?.show('draw');
-    } else {
-      this.viewer.setBottomInset(0, true);
-      this.drawingTool.hide();
-      this.toolbar.setDrawActive(false);
-      changeTracker.markDraw(false);
-      this.toolHud?.hide();
-    }
+    return this._withEditingSync(() => {
+      const should = forceState !== null ? forceState : !this.drawingTool.active;
+      if (should) {
+        if (!this.viewer.img) return toast.show('Load an image first to draw');
+        if (this.cropper?.active) this.toggleCrop(false);
+        if (this.blurTool?.active) this.toggleBlur(false);
+        if (this.textTool?.active) this.toggleText(false);
+        this.closeAdjustments();
+        this.viewer.setBottomInset(110, false);
+        this.drawingTool.show();
+        this.toolbar.setDrawActive(true);
+        this.toolHud?.show('draw');
+      } else {
+        this.viewer.setBottomInset(0, true);
+        this.drawingTool.hide();
+        this.toolbar.setDrawActive(false);
+        changeTracker.markDraw(false);
+        this.toolHud?.hide();
+      }
+    });
   }
 
   applyDraw() {
@@ -136,24 +162,65 @@ export class CanvasToolsManager {
     };
   }
 
+  toggleBlur(forceState = null) {
+    return this._withEditingSync(() => {
+      const should = forceState !== null ? forceState : !this.blurTool?.active;
+      if (should) {
+        if (!this.viewer.img) return toast.show('Load an image first to blur');
+        if (this.cropper?.active) this.toggleCrop(false);
+        if (this.drawingTool?.active) this.toggleDraw(false);
+        if (this.textTool?.active) this.toggleText(false);
+        this.closeAdjustments();
+        this.viewer.setBottomInset(110, false);
+        this.blurTool?.show();
+        this.toolbar.setBlurActive(true);
+        this.toolHud?.show('blur');
+      } else {
+        this.viewer.setBottomInset(0, true);
+        this.blurTool?.hide();
+        this.toolbar.setBlurActive(false);
+        changeTracker.markBlur(false);
+        this.toolHud?.hide();
+      }
+    });
+  }
+
+  applyBlur() {
+    const baked = this.blurTool?.bakeToImage();
+    if (!baked) return toast.show('No blur regions to apply');
+    const currentMeta = this.fileLoader.currentMeta || {};
+    baked.onload = () => {
+      this.fileLoader.loadDirectImage(baked, {
+        ...currentMeta,
+        name: currentMeta.name || 'Blurred Image',
+      });
+      this.toggleBlur(false);
+      changeTracker.markBlur(true);
+      toast.show('Applied blur to image');
+    };
+  }
+
   toggleText(forceState = null) {
-    const should = forceState !== null ? forceState : !this.textTool?.active;
-    if (should) {
-      if (!this.viewer.img) return toast.show('Load an image first to add text');
-      if (this.cropper?.active) this.toggleCrop(false);
-      if (this.drawingTool?.active) this.toggleDraw(false);
-      this.closeAdjustments();
-      this.viewer.setBottomInset(110, false);
-      this.textTool?.show();
-      this.toolbar.setTextActive(true);
-      this.toolHud?.show('text');
-    } else {
-      this.viewer.setBottomInset(0, true);
-      this.textTool?.hide();
-      this.toolbar.setTextActive(false);
-      changeTracker.markText(false);
-      this.toolHud?.hide();
-    }
+    return this._withEditingSync(() => {
+      const should = forceState !== null ? forceState : !this.textTool?.active;
+      if (should) {
+        if (!this.viewer.img) return toast.show('Load an image first to add text');
+        if (this.cropper?.active) this.toggleCrop(false);
+        if (this.drawingTool?.active) this.toggleDraw(false);
+        if (this.blurTool?.active) this.toggleBlur(false);
+        this.closeAdjustments();
+        this.viewer.setBottomInset(110, false);
+        this.textTool?.show();
+        this.toolbar.setTextActive(true);
+        this.toolHud?.show('text');
+      } else {
+        this.viewer.setBottomInset(0, true);
+        this.textTool?.hide();
+        this.toolbar.setTextActive(false);
+        changeTracker.markText(false);
+        this.toolHud?.hide();
+      }
+    });
   }
 
   applyText() {
@@ -174,17 +241,38 @@ export class CanvasToolsManager {
   handleUndo() {
     if (this.textTool?.active) return this.textTool.undo();
     if (this.drawingTool?.active) return this.drawingTool.undo();
+    if (this.blurTool?.active) return this.blurTool.undo();
   }
 
   handleRedo() {
     if (this.textTool?.active) return this.textTool.redo();
     if (this.drawingTool?.active) return this.drawingTool.redo();
+    if (this.blurTool?.active) return this.blurTool.redo();
   }
 
   handleEnter(filters) {
     if (this.cropper?.active) { this.applyCrop(filters); return true; }
     if (this.drawingTool?.active) { this.applyDraw(); return true; }
+    if (this.blurTool?.active) { this.applyBlur(); return true; }
     if (this.textTool?.active) { this.applyText(); return true; }
     return false;
+  }
+
+  handleEscape() {
+    if (!this.isEditing()) return false;
+    const openPopovers = document.querySelectorAll('.draw-popover:not(.hidden), .text-popover:not(.hidden)');
+    if (openPopovers.length > 0) {
+      openPopovers.forEach((p) => p.classList.add('hidden'));
+      return true;
+    }
+    if (document.activeElement?.closest?.('#drawToolbar, #blurToolbar, #textToolbar, #cropToolbar, #adjustmentsPanel')) {
+      document.activeElement.blur();
+    }
+    if (this.textTool?.active) this.toggleText(false);
+    else if (this.blurTool?.active) this.toggleBlur(false);
+    else if (this.drawingTool?.active) this.toggleDraw(false);
+    else if (this.cropper?.active) this.toggleCrop(false);
+    else if (this.adjustmentsPanel?.isOpen()) this.closeAdjustments();
+    return true;
   }
 }

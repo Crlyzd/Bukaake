@@ -123,6 +123,8 @@ pub fn set_window_resizable(window: tauri::Window, resizable: bool) -> Result<()
 #[tauri::command]
 pub fn resize_and_center_window(window: tauri::Window, width: u32, height: u32) -> Result<(), String> {
     let _ = window.unmaximize();
+    let (min_w, min_h) = if width < 740 || height < 520 { (680.0, 480.0) } else { (740.0, 520.0) };
+    let _ = window.set_min_size(Some(tauri::Size::Logical(tauri::LogicalSize { width: min_w, height: min_h })));
     window.set_size(tauri::Size::Logical(tauri::LogicalSize { width: width as f64, height: height as f64 })).map_err(|e| e.to_string())?;
     window.center().map_err(|e| e.to_string())
 }

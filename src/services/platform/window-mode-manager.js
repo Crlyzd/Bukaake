@@ -21,6 +21,7 @@ export class WindowModeManager {
     this.mode2Style = localStorage.getItem('bukaake-mode2-style') || 'maximized';
     this.isPendingPathLoad = false;
     this.isTransitioning = false;
+    this.preEditSize = null;
 
     if (this.viewer) modeTransition.setViewer(this.viewer);
     this.init();
@@ -101,8 +102,8 @@ export class WindowModeManager {
   }
 
   calculateAspectDimensions(imgWidth, imgHeight, maxDim = 820) {
-    const minW = 680;
-    const minH = 480;
+    const minW = 740;
+    const minH = 520;
 
     if (!imgWidth || !imgHeight) {
       return { width: minW, height: minH };
@@ -179,12 +180,40 @@ export class WindowModeManager {
     } else {
       modeTransition.setViewer(this.viewer);
       const isDark = !document.body.classList.contains('light-theme');
-      const dims = this.lastAspectSize || { width: 680, height: 480 };
+      const img = this.viewer?.img;
+      const dims = img
+        ? (this.lastAspectSize || this.calculateAspectDimensions(img.naturalWidth || img.width, img.naturalHeight || img.height, 820))
+        : { width: 680, height: 480 };
       await modeTransition.exitViewer({
         dims,
         isDark,
         updateClasses: () => this.updateModeClasses(MODE_REGULAR),
       });
+    }
+  }
+
+  async setEditingWindowSize(isEditing) {
+    if (this.currentMode === MODE_VIEWER || !this.viewer?.img) return;
+    if (isEditing) {
+      if (!this.preEditSize) {
+        this.preEditSize = {
+          width: window.innerWidth || this.lastAspectSize?.width || 740,
+          height: window.innerHeight || this.lastAspectSize?.height || 520,
+        };
+      }
+      const maxW = Math.max(740, (window.screen?.availWidth || 1280) - 40);
+      const maxH = Math.max(520, (window.screen?.availHeight || 800) - 40);
+      const targetW = Math.min(Math.max(this.preEditSize.width, 1280), maxW);
+      const targetH = Math.min(Math.max(this.preEditSize.height, 720), maxH);
+      if (targetW > (window.innerWidth || 0) || targetH > (window.innerHeight || 0)) {
+        await tauriBridge.resizeAndCenter(targetW, targetH);
+        setTimeout(() => { this.viewer?.fitToScreen(true); this.viewer?.onTransformChange?.(); }, 60);
+      }
+    } else if (this.preEditSize) {
+      const restore = this.preEditSize;
+      this.preEditSize = null;
+      await tauriBridge.resizeAndCenter(restore.width, restore.height);
+      setTimeout(() => { this.viewer?.fitToScreen(true); this.viewer?.onTransformChange?.(); }, 60);
     }
   }
 
