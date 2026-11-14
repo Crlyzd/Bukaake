@@ -6,9 +6,10 @@
 import { changeTracker } from './change-tracker.js';
 import { toast } from '../../components/viewer/toast.js';
 import { ToolHud } from '../../components/viewer/tool-hud.js';
+import { i18n } from '../platform/i18n-service.js';
 
 export class CanvasToolsManager {
-  constructor({ viewer, cropper, drawingTool, blurTool, textTool, toolbar, fileLoader, adjustmentsPanel, onEditingStateChange }) {
+  constructor({ viewer, cropper, drawingTool, blurTool, textTool, toolbar, fileLoader, adjustmentsPanel, animatedPlayer, onEditingStateChange }) {
     this.viewer = viewer;
     this.cropper = cropper;
     this.drawingTool = drawingTool;
@@ -17,6 +18,7 @@ export class CanvasToolsManager {
     this.toolbar = toolbar;
     this.fileLoader = fileLoader;
     this.adjustmentsPanel = adjustmentsPanel;
+    this.animatedPlayer = animatedPlayer || null;
     this.onEditingStateChange = onEditingStateChange || null;
     this._suppressEditingSync = false;
 
@@ -57,11 +59,19 @@ export class CanvasToolsManager {
     });
   }
 
+  _pauseAnimatedIfActive() {
+    if (this.animatedPlayer?.isAnimated()) {
+      this.animatedPlayer.pause();
+      toast.warn(i18n.t('toasts.animatedStaticExport'));
+    }
+  }
+
   toggleAdjustments() {
     return this._withEditingSync(() => {
       const isOpening = !this.adjustmentsPanel?.isOpen();
       if (isOpening) {
         if (!this.viewer.img) return toast.show('Load an image first for adjustments');
+        this._pauseAnimatedIfActive();
         if (this.cropper?.active) this.toggleCrop(false);
         if (this.drawingTool?.active) this.toggleDraw(false);
         if (this.blurTool?.active) this.toggleBlur(false);
@@ -80,6 +90,7 @@ export class CanvasToolsManager {
       const should = forceState !== null ? forceState : !this.cropper.active;
       if (should) {
         if (!this.viewer.img) return toast.show('Load an image first to crop');
+        this._pauseAnimatedIfActive();
         if (this.drawingTool?.active) this.toggleDraw(false);
         if (this.blurTool?.active) this.toggleBlur(false);
         if (this.textTool?.active) this.toggleText(false);
@@ -129,6 +140,7 @@ export class CanvasToolsManager {
       const should = forceState !== null ? forceState : !this.drawingTool.active;
       if (should) {
         if (!this.viewer.img) return toast.show('Load an image first to draw');
+        this._pauseAnimatedIfActive();
         if (this.cropper?.active) this.toggleCrop(false);
         if (this.blurTool?.active) this.toggleBlur(false);
         if (this.textTool?.active) this.toggleText(false);
@@ -167,6 +179,7 @@ export class CanvasToolsManager {
       const should = forceState !== null ? forceState : !this.blurTool?.active;
       if (should) {
         if (!this.viewer.img) return toast.show('Load an image first to blur');
+        this._pauseAnimatedIfActive();
         if (this.cropper?.active) this.toggleCrop(false);
         if (this.drawingTool?.active) this.toggleDraw(false);
         if (this.textTool?.active) this.toggleText(false);
@@ -205,6 +218,7 @@ export class CanvasToolsManager {
       const should = forceState !== null ? forceState : !this.textTool?.active;
       if (should) {
         if (!this.viewer.img) return toast.show('Load an image first to add text');
+        this._pauseAnimatedIfActive();
         if (this.cropper?.active) this.toggleCrop(false);
         if (this.drawingTool?.active) this.toggleDraw(false);
         if (this.blurTool?.active) this.toggleBlur(false);

@@ -4,6 +4,7 @@
  */
 
 import { CanvasViewer } from './core/canvas/canvas-viewer.js';
+import { AnimatedImagePlayer } from './core/canvas/animated-image-player.js';
 import { CropperTool } from './core/crop/cropper.js';
 import { FilterEngine } from './core/filters/filters.js';
 import { DrawingTool } from './core/draw/drawing-tool.js';
@@ -49,6 +50,7 @@ class BukaakeApp {
     this.dropZoneEl = document.getElementById('dropZone');
     this.fileInput = document.getElementById('fileInput');
     this.viewer = new CanvasViewer(this.canvasEl, this.viewportEl);
+    this.animatedPlayer = new AnimatedImagePlayer({ onFrame: (f) => this.viewer.setFrameSource(f), onSizeLimitExceeded: () => toast.warn(i18n.t('toasts.animatedTooLarge')) });
     this.filters = new FilterEngine(this.viewer, { onModified: (d) => changeTracker.markColor(d) });
     this.cropper = new CropperTool(document.getElementById('cropOverlayContainer'), document.getElementById('cropBox'), document.getElementById('cropDimensionsTag'), this.viewer);
     this.drawingTool = new DrawingTool(document.getElementById('drawCanvas'), this.viewer, { onModified: (d) => changeTracker.markDraw(d) });
@@ -102,7 +104,7 @@ class BukaakeApp {
     this.toolsManager = new CanvasToolsManager({
       viewer: this.viewer, cropper: this.cropper, drawingTool: this.drawingTool, blurTool: this.blurTool,
       textTool: this.textTool, toolbar: this.toolbar, fileLoader: this.fileLoader, adjustmentsPanel: this.adjustmentsPanel,
-      onEditingStateChange: (editing) => this.windowModeManager?.setEditingWindowSize(editing),
+      animatedPlayer: this.animatedPlayer, onEditingStateChange: (editing) => this.windowModeManager?.setEditingWindowSize(editing),
     });
 
     this.rawLoadController = new RawLoadController({
@@ -134,6 +136,7 @@ class BukaakeApp {
       document.body.classList.add('image-loaded');
       this.dropZoneEl.style.display = 'none';
       this.viewer.setImage(img);
+      this.animatedPlayer.load(img.src, meta);
       this.filters.reset(); changeTracker.reset(); this.drawingTool?.clear(); this.blurTool?.clear(); this.textTool?.clear();
       if (this.drawingTool?.active) this.toolsManager?.toggleDraw(false);
       if (this.blurTool?.active) this.toolsManager?.toggleBlur(false);
@@ -203,6 +206,12 @@ class BukaakeApp {
       onToggleMaximize: () => { if (this.viewer.img) this.windowModeManager?.toggleMode(); else toast.info('Load an image first'); },
       onToggleHelp: () => this.shortcutsModal.toggle(),
       onDeleteFile: (perm) => this.deleteCurrentFile(perm), onLoadFullRaw: () => this.handleLoadFullRaw(),
+      onTogglePlayPause: () => {
+        if (this.deleteModal.isOpen() || this.confirmModal.isOpen() || this.settingsModal.isOpen() || this.shortcutsModal.isOpen() || !this.animatedPlayer?.isAnimated()) return false;
+        const playing = this.animatedPlayer.togglePlay();
+        toast.show(i18n.t(playing ? 'toasts.animatedPlaying' : 'toasts.animatedPaused'), playing ? 'ri-play-circle-line' : 'ri-pause-circle-line', 1100);
+        return true;
+      },
       onEscape: () => {
         if (this.deleteModal.isOpen()) return this.deleteModal.hide();
         if (this.confirmModal.isOpen()) return this.confirmModal.hide();
@@ -218,6 +227,7 @@ class BukaakeApp {
 
   async init() {
     i18n.init();
+    document.addEventListener('visibilitychange', () => { if (document.hidden) this.animatedPlayer?.pause(false); else this.animatedPlayer?.play(false); });
     tauriBridge.initExternalLinks();
     this.fileLoader.bindDropAndPaste(this.viewportEl, this.fileInput);
     const shield = document.getElementById('modalShield');
@@ -261,7 +271,7 @@ class BukaakeApp {
   }
 
   copyImage() { copyProcessedImage(this.viewer, this.filters); }
-  async saveImage() { return await exportImage(this.viewer, this.filters, this.fileLoader, this.cropper.active, this.drawingTool.active, this.textTool?.active, this.blurTool?.active); }
+  async saveImage() { return await exportImage(this.viewer, this.filters, this.fileLoader, this.cropper.active, this.drawingTool.active, this.textTool?.active, this.blurTool?.active, this.animatedPlayer); }
 
   async openFile() {
     if (!tauriBridge.isTauri()) return this.fileInput?.click();
@@ -277,6 +287,7 @@ class BukaakeApp {
   }
 
   handleEmptyState(skipResize = false) {
+    this.animatedPlayer?.dispose();
     this.rawLoadController.cancel();
     if (this.windowModeManager) { this.windowModeManager.lastAspectSize = null; this.windowModeManager.preEditSize = null; this.windowModeManager.updateModeClasses(MODE_REGULAR); }
     this.fileLoader?.clearItems();

@@ -6,6 +6,7 @@
 import { tauriBridge } from '../platform/tauri-bridge.js';
 import { changeTracker } from '../interaction/change-tracker.js';
 import { toast } from '../../components/viewer/toast.js';
+import { i18n } from '../platform/i18n-service.js';
 
 function getEditTimestamp() {
   const d = new Date();
@@ -13,12 +14,16 @@ function getEditTimestamp() {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}_${pad(d.getHours())}-${pad(d.getMinutes())}-${pad(d.getSeconds())}`;
 }
 
-export async function exportImage(viewer, filters, fileLoader, isCropActive, isDrawActive, isTextActive, isBlurActive = false) {
+export async function exportImage(viewer, filters, fileLoader, isCropActive, isDrawActive, isTextActive, isBlurActive = false, animatedPlayer = null) {
   if (!viewer.img) { toast.show('No image loaded to save'); return false; }
   if (isCropActive) { toast.show('Please apply or cancel crop before saving'); return false; }
   if (isDrawActive) { toast.show('Please apply or cancel drawing before saving'); return false; }
   if (isBlurActive) { toast.show('Please apply or cancel blur before saving'); return false; }
   if (isTextActive) { toast.show('Please apply or cancel text before saving'); return false; }
+  if (animatedPlayer?.isAnimated()) {
+    animatedPlayer.pause();
+    toast.warn(i18n.t('toasts.animatedStaticExport'));
+  }
 
   const off = viewer.getProcessedCanvas(null, filters.getFilterCssString());
   if (!off) return false;

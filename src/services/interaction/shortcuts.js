@@ -173,6 +173,10 @@ export class ShortcutsRegistry {
         e.preventDefault();
         this.actions.onToggleHelp?.();
         break;
+      case ' ':
+      case 'Spacebar':
+        if (this.actions.onTogglePlayPause?.()) e.preventDefault();
+        break;
     }
   }
 }
