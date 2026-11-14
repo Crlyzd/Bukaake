@@ -12,7 +12,7 @@ export class CanvasViewer {
     this.ctx = this.canvas.getContext('2d');
     this.container = viewportContainer;
 
-    this.img = null;
+    this.img = null; this.frameSource = null;
     this.scale = 1.0; this.targetScale = 1.0;
     this.panX = 0; this.panY = 0;
     this.targetPanX = 0; this.targetPanY = 0;
@@ -100,14 +100,14 @@ export class CanvasViewer {
   }
 
   setImage(img) {
-    this.img = img;
-    this.rotation = 0;
-    this.flipH = false;
-    this.flipV = false;
+    this.img = img; this.frameSource = null;
+    this.rotation = 0; this.flipH = false; this.flipV = false;
     this.currentFilterCss = '';
     if (img) this.fitToScreen(true);
     else this.render();
   }
+
+  setFrameSource(frame) { this.frameSource = frame; this.render(); }
 
   calculateFitScale(bottomInset = this.bottomInset) {
     if (!this.img) return 1.0;
@@ -243,7 +243,7 @@ export class CanvasViewer {
     this.ctx.rotate((this.rotation * Math.PI) / 180);
     this.ctx.scale(this.flipH ? -1 : 1, this.flipV ? -1 : 1);
 
-    this.ctx.drawImage(this.img, -this.img.width / 2, -this.img.height / 2);
+    this.ctx.drawImage(this.frameSource || this.img, -this.img.width / 2, -this.img.height / 2);
     this.ctx.restore();
   }
 
