@@ -76,6 +76,7 @@ Open any picture and Bukaake softly dims your surrounding desktop wallpaper with
 Bukaake natively opens **49 image formats** with zero external dependencies or paid extensions—from everyday WebP and Apple HEIC to full-sensor Camera RAW and 3D VFX textures.
 
 - **Supported Formats**: `PNG`, `JPG`, `WebP`, `GIF`, `SVG`, `AVIF`, `HEIC`/`HEIF`, `ARW`, `CR2`, `CR3`, `NEF`, `DNG`, `RAF`, `RW2`, `ORF`, `EXR`, `HDR`, `DDS`, `TGA`, `QOI`, and more.
+- **Animated Playback (`Space`)**: Smoothly plays animated **GIF**, **WebP**, **APNG**, and **AVIF** directly on the canvas with full zoom, pan, rotate, and fullscreen support (`Space` to play/pause; files over 30 MB fall back to a static preview).
 - **Instant Preview + Full Sensor Develop (`Q`)**: Opens embedded RAW previews in ~15ms, or press `Q` to unpack full uncompressed sensor data with an ambient titlebar progress beam.
 - **EXIF Telemetry Drawer (`I`)**: Inspect camera body, lens, focal length, aperture, shutter speed, ISO, and GPS metadata.
 - **5-Slot Predictive Prefetch**: Folder neighbors pre-load silently in the background for zero-latency arrow navigation.
@@ -236,6 +237,7 @@ Built as a single ~5 MB standalone executable (or Microsoft Store MSIX) with zer
 | `,` / `.` (or `L`/`R`) | Rotate 90° Left / Right |
 | `B` | Toggle background checkerboard |
 | `P` | Toggle pixel art crisp mode |
+| `Space` | Play / Pause animated image |
 
 </td>
 <td valign="top">
