@@ -360,7 +360,11 @@
     "wallpaperFailed": "Gagal ngetrapaken wallpaper",
     "languageChanged": "Basa dipungantos dados {lang}",
     "rawDecoding": "Mroses dekode sensor jangkep RAW...",
-    "rawComplete": "Dekode RAW sampun rampung"
+    "rawComplete": "Dekode RAW sampun rampung",
+    "animatedTooLarge": "Gambar obah nglangkungi 30 MB — ningalaken pratinjau statis",
+    "animatedStaticExport": "Ngowahi utawi nyimpen gambar obah ngasilaken setunggal bingkai statis",
+    "animatedPlaying": "Dipunputer",
+    "animatedPaused": "Dipunkendelaken"
   },
   "toolHud": {
     "cropTitle": "Cekakan Pangkas",

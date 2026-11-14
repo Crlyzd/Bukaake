@@ -360,7 +360,11 @@
     "wallpaperFailed": "Gagal menerapkan wallpaper desktop",
     "languageChanged": "Bahasa diubah ke {lang}",
     "rawDecoding": "Mendekode sensor penuh RAW...",
-    "rawComplete": "Dekode RAW selesai"
+    "rawComplete": "Dekode RAW selesai",
+    "animatedTooLarge": "Gambar animasi melebihi 30 MB — menampilkan pratinjau statis",
+    "animatedStaticExport": "Mengedit atau menyimpan gambar animasi mengekspor bingkai statis",
+    "animatedPlaying": "Diputar",
+    "animatedPaused": "Dijeda"
   },
   "toolHud": {
     "cropTitle": "Pintasan Pangkas",

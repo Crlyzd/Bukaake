@@ -360,7 +360,11 @@
     "wallpaperFailed": "Failed to set desktop wallpaper",
     "languageChanged": "Language changed to {lang}",
     "rawDecoding": "Decoding RAW full sensor...",
-    "rawComplete": "RAW decode complete"
+    "rawComplete": "RAW decode complete",
+    "animatedTooLarge": "Animated image exceeds 30 MB — showing static preview",
+    "animatedStaticExport": "Editing or saving an animated image exports a static frame",
+    "animatedPlaying": "Playing",
+    "animatedPaused": "Paused"
   },
   "toolHud": {
     "cropTitle": "Crop Shortcuts",

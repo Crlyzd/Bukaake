@@ -360,7 +360,11 @@
     "wallpaperFailed": "Gagal masang wallpaper layar",
     "languageChanged": "Basa wis diganti dadi {lang}",
     "rawDecoding": "Ngemot dekode RAW gambar asli...",
-    "rawComplete": "Dekode RAW gambar asli wis mari"
+    "rawComplete": "Dekode RAW gambar asli wis mari",
+    "animatedTooLarge": "Gambar gerak luwih teko 30 MB — nampilno pratinjau statis",
+    "animatedStaticExport": "Ngedit utawa nyimpen gambar gerak ngasilno sak bingkai statis",
+    "animatedPlaying": "Muter",
+    "animatedPaused": "Mandek"
   },
   "toolHud": {
     "cropTitle": "Cekakan Pangkas",
