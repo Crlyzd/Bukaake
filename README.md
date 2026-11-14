@@ -37,6 +37,48 @@
 
 ---
 
+## 📖 Cultural Etymology Trivia
+
+<div align="center">
+
+  <h3><strong>BUKAAKE</strong> &nbsp;<code>[ boo • kah • ah • keh ]</code> &nbsp;•&nbsp; <span>ꦧꦸꦏꦲꦏꦺ</span></h3>
+
+  <table>
+    <tr>
+      <td align="left" width="30%" valign="top">
+        <sub><strong>ROOT VERB (JAVANESE)</strong></sub><br /><br />
+        <strong>Buka / Bukak</strong><br />
+        <sub>To open, unlock, or reveal (<em>me-re-kah</em>).</sub>
+      </td>
+      <td align="center" width="5%" valign="middle">
+        <h3><strong>+</strong></h3>
+      </td>
+      <td align="left" width="30%" valign="top">
+        <sub><strong>IMPERATIVE SUFFIX</strong></sub><br /><br />
+        <strong>-ake</strong> <sub>(-aken)</sub><br />
+        <sub>Action suffix meaning <em>to open for me</em> (equivalent to <em>"bukakan"</em> in Indonesian).</sub>
+      </td>
+      <td align="center" width="5%" valign="middle">
+        <h3><strong>=</strong></h3>
+      </td>
+      <td align="left" width="30%" valign="top">
+        <sub><strong>LITERAL TRANSLATION</strong></sub><br /><br />
+        <strong>“Open It Up!”</strong><br />
+        <sub>Instant, friction-free image loading—open it for me without stutter.</sub>
+      </td>
+    </tr>
+  </table>
+
+  <p>
+    While internet culture might lead certain minds down another rabbit hole, <strong>Bukaake</strong> is an authentic, everyday Javanese phrase (<em>bukak-ake → bukaake</em>). It is a playful subversion and simultaneously the most honest, literal name possible for software whose sole mission is to open your high-resolution photos instantaneously without friction.
+  </p>
+
+</div>
+
+<br />
+
+---
+
 ## 💡 Why Bukaake?
 
 Most photo viewers on Windows today are slow to launch, cluttered with heavy toolbars, or trap your pictures inside thick, distracting window frames. Some even force you to pay for extra codecs just to open photos from your iPhone.
@@ -45,7 +87,7 @@ Most photo viewers on Windows today are slow to launch, cluttered with heavy too
 
 - 🪟 **Zero Distractions**: Truly borderless and translucent. Your desktop wallpaper stays softly dimmed in the background while your photo takes center stage.
 - ⚡ **Instant Launch & Standby**: Opens in the blink of an eye (~5 MB single portable file) and trims idle tray memory down to ~8–15 MB RAM.
-- 📷 **49+ Formats & Camera RAW**: Native iPhone HEIC/HEIF (100% free), 24+ RAW camera formats, and 3D VFX textures—zero external codecs needed.
+- 📷 **49+ Formats, Camera RAW & Animated WebP/GIF**: Native iPhone HEIC/HEIF (100% free), animated WebP/GIF/APNG/AVIF (`Space`), 24+ RAW camera formats, and 3D VFX textures—zero external codecs needed.
 - 🎨 **5-Tool Creative & Redaction Suite**: Blur/Pixelate (`U`), Smooth & Galaxy Pen (`D`), Vector Text (`T`), Laser-Guided Crop (`C`), and Real-Time Filters (`E`) with an on-screen Shortcut HUD.
 - 📸 **Built-in Snip, OCR & GPU Record**: Capture regions, extract text with native Windows OCR, pick pixel colors, or record 60 FPS H.264 MP4 clips with <2% CPU overhead.
 - 🗑️ **Stress-Free & Safe**: Send unwanted photos straight to your **Windows Recycle Bin** with `Delete`—easily restore them if you change your mind.
@@ -76,7 +118,6 @@ Open any picture and Bukaake softly dims your surrounding desktop wallpaper with
 Bukaake natively opens **49 image formats** with zero external dependencies or paid extensions—from everyday WebP and Apple HEIC to full-sensor Camera RAW and 3D VFX textures.
 
 - **Supported Formats**: `PNG`, `JPG`, `WebP`, `GIF`, `SVG`, `AVIF`, `HEIC`/`HEIF`, `ARW`, `CR2`, `CR3`, `NEF`, `DNG`, `RAF`, `RW2`, `ORF`, `EXR`, `HDR`, `DDS`, `TGA`, `QOI`, and more.
-- **Animated Playback (`Space`)**: Smoothly plays animated **GIF**, **WebP**, **APNG**, and **AVIF** directly on the canvas with full zoom, pan, rotate, and fullscreen support (`Space` to play/pause; files over 30 MB fall back to a static preview).
 - **Instant Preview + Full Sensor Develop (`Q`)**: Opens embedded RAW previews in ~15ms, or press `Q` to unpack full uncompressed sensor data with an ambient titlebar progress beam.
 - **EXIF Telemetry Drawer (`I`)**: Inspect camera body, lens, focal length, aperture, shutter speed, ISO, and GPS metadata.
 - **5-Slot Predictive Prefetch**: Folder neighbors pre-load silently in the background for zero-latency arrow navigation.
@@ -87,7 +128,21 @@ Bukaake natively opens **49 image formats** with zero external dependencies or p
 
 ---
 
-### 3. 📸 Screen Snipper, Native OCR & Loupe Eyedropper
+### 3. 🎞️ Animated WebP, GIF, APNG & AVIF Playback (`Space`)
+
+Watch high-framerate animated images and transparent stickers smoothly without frame drops or memory bloat.
+
+- **Native WebCodecs Streaming**: Hardware-accelerated playback for animated **WebP**, **GIF**, **APNG**, and **AVIF** with 1-frame lookahead and instant `VideoFrame` memory cleanup.
+- **Full Canvas Transform & Filter Support**: Zoom, pan, rotate, flip, apply real-time color filters, or view transparent animations over your desktop in Mode 2 fullscreen.
+- **Play/Pause & 30 MB Memory Guardrail**: Press `Space` anytime to toggle play/pause with toast feedback, auto-pause when minimized to standby, and safely preview oversized files (>30 MB) as static images.
+
+<p align="center">
+  <img width="1280" alt="Animated WebP and GIF Playback" src="screenshots/animated.png" />
+</p>
+
+---
+
+### 4. 📸 Screen Snipper, Native OCR & Loupe Eyedropper
 
 Capture anything on your screen without launching heavy third-party tools.
 
@@ -102,7 +157,7 @@ Capture anything on your screen without launching heavy third-party tools.
 
 ---
 
-### 4. 🎥 Hardware GPU Screen Recorder
+### 5. 🎥 Hardware GPU Screen Recorder
 
 Record silky-smooth desktop or region videos directly to native `.mp4` files with minimal system impact.
 
@@ -116,7 +171,7 @@ Record silky-smooth desktop or region videos directly to native `.mp4` files wit
 
 ---
 
-### 5. 🔒 Blur & Pixelate Redaction (`U`)
+### 6. 🔒 Blur & Pixelate Redaction (`U`)
 
 Hide sensitive details or softly blur backgrounds directly inside the viewer before sharing.
 
@@ -130,7 +185,7 @@ Hide sensitive details or softly blur backgrounds directly inside the viewer bef
 
 ---
 
-### 6. ✍️ Freehand Pen, Highlighter & Galaxy Auto-Smooth (`D` / `S`)
+### 7. ✍️ Freehand Pen, Highlighter & Galaxy Auto-Smooth (`D` / `S`)
 
 Sketch annotations, highlight details, or draw expressive calligraphic strokes right over your photos.
 
@@ -144,7 +199,7 @@ Sketch annotations, highlight details, or draw expressive calligraphic strokes r
 
 ---
 
-### 7. ✂️ Laser-Guided Crop (`C`)
+### 8. ✂️ Laser-Guided Crop (`C`)
 
 Reframe photos effortlessly with precision snapping and instant aspect ratios.
 
@@ -158,7 +213,7 @@ Reframe photos effortlessly with precision snapping and instant aspect ratios.
 
 ---
 
-### 8. 🔤 Vector Typography (`T`)
+### 9. 🔤 Vector Typography (`T`)
 
 Add crisp, scalable text captions and badges without opening an external editor.
 
@@ -172,7 +227,7 @@ Add crisp, scalable text captions and badges without opening an external editor.
 
 ---
 
-### 9. 🎛️ Real-Time Color Filters (`E`) & On-Screen Shortcut HUD
+### 10. 🎛️ Real-Time Color Filters (`E`) & On-Screen Shortcut HUD
 
 Fine-tune lighting and color at 60 FPS while keeping every tool shortcut within reach.
 
@@ -186,7 +241,7 @@ Fine-tune lighting and color at 60 FPS while keeping every tool shortcut within 
 
 ---
 
-### 10. 🎨 Stroke-Free Dark & Light Themes
+### 11. 🎨 Stroke-Free Dark & Light Themes
 
 Designed from the ground up for modern Windows frosted-glass aesthetics with zero 1px border outlines.
 
@@ -199,7 +254,7 @@ Designed from the ground up for modern Windows frosted-glass aesthetics with zer
 
 ---
 
-### 11. 🌐 Multi-Language & Portable Windows Integration
+### 12. 🌐 Multi-Language & Portable Windows Integration
 
 Built as a single ~5 MB standalone executable (or Microsoft Store MSIX) with zero external runtimes.
 

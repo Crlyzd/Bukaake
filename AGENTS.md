@@ -38,7 +38,7 @@ All agents working on this repository **MUST** strictly enforce these five non-n
   - **Elevated Floating Toolbar**: Control dock elevated to `bottom: 80px !important;` to avoid colliding with the Windows taskbar, with a 140px bottom mouse-hover threshold.
   - **Checkerboard Disabled in Mode 2**: Canvas checkerboard toggle is disabled/dimmed to preserve desktop immersion.
 - **Picasa Idle Mouse Fade**: 2.5s of stationary mouse fades all UI chrome to `opacity: 0` (`pointer-events: none`); mouse movement restores controls immediately.
-- **Navigation & Ergonomics**: Smooth mouse wheel zoom anchored to cursor; `Up`/`Down` arrow keys for intuitive centered/anchored zoom in and zoom out (matching Picasa navigation alongside mouse wheel); `Left`/`Right` arrow keys for directory navigation; quick keys `F` (fit), `1` (1:1), `,`/`.` (rotate), `Esc` (layered: closes open tool popovers, exits active editor, or exits/closes viewer), `C` (crop), `D` (draw), `U` (blur/pixelate), `T` (text), `E` (filters), `I` (EXIF info), `Q` (full RAW decode), `Delete` (Recycle Bin), `Shift+Delete` (permanent delete), `Ctrl+V` (paste image).
+- **Navigation & Ergonomics**: Smooth mouse wheel zoom anchored to cursor; `Up`/`Down` arrow keys for intuitive centered/anchored zoom in and zoom out (matching Picasa navigation alongside mouse wheel); `Left`/`Right` arrow keys for directory navigation; quick keys `Space` (play/pause animated image), `F` (fit), `1` (1:1), `,`/`.` (rotate), `Esc` (layered: closes open tool popovers, exits active editor, or exits/closes viewer), `C` (crop), `D` (draw), `S` (cycle drawing auto-smooth), `U` (blur/pixelate), `[`/`]` (step brush size), `T` (text), `E` (filters), `I` (EXIF info), `Q` (full RAW decode), `Delete` (Recycle Bin), `Shift+Delete` (permanent delete), `Ctrl+V` (paste image).
 
 ### Pillar 5: Strict Modularity Architecture (< 300 Lines per File)
 - **Hard Rule**: No source file (`.js`, `.css`, `.rs`) may exceed **300 lines of code**. Files approaching this limit must be proactively split into focused modules.
@@ -63,7 +63,7 @@ src/
 â”‚   â””â”€â”€ tools/                  # Editing tool sub-toolbars (blur-toolbar)
 â”œâ”€â”€ core/                # Canvas & Image Math Engines (< 300 lines each)
 â”‚   â”œâ”€â”€ blur/                   # Non-stacking blur/pixelate tool & offscreen renderer
-â”‚   â”œâ”€â”€ canvas/                 # Canvas viewer engine, events, FLIP & helpers
+â”‚   â”œâ”€â”€ canvas/                 # Canvas viewer engine, animated image player, events, FLIP & helpers
 â”‚   â”œâ”€â”€ crop/                   # Precision crop box & laser magnetic guides
 â”‚   â”œâ”€â”€ draw/                   # Freehand pen, highlighter, stroke smoother & cursor ring
 â”‚   â”œâ”€â”€ filters/                # Real-time color adjustments processor
@@ -85,6 +85,7 @@ src/
 â”œâ”€â”€ app.js               # Main viewer bootstrap coordinator (â‰¤ 350 lines)
 â”œâ”€â”€ settings-app.js      # Standalone settings window coordinator (â‰¤ 350 lines)
 â””â”€â”€ snipper-app.js       # Dedicated overlay window coordinator (â‰¤ 300 lines)
+screenshots/             # Feature showcase & README preview assets
 packaging/               # Microsoft Store & Packaging Automation
 â”œâ”€â”€ store-config.json    # Store identity & package configuration
 â””â”€â”€ msix/                # AppxManifest.template.xml & visual tile assets
@@ -186,7 +187,7 @@ src-tauri/src/
 - **Unified Hotkeys (`hotkey-service.js`, `hotkeys.rs`)**:
   - Coordinates global Windows shortcuts and in-app triggers for instant capture without input conflicts.
 
-### Camera RAW & VFX Subsystem
+### Camera RAW, Animated Images & VFX Subsystem
 - **Statically Linked LibRaw Engine (`LibRaw 0.21.2`, `raw_reader.rs`)**:
   - Compiles LibRaw statically via `build.rs` into single portable binary without external DLL dependencies.
   - **4-Tier Pipeline**: Tier 1 (Instant embedded JPEG preview ~15ms), Tier 2 (Full sensor unpack & demosaicing via `Q`), Tier 3 (Byte-stream scanner for legacy GPR/X3F), Tier 4 (Pure Rust linear DNG fallback).
@@ -200,6 +201,10 @@ src-tauri/src/
 - **Titlebar Ambient Glowing Loading Beam (`titlebar-loader.js`, `titlebar-loader.css`)**:
   - Dual-theme continuous dual-train laser animation across titlebar bottom (`Mode 1`) or monitor top edge (`Mode 2`) indicates background RAW decoding without layout shifts.
   - Smooth emerald flash (`#34d399`) upon completion before cross-fading away; titlebar stays pinned and steady during background decodes.
+- **Native WebCodecs Animated Image Playback (`animated-image-player.js`, `canvas-viewer.js`, `shortcuts.js`, `canvas-tools-manager.js`, `image-saver.js`, `toast.css`)**:
+  - **Zero-Dependency Streaming Decoder**: Streams animated GIF, WebP, APNG, and AVIF frames via `ImageDecoder` with 1-frame lookahead (`_prefetchNext`), monotonic `sessionId` race cancellation, and immediate `VideoFrame.close()` GPU/RAM disposal.
+  - **Memory Guardrails & Frame Timing**: Enforces a 30 MB pre-decode size guardrail (`MAX_ANIMATED_FILE_BYTES`) falling back to static frame 0 with a localized warning toast (`toasts.animatedTooLarge`), clamps legacy `< 20ms` GIF delays to `100ms`, and respects container `repetitionCount` loop limits.
+  - **Interactive Playback & Static-Export Safety**: `Space` toggles play/pause with `ri-play-circle-line` / `ri-pause-circle-line` toast feedback, auto-pauses on `visibilitychange` and tray standby, renders live `VideoFrame` instances through `CanvasViewer.render()` (`this.frameSource || this.img`) with full pan/zoom/rotate/flip/filter/Mode 2 support, and pauses with a localized warning (`toasts.animatedStaticExport`) when entering any editor or saving.
 
 ### Precision Crop, Drawing, Blur & Editing Exclusivity
 - **Precision Crop (`cropper.js`, `crop-snapping.js`, `crop.css`)**:
