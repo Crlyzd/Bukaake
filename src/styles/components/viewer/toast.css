@@ -21,14 +21,15 @@
   backdrop-filter: blur(20px) saturate(180%);
   -webkit-backdrop-filter: blur(20px) saturate(180%);
   border: none !important;
-  padding: 9px 18px;
+  padding: 5px 11px;
   border-radius: var(--radius-pill);
   color: var(--text-main);
-  font-size: 13px;
+  font-size: 12.5px;
+  line-height: 1.2;
   font-weight: 500;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
   animation: toastIn 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   white-space: nowrap;
@@ -41,6 +42,9 @@ html[data-theme="light"] .toast {
 
 .toast i {
   color: var(--accent-cyan);
+  font-size: 17px;
+  line-height: 1;
+  font-weight: normal !important;
 }
 
 .toast.toast-warning {
@@ -61,6 +65,7 @@ html[data-theme="light"] .toast.toast-warning {
     opacity: 0;
     transform: translateY(-8px) scale(0.96);
   }
+
   to {
     opacity: 1;
     transform: translateY(0) scale(1);
