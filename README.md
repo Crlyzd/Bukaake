@@ -108,7 +108,7 @@ Open any picture and Bukaake softly dims your surrounding desktop wallpaper with
 - **1-Click Desktop Wallpaper**: Set any photo or edited canvas as your Windows wallpaper via native Win32 APIs with automatic PNG caching.
 
 <p align="center">
-  <img width="1280" alt="Picasa-Style Transparent Immersion" src="screenshots/viewer.png" />
+  <img width="1280" alt="Picasa-Style Transparent Immersion" src="screenshots/viewer.webp" />
 </p>
 
 ---
@@ -123,7 +123,7 @@ Bukaake natively opens **49 image formats** with zero external dependencies or p
 - **5-Slot Predictive Prefetch**: Folder neighbors pre-load silently in the background for zero-latency arrow navigation.
 
 <p align="center">
-  <img width="1280" alt="Camera RAW and EXIF Telemetry Drawer" src="screenshots/raw.png" />
+  <img width="1280" alt="Camera RAW and EXIF Telemetry Drawer" src="screenshots/raw.webp" />
 </p>
 
 ---
@@ -137,7 +137,7 @@ Watch high-framerate animated images and transparent stickers smoothly without f
 - **Play/Pause & 30 MB Memory Guardrail**: Press `Space` anytime to toggle play/pause with toast feedback, auto-pause when minimized to standby, and safely preview oversized files (>30 MB) as static images.
 
 <p align="center">
-  <img width="1280" alt="Animated WebP and GIF Playback" src="screenshots/animated.png" />
+  <img width="1280" alt="Animated WebP and GIF Playback" src="screenshots/animated.webp" />
 </p>
 
 ---
@@ -180,7 +180,7 @@ Hide sensitive details or softly blur backgrounds directly inside the viewer bef
 - **Customizable Intensity & Feathering**: Choose `Low`, `Med`, or `High` strength, toggle soft **Feather Edge** blending, and adjust brush size (`10px–150px`) with `[` / `]`.
 
 <p align="center">
-  <img width="1280" alt="Blur and Pixelate Redaction Tool" src="screenshots/blur.png" />
+  <img width="1280" alt="Blur and Pixelate Redaction Tool" src="screenshots/blur.webp" />
 </p>
 
 ---
