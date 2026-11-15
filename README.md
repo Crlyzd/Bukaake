@@ -25,7 +25,7 @@
 
   <br />
 
-  <img width="1280" alt="Bukaake Photo Viewer Showcase" src="screenshots/hero.png" />
+  <img width="1280" alt="Bukaake Photo Viewer Showcase" src="screenshots/hero.png?v=1.4.0" />
 
   <p align="center">
     <em>Pure transparent desktop immersion: softly dimmed wallpaper background, centered floating controls, and zero bulky borders.</em>
@@ -152,7 +152,7 @@ Capture anything on your screen without launching heavy third-party tools.
 - **Instant Clipboard & Auto-Save**: Automatically copies snips (`CF_DIB`) and saves timestamped PNGs to `Pictures/Screenshots`.
 
 <p align="center">
-  <img width="1280" alt="Precision Screen Snipper and OCR" src="screenshots/snip.png" />
+  <img width="1280" alt="Precision Screen Snipper and OCR" src="screenshots/snip.png?v=1.4.0" />
 </p>
 
 ---
@@ -166,7 +166,7 @@ Record silky-smooth desktop or region videos directly to native `.mp4` files wit
 - **Sample-Accurate WASAPI Audio**: Mixes system loopback and microphone inputs at 48kHz stereo with ±200ms sync calibration and **Space Saver** 30 FPS mode (~75% smaller files).
 
 <p align="center">
-  <img width="1280" alt="Hardware GPU Screen Recorder" src="screenshots/record.png" />
+  <img width="1280" alt="Hardware GPU Screen Recorder" src="screenshots/record.png?v=1.4.0" />
 </p>
 
 ---
@@ -194,7 +194,7 @@ Sketch annotations, highlight details, or draw expressive calligraphic strokes r
 - **Full History**: Multi-step **Undo (`Ctrl+Z`)** and **Redo (`Ctrl+Y`)**, plus `[` / `]` quick brush sizing.
 
 <p align="center">
-  <img width="1280" alt="Freehand Pen and Galaxy Auto-Smooth" src="screenshots/draw.png" />
+  <img width="1280" alt="Freehand Pen and Galaxy Auto-Smooth" src="screenshots/draw.png?v=1.4.0" />
 </p>
 
 ---
@@ -208,7 +208,7 @@ Reframe photos effortlessly with precision snapping and instant aspect ratios.
 - **Quick Commit**: Double-click inside the crop box or press `Enter` to apply immediately.
 
 <p align="center">
-  <img width="1280" alt="Laser-Guided Crop Tool" src="screenshots/crop.png" />
+  <img width="1280" alt="Laser-Guided Crop Tool" src="screenshots/crop.png?v=1.4.0" />
 </p>
 
 ---
@@ -222,7 +222,7 @@ Add crisp, scalable text captions and badges without opening an external editor.
 - **Magnetic Alignment**: Laser guides snap text boxes flush to center lines and edges.
 
 <p align="center">
-  <img width="1280" alt="Vector Typography Tool" src="screenshots/text.png" />
+  <img width="1280" alt="Vector Typography Tool" src="screenshots/text.png?v=1.4.0" />
 </p>
 
 ---
@@ -236,7 +236,7 @@ Fine-tune lighting and color at 60 FPS while keeping every tool shortcut within 
 - **Smart Editing Window & Layered `Esc`**: Entering any tool in Mode 1 automatically expands the window (`1280×720`) for breathing room and restores your previous size on exit; pressing `Esc` closes popups first, then exits the tool without closing your photo.
 
 <p align="center">
-  <img width="1280" alt="Real-Time Color Filters and Shortcut HUD" src="screenshots/filters.png" />
+  <img width="1280" alt="Real-Time Color Filters and Shortcut HUD" src="screenshots/filters.png?v=1.4.0" />
 </p>
 
 ---
@@ -249,7 +249,7 @@ Designed from the ground up for modern Windows frosted-glass aesthetics with zer
 - **Soft Slate Light Mode**: Refined daytime palette using soft obsidian slate (`#242938`) with zero harsh pure-black borders.
 
 <p align="center">
-  <img width="1280" alt="Stroke-Free Dark and Light Themes" src="screenshots/themes.png" />
+  <img width="1280" alt="Stroke-Free Dark and Light Themes" src="screenshots/themes.png?v=1.4.0" />
 </p>
 
 ---
@@ -263,7 +263,7 @@ Built as a single ~5 MB standalone executable (or Microsoft Store MSIX) with zer
 - **In-Place Self-Updater**: Background GitHub Releases updates via `self-replace` (or automatic Windows Store updates for MSIX).
 
 <p align="center">
-  <img width="1280" alt="Multi-Language Settings and Localization" src="screenshots/i18n.png" />
+  <img width="1280" alt="Multi-Language Settings and Localization" src="screenshots/i18n.png?v=1.4.0" />
 </p>
 
 <br />
