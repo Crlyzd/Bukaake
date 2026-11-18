@@ -159,7 +159,7 @@ class BukaakeApp {
     this.fileLoader.onLoadingStart = (m) => loadingIndicator.show(m);
     this.fileLoader.onLoadingEnd = () => loadingIndicator.hide();
     this.fileLoader.onPromptOpen = () => this.confirmModal.promptIfDirty(() => this.openFile(), () => this.saveImage());
-    this.fileLoader.onAllFilesCleared = () => (this.windowModeManager?.currentMode === MODE_VIEWER ? this.enterStandby() : this.handleEmptyState());
+    this.fileLoader.onAllFilesCleared = () => (this.windowModeManager?.currentMode === MODE_VIEWER ? modeTransition.dismissViewer({ onComplete: () => this.enterStandby() }) : this.handleEmptyState());
     this.viewer.onTransformChange = () => {
       this.updateStatusBadges();
       if (this.drawingTool?.active) this.drawingTool.redraw();
@@ -338,7 +338,7 @@ class BukaakeApp {
     });
   }
 
-  enterStandby() { standbyService.enterStandby({ viewer: this.viewer, fileLoader: this.fileLoader, onHidden: () => this.handleEmptyState(true) }); }
+  enterStandby() { return standbyService.enterStandby({ viewer: this.viewer, fileLoader: this.fileLoader, onHidden: () => this.handleEmptyState(true) }); }
   async wakeFromStandby() {
     this.handleEmptyState(true);
     requestAnimationFrame(() => windowBridge.cloak(false));

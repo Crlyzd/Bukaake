@@ -197,7 +197,7 @@ export class ModeTransition {
    */
   async dismissViewer({ onComplete } = {}) {
     if (this.isTransitioning) {
-      onComplete?.();
+      await onComplete?.();
       return;
     }
     this.isTransitioning = true;
@@ -205,10 +205,10 @@ export class ModeTransition {
     try {
       document.body.classList.add('mode-dismissing');
       await new Promise((r) => setTimeout(r, 180));
-      onComplete?.();
+      await onComplete?.();
     } catch (err) {
       console.warn('[ModeTransition] dismissViewer error:', err);
-      onComplete?.();
+      await onComplete?.();
     } finally {
       document.body.classList.remove('mode-dismissing');
       this.isTransitioning = false;
