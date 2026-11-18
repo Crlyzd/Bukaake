@@ -136,9 +136,12 @@ pub fn enter_standby(
     }
 
     if let Some(win) = app_handle.get_webview_window("main") {
-        let _ = win.hide();
+        crate::platform::window_transition::set_cloak(&win, true);
+        let _ = win.set_always_on_top(false);
         let _ = win.set_fullscreen(false);
+        let _ = win.unmaximize();
         let _ = win.set_maximizable(false);
+        let _ = win.hide();
     }
     if let Some(settings_win) = app_handle.get_webview_window("settings") {
         let _ = settings_win.set_always_on_top(false);

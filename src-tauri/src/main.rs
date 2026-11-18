@@ -37,7 +37,6 @@ use imaging::image_loader::{
 use platform::standby::{self, enter_standby, is_standby_enabled, set_standby_enabled, show_main_window, StandbyManager};
 use platform::process_memory;
 use platform::window_subclass;
-use platform::window_transition;
 use platform::updater::{cleanup_old_update_artifacts, download_and_install_update, get_system_arch};
 use platform::package_info::get_distribution_channel;
 use platform::wallpaper::set_wallpaper;
@@ -88,13 +87,7 @@ fn main() {
                     // (cloaked maximize + foreground) so no empty or stale window ever flashes.
                     let _ = win.emit("bukaake://open-path", path);
                 } else {
-                    // Bare exe/shortcut re-launch: restore to Mode 1 and signal JS to reset UI
-                    let _ = win.set_fullscreen(false);
-                    let _ = win.unminimize();
-                    let _ = win.set_maximizable(false);
-                    let _ = win.emit("bukaake://wake-from-standby", ());
-                    window_transition::set_cloak(&win, false);
-                    platform::foreground::force_foreground(&win);
+                    standby::activate_main_window(app);
                 }
             }
         }))

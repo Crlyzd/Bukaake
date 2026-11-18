@@ -117,6 +117,7 @@ pub fn exit_recording_pill_mode(app: tauri::AppHandle, open_main: Option<bool>) 
             }
             let _ = win.unminimize();
             let _ = win.show();
+            crate::platform::window_transition::set_cloak(&win, false);
             let _ = win.set_focus();
             #[cfg(target_os = "windows")]
             if let Ok(hwnd) = win.hwnd() {
