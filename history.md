@@ -20,6 +20,8 @@
 
 ## Change Log
 
+- **2026-11-18** | `file_ops.rs`, `window_commands.rs`, `capture_commands.rs`, `neighbor_scanner.rs`, `image_loader.rs`, `main.rs`, `Cargo.toml`, `context-menu.js`, `settings-capture-section.js`, `locales/*.json`: Fixed Windows "Open File Location" (`show_in_folder`) and automatic capture folder creation: (1) Normalized `\\?\` / `\\?\UNC\` paths via `clean_windows_path` in `neighbor_scanner.rs` and `image_loader.rs`; (2) Replaced `explorer.exe /select,<path>` CLI arg quoting with native Win32 `SHOpenFolderAndSelectItems` (`ILCreateFromPathW` + COM `CoInitializeEx` lifecycle + `Win32_UI_Shell_Common`) and `raw_arg` fallback in `file_ops.rs`, keeping Mode 2 fullscreen/`always_on_top` untouched; (3) Updated `get_default_videos_dir` to resolve `video_dir()` -> `USERPROFILE\Videos` -> `home_dir()\Videos` -> `temp_dir\Bukaake` + `Captures` with verified `create_dir_all`, and added `ensure_and_open_dir` for Settings Auto-Save Directory Open; (4) Added localized `toasts.openLocationFailed` / `toasts.openFolderFailed` feedback in `context-menu.js` and `settings-capture-section.js`, verified `npm run build` and `cargo check` passing with all files < 300 lines.
+
 - **2026-11-18** | `.agents/workflows/architect.md`: Added a mandatory **What You Can Expect (Human Language)** section to `## Output Format` requiring all `/architect` plans and chat summaries to explain user-visible behavior in plain, jargon-free language.
 
 - **2026-11-15** | `README.md`, `screenshots/*.webp`: Converted all 9 `.png` showcase screenshots to static `.webp` via ImageMagick (`-quality 90 -define webp:method=6`, reducing ~25.2 MB to ~2.4 MB) while keeping the `.png` originals, and updated all 13 `README.md` references to clean `screenshots/*.webp` paths.
