@@ -140,15 +140,22 @@ pub fn get_regular_target_rect(app: tauri::AppHandle, width: f64, height: f64) -
     Ok(regular_target(&main_window(&app)?, width, height))
 }
 
-/// Mode 2 commit: cloak -> maximize/fullscreen -> clear acrylic (-> show + foreground when revealing).
-/// When style == "fullscreen", sets always_on_top so the transparent borderless window occludes the Windows taskbar.
+/// Mode 2 commit: cloak -> clear acrylic -> maximize/fullscreen (-> show + foreground when revealing).
+/// Re-asserts DWMWA_CLOAK across show/maximize/fullscreen so Win32 ShowWindow transitions never leak an uncloaked frame.
 #[tauri::command]
 pub fn commit_viewer_geometry(app: tauri::AppHandle, style: String, reveal: bool) -> Result<LogicalRect, String> {
     let win = main_window(&app)?;
     crate::platform::reclaim::cancel_reclaim();
     set_cloak(&win, true);
+    #[cfg(target_os = "windows")]
+    let _ = window_vibrancy::clear_acrylic(&win);
     if win.is_minimized().unwrap_or(false) {
         let _ = win.unminimize();
+        set_cloak(&win, true);
+    }
+    if reveal && !win.is_visible().unwrap_or(false) {
+        let _ = win.show();
+        set_cloak(&win, true);
     }
     let sf = win.scale_factor().unwrap_or(1.0);
     let target = {
@@ -178,10 +185,10 @@ pub fn commit_viewer_geometry(app: tauri::AppHandle, style: String, reveal: bool
         let _ = win.set_fullscreen(false);
         let _ = win.maximize();
     }
-    #[cfg(target_os = "windows")]
-    let _ = window_vibrancy::clear_acrylic(&win);
+    set_cloak(&win, true);
     if reveal {
         crate::platform::foreground::force_foreground(&win);
+        set_cloak(&win, true);
     }
     Ok(target)
 }

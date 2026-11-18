@@ -137,6 +137,8 @@ pub fn enter_standby(
 
     if let Some(win) = app_handle.get_webview_window("main") {
         crate::platform::window_transition::set_cloak(&win, true);
+        #[cfg(target_os = "windows")]
+        let _ = window_vibrancy::clear_acrylic(&win);
         let _ = win.set_always_on_top(false);
         let _ = win.set_fullscreen(false);
         let _ = win.unmaximize();
