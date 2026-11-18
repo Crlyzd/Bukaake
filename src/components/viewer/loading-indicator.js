@@ -18,9 +18,9 @@ export class LoadingIndicator {
     return this.element;
   }
 
-  show(message = 'Loading image...') {
+  show(message = 'Loading image...', delayMs = 80) {
     clearTimeout(this.timer);
-    this.timer = setTimeout(() => {
+    const apply = () => {
       const el = this.getElement();
       if (!el) return;
       const textEl = el.querySelector('.loading-text');
@@ -30,7 +30,9 @@ export class LoadingIndicator {
         el.classList.add('visible');
         this.isVisible = true;
       });
-    }, 80);
+    };
+    if (delayMs <= 0) apply();
+    else this.timer = setTimeout(apply, delayMs);
   }
 
   hide() {

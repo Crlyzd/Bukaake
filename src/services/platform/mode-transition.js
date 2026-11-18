@@ -218,9 +218,9 @@ export class ModeTransition {
   /**
    * External Open Reveal Entrance (Cold Launch, Standby, or Background):
    * Stages decoded image into Mode 2 off-screen, reveals window via force_foreground,
-   * uncloaks, and runs a gentle scale+fade entrance.
+   * flushes 2 WebView2 swapchain frames while cloaked, uncloaks, and runs a 220ms scale+fade entrance.
    */
-  async revealExternal({ style = 'maximized', updateClasses }) {
+  async revealExternal({ style = 'maximized', updateClasses, backdropAlreadyRevealed = false }) {
     if (this.isTransitioning) return;
     this.isTransitioning = true;
 
@@ -231,13 +231,22 @@ export class ModeTransition {
 
     try {
       document.body.classList.add('mode-transitioning', 'mode-snap', 'mode-entrance');
-
-      const targetRect = await windowBridge.commitViewer(style, true);
       updateClasses?.();
-      await this.waitForCanvasResize(targetRect);
+
+      if (!backdropAlreadyRevealed) {
+        const targetRect = await windowBridge.commitViewer(style, true);
+        await this.waitForCanvasResize(targetRect);
+      } else {
+        this.viewer?.resizeCanvas();
+      }
 
       const fit = computeFitState(this.viewer);
       applyEntrance(this.viewer, fit, 0.94);
+
+      if (!backdropAlreadyRevealed) {
+        // Double-rAF presentation barrier ensures WebView2 swapchain flushes Mode 2 frame before uncloak
+        await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+      }
 
       document.body.classList.remove('mode-snap');
       await windowBridge.cloak(false);
@@ -246,7 +255,7 @@ export class ModeTransition {
         document.body.classList.remove('mode-entrance');
       });
 
-      await animateTo(this.viewer, fit, 260);
+      await animateTo(this.viewer, fit, 220);
     } catch (err) {
       console.warn('[ModeTransition] revealExternal error:', err);
     } finally {

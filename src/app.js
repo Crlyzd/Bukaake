@@ -157,7 +157,7 @@ class BukaakeApp {
     this.fileLoader.onListChanged = (t, i) => this.toolbar.updateCounter(t, i);
     this.fileLoader.onStatusMessage = (m) => toast.show(m);
     this.fileLoader.onStatusWarning = (m) => toast.warn(m);
-    this.fileLoader.onLoadingStart = (m) => loadingIndicator.show(m);
+    this.fileLoader.onLoadingStart = (m) => { if (!this.windowModeManager?.isPendingPathLoad) loadingIndicator.show(m); };
     this.fileLoader.onLoadingEnd = () => loadingIndicator.hide();
     this.fileLoader.onPromptOpen = () => this.confirmModal.promptIfDirty(() => this.openFile(), () => this.saveImage());
     this.fileLoader.onAllFilesCleared = () => (this.windowModeManager?.currentMode === MODE_VIEWER ? modeTransition.dismissViewer({ onComplete: () => this.enterStandby() }) : this.handleEmptyState());
