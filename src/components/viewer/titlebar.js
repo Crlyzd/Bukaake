@@ -7,6 +7,7 @@ import { tauriBridge } from '../../services/platform/tauri-bridge.js';
 import { themeManager } from '../../services/platform/theme-manager.js';
 import { updaterService, hydrateAppVersions } from '../../services/platform/updater-service.js';
 import { hotkeyService } from '../../services/interaction/hotkey-service.js';
+import { i18n } from '../../services/platform/i18n-service.js';
 
 export class Titlebar {
   constructor(options = {}) {
@@ -130,6 +131,7 @@ export class Titlebar {
     }
 
     window.addEventListener('bukaake-hotkeys-changed', () => this.updateCaptureButtonTitle());
+    window.addEventListener('bukaake-language-changed', () => this.updateCaptureButtonTitle());
     window.addEventListener('storage', (e) => {
       if (e.key === 'bukaake-hotkey-capture' || e.key === 'bukaake-hotkey-screenshot') {
         this.updateCaptureButtonTitle();
@@ -215,8 +217,7 @@ export class Titlebar {
 
   updateCaptureButtonTitle() {
     if (!this.btnCapture) return;
-    const combo = hotkeyService.getHotkey();
-    this.btnCapture.title = `Take Screenshot (${combo})`;
+    this.btnCapture.title = i18n.t('titlebar.capture', { hotkey: hotkeyService.getHotkey() });
   }
 
   setFileName(name) {

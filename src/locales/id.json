@@ -116,6 +116,7 @@
     "openLocation": "Buka Lokasi Berkas",
     "copyImage": "Salin Gambar",
     "saveAs": "Simpan Gambar Sebagai...",
+    "share": "Bagikan...",
     "setWallpaper": "Jadikan Wallpaper Desktop",
     "rotateCW": "Putar Kanan 90°",
     "flipH": "Balik Horizontal",
@@ -185,6 +186,8 @@
     "clickToCapture": "Klik untuk menangkap",
     "openTooltip": "Buka di Bukaake (Enter)",
     "copyTooltip": "Salin ke Papan Klip (Ctrl+C)",
+    "share": "Bagikan",
+    "shareTooltip": "Bagikan via Windows",
     "recTooltip": "Mulai Rekam Layar (Enter)",
     "ocrTooltip": "Baca Teks (OCR)",
     "cancelTooltip": "Batal (Esc)",
@@ -366,7 +369,8 @@
     "animatedPlaying": "Diputar",
     "animatedPaused": "Dijeda",
     "openLocationFailed": "Tidak dapat membuka lokasi file",
-    "openFolderFailed": "Tidak dapat membuka folder tangkapan"
+    "openFolderFailed": "Tidak dapat membuka folder tangkapan",
+    "shareFailed": "Tidak dapat membuka Windows Share"
   },
   "toolHud": {
     "cropTitle": "Pintasan Pangkas",

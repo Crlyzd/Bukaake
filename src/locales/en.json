@@ -116,6 +116,7 @@
     "openLocation": "Open File Location",
     "copyImage": "Copy Image",
     "saveAs": "Save Image As...",
+    "share": "Share...",
     "setWallpaper": "Set as Desktop Wallpaper",
     "rotateCW": "Rotate 90° CW",
     "flipH": "Flip Horizontal",
@@ -185,6 +186,8 @@
     "clickToCapture": "Click to capture",
     "openTooltip": "Open in Bukaake (Enter)",
     "copyTooltip": "Copy to Clipboard (Ctrl+C)",
+    "share": "Share",
+    "shareTooltip": "Share via Windows",
     "recTooltip": "Start Screen Recording (Enter)",
     "ocrTooltip": "Read Text (OCR)",
     "cancelTooltip": "Cancel (Esc)",
@@ -366,7 +369,8 @@
     "animatedPlaying": "Playing",
     "animatedPaused": "Paused",
     "openLocationFailed": "Could not open file location",
-    "openFolderFailed": "Could not open capture folder"
+    "openFolderFailed": "Could not open capture folder",
+    "shareFailed": "Could not open Windows Share"
   },
   "toolHud": {
     "cropTitle": "Crop Shortcuts",

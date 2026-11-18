@@ -116,6 +116,7 @@
     "openLocation": "Bukak Panggonan Berkas",
     "copyImage": "Salin Gambar",
     "saveAs": "Simpen Gambar dadi...",
+    "share": "Bagèkna...",
     "setWallpaper": "Dadekna Wallpaper Layar",
     "rotateCW": "Puter Nengen 90°",
     "flipH": "Walik Horisontal",
@@ -185,6 +186,8 @@
     "clickToCapture": "Klik kanggo njupuk gambar",
     "openTooltip": "Bukak neng Bukaake (Enter)",
     "copyTooltip": "Salin menyang Klip (Ctrl+C)",
+    "share": "Bagèkna",
+    "shareTooltip": "Bagèkna liwat Windows",
     "recTooltip": "Miwiti Rekam Layar (Enter)",
     "ocrTooltip": "Waca Tulisan (OCR)",
     "cancelTooltip": "Batal (Esc)",
@@ -366,7 +369,8 @@
     "animatedPlaying": "Muter",
     "animatedPaused": "Lèrèn",
     "openLocationFailed": "Ora isa mbukak lokasi berkas",
-    "openFolderFailed": "Ora isa mbukak folder tangkapan"
+    "openFolderFailed": "Ora isa mbukak folder tangkapan",
+    "shareFailed": "Ora isa mbukak Windows Share"
   },
   "toolHud": {
     "cropTitle": "Cekakan Pangkas",

@@ -116,6 +116,7 @@
     "openLocation": "Bikak Mapaning Berkas",
     "copyImage": "Turas Gambar",
     "saveAs": "Nyimpen Gambar Minangka...",
+    "share": "Andum...",
     "setWallpaper": "Dadosaken Wallpaper Layar",
     "rotateCW": "Puter Tengen 90°",
     "flipH": "Walik Horisontal",
@@ -185,6 +186,8 @@
     "clickToCapture": "Pencet kanggé mundhut gambar",
     "openTooltip": "Bikak wonten Bukaake (Enter)",
     "copyTooltip": "Turas dhateng Klip (Ctrl+C)",
+    "share": "Andum",
+    "shareTooltip": "Andum lumantar Windows",
     "recTooltip": "Miwiti Rekam Layar (Enter)",
     "ocrTooltip": "Waos Seratan (OCR)",
     "cancelTooltip": "Batal (Esc)",
@@ -366,7 +369,8 @@
     "animatedPlaying": "Dipunputer",
     "animatedPaused": "Dipunkendelaken",
     "openLocationFailed": "Mboten saged mbikak lokasi berkas",
-    "openFolderFailed": "Mboten saged mbikak folder tangkapan"
+    "openFolderFailed": "Mboten saged mbikak folder tangkapan",
+    "shareFailed": "Mboten saged mbikak Windows Share"
   },
   "toolHud": {
     "cropTitle": "Cekakan Pangkas",
