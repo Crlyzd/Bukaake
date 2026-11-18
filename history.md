@@ -20,6 +20,8 @@
 
 ## Change Log
 
+- **2026-11-18** | `.agents/workflows/architect.md`: Added a mandatory **What You Can Expect (Human Language)** section to `## Output Format` requiring all `/architect` plans and chat summaries to explain user-visible behavior in plain, jargon-free language.
+
 - **2026-11-15** | `README.md`, `screenshots/*.webp`: Converted all 9 `.png` showcase screenshots to static `.webp` via ImageMagick (`-quality 90 -define webp:method=6`, reducing ~25.2 MB to ~2.4 MB) while keeping the `.png` originals, and updated all 13 `README.md` references to clean `screenshots/*.webp` paths.
 
 - **2026-11-14** | `AGENTS.md`, `README.md`, `screenshots/animated.png`, `screenshots/*.png`: Synchronized `AGENTS.md` with current `v1.4.0` state (documented `Space`, `S`, and `[`/`]` hotkeys, `animated-image-player.js`, WebCodecs animated playback subsystem specs, and `screenshots/`); added `## Cultural Etymology Trivia` and dedicated `### 3. Animated WebP, GIF, APNG & AVIF Playback (Space)` section in `README.md`; generated `screenshots/animated.png` (`#03`) and renumbered placeholder cards `#04`–`#12`.

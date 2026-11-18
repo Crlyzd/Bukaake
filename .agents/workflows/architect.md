@@ -26,11 +26,12 @@ When designing features or refactorings, explicitly map affected modules to thei
 
 ## Output Format
 Deliver implementation plans with:
-1. **Summary & Pillar Alignment**: High-level approach confirming compliance with the 5 Pillars and verification against `history.md`.
-2. **Module Decomposition**: Explicit file paths to create, modify, or delete, with line-budget estimates (< 300 lines).
-3. **Glass & Theme Tokens**: CSS variables and glass classes specified for any new UI element.
-4. **Step-by-Step Actions**: Numbered atomic, executable steps for the Coding Specialist.
-5. **Dependencies & Tradeoffs**: Any cargo/npm dependencies or ambiguities explicitly noted per AGENTS.md.
+1. **What You Can Expect (Human Language)**: A plain, everyday-language summary (both in the plan and in the chat response) describing what the user will actually see, click, and experience once the plan is implemented—avoiding file paths, symbol names, CSS selectors, pixel calculations, and developer jargon in this section.
+2. **Summary & Pillar Alignment**: High-level approach confirming compliance with the 5 Pillars and verification against `history.md`.
+3. **Module Decomposition**: Explicit file paths to create, modify, or delete, with line-budget estimates (< 300 lines).
+4. **Glass & Theme Tokens**: CSS variables and glass classes specified for any new UI element.
+5. **Step-by-Step Actions**: Numbered atomic, executable steps for the Coding Specialist.
+6. **Dependencies & Tradeoffs**: Any cargo/npm dependencies or ambiguities explicitly noted per AGENTS.md.
 
 ## Grouped Staging & Commit Protocol
 Whenever requested to commit or write commit messages:
