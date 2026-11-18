@@ -40,6 +40,7 @@ import { ExternalOpenController } from './services/platform/external-open-contro
 import { windowBridge } from './services/platform/window-bridge.js';
 import { modeTransition } from './services/platform/mode-transition.js';
 import { i18n } from './services/platform/i18n-service.js';
+import { shareService } from './services/platform/share-service.js';
 
 const RAW_EXTS = new Set(['arw', 'srf', 'sr2', 'cr2', 'cr3', 'nef', 'nrw', 'dng', 'raf', 'rw2', 'orf', 'pef', '3fr', 'mrw', 'srw', 'x3f', 'mos', 'mef', 'raw', 'kdc', 'dcr', 'rwl', 'iiq', 'erf']);
 
@@ -121,7 +122,7 @@ class BukaakeApp {
       isModified: () => changeTracker.hasUnsavedChanges(),
       isRaw: () => document.body.classList.contains('is-raw'),
       actions: {
-        onCopyImage: () => this.copyImage(), onSaveImage: () => this.saveImage(),
+        onCopyImage: () => this.copyImage(), onSaveImage: () => this.saveImage(), onShareImage: () => shareService.shareViewerImage({ filePath: this.fileLoader.currentMeta?.path || null, isModified: changeTracker.hasUnsavedChanges(), canvasViewer: this.viewer, filters: this.filters }),
         onSetWallpaper: () => setAsWallpaper(this.viewer, this.filters, this.fileLoader, this.cropper?.active, this.drawingTool?.active, this.textTool?.active, this.blurTool?.active),
         onRotateRight: () => this.handleRotate(90), onFlipH: () => this.handleFlip('h'),
         onFitScreen: () => this.viewer.fitToScreen(), onCrop: () => this.toolsManager.toggleCrop(true),

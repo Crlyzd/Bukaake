@@ -13,6 +13,7 @@ export class SnipperActionDock {
     this.confirmLabel = null;
     this.confirmIcon = null;
     this.btnCopy = null;
+    this.btnShare = null;
     this.btnOcr = null;
     this.btnCancel = null;
     this.createDom();
@@ -28,6 +29,9 @@ export class SnipperActionDock {
       <button class="snipper-btn" id="btnSnipCopy" title="${i18n.t('snipper.copyTooltip')}" data-i18n-title="snipper.copyTooltip">
         <i class="ri-file-copy-line"></i> <span data-i18n="snipper.copy">${i18n.t("snipper.copy")}</span>
       </button>
+      <button class="snipper-btn" id="btnSnipShare" title="${i18n.t('snipper.shareTooltip')}" data-i18n-title="snipper.shareTooltip">
+        <i class="ri-share-forward-line"></i> <span data-i18n="snipper.share">${i18n.t("snipper.share")}</span>
+      </button>
       <button class="snipper-btn" id="btnSnipOcr" title="Read Text (OCR)">
         <i class="ri-character-recognition-line"></i>
       </button>
@@ -40,6 +44,7 @@ export class SnipperActionDock {
     this.confirmLabel = this.el.querySelector('#snipConfirmLabel');
     this.confirmIcon = this.btnConfirm.querySelector('i');
     this.btnCopy = this.el.querySelector('#btnSnipCopy');
+    this.btnShare = this.el.querySelector('#btnSnipShare');
     this.btnOcr = this.el.querySelector('#btnSnipOcr');
     this.btnCancel = this.el.querySelector('#btnSnipCancel');
 
@@ -48,6 +53,7 @@ export class SnipperActionDock {
 
     this.btnConfirm.addEventListener('click', (e) => { e.stopPropagation(); this.callbacks.onConfirm?.(); });
     this.btnCopy.addEventListener('click', (e) => { e.stopPropagation(); this.callbacks.onCopy?.(); });
+    this.btnShare.addEventListener('click', (e) => { e.stopPropagation(); this.callbacks.onShare?.(); });
     this.btnOcr.addEventListener('click', (e) => { e.stopPropagation(); this.callbacks.onOcr?.(); });
     this.btnCancel.addEventListener('click', (e) => { e.stopPropagation(); this.callbacks.onCancel?.(); });
 
@@ -67,6 +73,7 @@ export class SnipperActionDock {
     }
     if (this.confirmIcon) this.confirmIcon.className = isRec ? 'ri-record-circle-fill' : 'ri-check-line';
     this.btnCopy?.classList.toggle('hidden', isRec);
+    this.btnShare?.classList.toggle('hidden', isRec);
     this.btnOcr?.classList.toggle('hidden', isRec);
   }
 

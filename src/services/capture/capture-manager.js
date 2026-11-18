@@ -12,6 +12,7 @@ import { hotkeyService } from '../interaction/hotkey-service.js';
 import { toast } from '../../components/viewer/toast.js';
 import { changeTracker } from '../interaction/change-tracker.js';
 import { tauriBridge } from '../platform/tauri-bridge.js';
+import { shareService } from '../platform/share-service.js';
 
 export class CaptureManager {
   constructor(options = {}) {
@@ -121,6 +122,7 @@ export class CaptureManager {
       <div class="complete-actions">
         <button class="complete-btn play" id="btnPostPlay" title="Play Video Directly"><i class="ri-play-fill"></i> <span>Play</span></button>
         <button class="complete-btn folder" id="btnPostFolder" title="Show in Windows Explorer"><i class="ri-folder-open-line"></i> <span>Folder</span></button>
+        <button class="complete-btn share" id="btnPostShare" title="Share Recording"><i class="ri-share-forward-line"></i> <span>Share</span></button>
         <button class="complete-btn alitken" id="btnPostAlitken" title="Open with Alitken Media Converter"><span>Open in Alitken</span></button>
         <button class="complete-btn close" id="btnPostClose" title="Dismiss"><i class="ri-close-line"></i></button>
       </div>`;
@@ -129,6 +131,7 @@ export class CaptureManager {
     const dismiss = () => { document.body.classList.remove('has-recording-banner'); banner.remove(); };
     banner.querySelector('#btnPostPlay')?.addEventListener('click', () => { invoke('open_url', { url: savedPath }); dismiss(); });
     banner.querySelector('#btnPostFolder')?.addEventListener('click', () => { invoke('show_in_folder', { path: savedPath }); dismiss(); });
+    banner.querySelector('#btnPostShare')?.addEventListener('click', () => { shareService.sharePath(savedPath); dismiss(); });
     banner.querySelector('#btnPostAlitken')?.addEventListener('click', () => { alitkenService.launch(savedPath); dismiss(); });
     banner.querySelector('#btnPostClose')?.addEventListener('click', () => dismiss());
     setTimeout(() => { if (document.body.contains(banner)) dismiss(); }, 12000);

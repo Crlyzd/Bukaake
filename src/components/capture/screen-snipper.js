@@ -7,6 +7,8 @@ import { i18n } from '../../services/platform/i18n-service.js';
 import { SnipperActionDock } from './snipper-action-dock.js';
 import { SnipperColorPicker } from './snipper-color-picker.js';
 import { snipperOcr } from './snipper-ocr.js';
+import { screenCaptureService } from '../../services/capture/screen-capture-service.js';
+import { shareService } from '../../services/platform/share-service.js';
 
 export class ScreenSnipper {
   constructor(containerEl = null) {
@@ -46,6 +48,7 @@ export class ScreenSnipper {
     this.actionDock = new SnipperActionDock(this.overlay, {
       onConfirm: () => this.confirmSnip(false),
       onCopy: () => this.confirmSnip(true),
+      onShare: () => this.shareSnip(),
       onOcr: () => this.confirmOcr(),
       onCancel: () => this.cancelSnip(),
     });
@@ -165,6 +168,7 @@ export class ScreenSnipper {
 
   async startSnip(captureDataUrl, onComplete, onCancel, options = {}) {
     this.currentDataUrl = captureDataUrl; this.onComplete = onComplete; this.onCancel = onCancel;
+    this.onShareComplete = options.onShareComplete || null;
     this.currentRect = null; this.isWindowLocked = false;
     const isStale = !window.innerWidth || window.innerWidth <= 680;
     const fallbackRatio = (!isStale && options.screenWidth) ? (options.screenWidth / window.innerWidth) : null;
@@ -255,6 +259,26 @@ export class ScreenSnipper {
     this.hideVisuals();
     try { await this.onComplete?.({ rect, dataUrl, sourceImg, copyOnly, isRecord, mode: this.currentMode }); }
     finally { this.cleanup(); }
+  }
+
+  async shareSnip() {
+    if (!this.currentRect || this.currentRect.width <= 5 || this.currentRect.height <= 5) return this.cancelSnip();
+    const rect = { ...this.currentRect };
+    const dataUrl = this.currentDataUrl, sourceImg = this.bgImg;
+    this.hideVisuals();
+    try {
+      const croppedUrl = await screenCaptureService.cropCapturedRegion(dataUrl, rect, sourceImg);
+      const bytes = Uint8Array.from(atob(croppedUrl.split(',')[1]), (c) => c.charCodeAt(0));
+      this.cleanup();
+      const ok = await shareService.shareBytes(bytes, 'Bukaake_Snip.png');
+      if (!ok) await this.onCancel?.();
+    } catch (err) {
+      console.warn('[ScreenSnipper] shareSnip failed:', err);
+      this.cleanup();
+      await this.onCancel?.();
+    } finally {
+      this.onShareComplete?.();
+    }
   }
 
   cancelSnip() { this.hide(); this.onCancel?.(); }

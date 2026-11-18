@@ -152,6 +152,13 @@ export class ContextMenu {
         },
       },
       {
+        id: 'share-image',
+        label: i18n.t('contextMenu.share'),
+        icon: 'ri-share-forward-line',
+        disabled: !this.hasImage() || this.isCropActive(),
+        action: () => this.actions.onShareImage?.(),
+      },
+      {
         id: 'set-wallpaper',
         label: i18n.t('contextMenu.setWallpaper'),
         icon: 'ri-landscape-line',

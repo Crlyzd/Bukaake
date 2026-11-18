@@ -94,6 +94,7 @@ export class SnipperApp {
     options.screenWidth = payload.width;
     options.screenHeight = payload.height;
     options.scaleFactor = payload.scale_factor || window.devicePixelRatio || 1;
+    options.onShareComplete = () => { this.isSnipActive = false; };
     const capturePhysW = payload.width;
     const capturePhysH = payload.height;
 
