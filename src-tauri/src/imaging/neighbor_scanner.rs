@@ -2,6 +2,20 @@ use serde::Serialize;
 use std::fs;
 use std::path::{Path, PathBuf};
 
+pub fn clean_windows_path(p: &Path) -> String {
+    let s = p.to_string_lossy();
+    #[cfg(target_os = "windows")]
+    {
+        let normalized = s.replace('/', "\\");
+        if let Some(unc_rest) = normalized.strip_prefix(r"\\?\UNC\") {
+            return format!(r"\\{}", unc_rest);
+        }
+        return normalized.strip_prefix(r"\\?\").unwrap_or(&normalized).to_string();
+    }
+    #[cfg(not(target_os = "windows"))]
+    s.into_owned()
+}
+
 #[derive(Debug, Serialize, Clone)]
 pub struct NeighborInfo {
     pub path: String,
@@ -45,7 +59,7 @@ where
             current_index = idx;
         }
         neighbors.push(NeighborInfo {
-            path: p.to_string_lossy().to_string(),
+            path: clean_windows_path(&p),
             name,
             size_bytes,
         });

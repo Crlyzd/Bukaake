@@ -32,22 +32,7 @@ pub fn open_url(url: String) -> Result<(), String> {
 
 #[tauri::command]
 pub fn show_in_folder(path: String) -> Result<(), String> {
-    #[cfg(target_os = "windows")]
-    {
-        let normalized = path.replace('/', "\\");
-        let p = std::path::Path::new(&normalized);
-        let mut cmd = std::process::Command::new("explorer.exe");
-        if p.is_dir() {
-            cmd.arg(&normalized);
-        } else {
-            let arg = format!("/select,{}", normalized);
-            cmd.arg(&arg);
-        }
-        cmd.spawn().map_err(|e| e.to_string())?;
-    }
-    #[cfg(not(target_os = "windows"))]
-    { let _ = path; }
-    Ok(())
+    crate::platform::file_ops::reveal_in_folder(&path)
 }
 
 #[tauri::command]

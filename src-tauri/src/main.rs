@@ -12,7 +12,7 @@ use capture::audio_capture::{
     set_recording_audio_volumes, set_recording_mic_muted, start_audio_capture, stop_audio_capture,
 };
 use capture::capture_commands::{
-    append_recording_chunk, capture_screen, discard_recording, finalize_recording,
+    append_recording_chunk, capture_screen, discard_recording, ensure_and_open_dir, finalize_recording,
     get_default_videos_dir, init_recording_stream, launch_alitken,
     prompt_select_executable, prompt_select_folder, prompt_save_recording,
     prepare_screen_snip, show_screen_snip, finish_screen_snip,
@@ -177,7 +177,7 @@ fn main() {
             get_autostart_status, set_autostart_enabled,
             enter_standby, show_main_window,
             set_standby_enabled, is_standby_enabled,
-            capture_screen, get_default_videos_dir, init_recording_stream,
+            capture_screen, get_default_videos_dir, ensure_and_open_dir, init_recording_stream,
             append_recording_chunk, finalize_recording, discard_recording,
             start_native_recording, pause_native_recording, resume_native_recording,
             stop_native_recording, discard_native_recording,

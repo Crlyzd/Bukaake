@@ -9,7 +9,7 @@ use std::path::{Path, PathBuf};
 
 pub use crate::platform::file_assoc::SUPPORTED_EXTENSIONS as SUPPORTED_EXTS;
 
-pub use crate::imaging::neighbor_scanner::NeighborInfo;
+pub use crate::imaging::neighbor_scanner::{clean_windows_path, NeighborInfo};
 
 #[derive(Debug, Serialize)]
 pub struct InitialImagePayload {
@@ -158,13 +158,13 @@ fn build_initial_payload(path: &Path) -> Result<InitialImagePayload, String> {
         .to_string();
     let parent_dir = abs_path
         .parent()
-        .map(|p| p.to_string_lossy().to_string())
+        .map(clean_windows_path)
         .unwrap_or_default();
     let (neighbors, current_index) = scan_directory_neighbors(&abs_path);
     let info = gather_file_info(&abs_path)?;
 
     Ok(InitialImagePayload {
-        target_path: abs_path.to_string_lossy().to_string(),
+        target_path: clean_windows_path(&abs_path),
         file_name,
         parent_dir,
         neighbors,

@@ -10,6 +10,7 @@ use crate::platform::process_memory;
 use std::fs::{self, OpenOptions};
 use std::io::Write;
 use std::path::{Path, PathBuf};
+use tauri::Manager;
 
 #[tauri::command]
 pub fn capture_screen() -> Result<ScreenCapturePayload, String> {
@@ -17,14 +18,32 @@ pub fn capture_screen() -> Result<ScreenCapturePayload, String> {
 }
 
 #[tauri::command]
-pub fn get_default_videos_dir() -> Result<String, String> {
-    let base = if let Ok(profile) = std::env::var("USERPROFILE") {
-        PathBuf::from(profile).join("Videos").join("Captures")
-    } else {
-        std::env::temp_dir().join("Bukaake").join("Captures")
-    };
-    let _ = fs::create_dir_all(&base);
-    Ok(base.to_string_lossy().to_string())
+pub fn get_default_videos_dir(app: tauri::AppHandle) -> Result<String, String> {
+    let candidates: [Option<PathBuf>; 4] = [
+        app.path().video_dir().ok().map(|p| p.join("Captures")),
+        std::env::var("USERPROFILE")
+            .ok()
+            .filter(|p| !p.is_empty())
+            .map(|p| PathBuf::from(p).join("Videos").join("Captures")),
+        app.path().home_dir().ok().map(|p| p.join("Videos").join("Captures")),
+        Some(std::env::temp_dir().join("Bukaake").join("Captures")),
+    ];
+    for candidate in candidates.into_iter().flatten() {
+        if fs::create_dir_all(&candidate).is_ok() {
+            return Ok(crate::imaging::neighbor_scanner::clean_windows_path(&candidate));
+        }
+    }
+    Err("Failed to resolve or create default capture directory".to_string())
+}
+
+#[tauri::command]
+pub fn ensure_and_open_dir(path: String) -> Result<(), String> {
+    let clean = crate::imaging::neighbor_scanner::clean_windows_path(Path::new(&path));
+    if clean.is_empty() {
+        return Err("Empty directory path".to_string());
+    }
+    fs::create_dir_all(&clean).map_err(|e| format!("Failed to create directory: {}", e))?;
+    crate::platform::file_ops::reveal_in_folder(&clean)
 }
 
 #[tauri::command]
@@ -145,8 +164,6 @@ pub use super::external_launch::{launch_alitken, prompt_select_executable, promp
 
 #[tauri::command]
 pub fn prepare_screen_snip(app: tauri::AppHandle) -> Result<ScreenCapturePayload, String> {
-    use tauri::Manager;
-
     crate::platform::reclaim::set_snip_active(true);
 
     let mut scale_factor = 1.0;
@@ -170,7 +187,6 @@ pub fn prepare_screen_snip(app: tauri::AppHandle) -> Result<ScreenCapturePayload
 
 #[tauri::command]
 pub fn show_screen_snip(app: tauri::AppHandle) -> Result<(), String> {
-    use tauri::Manager;
     if let Some(s) = app.get_webview_window("snipper") {
         if let Ok(Some(m)) = s.current_monitor() {
             let _ = s.set_position(tauri::Position::Physical(*m.position()));
@@ -192,7 +208,6 @@ pub fn finish_screen_snip(
     was_minimized: Option<bool>,
     was_hidden: Option<bool>,
 ) -> Result<(), String> {
-    use tauri::Manager;
     let _ = (was_fullscreen, was_minimized, was_hidden);
     if let Some(snipper) = app.get_webview_window("snipper") {
         let _ = snipper.set_always_on_top(false);
