@@ -364,7 +364,9 @@
     "animatedTooLarge": "Gambar animasi melebihi 30 MB — menampilkan pratinjau statis",
     "animatedStaticExport": "Mengedit atau menyimpan gambar animasi mengekspor bingkai statis",
     "animatedPlaying": "Diputar",
-    "animatedPaused": "Dijeda"
+    "animatedPaused": "Dijeda",
+    "openLocationFailed": "Tidak dapat membuka lokasi file",
+    "openFolderFailed": "Tidak dapat membuka folder tangkapan"
   },
   "toolHud": {
     "cropTitle": "Pintasan Pangkas",

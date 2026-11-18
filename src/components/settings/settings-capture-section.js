@@ -6,6 +6,8 @@
 import { invoke } from '@tauri-apps/api/core';
 import { tauriBridge } from '../../services/platform/tauri-bridge.js';
 import { hotkeyService } from '../../services/interaction/hotkey-service.js';
+import { toast } from '../viewer/toast.js';
+import { i18n } from '../../services/platform/i18n-service.js';
 import { bindTandemSettings } from './settings-tandem-section.js';
 import { bindAudioSettings } from './settings-audio-section.js';
 import { bindClickAndAccordionSettings } from './settings-click-section.js';
@@ -241,8 +243,18 @@ export function bindCaptureSettings() {
 
   btnOpenDir?.addEventListener('click', async () => {
     const dir = inputDir?.value || localStorage.getItem('bukaake-video-save-dir') || (await invoke('get_default_videos_dir'));
-    if (dir) {
-      await tauriBridge.showInFolder(dir);
+    if (!dir) return;
+    if (tauriBridge.isTauri()) {
+      try {
+        await invoke('ensure_and_open_dir', { path: dir });
+        return;
+      } catch (err) {
+        console.warn('[SettingsCapture] ensure_and_open_dir failed:', err);
+      }
+    }
+    const ok = await tauriBridge.showInFolder(dir);
+    if (!ok) {
+      toast.warn(i18n.t('toasts.openFolderFailed'));
     }
   });
 

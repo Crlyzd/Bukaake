@@ -120,9 +120,12 @@ export class ContextMenu {
         label: i18n.t('contextMenu.openLocation'),
         icon: 'ri-folder-open-line',
         disabled: !canOpenFileLocation,
-        action: () => {
+        action: async () => {
           if (filePath) {
-            tauriBridge.showInFolder(filePath);
+            const ok = await tauriBridge.showInFolder(filePath);
+            if (!ok) {
+              toast.warn(i18n.t('toasts.openLocationFailed'));
+            }
           } else {
             toast.show(i18n.t('contextMenu.noFilePath'));
           }

@@ -364,7 +364,9 @@
     "animatedTooLarge": "Gambar gerak luwih teko 30 MB — nampilno pratinjau statis",
     "animatedStaticExport": "Ngedit utawa nyimpen gambar gerak ngasilno sak bingkai statis",
     "animatedPlaying": "Muter",
-    "animatedPaused": "Mandek"
+    "animatedPaused": "Mandek",
+    "openLocationFailed": "Gak iso mbukak lokasi file",
+    "openFolderFailed": "Gak iso mbukak folder tangkapan"
   },
   "toolHud": {
     "cropTitle": "Cekakan Pangkas",

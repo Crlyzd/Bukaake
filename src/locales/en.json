@@ -364,7 +364,9 @@
     "animatedTooLarge": "Animated image exceeds 30 MB — showing static preview",
     "animatedStaticExport": "Editing or saving an animated image exports a static frame",
     "animatedPlaying": "Playing",
-    "animatedPaused": "Paused"
+    "animatedPaused": "Paused",
+    "openLocationFailed": "Could not open file location",
+    "openFolderFailed": "Could not open capture folder"
   },
   "toolHud": {
     "cropTitle": "Crop Shortcuts",

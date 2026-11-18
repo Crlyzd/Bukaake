@@ -364,7 +364,9 @@
     "animatedTooLarge": "Gambar obah ngluwihi 30 MB — nuduhake pratinjau statis",
     "animatedStaticExport": "Ngowahi utawa nyimpen gambar obah ngasilake siji bingkai statis",
     "animatedPlaying": "Muter",
-    "animatedPaused": "Lèrèn"
+    "animatedPaused": "Lèrèn",
+    "openLocationFailed": "Ora isa mbukak lokasi berkas",
+    "openFolderFailed": "Ora isa mbukak folder tangkapan"
   },
   "toolHud": {
     "cropTitle": "Cekakan Pangkas",
