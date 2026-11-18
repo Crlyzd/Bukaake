@@ -40,6 +40,7 @@ use platform::window_subclass;
 use platform::updater::{cleanup_old_update_artifacts, download_and_install_update, get_system_arch};
 use platform::package_info::get_distribution_channel;
 use platform::wallpaper::set_wallpaper;
+use platform::share::{share_image, share_image_bytes};
 use platform::window_commands::{
     get_cli_args, open_url, show_in_folder, close_window, exit_app,
     prompt_save_file, prompt_open_file, save_image_bytes,
@@ -181,7 +182,7 @@ fn main() {
             save_screenshot_to_dir,
             extract_text_from_image, launch_cathet,
             start_audio_capture, stop_audio_capture, set_recording_mic_muted, set_recording_audio_volumes,
-            set_wallpaper,
+            set_wallpaper, share_image, share_image_bytes,
             get_distribution_channel,
             cloak_main_window, get_main_window_info, get_regular_target_rect,
             commit_viewer_geometry, commit_regular_geometry, reveal_main_window,

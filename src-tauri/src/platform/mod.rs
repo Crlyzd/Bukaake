@@ -14,3 +14,4 @@ pub mod wallpaper;
 pub mod foreground;
 pub mod window_transition;
 pub mod bootstrapper;
+pub mod share;

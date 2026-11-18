@@ -193,6 +193,7 @@ pub fn show_screen_snip(app: tauri::AppHandle) -> Result<(), String> {
             let _ = s.set_size(tauri::Size::Physical(*m.size()));
         }
         let _ = s.unminimize();
+        let _ = s.set_ignore_cursor_events(false);
         let _ = s.set_always_on_top(true);
         let _ = s.show();
         let _ = s.set_focus();
